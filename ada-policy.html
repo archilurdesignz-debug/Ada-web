@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <title>Legal Portal | ADA Archilurdesignz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Outfit:wght=200;300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ── RESET ──────────────────────────────────────────────────────────── */
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html, body {
+            width:100%; max-width:100%; overflow-x:hidden;
+            -webkit-text-size-adjust:100%; text-size-adjust:100%;
+        }
+        img, svg, video { max-width:100%; height:auto; display:block; }
+
+        /* ── TOKENS ─────────────────────────────────────────────────────────── */
+        :root {
+            --ink:     #0d0c0a;
+            --ink2:    #1c1a17;
+            --ink3:    #2e2b26;
+            --mist:    #7a7570;
+            --sand:    #c9bfb0;
+            --paper:   #f3ede4;
+            --paper2:  #ede5d8;
+            --gold:    #b09070;
+            --gold2:   #d4b896;
+            --accent:  #c8a87a;
+            --white:   #faf8f4;
+            --glass:   rgba(255,255,255,0.04);
+            --shadow:  0 8px 40px rgba(26,23,20,0.12);
+
+            --f-display: 'Playfair Display', Georgia, serif;
+            --f-body:    'Outfit', sans-serif;
+
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+        }
+
+        body { 
+            background: var(--ink); 
+            color: var(--paper); 
+            font-family: var(--f-body); 
+            line-height: 1.75; 
+            cursor: default; 
+        }
+
+        /* ── CUSTOM CURSOR SUPPORT ─────────────────────────────────────────── */
+        @media (pointer: fine) {
+            body { cursor: none; }
+            a, button, [role="button"] { cursor: none; }
+        }
+
+        h1, h2, h3 { font-family: var(--f-display); font-weight: 400; text-transform: uppercase; letter-spacing: 1px; }
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+
+        /* ── NAV ─────────────────────────────────────────────────────────────── */
+        nav {
+            position: fixed; top:0; left:0; right:0; z-index:1000;
+            height:72px;
+            display:flex; align-items:center; justify-content:space-between;
+            padding: 0 4%;
+            transition: background 0.5s var(--ease-out), border-color 0.5s var(--ease-out);
+            background: transparent;
+            border-bottom: 1px solid transparent;
+        }
+        nav.scrolled {
+            background: rgba(13,12,10,0.94);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(201,191,176,0.08);
+        }
+        .nav-left { display:flex; gap:28px; align-items:center; }
+        .nav-left a {
+            font-family: var(--f-body); font-size:0.62rem; font-weight:400;
+            letter-spacing:2.5px; text-transform:uppercase; color: var(--sand);
+            text-decoration:none; transition: color 0.3s;
+            position:relative;
+        }
+        .nav-left a::after {
+            content:''; position:absolute; bottom:-3px; left:0;
+            width:0; height:1px; background:var(--accent);
+            transition: width 0.35s var(--ease-out);
+        }
+        .nav-left a:hover { color:var(--paper); }
+        .nav-left a:hover::after { width:100%; }
+
+        .nav-center {
+            position:absolute; left:50%; top:50%;
+            transform:translate(-50%,-50%);
+            display:flex; align-items:center; gap:14px;
+            text-decoration: none;
+        }
+        .nav-logomark {
+            width:38px; height:38px; border:1px solid rgba(201,191,176,0.3);
+            display:flex; align-items:center; justify-content:center;
+            font-family: var(--f-display); font-size:1.1rem;
+            color: var(--gold2); letter-spacing:1px;
+            transition: border-color 0.3s;
+        }
+        nav:hover .nav-logomark { border-color: var(--gold); }
+        .nav-wordmark { line-height:1; }
+        .nav-wordmark .w1 {
+            font-family: var(--f-display); font-size:1rem; font-weight:500;
+            letter-spacing:5px; text-transform:uppercase; color:var(--paper);
+            display:block;
+        }
+        .nav-wordmark .w2 {
+            font-family: var(--f-body); font-size:0.75rem; font-weight:300;
+            letter-spacing:2px; color:var(--gold); display:block; margin-top:2px;
+        }
+
+        .nav-right { display:flex; gap:14px; align-items:center; }
+        .nav-rc {
+            font-family: var(--f-body);
+            font-size:0.55rem; letter-spacing:2px; color:var(--mist);
+            border:1px solid rgba(122,117,112,0.3); padding:5px 10px;
+            line-height: 1;
+            text-transform: uppercase;
+        }
+
+        /* ── LEGAL HEADER ────────────────────────────────────────────────────── */
+        .legal-header {
+            height: 45vh; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(rgba(13,12,10,0.65), rgba(13,12,10,0.85)), 
+                        url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover; background-position: center; text-align: center; padding: 0 4%;
+            position: relative;
+        }
+        .legal-header h1 {
+            font-family: var(--f-display);
+            font-weight: 400;
+            color: var(--white);
+            line-height: 1.2;
+        }
+
+        /* ── LAYOUT GRID ─────────────────────────────────────────────────────── */
+        .legal-container {
+            display: grid; grid-template-columns: 260px 1fr;
+            gap: 80px; padding: 120px 10%;
+        }
+
+        /* Sticky Sidebar Navigation */
+        .legal-nav { position: sticky; top: 120px; height: fit-content; }
+        .legal-nav ul { list-style: none; border-left: 1px solid rgba(201,191,176,0.1); }
+        .legal-nav li { margin-bottom: 20px; padding-left: 20px; }
+        .legal-nav a { 
+            font-family: var(--f-body);
+            font-size: 0.35rem; 
+            letter-spacing: 2px; 
+            color: var(--mist); 
+            text-transform: uppercase; 
+            font-weight: 400;
+            transition: color 0.3s var(--ease-out);
+        }
+        .legal-nav a:hover, .legal-nav a.active { color: var(--gold2); }
+
+        /* Content Styling */
+        .legal-content section { margin-bottom: 120px; scroll-margin-top: 140px; }
+        .legal-content section:last-of-type { margin-bottom: 0; }
+        
+        .legal-content span { 
+            color: var(--gold); 
+            font-family: var(--f-body);
+            font-size: 0.58rem; 
+            letter-spacing: 4px; 
+            text-transform: uppercase; 
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .legal-content h2 { 
+            font-size: clamp(2rem, 3.5vw, 2.8rem); 
+            margin-bottom: 30px; 
+            color: var(--white);
+            line-height: 1.15;
+        }
+        
+        .legal-content h3 { 
+            font-size: 1.05rem; 
+            color: var(--gold2); 
+            margin: 40px 0 15px; 
+            letter-spacing: 2px; 
+        }
+        
+        .legal-content h3:first-of-type { margin-top: 0; }
+        
+        .legal-content p { 
+            font-weight: 200; 
+            color: var(--sand); 
+            margin-bottom: 20px; 
+            font-size: 0.9rem;
+            line-height: 1.8;
+            text-align: justify;
+        }
+        
+        .legal-content p:last-of-type { margin-bottom: 0; }
+        
+        .policy-box { 
+            background: var(--ink2); 
+            padding: 45px; 
+            border: 1px solid rgba(201,191,176,0.06); 
+        }
+
+/* ── FOOTER ────────────────────────────────── */
+footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201,191,176,0.06);}
+.footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding-bottom:50px;border-bottom:1px solid rgba(201,191,176,0.06);margin-bottom:28px;}
+.footer-brand .fb-name{font-family:var(--f-display);font-size:1.5rem;letter-spacing:5px;text-transform:uppercase;color:var(--paper);display:block;margin-bottom:6px;}
+.footer-brand .fb-rc{font-size:0.55rem;letter-spacing:2px;color:var(--gold);display:block;margin-bottom:18px;}
+.footer-brand p{font-size:0.75rem;color:var(--mist);font-weight:200;line-height:1.8;max-width:240px;}
+.footer-col h5{font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;color:var(--sand);margin-bottom:20px;}
+.footer-col a{display:block;font-size:0.72rem;color:var(--mist);margin-bottom:10px;transition:color 0.3s;}
+.footer-col a:hover{color:var(--paper);}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-copy{font-size:0.58rem;color:rgba(122,117,112,0.5);letter-spacing:1px;}
+
+/* ── RESPONSIVE ────────────────────────────── */
+@media(max-width:1024px){.portfolio-grid{columns:2;}}
+@media(max-width:768px){
+    nav{padding:0 5%;height:62px;}
+    .nav-center .nav-wordmark{display:none;}
+    .nav-right .nav-rc{display:none;}
+    .portfolio-grid{columns:1;}
+    .filter-bar{top:62px;padding:0 5%;}
+    .grid-section{padding:30px 5% 60px;}
+    .footer-top{grid-template-columns:1fr;}
+    .lb-nav{display:none;}
+}
+    </style>
+</head>
+<body>
+
+<!-- ── NAV ────────────────────────────────────────────────────────────── -->
+<nav id="navbar">
+    <div class="nav-left">
+        <a href="ada-about.html">About</a>
+        <a href="ada-portfolio.html">Portfolio</a>
+        <a href="ada-store.html">Store</a>
+    </div>
+
+        <a href="ada-index.html" class="nav-center">
+            <div class="nav-logomark">A</div>
+            <div class="nav-wordmark">
+                <span class="w1">ADA</span>
+                <span class="w2">Architecture</span>
+            </div>
+        </a>
+
+        <div class="nav-right">
+            <div class="nav-rc">RC:9176834</div>
+        </div>
+    </nav>
+
+    <header class="legal-header">
+        <div>
+            <h1 style="font-style: italic; font-family: var(--f-display); text-transform: none; font-size: clamp(1.8rem, 3.5vw, 2.5rem); margin-bottom: 10px;">Studio</h1>
+            <h1 style="letter-spacing: 4px; font-size: clamp(2rem, 4.5vw, 3.5rem);">Compliance & Policies</h1>
+        </div>
+    </header>
+
+    <div class="legal-container">
+        <aside class="legal-nav">
+            <ul>
+                <li><a href="#privacy" class="active">Introduction</a></li>
+                <li><a href="#privacy" class="active">Privacy Policy</a></li>
+                <li><a href="#returns">Return Policy</a></li>
+                <li><a href="#terms">Terms & Conditions</a></li>
+            </ul>
+        </aside>
+
+        <main class="legal-content">
+            <section id="privacy">
+                <span>ADA Privacy Policy, Terms & Conditions, and Return Policy</span>
+                <h2>Introduction</h2>
+                <div class="policy-box">
+                    <p>Welcome to the official website of Archilurdesignz and Architecture (ADA). By accessing or using this website and/or engaging our services, you agree to be bound by these Terms & Conditions and Privacy Policy.</p>
+                    
+                    <p>These Terms govern:</p>
+                    <ul>
+                <li>Use of this website</li>
+                <li>Purchase of architectural products</li>
+                <li>Engagement of professional services</li>
+                </div>
+            </section>
+
+            <section id="privacy">
+                <span>Data Protection</span>
+                <h2>Privacy Policy</h2>
+                <div class="policy-box">
+                    <p>At ADA Archilurdesignz, we respect your privacy regarding any information we may collect while operating our website. This Privacy Policy applies to our digital studio and all services provided under the ADA brand.</p>
+                    
+                    <h3>Information We Collect</h3>
+                    <p>ADA collects information you provide directly to us when you fill out a design brief, purchase a building plan, request architectural services, initiate a project tracking token, contact us through forms, email, phone, or WhatsApp. This information may include: full name, email address, whatsApp number, phone number, project location, project details and requirements</p>
+                    
+                    <h3>Technical Data and Dashboard Monitoring</h3>
+                    <p>When you use the Client Dashboard or interact with our website, ADA may monitor: progress tracking data, login and interaction logs, download activity, timeline and communication records. This is done to protect architectural documents, improve service delivery, maintain project accuracy and security</p>
+                
+                    <h3>Use of User Data</h3>
+                    <P>Information collected through Website forms, service requests, purchases, website interactions shall be used solely for service delivery, communication with clients, internal project tracking, customer support, administrative and operational purposes. ADA shall not sell, rent, or intentionally misuse client data.</P>
+                    <h3>Communication Consent</h3>
+                    <p>Clients may be contacted through emails, phone calls or whatsApp for purposes relating to purchases, inquiries, service updates, project communication and payment processing.</p>
+                </div>
+            </section>
+
+            <section id="returns">
+                <span>Bespoke Integrity</span>
+                <h2>Return & Refund Policy</h2>
+                <div class="policy-box">
+                    <h3>Digital Building Plans</h3>
+                    <p>Due to the digital nature of architectural floor plans, 3D files, and BoQ documents, All sales are final, Payments are non-refundable once files have been delivered and Refunds cannot be issued after download links have been generated or files have been sent</p>
+                    
+                    <h3>Custom Design Services</h3>
+                    <p>For custom commissions, Refunds may be considered only during the early “Design Brief” stage, Partial refunds, if approved, shall depend on the amount of work completed, Once any of the following phases have commenced, payments become non-refundable: Schematic Design, Design Development, 3D Visualization and Technical Documentation
+                    <p>This is because payments cover professional design labor, technical development, consultant coordination, and production time. Refunds, where applicable, remain at the sole discretion of ADA.</p>
+                
+                    <h3>Copyright & Intellectual Property</h3>
+                    <p>All designs, drawings, 3D renders, documents, models, graphics, and digital content produced by ADA remain the intellectual property of Archilurdesignz and Architecture unless otherwise agreed in writing.</P> 
+                    <P>Clients are granted a limited license strictly for, Approved project use, Single-site construction use and Unauthorized reproduction, resale, redistribution, modification, or commercial reuse is prohibited.</p>
+                
+                    <h3>Client Responsibilities</h3>        
+                    <p>Clients agree to Provide accurate site information and project details, engage qualified professionals during construction, obtain necessary statutory approvals, ensure compliance with local building regulations and verify dimensions and construction requirements before execution</p>
+                
+                    <h3>Project Monitoring & Site Supervision</h3>
+                    <p>Construction supervision, project monitoring, and site inspection services are, not included by default, subject to separate agreements and professional fees
+                    <p>ADA shall not be liable for site execution errors where supervision services were not formally engaged.</p>
+                
+                    <h3>Limitation of Liability</h3>
+                    <p>ADA shall not be liable for, Construction errors not supervised by ADA, Misuse of conceptual or presentation drawings, Failure to obtain statutory approvals, Modifications made by third parties and Improper construction practices by contractors or consultants</p>
+               
+                    <h3>Reviews and Feedback</h3>
+                    <p>Only verified clients who have engaged ADA services may submit reviews or testimonials. ADA reserves the right to, Moderate submissions, Approve reviews and Remove misleading, false, offensive, or inappropriate content</p>
+               
+                    <h3>Third-Party Links</h3>
+                    <p>This website may contain links to third-party platforms including: Fiverr. ADA is not responsible for: Third-party content, External policies and Transactions conducted outside ADA platforms</p>
+                
+                    <h3>Termination of Service</h3>
+                    <p>ADA reserves the right to, Decline projects, Refuse engagement, Suspend or terminate services where; These Terms are violated client conduct is inappropriate or Requested services conflict with professional or legal standards</p>
+
+                    <h3>Governing Law</h3>
+                    <p>These Terms and all engagements with ADA shall be governed by the laws of the Nigeria.</p>
+                    <p>Any disputes arising from the use of this website or ADA services shall be subject to the jurisdiction of Nigerian courts.</p>
+
+                    <h3>Amendments</h3>
+                    <p>ADA reserves the right to update or modify these Terms, Policies, and Conditions at any time without prior notice.</p>
+                    <p>Continued use of this website or engagement of ADA services constitutes acceptance of any updated Terms and Policies.</p>
+                </div>
+            </section>
+
+            <section id="terms">
+                <span>Legal Framework</span>
+                <h2>Terms & Conditions</h2>
+                <div class="policy-box">
+                    <h3>Copyright & Intellectual Property</h3>
+                    <p>All designs, 3D renders, and technical drawings produced by ADA remain the intellectual property of Archilurdesignz and Architecture. Building plans purchased from our store are licensed for a single-use construction on one site only.</p>
+                    
+                    <h3>Nature of Services</h3>
+                    <p>ADA provides professional services including but not limited to Architectural Design, Structural, Mechanical, and Electrical Design Coordination, Quantity Surveying (BoQ), 3D Visualization, Land Survey, Construction and Project Support.</p>
+                    
+                    <h3>Professional Compliance</h3>
+                    <p>All architectural services requiring statutory approval shall be carried out in accordance with the regulations of the Architects Registration Council of Nigeria and other relevant authorities. </p>
+                    <p>Where required, ADA shall collaborate with duly licensed professionals for Structural engineering, Mechanical engineering, Electrical engineering and Quantity surveying (BoQ).</p>
+                    
+                    <h3>Sale of Architectural Plans and 3D Concepts</h3>
+                    <h4>Nature of Products</h4>
+                    <p>Plans and 3D models sold on this platform are conceptual and presentation-based, not fully dimensioned working drawings and not intended for direct construction use without professional review.</p>
+
+                    <h4>Mandatory Professional Review</h4>
+                    <p>All purchased plans must be reviewed, adapted and approved by a registered professional before construction begins.</p>
+
+                    <h4>Limitation of Use</h4>
+                    <p>Purchased designs are licensed for single-use construction only, for one approved project site only. Reuse, resale, duplication, redistribution, or modification without written consent from ADA is prohibited.</p>
+
+                    <h3>Custom Design Services</h3>
+                    <p>Clients requesting custom services agree to provide accurate project information, approve design stages promptly, cooperate during the design process and engage ADA under a separate service agreement where required. All timelines are dependent on client responsiveness, project scope, design complexity and consultant coordination
+                    <p>While ADA aims to provide prompt responses, architectural development timelines are estimates and may vary to ensure quality and technical accuracy.</p>
+
+                    <h3>Payment Terms</h3>
+                    <h4>General</h4>
+                    <p>Payments may be made in Nigerian Naira (₦) and United States Dollars ($) as selected by the client.</p>
+                    <h4>Payment Process</h4>
+                    <p>Payments are currently processed offline. Upon inquiry or purchase request: ADA will contact the client within approximately 1 hour and Payment instructions will be provided directly.</p>
+
+                    <h4>Deposits</h4>
+                    <p>For custom architectural services, a minimum deposit of at least 70% of the total agreed sum is required before work begins while the outstanding balances shall be paid according to agreed milestones or project completion stages.</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-top">
+        <div class="footer-brand">
+            <span class="fb-name">ADA</span>
+            <span class="fb-rc">RC: 9176834</span>
+            <p>Archilurdesignz and Architecture — crafting bespoke luxury spaces across Nigeria and beyond since 2012.</p>
+        </div>
+        <div class="footer-col">
+            <h5>Studio</h5>
+            <a href="ada-index.html">Home</a>
+            <a href="ada-about.html">About Us</a>
+            <a href="ada-connect.html">Contact</a>
+        </div>
+        <div class="footer-col">
+            <h5>Work</h5>
+            <a href="ada-portfolio.html">Portfolio</a>
+            <a href="ada-store.html">Plan Store</a>
+        </div>
+        <div class="footer-col">
+            <h5>Legal</h5>
+            <a href="ada-policy.html">Privacy Policy</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p class="footer-copy">© 2026 Archilurdesignz and Architecture. All rights reserved.</p>
+        <p class="footer-copy">info@archilurdesignz.com</p>
+    </div>
+</footer>
+
+    <script>
+        // Dynamic sticky navigation backdrop toggler
+        const nav = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 40) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Highlight active legal section link inside sticky aside layout
+        window.addEventListener('scroll', () => {
+            let current = "";
+            const sections = document.querySelectorAll('section');
+            const navLi = document.querySelectorAll('.legal-nav a');
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 160) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLi.forEach(a => {
+                a.classList.remove('active');
+                if (a.getAttribute('href').includes(current)) {
+                    a.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

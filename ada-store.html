@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Plan Store | ADA Archilurdesignz</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%;}
+img,svg,video{max-width:100%;height:auto;display:block;}
+:root{
+    --ink:#0d0c0a;--ink2:#1c1a17;--ink3:#2e2b26;
+    --mist:#7a7570;--sand:#c9bfb0;--paper:#f3ede4;
+    --gold:#b09070;--gold2:#d4b896;--accent:#c8a87a;
+    --white:#faf8f4;--glass:rgba(255,255,255,0.04);--wa:#25D366;
+    --f-display:'Playfair Display',Georgia,serif;
+    --f-body:'Outfit',sans-serif;
+    --ease-out:cubic-bezier(0.16,1,0.3,1);
+}
+body{background:var(--ink);color:var(--paper);font-family:var(--f-body);line-height:1.65;}
+h1,h2,h3,h4{font-family:var(--f-display);font-weight:400;}
+a{text-decoration:none;color:inherit;transition:0.3s;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 4%;transition:background 0.5s var(--ease-out);}
+nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-bottom:1px solid rgba(201,191,176,0.08);}
+.nav-left{display:flex;gap:28px;align-items:center;}
+.nav-left a{font-size:0.62rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--sand);position:relative;}
+.nav-left a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--accent);transition:width 0.35s var(--ease-out);}
+.nav-left a:hover{color:var(--paper);}
+.nav-left a:hover::after{width:100%;}
+.nav-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;}
+.nav-logomark{width:38px;height:38px;border:1px solid rgba(201,191,176,0.3);display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-size:1.1rem;color:var(--gold2);}
+.nav-wordmark .w1{font-family:var(--f-display);font-size:1rem;font-weight:500;letter-spacing:5px;text-transform:uppercase;color:var(--paper);display:block;}
+.nav-wordmark .w2{font-family:var(--f-body);font-size:0.5rem;letter-spacing:2px;color:var(--gold);display:block;margin-top:2px;}
+.nav-right{display:flex;gap:14px;align-items:center;}
+.nav-rc{font-size:0.55rem;letter-spacing:2px;color:var(--mist);border:1px solid rgba(122,117,112,0.3);padding:5px 10px;}
+
+/* PAGE HEADER */
+.store-header-section{padding:140px 5% 50px;text-align:center;}
+.store-header-section .eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;}
+.store-header-section .eyebrow::before{content:'';width:24px;height:1px;background:var(--gold);}
+.store-header-section h1{font-family:var(--f-display);font-size:clamp(2.2rem,4vw,3.8rem);font-weight:400;letter-spacing:2px;text-transform:uppercase;color:var(--white);margin-bottom:0;}
+
+/* SEARCH */
+.search-wrap{padding:30px 5% 50px;display:flex;justify-content:center;}
+.search-box{position:relative;width:100%;max-width:580px;}
+.search-box svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);pointer-events:none;width:16px;opacity:0.4;stroke:var(--sand);fill:none;stroke-width:2;}
+.search-box input{width:100%;padding:15px 44px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,191,176,0.15);color:var(--white);font-family:var(--f-body);font-size:0.85rem;letter-spacing:0.5px;outline:none;transition:border-color 0.3s,background 0.3s;}
+.search-box input::placeholder{color:var(--mist);}
+.search-box input:focus{border-color:var(--accent);background:rgba(255,255,255,0.06);}
+#searchClear{position:absolute;right:16px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--gold);display:none;font-size:1rem;line-height:1;background:none;border:none;}
+
+/* GRID */
+.catalog-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;padding:0 5% 100px;max-width:1600px;margin:0 auto;}
+.plan-card{background:var(--ink2);border:1px solid rgba(201,191,176,0.07);cursor:pointer;transition:transform 0.45s var(--ease-out),border-color 0.4s,box-shadow 0.4s;overflow:hidden;}
+.plan-card:hover{border-color:rgba(201,191,176,0.2);transform:translateY(-6px);box-shadow:0 24px 60px rgba(0,0,0,0.5);}
+.plan-img-container{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;}
+.plan-img{width:100%;height:100%;background-size:cover;background-position:center;filter:brightness(0.75);transition:transform 0.6s var(--ease-out),filter 0.5s;}
+.plan-card:hover .plan-img{transform:scale(1.06);filter:brightness(1);}
+.plan-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(13,12,10,0.88),transparent);display:flex;flex-direction:column;justify-content:flex-end;padding:28px;}
+.plan-overlay h3{font-family:var(--f-display);font-size:1.1rem;letter-spacing:2px;text-transform:uppercase;color:var(--white);margin-bottom:4px;}
+.plan-overlay p{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);}
+
+/* MODAL */
+.modal{position:fixed;inset:0;background:var(--ink);z-index:2000;display:none;overflow-y:auto;padding:90px 5%;-webkit-overflow-scrolling:touch;}
+.modal.open{display:block;}
+.modal-grid{display:grid;grid-template-columns:1.2fr 0.8fr;gap:60px;max-width:1100px;margin:0 auto;}
+.gallery-strip img{width:100%;border:1px solid rgba(201,191,176,0.08);margin-bottom:16px;}
+.modal-details{}
+#modalTitle{font-family:var(--f-display);font-size:2.6rem;color:var(--gold2);font-weight:400;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+#modalMeta{font-size:0.68rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--mist);margin-bottom:24px;display:block;}
+#modalPrice{font-size:1.4rem;font-family:var(--f-display);color:var(--white);padding-bottom:20px;margin-bottom:28px;border-bottom:1px solid rgba(201,191,176,0.1);}
+.btn-modal-primary{width:100%;padding:15px;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:0.62rem;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;border:none;cursor:pointer;transition:all 0.3s;margin-bottom:10px;}
+.btn-modal-primary:hover{background:var(--accent);color:var(--white);}
+.btn-modal-ghost{width:100%;padding:15px;background:transparent;color:var(--paper);font-family:var(--f-body);font-size:0.62rem;letter-spacing:2.5px;text-transform:uppercase;border:1px solid rgba(201,191,176,0.3);cursor:pointer;transition:all 0.3s;margin-bottom:24px;}
+.btn-modal-ghost:hover{border-color:var(--paper);background:rgba(250,248,244,0.06);}
+.pkg-box{padding:20px;border:1px solid rgba(201,191,176,0.12);background:rgba(201,191,176,0.03);margin-bottom:16px;}
+.pkg-label{font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;display:block;font-family:var(--f-body);}
+.pkg-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:0.78rem;color:var(--sand);line-height:1.6;}
+.pkg-item:last-child{margin-bottom:0;}
+.pkg-dot{color:var(--accent);flex-shrink:0;margin-top:2px;}
+.notice-box{padding:16px 18px;border-left:2px solid var(--gold);background:rgba(176,144,112,0.05);}
+.notice-box p{font-size:0.75rem;color:var(--mist);line-height:1.7;font-style:italic;}
+.input-field{width:100%;padding:13px 15px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,191,176,0.12);color:var(--white);font-family:var(--f-body);font-size:0.8rem;outline:none;margin-bottom:12px;transition:border-color 0.3s;}
+.input-field:focus{border-color:rgba(201,191,176,0.4);}
+.modal-close{position:fixed;right:40px;top:30px;cursor:pointer;color:var(--sand);font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;z-index:2100;transition:color 0.3s;background:none;border:none;font-family:var(--f-body);}
+.modal-close:hover{color:var(--paper);}
+.back-link{background:none;border:none;color:var(--mist);font-family:var(--f-body);font-size:0.62rem;letter-spacing:1px;cursor:pointer;padding:0;margin-top:8px;transition:color 0.3s;}
+.back-link:hover{color:var(--paper);}
+.form-section-title{font-family:var(--f-display);font-size:1.4rem;color:var(--gold2);margin-bottom:20px;letter-spacing:1px;}
+.search-no-results{grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--mist);font-size:0.75rem;letter-spacing:3px;text-transform:uppercase;}
+
+/* WA */
+#waDraggable{position:fixed;bottom:32px;right:32px;width:58px;height:58px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:9999;cursor:move;touch-action:none;box-shadow:0 8px 30px rgba(37,211,102,0.25);transition:transform 0.3s;}
+#waDraggable:hover{transform:scale(1.08);}
+#waDraggable svg{width:28px;height:28px;fill:#fff;pointer-events:none;}
+
+/* FOOTER */
+footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201,191,176,0.06);}
+.footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding-bottom:50px;border-bottom:1px solid rgba(201,191,176,0.06);margin-bottom:28px;}
+.footer-brand .fb-name{font-family:var(--f-display);font-size:1.5rem;letter-spacing:5px;text-transform:uppercase;color:var(--paper);display:block;margin-bottom:6px;}
+.footer-brand .fb-rc{font-size:0.55rem;letter-spacing:2px;color:var(--gold);display:block;margin-bottom:18px;}
+.footer-brand p{font-size:0.75rem;color:var(--mist);font-weight:200;line-height:1.8;max-width:240px;}
+.footer-col h5{font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;color:var(--sand);margin-bottom:20px;}
+.footer-col a{display:block;font-size:0.72rem;color:var(--mist);margin-bottom:10px;transition:color 0.3s;}
+.footer-col a:hover{color:var(--paper);}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-copy{font-size:0.58rem;color:rgba(122,117,112,0.5);letter-spacing:1px;}
+
+/* RESPONSIVE */
+@media(max-width:1024px){.modal-grid{grid-template-columns:1fr;}}
+@media(max-width:768px){
+    nav{padding:0 5%;height:62px;}
+    .nav-center .nav-wordmark{display:none;}
+    .nav-right .nav-rc{display:none;}
+    .store-header-section{padding:110px 5% 40px;}
+    .catalog-grid{grid-template-columns:1fr;padding:0 5% 60px;}
+    .modal{padding:70px 5% 40px;}
+    .modal-grid{display:flex;flex-direction:column;}
+    #modalDetails{order:1;}
+    #modalGallery{order:2;margin-top:30px;}
+    #modalTitle{font-size:2rem;}
+    .footer-top{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div id="cursor" style="position:fixed;width:10px;height:10px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width 0.3s,height 0.3s;mix-blend-mode:difference;display:none;"></div>
+
+<nav id="navbar">
+    <div class="nav-left">
+        <a href="ada-index.html">Home</a>
+        <a href="ada-about.html">About</a>
+        <a href="ada-portfolio.html">Portfolio</a>
+    </div>
+    <div class="nav-center">
+        <div class="nav-logomark">A</div>
+        <div class="nav-wordmark">
+            <span class="w1">ADA</span>
+            <span class="w2">Archilurdesignz</span>
+        </div>
+    </div>
+    <div class="nav-right">
+        <span class="nav-rc">RC: 9176834</span>
+    </div>
+</nav>
+
+<div class="store-header-section">
+    <span class="eyebrow">Purchase Our Ready-to-Build</span>
+    <h1>Plan — Concept<br>Collection</h1>
+</div>
+
+<div class="search-wrap">
+    <div class="search-box">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="storeSearch" placeholder="Search by name, beds, style, price…" autocomplete="off">
+        <button id="searchClear" onclick="clearSearch()">✕</button>
+    </div>
+</div>
+
+<main class="catalog-grid" id="storeGrid"></main>
+
+<div id="planModal" class="modal">
+    <button class="modal-close" onclick="closePlan()">Close ✕</button>
+    <div class="modal-grid">
+        <div class="gallery-strip" id="modalGallery"></div>
+        <div class="modal-details" id="modalDetails">
+            <h2 id="modalTitle"></h2>
+            <span id="modalMeta"></span>
+            <div id="modalPrice"></div>
+
+            <div id="initialActions">
+                <button class="btn-modal-primary" onclick="showRequestForm('Purchase')">Purchase Plan</button>
+                <button class="btn-modal-ghost" onclick="showRequestForm('Modification')">Request Modification</button>
+
+                <div class="pkg-box">
+                    <span class="pkg-label">Included in Package</span>
+                    <div class="pkg-item"><span class="pkg-dot">✦</span>Presentation Floor Plan(s) with dimensions</div>
+                    <div class="pkg-item"><span class="pkg-dot">✦</span>2 Nos Exterior Renders (Without Watermark)</div>
+                    <div class="pkg-item"><span class="pkg-dot">✦</span>Scaled Floor Plan Sketch (No Sections/Elevations)</div>
+                </div>
+
+                <div class="notice-box">
+                    <p><strong style="color:var(--gold2);">Notice:</strong> These are conceptual models. For safe implementation, consult our architectural team to adjust plans to your site's requirements.</p>
+                </div>
+            </div>
+
+            <div id="requestForm" style="display:none;">
+                <p class="form-section-title" id="formActionTitle"></p>
+                <input type="text" id="clientName" class="input-field" placeholder="Your Full Name">
+                <input type="email" id="clientEmail" class="input-field" placeholder="Email Address">
+                <input type="text" id="clientPhone" class="input-field" placeholder="WhatsApp Number">
+                <button class="btn-modal-primary" onclick="processFinalRequest()">Send Request</button>
+                <button class="back-link" onclick="hideRequestForm()">← Back</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="waDraggable">
+    <a href="https://wa.me/2348138580315" target="_blank">
+        <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.7 17.7 68.9 27.1 106.1 27.1h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.1 0-65.6-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-5.5-2.8-23.2-8.5-44.2-27.1-16.4-14.6-27.4-32.7-30.6-38.1-3.2-5.5-.3-8.4 2.4-11.2 2.5-2.5 5.5-6.4 8.3-9.6 2.8-3.2 3.7-5.5 5.5-9.3 1.9-3.7 1-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 13.2 5.7 23.5 9.2 31.6 11.8 13.3 4.2 25.4 3.6 35 2.2 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+    </a>
+</div>
+
+<footer>
+    <div class="footer-top">
+        <div class="footer-brand">
+            <span class="fb-name">ADA</span>
+            <span class="fb-rc">RC: 9176834</span>
+            <p>Archilurdesignz and Architecture — crafting bespoke luxury spaces across Nigeria and beyond.</p>
+        </div>
+        <div class="footer-col"><h5>Studio</h5><a href="ada-index.html">Home</a><a href="ada-about.html">About Us</a><a href="ada-portfolio.html">Portfolio</a></div>
+        <div class="footer-col"><h5>Store</h5><a href="ada-store.html">Browse Plans</a><a href="ada-connect.html">Contact</a></div>
+        <div class="footer-col"><h5>Legal</h5><a href="ada-policy.html">Privacy Policy</a></div>
+    </div>
+    <div class="footer-bottom">
+        <p class="footer-copy">© 2026 Archilurdesignz and Architecture. All rights reserved.</p>
+        <p class="footer-copy">info@archilurdesignz.com</p>
+    </div>
+</footer>
+
+<script>
+const defaultPlans=[
+    {id:'obsidian-2bed',title:'The Obsidian',meta:'2 BEDS • 210 SQM',category:'Tropical Contemporary',price:'₦100,000',main_image:'images/2BED3.png',image_urls:['images/2BED1.png','images/2BED2.png','images/2BED3.png']},
+    {id:'modeer-2bed',title:'The Modeer',meta:'2 BEDS • 165 SQM',category:'Tropical Contemporary',price:'₦90,000',main_image:'images/2BEDSTY2D.png',image_urls:['images/PSEUDO.png','images/2BEDSTY2C.png','images/2BEDSTY2D.png','images/2BEDSTY2B.png']}
+];
+let dynamicData={},currentAction='',currentPlan='',page=1,isLoading=false,hasMore=true,searchTimeout=null,isSearchMode=false;
+
+/* cursor */
+if(window.matchMedia('(pointer:fine)').matches){
+    const cur=document.getElementById('cursor');cur.style.display='block';
+    document.addEventListener('mousemove',e=>{cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
+}
+
+/* search */
+document.addEventListener('DOMContentLoaded',()=>{
+    const inp=document.getElementById('storeSearch'),clr=document.getElementById('searchClear');
+    inp.addEventListener('input',()=>{const q=inp.value.trim();clr.style.display=q?'block':'none';clearTimeout(searchTimeout);if(!q){clearSearch();return;}searchTimeout=setTimeout(()=>runSearch(q),400);});
+});
+function clearSearch(){document.getElementById('storeSearch').value='';document.getElementById('searchClear').style.display='none';isSearchMode=false;const g=document.getElementById('storeGrid');g.innerHTML='';defaultPlans.forEach(p=>renderCard(p,g));Object.values(dynamicData).forEach(p=>renderCard(p,g));hasMore=true;}
+async function runSearch(query){isSearchMode=true;const g=document.getElementById('storeGrid'),q=query.toLowerCase().replace(/[₦,]/g,'').trim();const hits=defaultPlans.filter(p=>[p.id,p.title,p.meta,p.category,p.price?.replace(/[₦,]/g,'')].some(f=>f&&f.toLowerCase().includes(q)));g.innerHTML='';if(!hits.length){g.innerHTML=`<div class="search-no-results">No plans found for "${query.toUpperCase()}"</div>`;return;}hits.forEach(p=>renderCard(p,g));}
+
+async function fetchStoreItems(){if(isLoading||!hasMore||isSearchMode)return;isLoading=true;try{const r=await fetch(`/.netlify/functions/get-store?page=${page}`),items=await r.json();if(!items||!items.length){hasMore=false;return;}const g=document.getElementById('storeGrid');items.forEach(i=>{if(!dynamicData[i.id]){dynamicData[i.id]=i;renderCard(i,g);}});page++;}catch(_){}isLoading=false;}
+window.addEventListener('scroll',()=>{if((window.innerHeight+window.scrollY)>=document.body.offsetHeight-300)fetchStoreItems();});
+
+function renderCard(item,container){const c=document.createElement('div');c.className='plan-card';c.addEventListener('click',()=>fillModal(item.title,item.meta,item.price,item.image_urls));c.innerHTML=`<div class="plan-img-container"><div class="plan-img" style="background-image:url('${item.main_image}')"></div><div class="plan-overlay"><h3>${item.title}</h3><p>${item.category||item.meta}</p></div></div>`;container.appendChild(c);}
+
+function fillModal(title,meta,price,images){document.getElementById('modalTitle').innerText=title;document.getElementById('modalMeta').innerText=meta;document.getElementById('modalPrice').innerText=price;document.getElementById('modalGallery').innerHTML=(images||[]).map(img=>`<img src="${img}">`).join('');document.getElementById('planModal').classList.add('open');document.body.style.overflow='hidden';hideRequestForm();}
+function closePlan(){document.getElementById('planModal').classList.remove('open');document.body.style.overflow='';}
+function showRequestForm(a){currentAction=a;currentPlan=document.getElementById('modalTitle').innerText;document.getElementById('formActionTitle').innerText=a+' Request';document.getElementById('initialActions').style.display='none';document.getElementById('requestForm').style.display='block';}
+function hideRequestForm(){document.getElementById('initialActions').style.display='block';document.getElementById('requestForm').style.display='none';}
+function processFinalRequest(){const n=document.getElementById('clientName').value,e=document.getElementById('clientEmail').value,p=document.getElementById('clientPhone').value;if(!n||!e){alert('Please complete name and email.');return;}window.location.href=`mailto:office@archilurdesignz.com?subject=${currentAction} for ${currentPlan}&body=Name: ${n}%0D%0AEmail: ${e}%0D%0APhone: ${p}`;setTimeout(()=>{window.open(`https://wa.me/2348138580315?text=${encodeURIComponent(`Hi ADA, I'm ${n}. I want to request a ${currentAction} for ${currentPlan}.`)}`,'_blank');},1500);}
+
+function checkUrlForPlan(){const id=new URLSearchParams(window.location.search).get('plan');if(!id)return;const l=defaultPlans.find(p=>p.id===id);if(l){fillModal(l.title,l.meta,l.price,l.image_urls);}}
+
+window.addEventListener('scroll',()=>{document.getElementById('navbar').classList.toggle('solid',window.scrollY>60);},{passive:true});
+
+const wa=document.getElementById('waDraggable');let dr=false,ox=0,oy=0;
+wa.addEventListener('mousedown',e=>{dr=true;ox=e.clientX-wa.offsetLeft;oy=e.clientY-wa.offsetTop;wa.style.transition='none';});
+document.addEventListener('mousemove',e=>{if(dr){wa.style.left=(e.clientX-ox)+'px';wa.style.top=(e.clientY-oy)+'px';wa.style.right=wa.style.bottom='auto';}});
+document.addEventListener('mouseup',()=>{dr=false;wa.style.transition='transform 0.3s';});
+
+window.addEventListener('DOMContentLoaded',()=>{const g=document.getElementById('storeGrid');defaultPlans.forEach(p=>renderCard(p,g));fetchStoreItems();checkUrlForPlan();});
+</script>
+</body>
+</html>

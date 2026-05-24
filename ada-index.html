@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <title>ADA | Archilurdesignz and Architecture</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+    <style>
+/* ── RESET ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body {
+    width:100%; max-width:100%; overflow-x:hidden;
+    -webkit-text-size-adjust:100%; text-size-adjust:100%;
+}
+img, svg, video { max-width:100%; height:auto; display:block; }
+
+/* ── TOKENS ─────────────────────────────────────────────────────────── */
+:root {
+    --ink:     #0d0c0a;
+    --ink2:    #1c1a17;
+    --ink3:    #2e2b26;
+    --mist:    #7a7570;
+    --sand:    #c9bfb0;
+    --paper:   #f3ede4;
+    --paper2:  #ede5d8;
+    --gold:    #b09070;
+    --gold2:   #d4b896;
+    --accent:  #c8a87a;
+    --white:   #faf8f4;
+    --glass:   rgba(255,255,255,0.04);
+    --wa:      #25D366;
+    --shadow:  0 8px 40px rgba(26,23,20,0.12);
+
+    --f-display: 'Playfair Display', Georgia, serif;
+    --f-body:    'Outfit', sans-serif;
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--f-body);
+    line-height: 1.65;
+    cursor: default;
+}
+
+/* ── CUSTOM CURSOR ───────────────────────────────────────────────────── */
+@media (pointer: fine) {
+    body { cursor: none; }
+    a, button, [role="button"] { cursor: none; }
+}
+#cursor {
+    position: fixed; width:10px; height:10px;
+    background: var(--accent); border-radius:50%;
+    pointer-events: none; z-index:99999;
+    transform: translate(-50%,-50%);
+    transition: transform 0.1s, width 0.3s var(--ease-out), height 0.3s var(--ease-out), background 0.3s;
+    mix-blend-mode: difference;
+}
+#cursor.expanded { width:40px; height:40px; background: var(--gold2); opacity:0.6; }
+
+/* ── NAV ─────────────────────────────────────────────────────────────── */
+nav {
+    position: fixed; top:0; left:0; right:0; z-index:1000;
+    height:72px;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 0 4%;
+    transition: background 0.5s var(--ease-out), backdrop-filter 0.5s;
+}
+nav.solid {
+    background: rgba(13,12,10,0.94);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(201,191,176,0.08);
+}
+.nav-left { display:flex; gap:28px; align-items:center; }
+.nav-left a {
+    font-family: var(--f-body); font-size:0.62rem; font-weight:400;
+    letter-spacing:2.5px; text-transform:uppercase; color: var(--sand);
+    text-decoration:none; transition: color 0.3s;
+    position:relative;
+}
+.nav-left a::after {
+    content:''; position:absolute; bottom:-3px; left:0;
+    width:0; height:1px; background:var(--accent);
+    transition: width 0.35s var(--ease-out);
+}
+.nav-left a:hover { color:var(--paper); }
+.nav-left a:hover::after { width:100%; }
+
+.nav-center {
+    position:absolute; left:50%; top:50%;
+    transform:translate(-50%,-50%);
+    display:flex; align-items:center; gap:10px;
+}
+.nav-logomark {
+    width:38px; height:38px; border:1px solid rgba(201,191,176,0.3);
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--f-display); font-size:1.1rem;
+    color: var(--gold2); letter-spacing:1px;
+    transition: border-color 0.3s;
+}
+nav:hover .nav-logomark { border-color: var(--gold); }
+.nav-wordmark { line-height:1; }
+.nav-wordmark .w1 {
+    font-family: var(--f-display); font-size:1rem; font-weight:500;
+    letter-spacing:5px; text-transform:uppercase; color:var(--paper);
+    display:block;
+}
+.nav-wordmark .w2 {
+    font-family: var(--f-body); font-size:0.75rem; font-weight:300;
+    letter-spacing:2px; color:var(--gold); display:block; margin-top:2px;
+}
+
+.nav-right { display:flex; gap:14px; align-items:center; }
+.nav-rc {
+    font-size:0.55rem; letter-spacing:2px; color:var(--mist);
+    border:1px solid rgba(122,117,112,0.3); padding:5px 10px;
+}
+.nav-cta-btn {
+    font-family:var(--f-body); font-size:0.6rem; font-weight:400;
+    letter-spacing:2px; text-transform:uppercase;
+    padding:10px 22px; background:transparent;
+    border:1px solid var(--sand); color:var(--paper);
+    cursor:pointer; transition:all 0.3s;
+}
+.nav-cta-btn:hover { background:var(--paper); color:var(--ink); }
+
+/* ── HERO ────────────────────────────────────────────────────────────── */
+.hero {
+    position:relative; height:100vh; min-height:640px;
+    display:flex; align-items:flex-end;
+    overflow:hidden;
+}
+
+.hero-bg {
+    position:absolute; inset:0;
+    background: url('Hero.svg') center/cover no-repeat;
+    transform-origin: center;
+    animation: heroScale 12s var(--ease-in-out) forwards;
+}
+@keyframes heroScale {
+    from { transform:scale(1.08); }
+    to   { transform:scale(1.0); }
+}
+.hero-bg::after {
+    content:''; position:absolute; inset:0;
+    background: linear-gradient(
+        125deg,
+        rgba(13,12,10,0.15) 0%,
+        rgba(13,12,10,0.45) 50%,
+        rgba(13,12,10,0.92) 100%
+    );
+}
+
+/* Architectural line overlay */
+.hero-lines {
+    position:absolute; inset:0; pointer-events:none; z-index:1;
+    overflow:hidden;
+}
+.hero-lines::before {
+    content:'';
+    position:absolute; top:0; left:38%;
+    width:1px; height:100%;
+    background:linear-gradient(to bottom, transparent 0%, rgba(201,191,176,0.15) 30%, rgba(201,191,176,0.08) 70%, transparent 100%);
+}
+.hero-lines::after {
+    content:'';
+    position:absolute; bottom:0; left:0; right:0;
+    height:1px;
+    background:linear-gradient(to right, transparent 0%, rgba(201,191,176,0.2) 38%, transparent 100%);
+}
+
+.hero-content {
+    position:relative; z-index:2;
+    padding: 0 5% 7%;
+    max-width:760px;
+    animation: heroUp 1.2s var(--ease-out) 0.3s both;
+}
+@keyframes heroUp {
+    from { opacity:0; transform:translateY(40px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+
+.hero-tag {
+    display:inline-flex; align-items:center; gap:10px;
+    margin-bottom:24px;
+}
+.hero-tag-line { width:32px; height:1px; background:var(--accent); }
+.hero-tag span {
+    font-family:var(--f-body); font-size:0.58rem; font-weight:400;
+    letter-spacing:4px; text-transform:uppercase; color:var(--gold2);
+}
+
+.hero-title {
+    font-family: var(--f-display);
+    font-size: clamp(2.6rem, 5.5vw, 5.2rem);
+    font-weight:400; line-height:1.08;
+    letter-spacing:-0.5px; color:var(--white);
+    margin-bottom:28px;
+}
+.hero-title em {
+    font-style:italic; color:var(--gold2);
+    display:block;
+}
+
+.hero-sub {
+    font-size:0.8rem; font-weight:200; color:var(--sand);
+    max-width:420px; line-height:1.8; margin-bottom:40px;
+    letter-spacing:0.3px;
+}
+
+.hero-btns { display:flex; gap:14px; flex-wrap:wrap; }
+
+.btn-fill {
+    padding:14px 36px;
+    background:var(--paper); color:var(--ink);
+    font-family:var(--f-body); font-size:0.62rem; font-weight:500;
+    letter-spacing:2.5px; text-transform:uppercase;
+    text-decoration:none; border:none; cursor:pointer;
+    transition:all 0.35s var(--ease-out);
+    display:inline-block;
+}
+.btn-fill:hover { background:var(--accent); color:var(--white); transform:translateY(-3px); }
+
+.btn-ghost {
+    padding:14px 36px;
+    background:transparent; color:var(--paper);
+    font-family:var(--f-body); font-size:0.62rem; font-weight:400;
+    letter-spacing:2.5px; text-transform:uppercase;
+    border:1px solid rgba(201,191,176,0.4); cursor:pointer;
+    transition:all 0.35s var(--ease-out);
+    display:inline-block;
+}
+.btn-ghost:hover { border-color:var(--paper); background:rgba(250,248,244,0.08); transform:translateY(-3px); }
+
+/* Scroll indicator */
+.hero-scroll {
+    position:absolute; bottom:40px; right:5%;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    z-index:2; animation: heroUp 1.2s var(--ease-out) 1s both;
+}
+.hero-scroll span {
+    font: size 0.75em;rem; letter-spacing:3px; text-transform:uppercase;
+    color:var(--mist); writing-mode:vertical-rl;
+}
+.hero-scroll-line {
+    width:1px; height:60px;
+    background:linear-gradient(to bottom, var(--accent), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+    0%,100% { opacity:0.4; transform:scaleY(0.7); }
+    50% { opacity:1; transform:scaleY(1); }
+}
+
+/* ── MARQUEE STRIP ───────────────────────────────────────────────────── */
+.marquee-strip {
+    background: var(--ink2);
+    border-top:1px solid rgba(201,191,176,0.06);
+    border-bottom:1px solid rgba(201,191,176,0.06);
+    padding:14px 0; overflow:hidden;
+}
+.marquee-track {
+    display:flex; gap:0;
+    width:max-content;
+    animation: marqueeTick 25s linear infinite;
+}
+.marquee-track:hover { animation-play-state:paused; }
+@keyframes marqueeTick {
+    from { transform:translateX(0); }
+    to   { transform:translateX(-50%); }
+}
+.marquee-item {
+    display:flex; align-items:center; gap:18px;
+    padding:0 28px; white-space:nowrap;
+    font-family:var(--f-body); font-size:0.6rem; font-weight:300;
+    letter-spacing:3px; text-transform:uppercase; color:var(--mist);
+}
+.marquee-dot { width:4px; height:4px; background:var(--accent); border-radius:50%; flex-shrink:0; }
+
+/* ── SECTION BASE ────────────────────────────────────────────────────── */
+.s-reveal {
+    opacity:0; transform:translateY(32px);
+    transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+.s-reveal.in { opacity:1; transform:translateY(0); }
+.delay-1 { transition-delay:0.1s; }
+.delay-2 { transition-delay:0.2s; }
+.delay-3 { transition-delay:0.3s; }
+.delay-4 { transition-delay:0.4s; }
+.delay-5 { transition-delay:0.5s; }
+
+.eyebrow {
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:var(--f-body); font-size:0.58rem; font-weight:400;
+    letter-spacing:4px; text-transform:uppercase; color:var(--gold);
+    margin-bottom:14px;
+}
+.eyebrow::before { content:''; width:24px; height:1px; background:var(--gold); }
+
+.section-h {
+    font-family:var(--f-display);
+    font-size:clamp(1.9rem,3.2vw,3rem);
+    font-weight:400; letter-spacing:1px;
+    text-transform:uppercase; color:var(--white);
+    line-height:1.15;
+}
+
+/* ── PLANS SECTION ───────────────────────────────────────────────────── */
+#plans {
+    padding: 90px 0 70px;
+    background: var(--ink);
+}
+.plans-header {
+    display:flex; align-items:flex-end; justify-content:space-between;
+    padding:0 5%; margin-bottom:40px;
+}
+.plans-link {
+    font-size:0.58rem; letter-spacing:2.5px; text-transform:uppercase;
+    color:var(--gold); text-decoration:none;
+    border-bottom:1px solid rgba(176,144,112,0.3); padding-bottom:2px;
+    transition:color 0.3s, border-color 0.3s;
+}
+.plans-link:hover { color:var(--gold2); border-color:var(--gold2); }
+
+.carousel-outer { position:relative; overflow:hidden; }
+
+.plans-carousel {
+    display:flex; gap:0;
+    padding:8px 5% 24px;
+    overflow-x:auto; scroll-snap-type:x mandatory;
+    scrollbar-width:none; cursor:grab;
+    -webkit-overflow-scrolling:touch;
+}
+.plans-carousel::-webkit-scrollbar { display:none; }
+.plans-carousel.dragging { cursor:grabbing; }
+
+.plan-card {
+    flex:0 0 300px; min-width:300px;
+    scroll-snap-align:start;
+    margin-right:20px;
+    background:var(--ink2);
+    border:1px solid rgba(201,191,176,0.07);
+    overflow:hidden;
+    transition: transform 0.45s var(--ease-out), border-color 0.4s, box-shadow 0.4s;
+    cursor:pointer;
+}
+.plan-card:hover {
+    transform:translateY(-8px);
+    border-color:rgba(201,191,176,0.2);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+}
+.plan-img-wrap { position:relative; height:210px; overflow:hidden; }
+.plan-img {
+    width:100%; height:100%;
+    background-size:cover; background-position:center;
+    filter:brightness(0.8) saturate(0.8);
+    transition:transform 0.6s var(--ease-out), filter 0.5s;
+}
+.plan-card:hover .plan-img { transform:scale(1.07); filter:brightness(1) saturate(1); }
+
+.plan-badge {
+    position:absolute; bottom:14px; left:14px;
+    background:var(--ink); color:var(--gold2);
+    font-family:var(--f-body); font-size:0.65rem; font-weight:500;
+    letter-spacing:1px; padding:5px 12px;
+    border:1px solid rgba(201,191,176,0.15);
+}
+.plan-info { padding:20px 22px 22px; }
+.plan-title {
+    font-family:var(--f-display); font-size:1.05rem; font-weight:500;
+    letter-spacing:2px; text-transform:uppercase; color:var(--white);
+    margin-bottom:6px;
+}
+.plan-cat {
+    font-size:0.58rem; font-weight:300; letter-spacing:2px;
+    text-transform:uppercase; color:var(--gold); margin-bottom:10px;
+}
+.plan-meta { font-size:0.75rem; color:var(--mist); font-weight:200; }
+
+.arrow-btn {
+    position:absolute; top:50%; transform:translateY(-50%);
+    width:44px; height:44px;
+    background:rgba(13,12,10,0.8); backdrop-filter:blur(8px);
+    border:1px solid rgba(201,191,176,0.15);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; z-index:10;
+    transition:background 0.3s, border-color 0.3s;
+    color:var(--sand);
+}
+.arrow-btn:hover { background:var(--accent); border-color:var(--accent); color:var(--ink); }
+.arrow-btn svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.8; }
+.arr-prev { left:12px; }
+.arr-next { right:12px; }
+
+/* ── SERVICES ────────────────────────────────────────────────────────── */
+#services {
+    padding:100px 5%;
+    background:var(--ink2);
+    position:relative; overflow:hidden;
+}
+#services::before {
+    content:'SERVICES';
+    position:absolute; top:40px; right:-20px;
+    font-family:var(--f-display); font-size:clamp(5rem,12vw,11rem);
+    font-weight:700; letter-spacing:-4px;
+    color:rgba(255,255,255,0.02);
+    white-space:nowrap; pointer-events:none; user-select:none;
+}
+
+.services-top {
+    display:flex; align-items:flex-end; justify-content:space-between;
+    margin-bottom:60px; flex-wrap:wrap; gap:20px;
+}
+.services-desc {
+    max-width:420px; font-size:0.82rem; font-weight:200;
+    color:var(--mist); line-height:1.85; letter-spacing:0.2px;
+}
+
+.svc-grid {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:rgba(201,191,176,0.06);
+}
+
+.svc-item {
+    background:var(--ink2);
+    padding:38px 32px;
+    position:relative; overflow:hidden;
+    transition:background 0.45s var(--ease-out);
+}
+.svc-item::before {
+    content:''; position:absolute; top:0; left:0;
+    width:100%; height:2px;
+    background:var(--accent); transform:scaleX(0);
+    transform-origin:left; transition:transform 0.45s var(--ease-out);
+}
+.svc-item:hover { background:var(--ink3); }
+.svc-item:hover::before { transform:scaleX(1); }
+.svc-item:hover .svc-num { color:var(--accent); }
+.svc-item:hover .svc-name { color:var(--gold2); }
+
+.svc-num {
+    font-family:var(--f-display); font-size:0.7rem; font-style:italic;
+    color:rgba(201,191,176,0.2); letter-spacing:1px;
+    margin-bottom:24px; display:block;
+    transition:color 0.4s;
+}
+.svc-icon-wrap {
+    width:42px; height:42px; margin-bottom:20px;
+    color:var(--sand); opacity:0.6;
+    transition:opacity 0.4s;
+}
+.svc-item:hover .svc-icon-wrap { opacity:1; }
+.svc-icon-wrap svg { width:100%; height:100%; stroke:currentColor; fill:none; stroke-width:1.2; }
+.svc-name {
+    font-family:var(--f-display); font-size:1rem; font-weight:500;
+    letter-spacing:2px; text-transform:uppercase; color:var(--white);
+    margin-bottom:12px; transition:color 0.4s;
+}
+.svc-desc-text { font-size:0.75rem; font-weight:200; color:var(--mist); line-height:1.8; }
+
+/* ── STAT BAND ───────────────────────────────────────────────────────── */
+.stat-band {
+    background:var(--ink); padding:60px 5%;
+    border-top:1px solid rgba(201,191,176,0.06);
+    border-bottom:1px solid rgba(201,191,176,0.06);
+}
+.stat-grid {
+    display:grid; grid-template-columns:repeat(4,1fr);
+    gap:1px; background:rgba(201,191,176,0.06);
+}
+.stat-item {
+    background:var(--ink); padding:36px 28px;
+    text-align:center;
+}
+.stat-num {
+    font-family:var(--f-display); font-size:clamp(2rem,3.5vw,3rem);
+    font-weight:400; color:var(--gold2); letter-spacing:-1px;
+    display:block; margin-bottom:8px;
+}
+.stat-label {
+    font-size:0.58rem; letter-spacing:3px; text-transform:uppercase;
+    color:var(--mist); font-weight:300;
+}
+
+/* ── REVIEWS ─────────────────────────────────────────────────────────── */
+#reviews {
+    padding:100px 0 80px;
+    background:var(--ink);
+}
+.reviews-header { padding:0 5%; margin-bottom:50px; }
+.reviews-wrapper {
+    overflow:hidden; width:100%; position:relative;
+}
+.reviews-track {
+    display:flex; gap:20px;
+    padding:0 5% 8px;
+    animation: reviewsTick 45s linear infinite;
+    width:max-content;
+}
+.reviews-track:hover { animation-play-state:paused; }
+@keyframes reviewsTick {
+    from { transform:translateX(0); }
+    to   { transform:translateX(-50%); }
+}
+
+.review-card {
+    flex:0 0 360px; min-width:360px;
+    background:var(--ink2);
+    border:1px solid rgba(201,191,176,0.07);
+    padding:32px 28px;
+    transition:border-color 0.4s, transform 0.4s;
+}
+.review-card:hover {
+    border-color:rgba(201,191,176,0.18);
+    transform:translateY(-4px);
+}
+.review-stars { color:var(--accent); font-size:0.75rem; letter-spacing:3px; margin-bottom:18px; }
+.review-quote {
+    font-family:var(--f-display); font-size:0.97rem; font-style:italic;
+    font-weight:400; color:var(--paper); line-height:1.75;
+    margin-bottom:22px; quotes:'\201C' '\201D';
+}
+.review-quote::before { content:open-quote; color:var(--gold); margin-right:2px; }
+.review-quote::after  { content:close-quote; color:var(--gold); margin-left:2px; }
+.review-author {
+    font-size:0.58rem; letter-spacing:2.5px; text-transform:uppercase;
+    color:var(--gold); font-weight:400;
+}
+
+/* ── INQUIRY MODAL ───────────────────────────────────────────────────── */
+.modal-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(5,5,4,0.97); z-index:10000;
+    padding:5% 5%; overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+}
+.modal-overlay.open { display:block; }
+.modal-inner { max-width:860px; margin:0 auto; }
+
+.modal-close-btn {
+    display:flex; align-items:center; gap:8px;
+    background:none; border:none; color:var(--sand);
+    font-family:var(--f-body); font-size:0.58rem; font-weight:300;
+    letter-spacing:3px; text-transform:uppercase; cursor:pointer;
+    margin-bottom:50px; transition:color 0.3s;
+}
+.modal-close-btn:hover { color:var(--white); }
+.modal-close-line {
+    width:30px; height:1px; background:currentColor; transition:width 0.3s;
+}
+.modal-close-btn:hover .modal-close-line { width:50px; }
+
+.modal-title {
+    font-family:var(--f-display); font-size:clamp(1.8rem,3vw,2.8rem);
+    font-weight:400; letter-spacing:1px; text-transform:uppercase;
+    color:var(--white); margin-bottom:8px;
+}
+.modal-sub { font-size:0.75rem; color:var(--mist); margin-bottom:44px; letter-spacing:0.3px; }
+
+.field-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.field { display:flex; flex-direction:column; gap:7px; }
+.field label {
+    font-size:0.55rem; letter-spacing:2.5px; text-transform:uppercase;
+    color:var(--gold); font-weight:400;
+}
+.field input, .field select, .field textarea {
+    background:rgba(255,255,255,0.04); border:1px solid rgba(201,191,176,0.12);
+    color:var(--white); padding:13px 15px;
+    font-family:var(--f-body); font-size:0.8rem; font-weight:200;
+    outline:none; width:100%;
+    transition:border-color 0.3s, background 0.3s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+    border-color:rgba(201,191,176,0.4); background:rgba(255,255,255,0.06);
+}
+.field textarea { min-height:110px; resize:vertical; }
+.field select option { background:var(--ink2); }
+
+.svc-check-grid {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:10px; margin:16px 0;
+}
+.svc-check-label {
+    display:flex; align-items:center; gap:9px;
+    font-size:0.7rem; color:var(--mist); cursor:pointer;
+    font-weight:200; letter-spacing:0.3px;
+}
+.svc-check-label input[type=checkbox] { accent-color:var(--accent); width:13px; height:13px; }
+
+.modal-submit {
+    width:100%; padding:16px;
+    background:var(--paper); color:var(--ink);
+    font-family:var(--f-body); font-size:0.62rem; font-weight:500;
+    letter-spacing:3px; text-transform:uppercase;
+    border:none; cursor:pointer; margin-top:12px;
+    transition:background 0.3s, transform 0.3s;
+}
+.modal-submit:hover { background:var(--accent); color:var(--white); transform:translateY(-2px); }
+
+/* ── WHATSAPP ────────────────────────────────────────────────────────── */
+#waDraggable {
+    position:fixed; bottom:32px; right:32px;
+    width:58px; height:58px; background:var(--wa);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    z-index:9999; cursor:move; touch-action:none;
+    box-shadow:0 8px 30px rgba(37,211,102,0.25);
+    transition:transform 0.3s, box-shadow 0.3s;
+}
+#waDraggable:hover { transform:scale(1.08); box-shadow:0 12px 40px rgba(37,211,102,0.35); }
+#waDraggable svg { width:28px; height:28px; fill:#fff; pointer-events:none; }
+
+/* ── FOOTER ──────────────────────────────────────────────────────────── */
+footer {
+    background:var(--ink2); padding:64px 5% 28px;
+    border-top:1px solid rgba(201,191,176,0.06);
+}
+.footer-top {
+    display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr;
+    gap:40px; padding-bottom:50px;
+    border-bottom:1px solid rgba(201,191,176,0.06);
+    margin-bottom:28px;
+}
+.footer-brand .fb-name {
+    font-family:var(--f-display); font-size:1.5rem; font-weight:400;
+    letter-spacing:5px; text-transform:uppercase; color:var(--paper);
+    display:block; margin-bottom:6px;
+}
+.footer-brand .fb-rc {
+    font-size:0.55rem; letter-spacing:2px; color:var(--gold);
+    display:block; margin-bottom:18px;
+}
+.footer-brand p { font-size:0.75rem; color:var(--mist); font-weight:200; line-height:1.8; max-width:240px; }
+
+.footer-col h5 {
+    font-family:var(--f-body); font-size:0.58rem; font-weight:500;
+    letter-spacing:3px; text-transform:uppercase; color:var(--sand);
+    margin-bottom:20px;
+}
+.footer-col a {
+    display:block; font-size:0.72rem; color:var(--mist); font-weight:200;
+    text-decoration:none; margin-bottom:10px; transition:color 0.3s;
+    letter-spacing:0.3px;
+}
+.footer-col a:hover { color:var(--paper); }
+
+.footer-bottom {
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:12px;
+}
+.footer-copy { font-size:0.58rem; color:rgba(122,117,112,0.5); letter-spacing:1px; }
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────── */
+@media (max-width:1024px) {
+    .svc-grid { grid-template-columns:repeat(2,1fr); }
+    .stat-grid { grid-template-columns:repeat(2,1fr); }
+    .footer-top { grid-template-columns:1fr 1fr; }
+}
+
+@media (max-width:768px) {
+    nav { padding:0 5%; height:62px; }
+    .nav-center .nav-wordmark { display:none; }
+    .nav-right .nav-rc { display:none; }
+
+    .hero-content { padding:0 5% 60px; }
+
+    #plans, #reviews { padding-top:70px; }
+    .plans-header, .reviews-header { padding:0 5%; }
+
+    #services { padding:70px 5%; }
+    .services-top { flex-direction:column; }
+    .svc-grid { grid-template-columns:1fr; }
+
+    .stat-grid { grid-template-columns:repeat(2,1fr); }
+    .footer-top { grid-template-columns:1fr; }
+
+    .field-grid { grid-template-columns:1fr; }
+    .svc-check-grid { grid-template-columns:1fr 1fr; }
+
+    .plan-card { flex:0 0 250px; min-width:250px; }
+    .plan-img-wrap { height:175px; }
+    .review-card { flex:0 0 280px; min-width:280px; }
+
+    #cursor { display:none; }
+}
+
+@media (max-width:480px) {
+    .hero-title { font-size:2.2rem; }
+    .hero-btns { flex-direction:column; }
+    .btn-fill, .btn-ghost { width:100%; text-align:center; }
+    .stat-grid { grid-template-columns:1fr 1fr; }
+}
+    </style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+
+<!-- ── NAV ────────────────────────────────────────────────────────────── -->
+<nav id="navbar">
+    <div class="nav-left">
+        <a href="ada-about.html">About</a>
+        <a href="ada-portfolio.html">Portfolio</a>
+        <a href="ada-store.html">Store</a>
+    </div>
+    <div class="nav-center">
+        <div class="nav-logomark">A</div>
+        <div class="nav-wordmark">
+            <span class="w1">ADA</span>
+            <span class="w2">Archilurdesignz</span>
+        </div>
+    </div>
+    <div class="nav-right">
+        <span class="nav-rc">RC: 9176834</span>
+        <button class="nav-cta-btn" onclick="toggleInquiry(true)">Enquire</button>
+    </div>
+</nav>
+
+<!-- ── INQUIRY MODAL ──────────────────────────────────────────────────── -->
+<div id="inquiryModal" class="modal-overlay">
+    <div class="modal-inner">
+        <button class="modal-close-btn" onclick="toggleInquiry(false)">
+            <span class="modal-close-line"></span>
+            Close
+        </button>
+        <p class="modal-title">Custom Design Brief</p>
+        <p class="modal-sub">Bespoke solutions curated for your lifestyle. We respond within 24 hours.</p>
+        <form id="designBriefForm" onsubmit="handleInquirySubmit(event)">
+            <div class="field-grid">
+                <div class="field"><label>Full Name</label><input type="text" id="cName" placeholder="Your name" required></div>
+                <div class="field"><label>Email</label><input type="email" id="cEmail" placeholder="you@example.com" required></div>
+                <div class="field"><label>WhatsApp</label><input type="tel" id="cWA" placeholder="+234 ..."></div>
+                <div class="field"><label>Project Location</label><input type="text" id="cLoc" placeholder="City, State"></div>
+            </div>
+            <div class="field" style="margin-bottom:14px;">
+                <label>Services of Interest</label>
+                <div class="svc-check-grid">
+                    <label class="svc-check-label"><input type="checkbox" name="srv" value="Architecture"> Architecture</label>
+                    <label class="svc-check-label"><input type="checkbox" name="srv" value="Structural"> Structural Eng.</label>
+                    <label class="svc-check-label"><input type="checkbox" name="srv" value="Mechanical"> Mechanical Eng.</label>
+                    <label class="svc-check-label"><input type="checkbox" name="srv" value="Electrical"> Electrical Eng.</label>
+                    <label class="svc-check-label"><input type="checkbox" name="srv" value="QS"> Quantity Surveying</label>
+                    <label class="svc-check-label"><input type="checkbox" name="srv" value="Permit"> Permit Approval</label>
+                    <label class="svc-check-label"><input type="checkbox" name="srv" value="Landscape"> Landscaping</label>
+                </div>
+            </div>
+            <div class="field" style="margin-bottom:14px;">
+                <label>Design Brief</label>
+                <textarea id="cBrief" placeholder="Describe your project vision, budget range, and timeline..." required></textarea>
+            </div>
+            <div class="field-grid">
+                <div class="field">
+                    <label>Preferred Currency</label>
+                    <select id="cCurr">
+                        <option value="NGN">Nigerian Naira (₦)</option>
+                        <option value="USD">US Dollar ($)</option>
+                    </select>
+                </div>
+                <div class="field" style="justify-content:flex-end; padding-bottom:4px;">
+                    <label class="svc-check-label" style="margin-top:auto;">
+                        <input type="checkbox" id="cVideo"> Request video consultation
+                    </label>
+                </div>
+            </div>
+            <button type="submit" class="modal-submit">Submit Brief →</button>
+        </form>
+    </div>
+</div>
+
+<!-- ── HERO ───────────────────────────────────────────────────────────── -->
+<header class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-lines"></div>
+    <div class="hero-content">
+        <div class="hero-tag">
+            <span class="hero-tag-line"></span>
+            <span>Archilurdesignz and Architecture</span>
+        </div>
+        <h1 class="hero-title">
+            Bespoke<br>
+            <em>Luxury</em><br>
+            Architecture.
+        </h1>
+        <p class="hero-sub">End-to-end design, engineering, and construction coordination — from concept to site without disconnect.</p>
+        <div class="hero-btns">
+            <a href="ada-store.html" class="btn-fill">Shop Plans</a>
+            <button class="btn-ghost" onclick="toggleInquiry(true)">Request Custom Design</button>
+        </div>
+    </div>
+    <div class="hero-scroll">
+        <div class="hero-scroll-line"></div>
+        <span>Scroll</span>
+    </div>
+</header>
+
+<!-- ── MARQUEE STRIP ──────────────────────────────────────────────────── -->
+<div class="marquee-strip">
+    <div class="marquee-track" id="marqueeTrack">
+        <!-- JS fills this -->
+    </div>
+</div>
+
+<!-- ── PLANS ──────────────────────────────────────────────────────────── -->
+<section id="plans">
+    <div class="plans-header s-reveal">
+        <div>
+            <span class="eyebrow">Ready to Build</span>
+            <h2 class="section-h">Top Selling Designs</h2>
+        </div>
+        <a href="ada-store.html" class="plans-link s-reveal delay-2">View Full Collection →</a>
+    </div>
+    <div class="carousel-outer">
+        <button class="arrow-btn arr-prev" onclick="shiftCarousel(-1)">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="plans-carousel" id="plansCarousel"></div>
+        <button class="arrow-btn arr-next" onclick="shiftCarousel(1)">
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+    </div>
+</section>
+
+<!-- ── SERVICES ───────────────────────────────────────────────────────── -->
+<section id="services">
+    <div class="services-top">
+        <div class="s-reveal">
+            <span class="eyebrow">Our Expertise</span>
+            <h2 class="section-h">Delivering<br>Top Value</h2>
+        </div>
+        <p class="services-desc s-reveal delay-2">We provide end-to-end architectural services that integrate design, engineering, and construction coordination, ensuring every project moves from concept to site without disconnect.</p>
+    </div>
+    <div class="svc-grid">
+        <div class="svc-item s-reveal delay-1">
+            <span class="svc-num">01</span>
+            <div class="svc-icon-wrap">
+                <svg viewBox="0 0 48 48"><rect x="6" y="6" width="36" height="36" rx="1"/><line x1="6" y1="18" x2="42" y2="18"/><line x1="18" y1="18" x2="18" y2="42"/><line x1="24" y1="6" x2="24" y2="18"/></svg>
+            </div>
+            <p class="svc-name">Architectural Design</p>
+            <p class="svc-desc-text">Innovative residential and Airbnb concepts designed for tropical luxury. We also specialize in the design of commercial, industrial and other recreational spaces as the need may arise.</p>
+        </div>
+        <div class="svc-item s-reveal delay-2">
+            <span class="svc-num">02</span>
+            <div class="svc-icon-wrap">
+                <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><line x1="24" y1="6" x2="24" y2="42"/><line x1="6" y1="24" x2="42" y2="24"/><ellipse cx="24" cy="24" rx="10" ry="18"/></svg>
+            </div>
+            <p class="svc-name">3D Visualization</p>
+            <p class="svc-desc-text">Clear, photorealistic visual representations and animations helping you understand the project before construction begins.</p>
+        </div>
+        <div class="svc-item s-reveal delay-3">
+            <span class="svc-num">03</span>
+            <div class="svc-icon-wrap">
+                <svg viewBox="0 0 48 48"><polygon points="24,4 44,14 44,34 24,44 4,34 4,14"/><line x1="24" y1="4" x2="24" y2="44"/><line x1="4" y1="14" x2="44" y2="14"/><line x1="4" y1="34" x2="44" y2="34"/></svg>
+            </div>
+            <p class="svc-name">Engineering Suite</p>
+            <p class="svc-desc-text">Integrated structural, mechanical, and electrical systems delivering complete engineering coordination on request.</p>
+        </div>
+        <div class="svc-item s-reveal delay-1">
+            <span class="svc-num">04</span>
+            <div class="svc-icon-wrap">
+                <svg viewBox="0 0 48 48"><rect x="8" y="24" width="8" height="18"/><rect x="20" y="16" width="8" height="26"/><rect x="32" y="8" width="8" height="34"/><line x1="4" y1="42" x2="44" y2="42"/></svg>
+            </div>
+            <p class="svc-name">Quantity Surveying</p>
+            <p class="svc-desc-text">Detailed cost planning and Bill of Quantity (BoQ) that provides financial clarity and keeps projects within scope.</p>
+        </div>
+        <div class="svc-item s-reveal delay-2">
+            <span class="svc-num">05</span>
+            <div class="svc-icon-wrap">
+                <svg viewBox="0 0 48 48"><path d="M8 40 L8 20 L24 8 L40 20 L40 40 Z"/><rect x="18" y="28" width="12" height="12"/><line x1="24" y1="8" x2="24" y2="20"/></svg>
+            </div>
+            <p class="svc-name">Construction Administration</p>
+            <p class="svc-desc-text">Coordinated construction processes ensuring what is drawn is accurately delivered on site without disconnect.</p>
+        </div>
+        <div class="svc-item s-reveal delay-3">
+            <span class="svc-num">06</span>
+            <div class="svc-icon-wrap">
+                <svg viewBox="0 0 48 48"><path d="M10 38 Q10 14 24 10 Q38 14 38 38"/><line x1="10" y1="38" x2="38" y2="38"/><line x1="24" y1="10" x2="24" y2="38"/><circle cx="24" cy="24" r="4"/></svg>
+            </div>
+            <p class="svc-name">Architectural Landscaping</p>
+            <p class="svc-desc-text">Outdoor environments designed to complement, enhance, and extend the built form into its natural context.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ── STAT BAND ──────────────────────────────────────────────────────── -->
+<div class="stat-band">
+    <div class="stat-grid">
+        <div class="stat-item s-reveal">
+            <span class="stat-num">180+</span>
+            <span class="stat-label">Projects Delivered</span>
+        </div>
+        <div class="stat-item s-reveal delay-1">
+            <span class="stat-num">12+</span>
+            <span class="stat-label">Years Experience</span>
+        </div>
+        <div class="stat-item s-reveal delay-2">
+            <span class="stat-num">14</span>
+            <span class="stat-label">Countries Served</span>
+        </div>
+        <div class="stat-item s-reveal delay-3">
+            <span class="stat-num">98%</span>
+            <span class="stat-label">Client Satisfaction</span>
+        </div>
+    </div>
+</div>
+
+<!-- ── REVIEWS ────────────────────────────────────────────────────────── -->
+<section id="reviews">
+    <div class="reviews-header s-reveal">
+        <span class="eyebrow">Verified Clients</span>
+        <h2 class="section-h">Client Experience</h2>
+    </div>
+    <div class="reviews-wrapper">
+        <div class="reviews-track" id="reviews-display">
+            <div class="review-card">
+                <div class="review-stars">★★★★★</div>
+                <p class="review-quote">Best Experience I have had working online. If you need a service, I recommend this guy. He's got the skills and professionalism. Top notch delivery</p>
+                <p class="review-author">Mark Gregory · Lagos</p>
+            </div>
+            <div class="review-card">
+                <div class="review-stars">★★★★★</div>
+                <p class="review-quote">I am absolutely satisfied by his delivery. Great experience, will place another order as soon as possible.</p>
+                <p class="review-author">Aliirajput · Pakistan</p>
+            </div>
+            <div class="review-card">
+                <div class="review-stars">★★★★★</div>
+                <p class="review-quote">Archilurd is an easy to work with, extremely committed and persevering contractor who is willing to go over and beyond. I recommend him.</p>
+                <p class="review-author">Robert Ponta · Austria</p>
+            </div>
+            <div class="review-card">
+                <div class="review-stars">★★★★★</div>
+                <p class="review-quote">Ibukunoluwa did an amazing job with our house plans. He was very helpful and great with assisting us in figuring out how we wanted our house plan to be.</p>
+                <p class="review-author">Zhanesmith · United States</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── WHATSAPP ───────────────────────────────────────────────────────── -->
+<div id="waDraggable">
+    <a href="https://wa.me/2348138580315" target="_blank">
+        <svg viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+            <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.7 17.7 68.9 27.1 106.1 27.1h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.1 0-65.6-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-5.5-2.8-23.2-8.5-44.2-27.1-16.4-14.6-27.4-32.7-30.6-38.1-3.2-5.5-.3-8.4 2.4-11.2 2.5-2.5 5.5-6.4 8.3-9.6 2.8-3.2 3.7-5.5 5.5-9.3 1.9-3.7 1-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 13.2 5.7 23.5 9.2 31.6 11.8 13.3 4.2 25.4 3.6 35 2.2 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
+        </svg>
+    </a>
+</div>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────────── -->
+<footer>
+    <div class="footer-top">
+        <div class="footer-brand">
+            <span class="fb-name">ADA</span>
+            <span class="fb-rc">RC: 9176834</span>
+            <p>Archilurdesignz and Architecture — crafting bespoke luxury spaces across Nigeria and beyond since 2012.</p>
+        </div>
+        <div class="footer-col">
+            <h5>Company</h5>
+            <a href="ada-about.html">About Us</a>
+            <a href="ada-portfolio.html">Portfolio</a>
+            <a href="ada-connect.html">Contact</a>
+        </div>
+        <div class="footer-col">
+            <h5>Services</h5>
+            <a href="#">Architecture</a>
+            <a href="#">3D Visualization</a>
+            <a href="#">Engineering</a>
+            <a href="#">Quantity Surveying</a>
+        </div>
+        <div class="footer-col">
+            <h5>Plans Store</h5>
+            <a href="ada-store.html">Browse Plans</a>
+            <a href="ada-policy.html">Privacy Policy</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p class="footer-copy">© 2026 Archilurdesignz and Architecture. All rights reserved.</p>
+        <p class="footer-copy">info@archilurdesignz.com</p>
+    </div>
+</footer>
+
+<script>
+/* ── CURSOR ─────────────────────────────────────────────────────────── */
+const cur = document.getElementById('cursor');
+if (window.matchMedia('(pointer:fine)').matches) {
+    document.addEventListener('mousemove', e => {
+        cur.style.left = e.clientX + 'px';
+        cur.style.top  = e.clientY + 'px';
+    });
+    document.querySelectorAll('a,button,[role=button]').forEach(el => {
+        el.addEventListener('mouseenter', () => cur.classList.add('expanded'));
+        el.addEventListener('mouseleave', () => cur.classList.remove('expanded'));
+    });
+}
+
+/* ── SUPABASE ───────────────────────────────────────────────────────── */
+const { createClient } = supabase;
+let _db = null;
+try { _db = createClient('YOUR_SUPABASE_URL','YOUR_SUPABASE_ANON_KEY'); } catch(e) {}
+
+/* ── DEFAULT PLANS ──────────────────────────────────────────────────── */
+const defaultPlans = [
+    { id:'obsidian-2bed',  title:'The Obsidian',  category:'Tropical Contemporary', meta:'2 Beds · 210 SQM', price:'₦100,000', main_image:'images/2BED3.png',         image_urls:['images/2BED1.png','images/2BED2.png','images/2BED3.png'] },
+    { id:'modeer-2bed',title:'The Modeer',meta:'2 BEDS • 165 SQM',category:'Tropical Contemporary',price:'₦90,000',main_image:'images/2BEDSTY2D.png',image_urls:['images/PSEUDO.png','images/2BEDSTY2C.png','images/2BEDSTY2D.png','images/2BEDSTY2B.png'] },
+   ];
+
+/* ── MARQUEE STRIP ──────────────────────────────────────────────────── */
+function buildMarquee() {
+    const items = ['Architectural Design','3D Visualization','Engineering Suite',
+                   'Quantity Surveying','Construction Admin','Permit Approval',
+                   'Architectural Landscaping','Bespoke Luxury'];
+    const track = document.getElementById('marqueeTrack');
+    const doubled = [...items, ...items];
+    track.innerHTML = doubled.map(t => `
+        <div class="marquee-item">
+            <span class="marquee-dot"></span>
+            ${t}
+        </div>`).join('');
+}
+
+/* ── RENDER PLANS CAROUSEL ──────────────────────────────────────────── */
+async function loadPlans() {
+    let all = [...defaultPlans];
+    try {
+        if (_db) {
+            const { data, error } = await _db.from('plans')
+                .select('id,title,meta,category,price,main_image,image_urls')
+                .order('created_at',{ascending:false}).limit(20);
+            if (!error && data) {
+                const ids = new Set(all.map(p => p.id));
+                data.forEach(p => { if (!ids.has(p.id)) all.push(p); });
+            }
+        }
+    } catch(_) {}
+
+    const selected = [...all].sort(() => Math.random()-0.5).slice(0,6);
+    const carousel = document.getElementById('plansCarousel');
+    carousel.innerHTML = selected.map(p => `
+        <div class="plan-card s-reveal"
+             onclick="window.location.href='ada-store.html?plan=${p.id}'"
+             role="button" tabindex="0">
+            <div class="plan-img-wrap">
+                <div class="plan-img" style="background-image:url('${p.main_image}')"></div>
+                <span class="plan-badge">${p.price}</span>
+            </div>
+            <div class="plan-info">
+                <p class="plan-title">${p.title}</p>
+                <p class="plan-cat">${p.category || ''}</p>
+                <p class="plan-meta">${p.meta}</p>
+            </div>
+        </div>`).join('');
+    observeReveal();
+
+    /* drag-scroll */
+    let isDown=false, sx=0, sl=0;
+    carousel.addEventListener('mousedown',  e => { isDown=true; carousel.classList.add('dragging'); sx=e.pageX-carousel.offsetLeft; sl=carousel.scrollLeft; });
+    carousel.addEventListener('mouseleave', () => { isDown=false; carousel.classList.remove('dragging'); });
+    carousel.addEventListener('mouseup',    () => { isDown=false; carousel.classList.remove('dragging'); });
+    carousel.addEventListener('mousemove',  e => { if(!isDown)return; e.preventDefault(); carousel.scrollLeft = sl-(e.pageX-carousel.offsetLeft-sx)*1.4; });
+}
+
+function shiftCarousel(dir) {
+    document.getElementById('plansCarousel').scrollBy({ left: dir*320, behavior:'smooth' });
+}
+
+/* ── REVIEWS ────────────────────────────────────────────────────────── */
+async function loadReviews() {
+    const container = document.getElementById('reviews-display');
+    const defaultHTML = container.innerHTML;
+
+    try {
+        if (!_db) throw new Error('no db');
+        const { data, error } = await _db.from('reviews').select('*').eq('status','approved');
+        if (error || !data || !data.length) throw new Error('no data');
+
+        const dynHTML = data.map(r => `
+            <div class="review-card">
+                <div class="review-stars">${'★'.repeat(r.rating)}</div>
+                <p class="review-quote">${r.comment}</p>
+                <p class="review-author">${r.client_name} · ${r.location||'Nigeria'}</p>
+            </div>`).join('');
+
+        const combined = defaultHTML + dynHTML;
+        container.innerHTML = combined + combined;
+    } catch(_) {
+        container.innerHTML = defaultHTML + defaultHTML;
+    }
+}
+
+/* ── NAV SCROLL ─────────────────────────────────────────────────────── */
+window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('solid', window.scrollY > 60);
+}, { passive:true });
+
+/* ── SCROLL REVEAL ──────────────────────────────────────────────────── */
+function observeReveal() {
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
+    }, { threshold:0.1 });
+    document.querySelectorAll('.s-reveal:not(.in)').forEach(el => io.observe(el));
+}
+
+/* ── MODAL ──────────────────────────────────────────────────────────── */
+function toggleInquiry(show) {
+    const m = document.getElementById('inquiryModal');
+    m.classList.toggle('open', show);
+    document.body.style.overflow = show ? 'hidden' : '';
+}
+function handleInquirySubmit(e) {
+    e.preventDefault();
+    alert('Thank you — your design brief has been received. We will be in touch within 24 hours.');
+    toggleInquiry(false);
+}
+
+/* ── WA DRAG ────────────────────────────────────────────────────────── */
+const wa = document.getElementById('waDraggable');
+let dragging=false, ox=0, oy=0;
+wa.addEventListener('mousedown', e => { dragging=true; ox=e.clientX-wa.offsetLeft; oy=e.clientY-wa.offsetTop; wa.style.transition='none'; });
+document.addEventListener('mousemove', e => { if(dragging){ wa.style.left=(e.clientX-ox)+'px'; wa.style.top=(e.clientY-oy)+'px'; wa.style.right=wa.style.bottom='auto'; } });
+document.addEventListener('mouseup', () => { dragging=false; wa.style.transition='transform 0.3s, box-shadow 0.3s'; });
+
+/* ── FADE IN ────────────────────────────────────────────────────────── */
+document.body.style.opacity='0';
+document.body.style.transition='opacity 0.4s ease';
+setTimeout(()=>{ document.body.style.opacity='1'; }, 80);
+
+/* ── INIT ───────────────────────────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', () => {
+    buildMarquee();
+    loadPlans();
+    loadReviews();
+    observeReveal();
+});
+</script>
+</body>
+</html>

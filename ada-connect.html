@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <title>Connect | ADA Archilurdesignz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Outfit:wght=200;300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ── RESET ──────────────────────────────────────────────────────────── */
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html, body {
+            width:100%; max-width:100%; overflow-x:hidden;
+            -webkit-text-size-adjust:100%; text-size-adjust:100%;
+        }
+        img, svg, video { max-width:100%; height:auto; display:block; }
+
+        /* ── TOKENS ─────────────────────────────────────────────────────────── */
+        :root {
+            --ink:     #0d0c0a;
+            --ink2:    #1c1a17;
+            --ink3:    #2e2b26;
+            --mist:    #7a7570;
+            --sand:    #c9bfb0;
+            --paper:   #f3ede4;
+            --paper2:  #ede5d8;
+            --gold:    #b09070;
+            --gold2:   #d4b896;
+            --accent:  #c8a87a;
+            --white:   #faf8f4;
+            --glass:   rgba(255,255,255,0.04);
+            --shadow:  0 8px 40px rgba(26,23,20,0.12);
+
+            --f-display: 'Playfair Display', Georgia, serif;
+            --f-body:    'Outfit', sans-serif;
+
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+        }
+
+        body { 
+            background: var(--ink); 
+            color: var(--paper); 
+            font-family: var(--f-body); 
+            line-height: 1.65; 
+            cursor: default; 
+        }
+
+        /* ── CUSTOM CURSOR SUPPORT ─────────────────────────────────────────── */
+        @media (pointer: fine) {
+            body { cursor: none; }
+            a, button, [role="button"], input, select, textarea { cursor: none; }
+        }
+
+        h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 400; text-transform: uppercase; letter-spacing: 1px; }
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        
+        /* ── NAV ─────────────────────────────────────────────────────────────── */
+        nav {
+            position: fixed; top:0; left:0; right:0; z-index:1000;
+            height:72px;
+            display:flex; align-items:center; justify-content:space-between;
+            padding: 0 4%;
+            transition: background 0.5s var(--ease-out), backdrop-filter 0.5s;
+            background: transparent;
+            border-bottom: 1px solid transparent;
+        }
+        nav.scrolled {
+            background: rgba(13,12,10,0.94);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(201,191,176,0.08);
+        }
+        .nav-left { display:flex; gap:28px; align-items:center; }
+        .nav-left a {
+            font-family: var(--f-body); font-size:0.62rem; font-weight:400;
+            letter-spacing:2.5px; text-transform:uppercase; color: var(--sand);
+            text-decoration:none; transition: color 0.3s;
+            position:relative;
+        }
+        .nav-left a::after {
+            content:''; position:absolute; bottom:-3px; left:0;
+            width:0; height:1px; background:var(--accent);
+            transition: width 0.35s var(--ease-out);
+        }
+        .nav-left a:hover { color:var(--paper); }
+        .nav-left a:hover::after { width:100%; }
+
+        .nav-center {
+            position:absolute; left:50%; top:50%;
+            transform:translate(-50%,-50%);
+            display:flex; align-items:center; gap:14px;
+            text-decoration: none;
+        }
+        .nav-logomark {
+            width:38px; height:38px; border:1px solid rgba(201,191,176,0.3);
+            display:flex; align-items:center; justify-content:center;
+            font-family: var(--f-display); font-size:1.1rem;
+            color: var(--gold2); letter-spacing:1px;
+            transition: border-color 0.3s;
+        }
+        nav:hover .nav-logomark { border-color: var(--gold); }
+        .nav-wordmark { line-height:1; }
+        .nav-wordmark .w1 {
+            font-family: var(--f-display); font-size:1rem; font-weight:500;
+            letter-spacing:5px; text-transform:uppercase; color:var(--paper);
+            display:block;
+        }
+        .nav-wordmark .w2 {
+            font-family: var(--f-body); font-size:0.75rem; font-weight:300;
+            letter-spacing:2px; color:var(--gold); display:block; margin-top:2px;
+        }
+
+        .nav-right { display:flex; gap:14px; align-items:center; }
+        .nav-rc {
+            font-family: var(--f-body);
+            font-size:0.55rem; letter-spacing:2px; color:var(--mist);
+            border:1px solid rgba(122,117,112,0.3); padding:5px 10px;
+            line-height: 1;
+            text-transform: uppercase;
+        }
+
+        /* ── HERO ────────────────────────────────────────────────────────────── */
+        .connect-hero {
+            height: 45vh; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(rgba(13,12,10,0.65), rgba(13,12,10,0.85)), 
+                        url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover; background-position: center; text-align: center; padding: 0 4%;
+            position: relative;
+        }
+        .connect-hero h1 {
+            font-family: var(--f-display);
+            font-weight: 400;
+            color: var(--white);
+            line-height: 1.2;
+        }
+
+        /* ── LAYOUT SECTIONS ─────────────────────────────────────────────────── */
+        .section-padding { padding: 120px 10%; }
+        .connect-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 80px; }
+
+        .info-col span { 
+            color: var(--gold); 
+            font-family: var(--f-body);
+            font-size: 0.58rem; 
+            letter-spacing: 4px; 
+            display: block; 
+            margin-bottom: 20px; 
+            text-transform: uppercase;
+        }
+        .info-col h2 { font-size: clamp(2rem, 3.5vw, 2.8rem); margin-bottom: 40px; line-height: 1.15; color: var(--white); }
+        
+        .contact-method { margin-bottom: 35px; }
+        .contact-method h4 { 
+            font-family: var(--f-body);
+            font-size: 0.65rem; 
+            color: var(--gold); 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            margin-bottom: 8px; 
+            font-weight: 500;
+        }
+        .contact-method p { font-size: 1.1rem; font-weight: 200; color: var(--sand); }
+        .contact-method a:hover { color: var(--white); }
+
+        /* Fiverr Spotlight Box */
+        .fiverr-banner { 
+            background: var(--ink2);
+            border: 1px solid rgba(201,191,176,0.12); 
+            padding: 40px; 
+            margin-top: 50px;
+            transition: border-color 0.4s var(--ease-out);
+        }
+        .fiverr-banner:hover {
+            border-color: rgba(201,191,176,0.3);
+        }
+        .fiverr-banner h3 { font-size: 1.2rem; color: var(--gold2); margin-bottom: 12px; letter-spacing: 2px; }
+        .fiverr-banner p { font-size: 0.85rem; font-weight: 200; color: var(--sand); margin-bottom: 25px; line-height: 1.7; }
+        
+        .fiverr-btn { 
+            display: inline-block;
+            padding: 12px 28px; background: transparent; border: 1px solid var(--sand); color: var(--paper);
+            font-family: var(--f-body); font-size: 0.62rem; letter-spacing: 2px; text-transform: uppercase;
+            transition: all 0.35s var(--ease-out);
+        }
+        .fiverr-btn:hover { background: var(--paper); color: var(--ink); }
+
+        /* Form Configuration */
+        .form-container { background: var(--ink2); padding: 50px; border: 1px solid rgba(201,191,176,0.06); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px; }
+        .form-group { display: flex; flex-direction: column; margin-bottom: 25px; }
+        .form-group.full-width { grid-column: span 2; }
+        
+        .form-group label { 
+            font-family: var(--f-body);
+            font-size: 0.65rem; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            margin-bottom: 10px; 
+            color: var(--gold); 
+            font-weight: 400;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            background: rgba(13,12,10,0.5);
+            border: 1px solid rgba(201,191,176,0.15); 
+            padding: 14px 18px; 
+            color: var(--white); 
+            font-family: var(--f-body); 
+            font-size: 0.88rem;
+            font-weight: 300;
+            transition: all 0.4s var(--ease-out);
+            outline: none;
+            border-radius: 0;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--accent);
+            background: rgba(13,12,10,0.9);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px; 
+            background: var(--paper); 
+            color: var(--ink); 
+            border: none;
+            font-family: var(--f-body); 
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 2.5px; 
+            text-transform: uppercase; 
+            transition: all 0.35s var(--ease-out);
+        }
+        .submit-btn:hover { background: var(--accent); color: var(--white); transform: translateY(-2px); }
+
+        /* Animations */
+        .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+/* ── FOOTER ────────────────────────────────── */
+footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201,191,176,0.06);}
+.footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding-bottom:50px;border-bottom:1px solid rgba(201,191,176,0.06);margin-bottom:28px;}
+.footer-brand .fb-name{font-family:var(--f-display);font-size:1.5rem;letter-spacing:5px;text-transform:uppercase;color:var(--paper);display:block;margin-bottom:6px;}
+.footer-brand .fb-rc{font-size:0.55rem;letter-spacing:2px;color:var(--gold);display:block;margin-bottom:18px;}
+.footer-brand p{font-size:0.75rem;color:var(--mist);font-weight:200;line-height:1.8;max-width:240px;}
+.footer-col h5{font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;color:var(--sand);margin-bottom:20px;}
+.footer-col a{display:block;font-size:0.72rem;color:var(--mist);margin-bottom:10px;transition:color 0.3s;}
+.footer-col a:hover{color:var(--paper);}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-copy{font-size:0.58rem;color:rgba(122,117,112,0.5);letter-spacing:1px;}
+
+/* ── RESPONSIVE ────────────────────────────── */
+@media(max-width:1024px){.portfolio-grid{columns:2;}}
+@media(max-width:768px){
+    nav{padding:0 5%;height:62px;}
+    .nav-center .nav-wordmark{display:none;}
+    .nav-right .nav-rc{display:none;}
+    .portfolio-grid{columns:1;}
+    .filter-bar{top:62px;padding:0 5%;}
+    .grid-section{padding:30px 5% 60px;}
+    .footer-top{grid-template-columns:1fr;}
+    .lb-nav{display:none;}
+}
+    </style>
+</head>
+<body>
+
+    <nav id="navbar">
+        <div class="nav-left">
+            <a href="ada-index.html">HOME</a>
+            <a href="ada-portfolio.html">PORTFOLIO</a>
+        </div>
+
+        <a href="ada-index.html" class="nav-center">
+            <div class="nav-logomark">A</div>
+            <div class="nav-wordmark">
+                <span class="w1">ADA</span>
+                <span class="w2">Architecture</span>
+            </div>
+        </a>
+
+        <div class="nav-right">
+            <div class="nav-rc">RC:9176834</div>
+        </div>
+    </nav>
+
+    <section class="connect-hero">
+        <div class="reveal">
+            <h1 style="font-style: italic; text-transform: none; font-size: clamp(1.8rem, 3.5vw, 2.5rem); margin-bottom: 10px;">Begin Your Architecture Briefing</h1>
+            <h1 style="letter-spacing: 4px; font-size: clamp(2rem, 4.5vw, 3.5rem);">Connect With Us</h1>
+        </div>
+    </section>
+
+    <section class="section-padding connect-grid reveal">
+        <div class="info-col">
+            <span>COMMISSION ADA</span>
+            <h2>Let's build reality together.</h2>
+            
+            <div class="contact-method">
+                <h4>Digital Office</h4>
+                <p><a href="mailto:design@archilurdesignz.com">info@archilurdesignz.com</a></p>
+            </div>
+
+            <div class="contact-method">
+                <h4>Hotline Support</h4>
+                <p>+234 (0) 813 858 0315</p>
+            </div>
+
+            <div class="fiverr-banner">
+                <h3>International Project Portal</h3>
+                <p>For clients outside West Africa, or those preferring verified institutional milestones, escrow-backed protection, and global credit options, order directly through our active studio space on Fiverr Pro.</p>
+                <a href="https://www.fiverr.com/s/3w00rY7" target="_blank" class="fiverr-btn">Order via Fiverr Pro</a>
+            </div>
+        </div>
+
+        <div>
+            <div class="form-container">
+                <form id="projectBriefForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" placeholder="Arc. Ibukun" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" placeholder="name@domain.com" required>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" placeholder="+234..." required>
+                        </div>
+                        <div class="form-group">
+                            <label>Primary Service Interested</label>
+                            <select required>
+                                <option value="" disabled selected>Select service token...</option>
+                                <option>Residential Architecture</option>
+                                <option>Bespoke Commercial Architecture</option>
+                                <option>3D Visualization</option>
+                                <option>Construction Management</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Vision Brief</label>
+                        <textarea placeholder="Describe your architectural requirements, specific site constraints, or property size parameters..." rows="6" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Initialize Briefing</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-top">
+        <div class="footer-brand">
+            <span class="fb-name">ADA</span>
+            <span class="fb-rc">RC: 9176834</span>
+            <p>Archilurdesignz and Architecture — crafting bespoke luxury spaces across Nigeria and beyond since 2012.</p>
+        </div>
+        <div class="footer-col">
+            <h5>Studio</h5>
+            <a href="ada-index.html">Home</a>
+            <a href="ada-about.html">About Us</a>
+            <a href="ada-connect.html">Contact</a>
+        </div>
+        <div class="footer-col">
+            <h5>Work</h5>
+            <a href="ada-portfolio.html">Portfolio</a>
+            <a href="ada-store.html">Plan Store</a>
+        </div>
+        <div class="footer-col">
+            <h5>Legal</h5>
+            <a href="ada-policy.html">Privacy Policy</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p class="footer-copy">© 2026 Archilurdesignz and Architecture. All rights reserved.</p>
+        <p class="footer-copy">info@archilurdesignz.com</p>
+    </div>
+</footer>
+    <script>
+        // Dynamic sticky navigation backdrop line toggle script
+        const nav = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 40) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Intersection Observer for fluid element entry animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('active'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <title>About Us | ADA Archilurdesignz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ── RESET ──────────────────────────────────────────────────────────── */
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html, body {
+            width:100%; max-width:100%; overflow-x:hidden;
+            -webkit-text-size-adjust:100%; text-size-adjust:100%;
+        }
+        img, svg, video { max-width:100%; height:auto; display:block; }
+
+        /* ── TOKENS ─────────────────────────────────────────────────────────── */
+        :root {
+            --ink:     #0d0c0a;
+            --ink2:    #1c1a17;
+            --ink3:    #2e2b26;
+            --mist:    #7a7570;
+            --sand:    #c9bfb0;
+            --paper:   #f3ede4;
+            --paper2:  #ede5d8;
+            --gold:    #b09070;
+            --gold2:   #d4b896;
+            --accent:  #c8a87a;
+            --white:   #faf8f4;
+            --glass:   rgba(255,255,255,0.04);
+            --shadow:  0 8px 40px rgba(26,23,20,0.12);
+
+            --f-display: 'Playfair Display', Georgia, serif;
+            --f-body:    'Outfit', sans-serif;
+
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+        }
+
+        body { 
+            background: var(--ink); 
+            color: var(--paper); 
+            font-family: var(--f-body); 
+            line-height: 1.65; 
+            cursor: default; 
+        }
+
+        /* ── CUSTOM CURSOR SUPPORT ─────────────────────────────────────────── */
+        @media (pointer: fine) {
+            body { cursor: none; }
+            a, button, [role="button"] { cursor: none; }
+        }
+
+        h1, h2, h3 { font-family: var(--f-display); font-weight: 400; text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* ── NAV ─────────────────────────────────────────────────────────────── */
+        nav {
+            position: fixed; top:0; left:0; right:0; z-index:1000;
+            height:72px;
+            display:flex; align-items:center; justify-content:space-between;
+            padding: 0 4%;
+            background: rgba(13,12,10,0.94);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(201,191,176,0.08);
+            transition: background 0.5s var(--ease-out), backdrop-filter 0.5s;
+        }
+        .nav-left { display:flex; gap:28px; align-items:center; }
+        .nav-left a {
+            font-family: var(--f-body); font-size:0.62rem; font-weight:400;
+            letter-spacing:2.5px; text-transform:uppercase; color: var(--sand);
+            text-decoration:none; transition: color 0.3s;
+            position:relative;
+        }
+        .nav-left a::after {
+            content:''; position:absolute; bottom:-3px; left:0;
+            width:0; height:1px; background:var(--accent);
+            transition: width 0.35s var(--ease-out);
+        }
+        .nav-left a:hover { color:var(--paper); }
+        .nav-left a:hover::after { width:100%; }
+
+        .nav-center {
+            position:absolute; left:50%; top:50%;
+            transform:translate(-50%,-50%);
+            display:flex; align-items:center; gap:14px;
+            text-decoration: none;
+        }
+        .nav-logomark {
+            width:38px; height:38px; border:1px solid rgba(201,191,176,0.3);
+            display:flex; align-items:center; justify-content:center;
+            font-family: var(--f-display); font-size:1.1rem;
+            color: var(--gold2); letter-spacing:1px;
+            transition: border-color 0.3s;
+        }
+        nav:hover .nav-logomark { border-color: var(--gold); }
+        .nav-wordmark { line-height:1; }
+        .nav-wordmark .w1 {
+            font-family: var(--f-display); font-size:1rem; font-weight:500;
+            letter-spacing:5px; text-transform:uppercase; color:var(--paper);
+            display:block;
+        }
+        .nav-wordmark .w2 {
+            font-family: var(--f-body); font-size:0.75rem; font-weight:300;
+            letter-spacing:2px; color:var(--gold); display:block; margin-top:2px;
+        }
+
+        .nav-right { display:flex; gap:14px; align-items:center; }
+        .nav-rc {
+            font-family: var(--f-body);
+            font-size:0.55rem; letter-spacing:2px; color:var(--mist);
+            border:1px solid rgba(122,117,112,0.3); padding:5px 10px;
+            line-height: 1;
+            text-transform: uppercase;
+        }
+
+        /* ── HERO ────────────────────────────────────────────────────────────── */
+        .about-hero {
+            height: 60vh; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(rgba(13,12,10,0.55), rgba(13,12,10,0.85)), 
+                        url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover; background-position: center; text-align: center; padding: 0 4%;
+            position: relative;
+        }
+        .about-hero h1 {
+            font-family: var(--f-display);
+            font-weight: 400;
+            color: var(--white);
+            line-height: 1.2;
+        }
+
+        /* ── LAYOUT SECTIONS ─────────────────────────────────────────────────── */
+        .section-padding { padding: 120px 10%; }
+        
+        .essence-section { padding-bottom: 60px; } 
+        .philosophy-section { padding-top: 80px; padding-bottom: 80px; } 
+        .leadership-section { padding-top: 80px; padding-bottom: 60px; }
+        .cta-section { padding-top: 80px; padding-bottom: 120px; text-align: center; border-top: 1px solid var(--glass); }
+
+        .split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+        .split-text h2 { font-size: clamp(2rem, 3.5vw, 2.8rem); margin-bottom: 30px; line-height: 1.15; color: var(--white); }
+        
+        /* Pillars Section */
+        .pillars-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 30px; 
+            margin-top: 60px; 
+        }
+        .pillar-card { 
+            padding: 40px; 
+            background: var(--ink2); 
+            border: 1px solid rgba(201,191,176,0.07); 
+            transition: 0.45s var(--ease-out); 
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .pillar-card:hover { 
+            border-color: rgba(201,191,176,0.2); 
+            transform: translateY(-8px); 
+            box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+        }
+        .pillar-card h3 { font-size: 1.1rem; color: var(--gold2); margin-bottom: 15px; letter-spacing: 2px; }
+        .pillar-card h6 {
+            font-family: var(--f-body);
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--paper);
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            text-transform: none;
+            display: block;
+        }
+        .pillar-card p { font-size: 0.8rem; font-weight: 200; color: var(--sand); line-height: 1.7; }
+
+        /* Team Section */
+        .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 60px; }
+        .team-member { position: relative; overflow: hidden; background: var(--ink2); border: 1px solid rgba(201,191,176,0.07); transition: 0.45s var(--ease-out); }
+        
+        .member-photo { 
+            width: 100%;
+            height: 400px; 
+            display: block;
+            object-fit: cover;
+            object-position: center;
+            filter: grayscale(100%) brightness(0.6); 
+            transition: transform 0.8s var(--ease-out), filter 0.8s; 
+        }
+        .team-member:hover .member-photo { filter: grayscale(0%) brightness(0.85); transform: scale(1.04); }
+        
+        .member-info { padding: 25px; border-top: 1px solid rgba(201,191,176,0.07); }
+        .member-info h3 { font-size: 1.1rem; color: var(--white); margin-bottom: 5px; letter-spacing: 1px; }
+        .member-info h6 { font-family: var(--f-body); font-size: 0.7rem; font-weight: 400; color: var(--gold); letter-spacing: 1px; margin-bottom: 12px; }
+        .member-info span { font-family: var(--f-body); font-size: 0.58rem; color: var(--accent); text-transform: uppercase; letter-spacing: 3px; font-weight: 500; display: block; margin-bottom: 4px; }
+        .member-info p {
+            font-size: 0.78rem;
+            color: var(--sand);
+            font-weight: 200;
+            text-align: justify;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        /* CTA Section */
+        .cta-section h2 { font-family: var(--f-display); font-style: italic; font-size: clamp(2rem, 4vw, 3.2rem); text-transform: none; margin-bottom: 40px; color: var(--white); }
+        .btn-gold { 
+            display: inline-block;
+            padding: 14px 36px; border: 1px solid var(--sand); color: var(--paper); 
+            font-family: var(--f-body); letter-spacing: 2.5px; font-size: 0.62rem; text-transform: uppercase; 
+            text-decoration: none; transition: all 0.35s var(--ease-out);
+        }
+        .btn-gold:hover { background: var(--paper); color: var(--ink); transform: translateY(-3px); }
+
+        /* Animations */
+        .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* Layout Elements */
+        .essence-image {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            display: block;
+            border: 1px solid rgba(201,191,176,0.1);
+        }
+
+        .split-text p {
+            text-align: justify;
+            line-height: 1.85;
+            margin-bottom: 20px;
+            font-weight: 200;
+            color: var(--sand);
+            hyphens: auto;
+        }
+
+        .split-text span {
+            font-family: var(--f-body);
+            text-align: left; 
+        }
+
+        .pillar-card p {
+            margin-bottom: 10px; 
+        }
+        .pillar-card p:last-of-type {
+            margin-bottom: 0;
+        }
+
+/* ── FOOTER ────────────────────────────────── */
+footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201,191,176,0.06);}
+.footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding-bottom:50px;border-bottom:1px solid rgba(201,191,176,0.06);margin-bottom:28px;}
+.footer-brand .fb-name{font-family:var(--f-display);font-size:1.5rem;letter-spacing:5px;text-transform:uppercase;color:var(--paper);display:block;margin-bottom:6px;}
+.footer-brand .fb-rc{font-size:0.55rem;letter-spacing:2px;color:var(--gold);display:block;margin-bottom:18px;}
+.footer-brand p{font-size:0.75rem;color:var(--mist);font-weight:200;line-height:1.8;max-width:240px;}
+.footer-col h5{font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;color:var(--sand);margin-bottom:20px;}
+.footer-col a{display:block;font-size:0.72rem;color:var(--mist);margin-bottom:10px;transition:color 0.3s;}
+.footer-col a:hover{color:var(--paper);}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-copy{font-size:0.58rem;color:rgba(122,117,112,0.5);letter-spacing:1px;}
+
+/* ── RESPONSIVE ────────────────────────────── */
+@media(max-width:1024px){.portfolio-grid{columns:2;}}
+@media(max-width:768px){
+    nav{padding:0 5%;height:62px;}
+    .nav-center .nav-wordmark{display:none;}
+    .nav-right .nav-rc{display:none;}
+    .portfolio-grid{columns:1;}
+    .filter-bar{top:62px;padding:0 5%;}
+    .grid-section{padding:30px 5% 60px;}
+    .footer-top{grid-template-columns:1fr;}
+    .lb-nav{display:none;}
+}
+    </style>
+</head>
+<body>
+
+<!-- ── NAV ────────────────────────────────────────────────────────────── -->
+<nav id="navbar">
+    <div class="nav-left">
+        <a href="ada-about.html">About</a>
+        <a href="ada-portfolio.html">Portfolio</a>
+        <a href="ada-store.html">Store</a>
+    </div>
+
+        <a href="ada-index.html" class="nav-center">
+            <div class="nav-logomark">A</div>
+            <div class="nav-wordmark">
+                <span class="w1">ADA</span>
+                <span class="w2">Architecture</span>
+            </div>
+        </a>
+
+        <div class="nav-right">
+            <div class="nav-rc">RC:9176834</div>
+        </div>
+    </nav>
+
+    <section class="about-hero">
+        <div class="reveal">
+            <h1 style="font-style: italic; text-transform: none; font-size: clamp(1.8rem, 3.5vw, 2.5rem); margin-bottom: 10px;">The Art of Vision. The Discipline of Execution</h1>
+            <h1 style="letter-spacing: 4px; font-size: clamp(2rem, 4.5vw, 3.5rem);">ADA Archilurdesignz</h1>
+        </div>
+    </section>
+
+    <section class="section-padding essence-section split-grid reveal">
+        <div class="split-text">
+            <span style="color: var(--gold); font-size: 0.58rem; letter-spacing: 4px; display: block; margin-bottom: 20px; font-weight: 400; text-transform: uppercase;">OUR ESSENCE</span>
+            <h2>Designing Possibility.<br>Delivering Reality.</h2>
+            
+            <p>Archilurdesignz and Architecture (ADA) is a forward-thinking studio bridging the gap between creative imagination and buildable reality. We specialize in residential architecture, bespoke design solutions, and construction-ready drawings tailored to unique site conditions and client needs.</p>
+            
+            <p>Our approach combines design intelligence with technical precision. By integrating structural coordination and building systems early in the process, we ensure every concept is fully executable. We prioritize buildability and detailed working drawings to reduce design conflicts and maximize construction efficiency.</p>
+            
+            <p>At ADA, we deliver more than visual appeal. Our architecture is practical, compliant, and responsive, ensuring every project stands structurally, functions effectively, and endures over time.</p>
+        </div>
+        <div class="essence-image-container">
+            <img src="ada-about1.svg" class="essence-image" alt="ADA Architecture Essence">
+        </div>
+    </section>
+
+    <section class="section-padding leadership-section reveal">
+        <span style="color: var(--gold); font-family: var(--f-body); letter-spacing: 4px; font-size: 0.58rem; font-weight: 400; text-transform: uppercase; display: block; margin-bottom: 14px;">THE LEADERSHIP</span>
+        <h2 style="font-size: clamp(2rem, 3.5vw, 2.8rem); margin-bottom: 10px;">Our Principal Team</h2>
+        
+        <div class="team-grid">
+            <div class="team-member">
+                <img src="ada-lead.svg" class="member-photo" alt="Arc. Ibukunoluwa Femi O.">
+                <div class="member-info">
+                    <span>Lead Architect</span>
+                    <h3>Ibukunoluwa Femi O.</h3>
+                    <h6>MNIA, ARCON</h6>
+                    <p>Leading the design and delivery of residential architecture and bespoke architectural projects, backed by over a decade of professional experience and exposure to global design standards. He provides comprehensive architectural design services, guiding projects from concept development through planning and construction-ready documentation with a focus on clarity, precision, and buildability.</p>
+                    <p>His expertise spans architectural design, site planning and landscaping, working drawings, 3D visualization, and construction coordination, delivering functional, buildable, and well-integrated solutions. He ensures design intent aligns with technical requirements, cost efficiency, and real-world execution, resulting in architecture that performs effectively from design through construction.</p>
+                </div>
+            </div>
+
+            <div class="team-member">
+                <img src="ada-eng.svg" class="member-photo" alt="Solomon Olowolafe T.">
+                <div class="member-info">
+                    <span>Lead Structural Engineer</span>
+                    <h3>Solomon Olowolafe T.</h3>
+                    <h6>MNSE, R.Eng.</h6>
+                    <p>Leads the engineering design and coordination of residential and bespoke construction projects, bringing over a decade of experience across diverse project environments and global standards. He specializes in delivering structurally sound, buildable solutions that align seamlessly with architectural intent.</p>
+                    <p>His expertise spans structural design, structural analysis, foundation systems and reinforced concrete detailing, with a strong focus on building safety, code compliance, and construction efficiency. He applies a rigorous, systems-based approach to ensure all engineering decisions support performance, durability, and successful project delivery.</p>
+                </div>
+            </div>
+
+            <div class="team-member">
+                <img src="ada-qs.svg" class="member-photo" alt="Awuleka James B.">
+                <div class="member-info">
+                    <span>QS & Project Manager</span>
+                    <h3>Awuleka James B.</h3>
+                    <p style="margin-top: 32px;">Cost planning, project management, financial management, and project control across residential and bespoke construction projects, backed by nearly a decade of industry experience. She brings strong expertise in cost management, quality assurance, and site supervision across diverse project environments.</p>
+                    <p>Her expertise spans quantity surveying, bill of quantities (BoQ) preparation, cost estimation, project budgeting, project management, and quality control, with a focus on delivering financially efficient and technically sound projects. She applies a structured, analytical approach to align design intent with cost realities, construction standards, and overall project performance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-padding philosophy-section reveal" style="background: var(--ink2); border-top: 1px solid var(--glass); border-bottom: 1px solid var(--glass);">
+        <span style="color: var(--gold); font-family: var(--f-body); letter-spacing: 4px; font-size: 0.58rem; font-weight: 400; text-transform: uppercase; display: block; margin-bottom: 14px;">THE PHILOSOPHY</span>
+        
+        <div class="pillars-grid">
+            <div class="pillar-card">
+                <h3>OUR APPROACH</h3>
+                <h6>Architectural Design Services From Concept to Construction</h6>
+                <p>At ADA, we provide professional architectural design services that transform ideas into clear, buildable solutions. Every project starts with understanding client needs, goals, and site conditions.</p>
+                <p>We translate concepts into functional architectural designs that respond to real-life use and environmental context. Our focus is always on clarity, usability, and performance.</p>
+                <p>We develop detailed construction drawings and coordinated documentation that integrate architectural, structural, and MEP systems. This ensures smooth project execution.</p>
+                <p>Our structured process improves efficiency, reduces design errors, and ensures seamless transition from concept design to construction delivery.</p>
+            </div>
+            <div class="pillar-card">
+                <h3>DESIGN INTELLIGENCE</h3>
+                <h6>Purpose-Driven Architectural Planning Solutions</h6>
+                <p>Our architectural planning services are guided by purpose, functionality, and long-term usability. We design spaces that are practical, efficient, and visually refined.</p>
+                <p>We consider key design factors such as circulation, lighting, ventilation, and spatial flow. This ensures optimal performance of every space we create.</p>
+                <p>Our approach balances form, function, and user experience, resulting in well-structured and efficient architectural layouts.</p>
+                <p>The outcome is a high-performance design solution that responds to user needs, site conditions, and modern building standards.</p>
+            </div>
+            <div class="pillar-card">
+                <h3>DELIVERY & COMMUNICATION</h3>
+                <h6>Construction Drawings and Design Execution Support</h6>
+                <p>We provide detailed construction drawings and architectural documentation that clearly communicate design intent for accurate site execution.</p>
+                <p>Our process includes 3D visualizations and architectural rendering services, helping clients and contractors understand the final outcome before construction begins.</p>
+                <p>This improves coordination between consultants, contractors, and clients, reducing errors and misinterpretation during construction.</p>
+                <p>By combining technical precision with clear communication, we ensure that every design is executed exactly as intended on site.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section reveal">
+        <h2 style="font-style: italic;">Let’s Design Your Reality.</h2>
+        <a href="ada-connect.html" class="btn-gold">Get in Touch</a>
+    </section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-top">
+        <div class="footer-brand">
+            <span class="fb-name">ADA</span>
+            <span class="fb-rc">RC: 9176834</span>
+            <p>Archilurdesignz and Architecture — crafting bespoke luxury spaces across Nigeria and beyond since 2012.</p>
+        </div>
+        <div class="footer-col">
+            <h5>Studio</h5>
+            <a href="ada-index.html">Home</a>
+            <a href="ada-about.html">About Us</a>
+            <a href="ada-connect.html">Contact</a>
+        </div>
+        <div class="footer-col">
+            <h5>Work</h5>
+            <a href="ada-portfolio.html">Portfolio</a>
+            <a href="ada-store.html">Plan Store</a>
+        </div>
+        <div class="footer-col">
+            <h5>Legal</h5>
+            <a href="ada-policy.html">Privacy Policy</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p class="footer-copy">© 2026 Archilurdesignz and Architecture. All rights reserved.</p>
+        <p class="footer-copy">info@archilurdesignz.com</p>
+    </div>
+</footer>
+
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('active'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
