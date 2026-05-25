@@ -1,8 +1,0 @@
-[build]
-  functions = "netlify/functions"
-  publish   = "."
-
-[[redirects]]
-  from   = "/*"
-  to     = "/ada-index.html"
-  status = 404
