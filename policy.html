@@ -45,11 +45,20 @@
             cursor: default; 
         }
 
-        /* ── CUSTOM CURSOR SUPPORT ─────────────────────────────────────────── */
-        @media (pointer: fine) {
-            body { cursor: none; }
-            a, button, [role="button"] { cursor: none; }
-        }
+    /* ── CUSTOM CURSOR ───────────────────────────────────────────────────── */
+@media (pointer: fine) {
+    body { cursor: none; }
+    a, button, [role="button"] { cursor: none; }
+}
+#cursor {
+    position: fixed; width: 10px; height: 10px;
+    background: var(--accent); border-radius: 50%;
+    pointer-events: none; z-index: 99999;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s var(--ease-out), height 0.3s var(--ease-out), background 0.3s;
+    mix-blend-mode: difference;
+}
+#cursor.expanded { width: 40px; height: 40px; background: var(--gold2); opacity: 0.6; }
 
         h1, h2, h3 { font-family: var(--f-display); font-weight: 400; text-transform: uppercase; letter-spacing: 1px; }
         a { text-decoration: none; color: inherit; transition: 0.3s; }
@@ -228,7 +237,11 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
     </style>
 </head>
 <body>
+<body>
 
+<!-- Custom cursor -->
+<div id="cursor"></div>
+    
 <!-- ── NAV ────────────────────────────────────────────────────────────── -->
 <nav id="navbar">
     <div class="nav-left">
@@ -448,6 +461,18 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
                 }
             });
         });
+        /* ── CURSOR ─────────────────────────────────────────────────────────── */
+const cur = document.getElementById('cursor');
+if (window.matchMedia('(pointer:fine)').matches) {
+    document.addEventListener('mousemove', e => {
+        cur.style.left = e.clientX + 'px';
+        cur.style.top  = e.clientY + 'px';
+    });
+    document.querySelectorAll('a, button, [role=button]').forEach(el => {
+        el.addEventListener('mouseenter', () => cur.classList.add('expanded'));
+        el.addEventListener('mouseleave', () => cur.classList.remove('expanded'));
+    });
+}
     </script>
 </body>
 </html>
