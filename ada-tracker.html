@@ -530,7 +530,7 @@ function populateDashboard(d) {
         document.getElementById('reviewUnlockedContent').style.display = 'block';
     }
 
-    // Load custom service terms if set by admin
+    // FIX 1: Service terms are now safely inside the function brackets!
     if (d.service_terms) {
         document.getElementById('termsDisplay').innerHTML = d.service_terms;
     }
@@ -540,7 +540,8 @@ function populateDashboard(d) {
     // Show dashboard, hide loader
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('dashboardMain').style.display = 'block';
-} // <--- This bracket now correctly closes the entire function at the very end!
+} 
+
 // ─── SUBMISSION HUB ───────────────────────────────────────────────────────────
 async function loadHubFiles() {
     if (!projectToken || !_db) return;
