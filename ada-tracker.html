@@ -529,15 +529,18 @@ function populateDashboard(d) {
         document.getElementById('reviewLockedContent').style.display  = 'none';
         document.getElementById('reviewUnlockedContent').style.display = 'block';
     }
-  startCountdown(d.deadline);
+
+    // Load custom service terms if set by admin
+    if (d.service_terms) {
+        document.getElementById('termsDisplay').innerHTML = d.service_terms;
+    }
+
+    startCountdown(d.deadline);
+
     // Show dashboard, hide loader
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('dashboardMain').style.display = 'block';
-} 
-// Load custom service terms if set by admin
-if (d.service_terms) {
-    document.getElementById('termsDisplay').innerHTML = d.service_terms;
-}
+} // <--- This bracket now correctly closes the entire function at the very end!
 // ─── SUBMISSION HUB ───────────────────────────────────────────────────────────
 async function loadHubFiles() {
     if (!projectToken || !_db) return;
