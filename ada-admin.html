@@ -287,7 +287,7 @@ const SUPABASE_KEY   = 'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK';
 const { createClient } = supabase;
 let _db = null;
 try {
-    _db = createClient(https://ofaxbduvnhscxvoakeax.supabase.co, sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK);
+    _db = createClient(SUPABASE_URL, SUPABASE_KEY);
 } catch(e) {
     console.warn('Supabase not connected — paste your credentials above');
 }
