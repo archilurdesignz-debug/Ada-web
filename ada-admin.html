@@ -225,6 +225,24 @@
         </div>
         <div class="form-group"><label>Category</label><input type="text" id="sCategory" placeholder="e.g. Tropical Contemporary"></div>
         <label style="margin-bottom:8px; display:block;">Gallery Image URLs (first = main/cover)</label>
+        <div class="form-group" style="margin-bottom: 10px; background: #fdfaf0; padding: 10px; border-radius: 4px; border: 1px dashed #f1c40f;">
+    <label style="font-weight: bold; color: #b7950b;">⚡ Quick Dropbox Gallery Uploader</label>
+    <div style="display: flex; gap: 10px; margin-top: 5px;">
+        <select id="targetStoreSlot" style="width: auto; padding: 8px;">
+            <option value="sImg1">Main / Cover Image</option>
+            <option value="sImg2">Image 2</option>
+            <option value="sImg3">Image 3</option>
+            <option value="sImg4">Image 4</option>
+            <option value="sImg5">Image 5</option>
+            <option value="sImg6">Image 6</option>
+        </select>
+        <label class="btn-action" style="width: auto; margin: 0; padding: 8px 15px; cursor: pointer; background-color: #f1c40f; color: #333;">
+            Select & Upload File
+            <input type="file" id="sFileInput" accept="image/*" style="display: none;" onchange="handleStoreGalleryUpload()">
+        </label>
+    </div>
+    <small id="sUploadStatus" style="display: block; margin-top: 5px; color: #7f8c8d;"></small>
+</div>
         <div class="grid-3" style="margin-bottom:15px;">
             <input type="text" id="sImg1" placeholder="Main Image URL">
             <input type="text" id="sImg2" placeholder="Image 2">
@@ -263,9 +281,8 @@ All architectural drawings remain the intellectual property of ADA...
 <script>
 // ─── SUPABASE INIT ────────────────────────────────────────────────────────────
 // TODO: Replace these two values with your actual Supabase credentials
-// Found in: Supabase Dashboard → Settings → API
-const SUPABASE_URL  = 'YOUR_SUPABASE_URL';   // e.g. https://xxxx.supabase.co
-const SUPABASE_KEY  = 'YOUR_SUPABASE_ANON_KEY'; // starts with eyJ...
+const SUPABASE_URL   = 'YOUR_SUPABASE_URL';   
+const SUPABASE_KEY   = 'YOUR_SUPABASE_ANON_KEY'; 
 
 const { createClient } = supabase;
 let _db = null;
@@ -275,7 +292,7 @@ try {
     console.warn('Supabase not connected — paste your credentials above');
 }
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
+// ─── HELPERS (INCLUDING DROPBOX COORD) ────────────────────────────────────────
 function generateToken() {
     const year = new Date().getFullYear();
     const rand = Math.floor(Math.random() * 9000) + 1000;
@@ -287,8 +304,94 @@ function setVal(id, val) {
     if (el) el.value = val ?? '';
 }
 
+// Fixed a tiny script fallback evaluation from your original code
 function getVal(id) {
-    return document.getElementById(id)?.value ?? '';
+    return document.getElementById(id)?.value?.trim() ?? '';
+}
+
+// Reads file data and converts it for our Netlify background function
+function getBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+    });
+}
+
+// Handler for the Portfolio image upload
+async function handleDirectUpload(fileInputId, targetInputId) {
+    const fileInput = document.getElementById(fileInputId);
+    const targetInput = document.getElementById(targetInputId);
+    const statusText = document.getElementById('pUploadStatus');
+
+    if (!fileInput.files.length) return;
+    const file = fileInput.files[0];
+
+    statusText.innerText = "⏳ Uploading to Dropbox...";
+    statusText.style.color = "#3498db";
+
+    try {
+        const base64Data = await getBase64(file);
+        
+        const response = await fetch('/.netlify/functions/upload-to-dropbox', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: file.name, filedata: base64Data })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.url) {
+            targetInput.value = data.url; 
+            statusText.innerText = "✅ Uploaded successfully and link attached!";
+            statusText.style.color = "#2ecc71";
+        } else {
+            throw new Error(data.error || "Upload failed");
+        }
+    } catch (err) {
+        statusText.innerText = `❌ Error: ${err.message}`;
+        statusText.style.color = "#e74c3c";
+    }
+}
+
+// Handler for the Store Gallery bulk uploads
+async function handleStoreGalleryUpload() {
+    const fileInput = document.getElementById('sFileInput');
+    const targetSlotId = document.getElementById('targetStoreSlot').value;
+    const targetInput = document.getElementById(targetSlotId);
+    const statusText = document.getElementById('sUploadStatus');
+
+    if (!fileInput.files.length) return;
+    const file = fileInput.files[0];
+
+    statusText.innerText = `⏳ Uploading to ${document.getElementById('targetStoreSlot').selectedOptions[0].text}...`;
+    statusText.style.color = "#f1c40f";
+
+    try {
+        const base64Data = await getBase64(file);
+        
+        const response = await fetch('/.netlify/functions/upload-to-dropbox', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: file.name, filedata: base64Data })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.url) {
+            targetInput.value = data.url; 
+            statusText.innerText = `✅ Successfully mapped to ${document.getElementById('targetStoreSlot').selectedOptions[0].text}!`;
+            statusText.style.color = "#2ecc71";
+        } else {
+            throw new Error(data.error || "Upload failed");
+        }
+    } catch (err) {
+        statusText.innerText = `❌ Error: ${err.message}`;
+        statusText.style.color = "#e74c3c";
+    } finally {
+        fileInput.value = ""; 
+    }
 }
 
 // ─── LOAD PROJECTS INTO SELECTORS ────────────────────────────────────────────
@@ -303,7 +406,7 @@ async function loadProjectSelectors() {
 
     ['projectSelector', 'fileProjectSelector'].forEach(selId => {
         const sel = document.getElementById(selId);
-        // Keep first option
+        if (!sel) return;
         sel.innerHTML = `<option value="">-- Select Project --</option>`;
         data.forEach(p => {
             const opt = document.createElement('option');
@@ -346,7 +449,6 @@ async function createNewProject() {
         <p style="margin-top:10px; font-size:0.7rem; color:#888;">Send this link to your client. They need no login — the token in the URL identifies their project.</p>
     `;
 
-    // Refresh selectors
     loadProjectSelectors();
 }
 
@@ -375,15 +477,15 @@ async function loadProjectDetails() {
     setVal('percVis',          data.perc_3d);
     setVal('percQS',           data.perc_qs);
     setVal('percPermit',       data.perc_permit);
+
+    if (data.deadline) {
+        const dt = new Date(data.deadline);
+        const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000)
+            .toISOString().slice(0, 16);
+        setVal('projDeadline', local);
+    }
 }
 
-if (data.deadline) {
-    const dt = new Date(data.deadline);
-    // datetime-local needs format: YYYY-MM-DDTHH:MM
-    const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000)
-        .toISOString().slice(0, 16);
-    setVal('projDeadline', local);
-}
 // ─── UPDATE PROJECT ───────────────────────────────────────────────────────────
 async function updateProject() {
     const token = getVal('projectSelector');
@@ -399,7 +501,8 @@ async function updateProject() {
         perc_architecture:  parseInt(getVal('percArch')) || 0,
         perc_3d:            parseInt(getVal('percVis'))  || 0,
         perc_qs:            parseInt(getVal('percQS'))   || 0,
-        perc_permit:        parseInt(getVal('percPermit'))|| 0
+        perc_permit:        parseInt(getVal('percPermit'))|| 0,
+        deadline:           getVal('projDeadline') || null
     };
 
     if (!_db) { alert('Supabase not connected.'); return; }
@@ -412,20 +515,7 @@ async function updateProject() {
     if (error) alert('Error: ' + error.message);
     else alert('✓ Client dashboard updated successfully.');
 }
-// Find the payload object in updateProject() and add this line
-const payload = {
-    overall_percent:    parseInt(getVal('overallProgress')) || 0,
-    stage_brief:        getVal('stgBrief'),
-    stage_schematics:   getVal('stgSchem'),
-    stage_coordination: getVal('stgCoord'),
-    stage_dev:          getVal('stgDev'),
-    stage_working:      getVal('stgWork'),
-    perc_architecture:  parseInt(getVal('percArch')) || 0,
-    perc_3d:            parseInt(getVal('percVis'))  || 0,
-    perc_qs:            parseInt(getVal('percQS'))   || 0,
-    perc_permit:        parseInt(getVal('percPermit'))|| 0,
-    deadline:           getVal('projDeadline') || null   // ← ADD THIS LINE
-};
+
 // ─── SUBMISSION HUB: LOAD FILES ──────────────────────────────────────────────
 async function loadProjectFiles() {
     const token = getVal('fileProjectSelector');
@@ -488,12 +578,11 @@ async function addProjectFile() {
     const { error } = await _db.from('project_files').insert([payload]);
     if (error) { alert('Error: ' + error.message); return; }
 
-    // Clear inputs
     setVal('newFileName', '');
     setVal('newFileUrl', '');
 
     alert('✓ File added to client hub.');
-    loadProjectFiles(); // Refresh list
+    loadProjectFiles();
 }
 
 // ─── SUBMISSION HUB: TOGGLE LOCK ─────────────────────────────────────────────
@@ -538,13 +627,15 @@ async function uploadPortfolio() {
     else {
         alert('✓ Published to portfolio.');
         ['pTitle','pUrl','pDesc'].forEach(id => setVal(id, ''));
+        const pStatus = document.getElementById('pUploadStatus');
+        if (pStatus) pStatus.innerText = ""; // Clear file upload complete layout text
     }
 }
 
-// ─── STORE UPLOAD ─────────────────────────────────────────────────────────────
+// ─── STORE UPLOAD (FIXED CLOSING SYNTAX SYNCHRONIZATION) ──────────────────────
 async function uploadStore() {
     const images = [1,2,3,4,5,6]
-        .map(i => getVal(`sImg${i}`).trim())
+        .map(i => getVal(`sImg${i}`))
         .filter(u => u);
 
     if (!images.length) { alert('Add at least one image URL.'); return; }
@@ -563,13 +654,18 @@ async function uploadStore() {
     if (!_db) { alert('Supabase not connected.'); return; }
 
     const { error } = await _db.from('plans').insert([payload]);
-    if (error) alert('Error: ' + error.message);
-    else {
+    if (error) {
+        alert('Error: ' + error.message);
+    } else {
         alert('✓ Plan published to store.');
         ['sTitle','sPrice','sMeta','sCategory','sImg1','sImg2','sImg3','sImg4','sImg5','sImg6']
             .forEach(id => setVal(id, ''));
         document.getElementById('sFeatured').checked = false;
+        const sStatus = document.getElementById('sUploadStatus');
+        if (sStatus) sStatus.innerText = ""; // Clear background process status indicator text
     }
+}
+
 async function updateProjectTerms() {
     const token = getVal('projectSelector');
     const newTerms = document.getElementById('adminTermsArea').value;
@@ -584,9 +680,11 @@ async function updateProjectTerms() {
     if (error) alert('Update failed: ' + error.message);
     else alert('✓ Service Terms updated for client.');
 }
+
 // ─── REVIEW MODERATION ────────────────────────────────────────────────────────
 async function loadPendingReviews() {
     const inbox = document.getElementById('reviewInbox');
+    if (!inbox) return;
     if (!_db) { inbox.innerHTML = '<p style="color:#444; font-size:0.75rem;">Supabase not connected.</p>'; return; }
 
     const { data, error } = await _db
