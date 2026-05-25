@@ -4,5 +4,5 @@
 
 [[redirects]]
   from   = "/*"
-  to     = "/ada-index.html"
-  status = 404
+  to     = "/index.html"
+  status = 200
