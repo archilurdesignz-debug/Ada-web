@@ -199,7 +199,18 @@
                 </select>
             </div>
         </div>
-        <div class="form-group"><label>Image URL</label><input type="text" id="pUrl"></div>
+        <div class="form-group">
+    <label>Portfolio Image Source</label>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" id="pUrl" placeholder="Image URL will appear here..." style="flex: 1;">
+        
+        <label class="btn-action" style="width: auto; margin: 0; padding: 10px 15px; cursor: pointer; text-align: center; background-color: #2ecc71;">
+            📁 Upload to Dropbox
+            <input type="file" id="pFileInput" accept="image/*" style="display: none;" onchange="handleDirectUpload('pFileInput', 'pUrl')">
+        </label>
+    </div>
+    <small id="pUploadStatus" style="display: block; margin-top: 5px; color: #7f8c8d;"></small>
+</div>
         <div class="form-group"><label>Description</label><textarea id="pDesc" rows="3"></textarea></div>
         <button class="btn-action" onclick="uploadPortfolio()">Publish to Portfolio</button>
     </div>
