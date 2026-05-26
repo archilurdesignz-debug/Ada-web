@@ -632,64 +632,55 @@ async function uploadPortfolio() {
     }
 }
 
-// ─── STORE UPLOAD (ROBUST FAIL-SAFE SYNCHRONIZATION) ──────────────────────
+// ─── STORE UPLOAD (FIXED CLOSING SYNTAX SYNCHRONIZATION) ──────────────────────
 async function uploadStore() {
-    try {
-        const images = [1,2,3,4,5,6]
-            .map(i => getVal(`sImg${i}`))
-            .filter(u => u);
+    const images = [1,2,3,4,5,6]
+        .map(i => getVal(`sImg${i}`))
+        .filter(u => u);
 
-        if (!images.length) { 
-            alert('Add at least one image URL or utilize the Quick Dropbox Uploader.'); 
-            return; 
-        }
+    if (!images.length) { alert('Add at least one image URL.'); return; }
 
-        const planTitle = getVal('sTitle');
-        if (!planTitle) { 
-            alert('Plan name is required.'); 
-            return; 
-        }
+    const payload = {
+        title:       getVal('sTitle'),
+        price:       getVal('sPrice'),
+        meta:        getVal('sMeta'),
+        category:    getVal('sCategory'),
+        image_urls:  images,
+        main_image:  images[0],
+        is_featured: document.getElementById('sFeatured').checked
+    };
 
-        const payload = {
-            title:       planTitle,
-            price:       getVal('sPrice') || 'Contact for Price',
-            meta:        getVal('sMeta') || '—',
-            category:    getVal('sCategory') || 'Uncategorized',
-            image_urls:  images,
-            main_image:  images[0],
-            is_featured: document.getElementById('sFeatured').checked ? true : false
-        };
+    if (!payload.title) { alert('Plan name required.'); return; }
+    if (!_db) { alert('Supabase not connected.'); return; }
 
-        if (!_db) { 
-            alert('Supabase client connection not initialized. Check credentials.'); 
-            return; 
-        }
-
-        // Pushing data to Supabase
-        const { data, error } = await _db
-            .from('plans')
-            .insert([payload])
-            .select();
-
-        if (error) {
-            throw new Error(error.message);
-        }
-
-        alert('✓ Plan published to concept store successfully!');
-        
-        // Resetting the fields after successful submission
+    const { error } = await _db.from('plans').insert([payload]);
+    if (error) {
+        alert('Error: ' + error.message);
+    } else {
+        alert('✓ Plan published to store.');
         ['sTitle','sPrice','sMeta','sCategory','sImg1','sImg2','sImg3','sImg4','sImg5','sImg6']
             .forEach(id => setVal(id, ''));
         document.getElementById('sFeatured').checked = false;
-        
         const sStatus = document.getElementById('sUploadStatus');
-        if (sStatus) sStatus.innerText = ""; 
-
-    } catch (err) {
-        console.error('Store Upload Fetch Breakdown:', err);
-        alert('Upload failed: ' + err.message);
+        if (sStatus) sStatus.innerText = ""; // Clear background process status indicator text
     }
 }
+
+async function updateProjectTerms() {
+    const token = getVal('projectSelector');
+    const newTerms = document.getElementById('adminTermsArea').value;
+    if (!token) { alert('Select a project first via the Update Active Project section above.'); return; }
+    if (!_db) { alert('Supabase not connected.'); return; }
+
+    const { error } = await _db
+        .from('projects')
+        .update({ service_terms: newTerms })
+        .eq('token', token);
+
+    if (error) alert('Update failed: ' + error.message);
+    else alert('✓ Service Terms updated for client.');
+}
+
 // ─── REVIEW MODERATION ────────────────────────────────────────────────────────
 async function loadPendingReviews() {
     const inbox = document.getElementById('reviewInbox');
