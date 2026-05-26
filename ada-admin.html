@@ -342,8 +342,10 @@ async function handleDirectUpload(fileInputId, targetInputId) {
 
         const data = await response.json();
 
-        if (response.ok && data.url) {
-            targetInput.value = data.url; 
+       if (response.ok && data.url) {
+    // Force convert the link structure to high-fidelity direct render streaming
+    const forcedRawUrl = data.url.replace('?dl=0', '?raw=1');
+    targetInput.value = forcedRawUrl;
             statusText.innerText = "✅ Uploaded successfully and link attached!";
             statusText.style.color = "#2ecc71";
         } else {
@@ -380,7 +382,9 @@ async function handleStoreGalleryUpload() {
         const data = await response.json();
 
         if (response.ok && data.url) {
-            targetInput.value = data.url; 
+    // Force convert the link structure for the Store Gallery components as well
+    const forcedRawUrl = data.url.replace('?dl=0', '?raw=1');
+    targetInput.value = forcedRawUrl; 
             statusText.innerText = `✅ Successfully mapped to ${document.getElementById('targetStoreSlot').selectedOptions[0].text}!`;
             statusText.style.color = "#2ecc71";
         } else {
