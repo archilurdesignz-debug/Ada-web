@@ -31,6 +31,8 @@
         .review-card { background: rgba(255,255,255,0.02); padding: 20px; border: 1px solid #222; margin-bottom: 15px; }
         .mod-btns { display: flex; gap: 10px; margin-top: 15px; }
         .btn-mod { padding: 8px 20px; font-size: 0.7rem; cursor: pointer; border: none; text-transform: uppercase; font-weight: 600; color: white; }
+
+        /* File Manager */
         .file-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 10px; padding: 15px; background: rgba(0,0,0,0.3); border: 1px solid #1a1a1a; }
         .file-row label { font-size: 0.6rem; }
         .btn-small { padding: 8px 15px; font-size: 0.65rem; cursor: pointer; border: none; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; background: var(--gold); color: #000; white-space: nowrap; }
@@ -48,6 +50,7 @@
 <div class="admin-container">
     <h1>ADA Universal Control Panel</h1>
 
+    <!-- ── INITIALIZE CLIENT DASHBOARD ─────────────────────────────── -->
     <div class="section-card" style="border-top-color: var(--success);">
         <h2>+ Initialize Client Dashboard</h2>
         <div class="grid-3">
@@ -60,6 +63,7 @@
         <div id="creationResult"></div>
     </div>
 
+    <!-- ── UPDATE ACTIVE PROJECT ────────────────────────────────────── -->
     <div class="section-card" style="border-top-color: var(--white);">
         <h2>Update Active Project</h2>
         <div class="form-group">
@@ -74,13 +78,13 @@
                 <div class="form-group"><label>Overall Completion (%)</label><input type="number" id="overallProgress" min="0" max="100"></div>
                 <div class="form-group"><label>Project Reference</label><input type="text" id="projRef" readonly style="color:#666;"></div>
             </div>
-            <div class="form-group" style="margin-top: 15px;">
-                <label>Project Deadline (Date & Time)</label>
-                <input type="datetime-local" id="projDeadline">
-                <p style="font-size: 0.6rem; color: #555; margin-top: 5px; letter-spacing: 1px;">
-                    Countdown timer starts immediately when you publish updates. Client sees days, hours, minutes, seconds.
-                </p>
-            </div>
+<div class="form-group" style="margin-top: 15px;">
+    <label>Project Deadline (Date & Time)</label>
+    <input type="datetime-local" id="projDeadline">
+    <p style="font-size: 0.6rem; color: #555; margin-top: 5px; letter-spacing: 1px;">
+        Countdown timer starts immediately when you publish updates. Client sees days, hours, minutes, seconds.
+    </p>
+</div>
             <h3>Architectural Sub-Stages</h3>
             <div class="stage-grid">
                 <div class="stage-item"><label>Design Brief</label>
@@ -107,8 +111,13 @@
         </div>
     </div>
 
+    <!-- ── SUBMISSION HUB MANAGER ───────────────────────────────────── -->
     <div class="section-card" style="border-top-color: var(--gold);">
         <h2>Submission Hub Manager</h2>
+        <p style="font-size: 0.75rem; color: #666; margin-bottom: 20px;">
+            Select a project then add Drive links. Toggle locked/released to control client visibility.
+        </p>
+
         <div class="form-group">
             <label>Select Project</label>
             <select id="fileProjectSelector" onchange="loadProjectFiles()">
@@ -168,6 +177,7 @@
         </div>
     </div>
 
+    <!-- ── PORTFOLIO UPLOAD ──────────────────────────────────────────── -->
     <div class="section-card" style="border-top-color: #3498db;">
         <h2>Upload to Portfolio</h2>
         <div class="grid-3">
@@ -190,20 +200,22 @@
             </div>
         </div>
         <div class="form-group">
-            <label>Portfolio Image Source</label>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <input type="text" id="pUrl" placeholder="Image URL will appear here..." style="flex: 1;">
-                <label class="btn-action" style="width: auto; margin: 0; padding: 10px 15px; cursor: pointer; text-align: center; background-color: #2ecc71;">
-                    📁 Upload to Dropbox
-                    <input type="file" id="pFileInput" accept="image/*" style="display: none;" onchange="handleDirectUpload('pFileInput', 'pUrl', 'pUploadStatus')">
-                </label>
-            </div>
-            <small id="pUploadStatus" style="display: block; margin-top: 5px; color: #7f8c8d;"></small>
-        </div>
+    <label>Portfolio Image Source</label>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" id="pUrl" placeholder="Image URL will appear here..." style="flex: 1;">
+        
+        <label class="btn-action" style="width: auto; margin: 0; padding: 10px 15px; cursor: pointer; text-align: center; background-color: #2ecc71;">
+            📁 Upload to Dropbox
+            <input type="file" id="pFileInput" accept="image/*" style="display: none;" onchange="handleDirectUpload('pFileInput', 'pUrl')">
+        </label>
+    </div>
+    <small id="pUploadStatus" style="display: block; margin-top: 5px; color: #7f8c8d;"></small>
+</div>
         <div class="form-group"><label>Description</label><textarea id="pDesc" rows="3"></textarea></div>
         <button class="btn-action" onclick="uploadPortfolio()">Publish to Portfolio</button>
     </div>
 
+    <!-- ── STORE PLAN UPLOAD ─────────────────────────────────────────── -->
     <div class="section-card" style="border-top-color: #f1c40f;">
         <h2>Upload New Plan to Store</h2>
         <div class="grid-3">
@@ -213,24 +225,24 @@
         </div>
         <div class="form-group"><label>Category</label><input type="text" id="sCategory" placeholder="e.g. Tropical Contemporary"></div>
         <label style="margin-bottom:8px; display:block;">Gallery Image URLs (first = main/cover)</label>
-        <div class="form-group" style="margin-bottom: 10px; background: rgba(255,255,255,0.02); padding: 15px; border: 1px dashed #f1c40f;">
-            <label style="font-weight: bold; color: var(--gold); font-size: 0.75rem;">⚡ Quick Dropbox Gallery Uploader</label>
-            <div style="display: flex; gap: 10px; margin-top: 5px;">
-                <select id="targetStoreSlot" style="width: auto; padding: 8px; background: #000; color: #fff; border: 1px solid #333;">
-                    <option value="sImg1">Main / Cover Image</option>
-                    <option value="sImg2">Image 2</option>
-                    <option value="sImg3">Image 3</option>
-                    <option value="sImg4">Image 4</option>
-                    <option value="sImg5">Image 5</option>
-                    <option value="sImg6">Image 6</option>
-                </select>
-                <label class="btn-action" style="width: auto; margin: 0; padding: 8px 15px; cursor: pointer; background-color: #f1c40f; color: #333;">
-                    Select & Upload File
-                    <input type="file" id="sFileInput" accept="image/*" style="display: none;" onchange="handleStoreGalleryUpload()">
-                </label>
-            </div>
-            <small id="sUploadStatus" style="display: block; margin-top: 5px; color: #7f8c8d;"></small>
-        </div>
+        <div class="form-group" style="margin-bottom: 10px; background: #fdfaf0; padding: 10px; border-radius: 4px; border: 1px dashed #f1c40f;">
+    <label style="font-weight: bold; color: #b7950b;">⚡ Quick Dropbox Gallery Uploader</label>
+    <div style="display: flex; gap: 10px; margin-top: 5px;">
+        <select id="targetStoreSlot" style="width: auto; padding: 8px;">
+            <option value="sImg1">Main / Cover Image</option>
+            <option value="sImg2">Image 2</option>
+            <option value="sImg3">Image 3</option>
+            <option value="sImg4">Image 4</option>
+            <option value="sImg5">Image 5</option>
+            <option value="sImg6">Image 6</option>
+        </select>
+        <label class="btn-action" style="width: auto; margin: 0; padding: 8px 15px; cursor: pointer; background-color: #f1c40f; color: #333;">
+            Select & Upload File
+            <input type="file" id="sFileInput" accept="image/*" style="display: none;" onchange="handleStoreGalleryUpload()">
+        </label>
+    </div>
+    <small id="sUploadStatus" style="display: block; margin-top: 5px; color: #7f8c8d;"></small>
+</div>
         <div class="grid-3" style="margin-bottom:15px;">
             <input type="text" id="sImg1" placeholder="Main Image URL">
             <input type="text" id="sImg2" placeholder="Image 2">
@@ -246,40 +258,58 @@
         <button class="btn-action" onclick="uploadStore()">Publish to Concept Store</button>
     </div>
 
-    <div class="section-card" style="border-top-color: #9b59b6;">
-        <h2>Service Terms Manager</h2>
-        <div class="form-group">
-            <label>Current Terms (Markdown/HTML Supported)</label>
-            <textarea id="adminTermsArea" style="height: 300px; font-size: 0.8rem; background: #050505;">
+<div class="section-card" style="border-top-color: #9b59b6;">
+    <h2>Service Terms Manager</h2>
+    <p style="font-size: 0.75rem; color: #666; margin-bottom: 20px;">Review or customize the service terms assigned to the current project.</p>
+    <div class="form-group">
+        <label>Current Terms (Markdown/HTML Supported)</label>
+        <textarea id="adminTermsArea" style="height: 300px; font-size: 0.8rem; background: #050505;">
 [Intellectual Property Rights]
 All architectural drawings remain the intellectual property of ADA...
-            </textarea>
-        </div>
-        <button class="btn-action" style="background: #9b59b6; color: white;" onclick="updateProjectTerms()">Update Client Terms</button>
+        </textarea>
     </div>
+    <button class="btn-action" style="background: #9b59b6; color: white;" onclick="updateProjectTerms()">Update Client Terms</button>
+</div>
 
+    <!-- ── REVIEW MODERATION ─────────────────────────────────────────── -->
     <div class="section-card" style="border-top-color: var(--gold);">
         <h2>Review Moderation Inbox</h2>
         <div id="reviewInbox"><p style="font-size:0.8rem; color:#444;">Loading reviews...</p></div>
     </div>
-</div>
 
+</div>
 <script>
 // ─── SUPABASE INIT ────────────────────────────────────────────────────────────
+// TODO: Replace these two values with your actual Supabase credentials
 const SUPABASE_URL   = 'https://ofaxbduvnhscxvoakeax.supabase.co';   
 const SUPABASE_KEY   = 'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK'; 
 
 const { createClient } = supabase;
 let _db = null;
-try { _db = createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) { console.warn('Supabase initialization failed.'); }
-
-// ─── UTILITIES ────────────────────────────────────────────────────────────────
-function generateToken() {
-    return `ADA-${new Date().getFullYear()}-${Math.floor(Math.random() * 9000) + 1000}`;
+try {
+    _db = createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch(e) {
+    console.warn('Supabase not connected — paste your credentials above');
 }
-function setVal(id, val) { const el = document.getElementById(id); if (el) el.value = val ?? ''; }
-function getVal(id) { return document.getElementById(id)?.value?.trim() ?? ''; }
 
+// ─── HELPERS (INCLUDING DROPBOX COORD) ────────────────────────────────────────
+function generateToken() {
+    const year = new Date().getFullYear();
+    const rand = Math.floor(Math.random() * 9000) + 1000;
+    return `ADA-${year}-${rand}`;
+}
+
+function setVal(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.value = val ?? '';
+}
+
+// Fixed a tiny script fallback evaluation from your original code
+function getVal(id) {
+    return document.getElementById(id)?.value?.trim() ?? '';
+}
+
+// Reads file data and converts it for our Netlify background function
 function getBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -288,37 +318,36 @@ function getBase64(file) {
         reader.onerror = error => reject(error);
     });
 }
-function clearStatusAfterDelay(id) {
-    setTimeout(() => { const el = document.getElementById(id); if (el) el.innerText = ""; }, 5000);
-}
 
-// ─── DROPBOX INTERACTION ──────────────────────────────────────────────────────
-async function handleDirectUpload(fileInputId, targetInputId, statusId) {
+// Handler for the Portfolio image upload
+async function handleDirectUpload(fileInputId, targetInputId) {
     const fileInput = document.getElementById(fileInputId);
     const targetInput = document.getElementById(targetInputId);
-    const statusText = document.getElementById(statusId);
+    const statusText = document.getElementById('pUploadStatus');
 
     if (!fileInput.files.length) return;
     const file = fileInput.files[0];
 
-    statusText.innerText = "⏳ Uploading asset to Dropbox...";
+    statusText.innerText = "⏳ Uploading to Dropbox...";
     statusText.style.color = "#3498db";
 
     try {
         const base64Data = await getBase64(file);
+        
         const response = await fetch('/.netlify/functions/upload-to-dropbox', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ filename: file.name, filedata: base64Data })
         });
+
         const data = await response.json();
+
         if (response.ok && data.url) {
             targetInput.value = data.url; 
-            statusText.innerText = "✅ Asset uploaded successfully!";
+            statusText.innerText = "✅ Uploaded successfully and link attached!";
             statusText.style.color = "#2ecc71";
-            clearStatusAfterDelay(statusId);
         } else {
-            throw new Error(data.error || "Upload pipeline failure");
+            throw new Error(data.error || "Upload failed");
         }
     } catch (err) {
         statusText.innerText = `❌ Error: ${err.message}`;
@@ -326,6 +355,7 @@ async function handleDirectUpload(fileInputId, targetInputId, statusId) {
     }
 }
 
+// Handler for the Store Gallery bulk uploads
 async function handleStoreGalleryUpload() {
     const fileInput = document.getElementById('sFileInput');
     const targetSlotId = document.getElementById('targetStoreSlot').value;
@@ -335,24 +365,26 @@ async function handleStoreGalleryUpload() {
     if (!fileInput.files.length) return;
     const file = fileInput.files[0];
 
-    statusText.innerText = `⏳ Uploading image data to Dropbox...`;
+    statusText.innerText = `⏳ Uploading to ${document.getElementById('targetStoreSlot').selectedOptions[0].text}...`;
     statusText.style.color = "#f1c40f";
 
     try {
         const base64Data = await getBase64(file);
+        
         const response = await fetch('/.netlify/functions/upload-to-dropbox', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ filename: file.name, filedata: base64Data })
         });
+
         const data = await response.json();
+
         if (response.ok && data.url) {
             targetInput.value = data.url; 
-            statusText.innerText = `✅ Successfully synchronized!`;
+            statusText.innerText = `✅ Successfully mapped to ${document.getElementById('targetStoreSlot').selectedOptions[0].text}!`;
             statusText.style.color = "#2ecc71";
-            clearStatusAfterDelay('sUploadStatus');
         } else {
-            throw new Error(data.error || "Asset processing failed");
+            throw new Error(data.error || "Upload failed");
         }
     } catch (err) {
         statusText.innerText = `❌ Error: ${err.message}`;
@@ -362,10 +394,14 @@ async function handleStoreGalleryUpload() {
     }
 }
 
-// ─── PIPELINES ────────────────────────────────────────────────────────────────
+// ─── LOAD PROJECTS INTO SELECTORS ────────────────────────────────────────────
 async function loadProjectSelectors() {
     if (!_db) return;
-    const { data, error } = await _db.from('projects').select('token, client_name, project_title').order('created_at', { ascending: false });
+    const { data, error } = await _db
+        .from('projects')
+        .select('token, client_name, project_title')
+        .order('created_at', { ascending: false });
+
     if (error || !data) return;
 
     ['projectSelector', 'fileProjectSelector'].forEach(selId => {
@@ -373,11 +409,15 @@ async function loadProjectSelectors() {
         if (!sel) return;
         sel.innerHTML = `<option value="">-- Select Project --</option>`;
         data.forEach(p => {
-            sel.innerHTML += `<option value="${p.token}">${p.client_name} — ${p.project_title} (${p.token})</option>`;
+            const opt = document.createElement('option');
+            opt.value = p.token;
+            opt.textContent = `${p.client_name} — ${p.project_title} (${p.token})`;
+            sel.appendChild(opt);
         });
     });
 }
 
+// ─── CREATE NEW PROJECT ──────────────────────────────────────────────────────
 async function createNewProject() {
     const token = generateToken();
     const payload = {
@@ -387,28 +427,43 @@ async function createNewProject() {
         project_title:  getVal('newProjTitle'),
         lead_architect: getVal('newLeadArch')
     };
-    if (!payload.client_name || !payload.project_title) { alert('Client info and title required.'); return; }
 
-    const { error } = await _db.from('projects').insert([payload]);
-    if (error) { alert('Error: ' + error.message); return; }
+    if (!payload.client_name || !payload.project_title) {
+        alert('Please fill in client name and project title.');
+        return;
+    }
 
+    if (_db) {
+        const { error } = await _db.from('projects').insert([payload]);
+        if (error) { alert('Error: ' + error.message); return; }
+    }
+
+    const dashboardUrl = `${window.location.origin}/ada-tracker.html?token=${token}`;
     const resultBox = document.getElementById('creationResult');
     resultBox.style.display = 'block';
     resultBox.innerHTML = `
         <p>✓ Project initialized for <strong>${payload.client_name}</strong></p>
-        <p>Dashboard Token: <code>${token}</code></p>
-        <p>Client Link:</p>
-        <code>https://visionary-halva-45fa07.netlify.app/ada-tracker.html?token=${token}</code>
+        <p style="margin-top:10px;">Dashboard Token: <code>${token}</code></p>
+        <p style="margin-top:8px; font-size:0.75rem;">Client Link:</p>
+        <code style="font-size:0.7rem; word-break:break-all;">${dashboardUrl}</code>
+        <p style="margin-top:10px; font-size:0.7rem; color:#888;">Send this link to your client. They need no login — the token in the URL identifies their project.</p>
     `;
+
     loadProjectSelectors();
 }
 
+// ─── LOAD PROJECT DETAILS INTO EDITOR ────────────────────────────────────────
 async function loadProjectDetails() {
     const token = getVal('projectSelector');
     document.getElementById('editorFields').style.display = token ? 'block' : 'none';
     if (!token || !_db) return;
 
-    const { data, error } = await _db.from('projects').select('*').eq('token', token).single();
+    const { data, error } = await _db
+        .from('projects')
+        .select('*')
+        .eq('token', token)
+        .single();
+
     if (error || !data) return;
 
     setVal('overallProgress',  data.overall_percent);
@@ -422,17 +477,20 @@ async function loadProjectDetails() {
     setVal('percVis',          data.perc_3d);
     setVal('percQS',           data.perc_qs);
     setVal('percPermit',       data.perc_permit);
-    document.getElementById('adminTermsArea').value = data.service_terms || '';
 
     if (data.deadline) {
         const dt = new Date(data.deadline);
-        setVal('projDeadline', new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0, 16));
+        const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000)
+            .toISOString().slice(0, 16);
+        setVal('projDeadline', local);
     }
 }
 
+// ─── UPDATE PROJECT ───────────────────────────────────────────────────────────
 async function updateProject() {
     const token = getVal('projectSelector');
-    if (!token) return;
+    if (!token) { alert('Select a project first.'); return; }
+
     const payload = {
         overall_percent:    parseInt(getVal('overallProgress')) || 0,
         stage_brief:        getVal('stgBrief'),
@@ -446,103 +504,208 @@ async function updateProject() {
         perc_permit:        parseInt(getVal('percPermit'))|| 0,
         deadline:           getVal('projDeadline') || null
     };
-    const { error } = await _db.from('projects').update(payload).eq('token', token);
-    alert(error ? 'Error: ' + error.message : '✓ Client dashboard updated successfully.');
+
+    if (!_db) { alert('Supabase not connected.'); return; }
+
+    const { error } = await _db
+        .from('projects')
+        .update(payload)
+        .eq('token', token);
+
+    if (error) alert('Error: ' + error.message);
+    else alert('✓ Client dashboard updated successfully.');
 }
 
+// ─── SUBMISSION HUB: LOAD FILES ──────────────────────────────────────────────
 async function loadProjectFiles() {
     const token = getVal('fileProjectSelector');
     document.getElementById('fileManager').style.display = token ? 'block' : 'none';
     if (!token || !_db) return;
 
-    const { data, error } = await _db.from('project_files').select('*').eq('project_token', token).order('created_at', { ascending: true });
+    const { data, error } = await _db
+        .from('project_files')
+        .select('*')
+        .eq('project_token', token)
+        .order('created_at', { ascending: true });
+
     const container = document.getElementById('existingFilesList');
-    if (error || !data || !data.length) { container.innerHTML = '<p style="font-size:0.75rem; color:#444;">No files added yet.</p>'; return; }
+
+    if (error || !data || data.length === 0) {
+        container.innerHTML = '<p style="font-size:0.75rem; color:#444;">No files added yet.</p>';
+        return;
+    }
 
     container.innerHTML = data.map(f => `
         <div class="existing-file-item">
             <div>
                 <div style="font-size:0.8rem; margin-bottom:3px;">${f.file_name}</div>
-                <div style="font-size:0.6rem; color:#666;">${f.stage_label} · ${f.file_tag} · Released: ${f.release_date || '—'}</div>
+                <div style="font-size:0.6rem; color:#666;">${f.stage_label} · ${f.file_tag} · ${f.released_date || 'No date'}</div>
             </div>
             <div class="file-actions">
-                <span class="file-status-badge ${f.locked ? 'badge-locked' : 'badge-released'}">${f.locked ? '🔒 Locked' : '✓ Released'}</span>
-                <button class="btn-small" onclick="toggleFileLock('${f.id}', ${f.locked})">${f.locked ? 'Release' : 'Lock'}</button>
+                <span class="file-status-badge ${f.locked ? 'badge-locked' : 'badge-released'}">
+                    ${f.locked ? '🔒 Locked' : '✓ Released'}
+                </span>
+                <button class="btn-small" onclick="toggleFileLock('${f.id}', ${f.locked})">
+                    ${f.locked ? 'Release' : 'Lock'}
+                </button>
                 <button class="btn-small btn-remove" onclick="deleteFile('${f.id}')">Remove</button>
             </div>
         </div>
     `).join('');
 }
 
+// ─── SUBMISSION HUB: ADD FILE ────────────────────────────────────────────────
 async function addProjectFile() {
     const token = getVal('fileProjectSelector');
-    if (!token) return;
+    if (!token) { alert('Select a project first.'); return; }
+
     const name = getVal('newFileName');
-    if (!name) { alert('Enter a file name.'); return; }
+    const url  = getVal('newFileUrl');
+    if (!name) { alert('Please enter a file name.'); return; }
 
     const payload = {
-        project_token: token,
-        stage_label:   getVal('newFileStage'),
-        file_name:     name,
-        file_tag:      getVal('newFileTag'),
-        drive_url:     getVal('newFileUrl'),
-        locked:        getVal('newFileLocked') === 'true',
-        release_date:  new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })
+        project_token:  token,
+        stage_label:    getVal('newFileStage'),
+        file_name:      name,
+        file_tag:       getVal('newFileTag'),
+        drive_url:      url,
+        locked:         getVal('newFileLocked') === 'true',
+        released_date:  new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })
     };
 
+    if (!_db) { alert('Supabase not connected.'); return; }
+
     const { error } = await _db.from('project_files').insert([payload]);
-    if (error) alert('Error: ' + error.message);
-    else { setVal('newFileName',''); setVal('newFileUrl',''); loadProjectFiles(); alert('✓ File synced to hub.'); }
+    if (error) { alert('Error: ' + error.message); return; }
+
+    setVal('newFileName', '');
+    setVal('newFileUrl', '');
+
+    alert('✓ File added to client hub.');
+    loadProjectFiles();
 }
 
-async function toggleFileLock(id, current) { await _db.from('project_files').update({ locked: !current }).eq('id', id); loadProjectFiles(); }
-async function deleteFile(id) { if (confirm('Remove file?')) { await _db.from('project_files').delete().eq('id', id); loadProjectFiles(); } }
+// ─── SUBMISSION HUB: TOGGLE LOCK ─────────────────────────────────────────────
+async function toggleFileLock(fileId, currentLocked) {
+    if (!_db) return;
+    const { error } = await _db
+        .from('project_files')
+        .update({ locked: !currentLocked })
+        .eq('id', fileId);
 
+    if (error) alert('Error: ' + error.message);
+    else loadProjectFiles();
+}
+
+// ─── SUBMISSION HUB: DELETE FILE ─────────────────────────────────────────────
+async function deleteFile(fileId) {
+    if (!confirm('Remove this file from the client hub?')) return;
+    if (!_db) return;
+    const { error } = await _db
+        .from('project_files')
+        .delete()
+        .eq('id', fileId);
+
+    if (error) alert('Error: ' + error.message);
+    else loadProjectFiles();
+}
+
+// ─── PORTFOLIO UPLOAD ─────────────────────────────────────────────────────────
 async function uploadPortfolio() {
-    const payload = { title: getVal('pTitle'), category: getVal('pCat'), layout: getVal('pLayout'), image_url: getVal('pUrl'), description: getVal('pDesc') };
-    if (!payload.title || !payload.image_url) { alert('Complete the fields.'); return; }
+    const payload = {
+        title:       getVal('pTitle'),
+        category:    getVal('pCat'),
+        layout:      getVal('pLayout'),
+        image_url:   getVal('pUrl'),
+        description: getVal('pDesc')
+    };
+    if (!payload.title || !payload.image_url) { alert('Title and image URL required.'); return; }
+    if (!_db) { alert('Supabase not connected.'); return; }
+
     const { error } = await _db.from('portfolio').insert([payload]);
     if (error) alert('Error: ' + error.message);
-    else { alert('✓ Published to portfolio.'); ['pTitle','pUrl','pDesc'].forEach(id => setVal(id, '')); document.getElementById('pUploadStatus').innerText = ""; }
+    else {
+        alert('✓ Published to portfolio.');
+        ['pTitle','pUrl','pDesc'].forEach(id => setVal(id, ''));
+        const pStatus = document.getElementById('pUploadStatus');
+        if (pStatus) pStatus.innerText = ""; // Clear file upload complete layout text
+    }
 }
 
+// ─── STORE UPLOAD (ROBUST FAIL-SAFE SYNCHRONIZATION) ──────────────────────
 async function uploadStore() {
     try {
-        const images = [1,2,3,4,5,6].map(i => getVal(`sImg${i}`)).filter(u => u);
-        if (!images.length) { alert('Add at least one image URL.'); return; }
-        if (!getVal('sTitle')) { alert('Plan name required.'); return; }
+        const images = [1,2,3,4,5,6]
+            .map(i => getVal(`sImg${i}`))
+            .filter(u => u);
+
+        if (!images.length) { 
+            alert('Add at least one image URL or utilize the Quick Dropbox Uploader.'); 
+            return; 
+        }
+
+        const planTitle = getVal('sTitle');
+        if (!planTitle) { 
+            alert('Plan name is required.'); 
+            return; 
+        }
 
         const payload = {
-            title:       getVal('sTitle'),
+            title:       planTitle,
             price:       getVal('sPrice') || 'Contact for Price',
             meta:        getVal('sMeta') || '—',
             category:    getVal('sCategory') || 'Uncategorized',
             image_urls:  images,
             main_image:  images[0],
-            is_featured: document.getElementById('sFeatured').checked
+            is_featured: document.getElementById('sFeatured').checked ? true : false
         };
 
-        const { error } = await _db.from('plans').insert([payload]);
-        if (error) throw new Error(error.message);
+        if (!_db) { 
+            alert('Supabase client connection not initialized. Check credentials.'); 
+            return; 
+        }
 
-        alert('✓ Plan successfully published to store!');
-        ['sTitle','sPrice','sMeta','sCategory','sImg1','sImg2','sImg3','sImg4','sImg5','sImg6'].forEach(id => setVal(id, ''));
+        // Pushing data to Supabase
+        const { data, error } = await _db
+            .from('plans')
+            .insert([payload])
+            .select();
+
+        if (error) {
+            throw new Error(error.message);
+        }
+
+        alert('✓ Plan published to concept store successfully!');
+        
+        // Resetting the fields after successful submission
+        ['sTitle','sPrice','sMeta','sCategory','sImg1','sImg2','sImg3','sImg4','sImg5','sImg6']
+            .forEach(id => setVal(id, ''));
         document.getElementById('sFeatured').checked = false;
-        document.getElementById('sUploadStatus').innerText = "";
-    } catch (err) { alert('Upload failed: ' + err.message); }
-}
+        
+        const sStatus = document.getElementById('sUploadStatus');
+        if (sStatus) sStatus.innerText = ""; 
 
-async function updateProjectTerms() {
-    const token = getVal('projectSelector');
-    if (!token) return;
-    const { error } = await _db.from('projects').update({ service_terms: document.getElementById('adminTermsArea').value }).eq('token', token);
-    alert(error ? 'Error: ' + error.message : '✓ Service Terms updated.');
+    } catch (err) {
+        console.error('Store Upload Fetch Breakdown:', err);
+        alert('Upload failed: ' + err.message);
+    }
 }
-
+// ─── REVIEW MODERATION ────────────────────────────────────────────────────────
 async function loadPendingReviews() {
     const inbox = document.getElementById('reviewInbox');
-    const { data, error } = await _db.from('reviews').select('*').eq('status', 'pending').order('created_at', { ascending: false });
-    if (error || !data || !data.length) { inbox.innerHTML = '<p style="font-size:0.8rem; color:#444;">No pending reviews.</p>'; return; }
+    if (!inbox) return;
+    if (!_db) { inbox.innerHTML = '<p style="color:#444; font-size:0.75rem;">Supabase not connected.</p>'; return; }
+
+    const { data, error } = await _db
+        .from('reviews')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+        inbox.innerHTML = '<p style="font-size:0.8rem; color:#444;">No pending reviews.</p>';
+        return;
+    }
 
     inbox.innerHTML = data.map(rev => `
         <div class="review-card">
@@ -556,9 +719,22 @@ async function loadPendingReviews() {
     `).join('');
 }
 
-async function moderateReview(id, status) { await _db.from('reviews').update({ status }).eq('id', id); loadPendingReviews(); }
+async function moderateReview(id, status) {
+    if (!_db) return;
+    const { error } = await _db
+        .from('reviews')
+        .update({ status })
+        .eq('id', id);
 
-window.addEventListener('DOMContentLoaded', () => { loadProjectSelectors(); loadPendingReviews(); });
+    if (error) alert('Error: ' + error.message);
+    else { alert(`Review ${status}.`); loadPendingReviews(); }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+    loadProjectSelectors();
+    loadPendingReviews();
+});
 </script>
 </body>
 </html>
