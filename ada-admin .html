@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADA Admin | Universal Control Panel</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #0c0b09; --gold: #b5a898; --white: #f5f2ec; --glass: rgba(255,255,255,0.05); --success: #2e7d52; --danger: #7d2e2e; }
+        body { background: var(--bg); color: var(--white); font-family: 'Inter', sans-serif; padding: 40px; line-height: 1.6; }
+        .admin-container { max-width: 1100px; margin: 0 auto; }
+        h1, h2, h3 { font-family: 'Cormorant Garamond'; color: var(--gold); text-transform: uppercase; letter-spacing: 4px; }
+        h1 { margin-bottom: 40px; border-bottom: 1px solid var(--glass); padding-bottom: 20px; }
+        .section-card { background: var(--glass); border: 1px solid #222; padding: 30px; margin-bottom: 40px; border-top: 3px solid #333; }
+        h3 { font-size: 0.9rem; margin-top: 25px; margin-bottom: 15px; border-left: 2px solid var(--gold); padding-left: 15px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .stage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        .stage-item { background: rgba(0,0,0,0.3); padding: 12px; border: 1px solid #1a1a1a; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.65rem; color: var(--gold); text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px; }
+        input, select, textarea { width: 100%; background: #000; border: 1px solid #333; color: white; padding: 10px; font-family: 'Inter'; outline: none; }
+        input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+        .btn-action { background: var(--gold); color: #000; border: none; padding: 15px; cursor: pointer; text-transform: uppercase; font-weight: 600; width: 100%; margin-top: 15px; transition: 0.3s; letter-spacing: 1px; }
+        .btn-action:hover { background: var(--white); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        #creationResult { margin-top: 20px; padding: 15px; background: rgba(46,125,82,0.1); border: 1px solid var(--success); display: none; }
+        code { background: #000; padding: 5px 10px; color: var(--gold); font-size: 0.9rem; }
+        .review-card { background: rgba(255,255,255,0.02); padding: 20px; border: 1px solid #222; margin-bottom: 15px; }
+        .mod-btns { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-mod { padding: 8px 20px; font-size: 0.7rem; cursor: pointer; border: none; text-transform: uppercase; font-weight: 600; color: white; }
+
+        /* File Manager */
+        .file-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 10px; padding: 15px; background: rgba(0,0,0,0.3); border: 1px solid #1a1a1a; }
+        .file-row label { font-size: 0.6rem; }
+        .btn-small { padding: 8px 15px; font-size: 0.65rem; cursor: pointer; border: none; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; background: var(--gold); color: #000; white-space: nowrap; }
+        .btn-small:hover { background: var(--white); }
+        .btn-remove { background: var(--danger); color: white; }
+        .existing-files { margin-top: 20px; }
+        .existing-file-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: rgba(0,0,0,0.2); border: 1px solid #1a1a1a; margin-bottom: 8px; font-size: 0.75rem; }
+        .file-status-badge { font-size: 0.55rem; padding: 3px 8px; letter-spacing: 1px; text-transform: uppercase; }
+        .badge-released { background: var(--success); color: white; }
+        .badge-locked { background: #333; color: #888; }
+        .file-actions { display: flex; gap: 8px; }
+    </style>
+</head>
+<body>
+<div class="admin-container">
+    <h1>ADA Universal Control Panel</h1>
+
+    <!-- ── INITIALIZE CLIENT DASHBOARD ─────────────────────────────── -->
+  <div class="section-card" style="border-top-color: var(--success);">
+    <h2>+ Initialize Client Dashboard</h2>
+    <div class="grid-3">
+        <div class="form-group"><label>Client Name</label><input type="text" id="newClientName"></div>
+        <div class="form-group"><label>Client Email</label><input type="email" id="newClientEmail"></div>
+        <div class="form-group"><label>Project Title</label><input type="text" id="newProjTitle"></div>
+    </div>
+    <div class="form-group"><label>Lead Architect</label><input type="text" id="newLeadArch" value="Arc. Ibukunoluwa"></div>
+    
+    <div class="grid-2" style="margin-top: 15px;">
+        <div class="form-group">
+            <label>Currency Option</label>
+            <select id="newCurrencyMode">
+                <option value="NGN">Naira (₦)</option>
+                <option value="USD">US Dollar ($)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Evaluation Architecture Protocol</label>
+            <select id="newEvalMode" onchange="toggleFormWorkspaces(this.value)">
+                <option value="eval1">Evaluation 1 (Full Matrix Scheme)</option>
+                <option value="eval2">Evaluation 2 (Universal Custom Single Bar)</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="grid-2" style="margin-top:10px;">
+        <div class="form-group">
+            <label for="newDepositPaid">Initial Deposit Paid (₦)</label>
+            <input type="number" id="newDepositPaid" placeholder="e.g. 150000" min="0">
+            <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">Amount the client has already paid at project start.</p>
+        </div>
+        <div class="form-group">
+            <label for="newTotalSum">Total Agreed Sum (₦)</label>
+            <input type="number" id="newTotalSum" placeholder="e.g. 500000" min="0">
+            <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">Full project package fee agreed with the client.</p>
+        </div>
+    </div>
+    <button class="btn-action btn-success" onclick="createNewProject()">Generate Token & Initialize</button>
+    <div id="creationResult"></div>
+</div>
+
+<div class="section-card" style="border-top-color: var(--white);">
+    <h2>Update Active Project</h2>
+    <div class="form-group">
+        <label>Select Project</label>
+        <select id="projectSelector" onchange="loadProjectDetails()">
+            <option value="">-- Select Active Project --</option>
+        </select>
+    </div>
+    
+    <div id="editorFields" style="display:none;">
+        <div class="grid-3">
+            <div class="form-group"><label>Overall Completion (%)</label><input type="number" id="overallProgress" min="0" max="100"></div>
+            <div class="form-group">
+                <label>Current Revision Count</label>
+                <select id="editRevisionCount">
+                    <option value="0">0 Revisions Used</option>
+                    <option value="1">1 Revision Used</option>
+                    <option value="2">2 Revisions Used</option>
+                    <option value="3">3 Revisions Used</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Project Reference</label><input type="text" id="projRef" readonly style="color:#666;"></div>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+            <label>Project Deadline (Date & Time)</label>
+            <input type="datetime-local" id="projDeadline">
+            <p style="font-size: 0.6rem; color: #555; margin-top: 5px; letter-spacing: 1px;">
+                Countdown timer starts immediately when you publish updates. Client sees days, hours, minutes, seconds.
+            </p>
+        </div>
+
+        <div class="grid-2" style="margin-top: 15px; margin-bottom: 15px;">
+            <div class="form-group">
+                <label>Active Project Currency</label>
+                <select id="editCurrencyMode" onchange="updateCurrencyLabels(this.value)">
+                    <option value="NGN">Naira (₦)</option>
+                    <option value="USD">US Dollar ($)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Active Evaluation Mode Type</label>
+                <select id="editEvalMode" onchange="toggleFormWorkspaces(this.value)">
+                    <option value="eval1">Evaluation 1 (Full Matrix Scheme)</option>
+                    <option value="eval2">Evaluation 2 (Universal Custom Single Bar)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:15px; margin-bottom:5px;">
+            <div class="form-group">
+                <label id="lblEditDepositPaid">Initial Deposit Paid (₦)</label>
+                <input type="number" id="editDepositPaid" placeholder="e.g. 150000" min="0">
+                <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">Amount client has paid so far.</p>
+            </div>
+            <div class="form-group">
+                <label id="lblEditTotalSum">Total Agreed Sum (₦)</label>
+                <input type="number" id="editTotalSum" placeholder="e.g. 500000" min="0">
+                <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">Full agreed project package fee.</p>
+            </div>
+        </div>
+
+        <div id="formWorkspaceEval1">
+            <h3>Architectural Sub-Stages</h3>
+            <div class="stage-grid">
+                <div class="stage-item"><label>Design Brief</label>
+                    <select id="stgBrief"><option value="pending">Pending</option><option value="started">Started</option><option value="completed">Completed</option></select></div>
+                <div class="stage-item"><label>Schematics</label>
+                    <select id="stgSchem"><option value="pending">Pending</option><option value="started">Started</option><option value="completed">Completed</option></select></div>
+                <div class="stage-item"><label>Coordination</label>
+                    <select id="stgCoord"><option value="pending">Pending</option><option value="started">Started</option><option value="completed">Completed</option></select></div>
+                <div class="stage-item"><label>Design Dev.</label>
+                    <select id="stgDev"><option value="pending">Pending</option><option value="started">Started</option><option value="completed">Completed</option></select></div>
+                <div class="stage-item"><label>Working Drawings</label>
+                    <select id="stgWork"><option value="pending">Pending</option><option value="started">Started</option><option value="completed">Completed</option></select></div>
+            </div>
+
+            <h3>Service Percentages</h3>
+            <div class="stage-grid">
+                <div class="stage-item"><label>Architecture %</label><input type="number" id="percArch" min="0" max="100"></div>
+                <div class="stage-item"><label>3D Vis %</label><input type="number" id="percVis" min="0" max="100"></div>
+                <div class="stage-item"><label>QS %</label><input type="number" id="percQS" min="0" max="100"></div>
+                <div class="stage-item"><label>Permit %</label><input type="number" id="percPermit" min="0" max="100"></div>
+            </div>
+        </div>
+
+        <div id="formWorkspaceEval2" style="display: none;">
+            <h3>Evaluation 2: Single Metric Customization</h3>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Custom Tracker Heading Label Title</label>
+                    <input type="text" id="eval2Heading" placeholder="e.g., General Site Mobilization & Substructure Construction">
+                </div>
+                <div class="form-group">
+                    <label>Tracker Progress Percentage Value (%)</label>
+                    <input type="number" id="eval2Percent" value="0" min="0" max="100">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-action" onclick="updateProject()" style="margin-top:25px;">Publish Updates to Client</button>
+    </div>
+</div>
+    <!-- ── SUBMISSION HUB MANAGER ───────────────────────────────────── -->
+    <div class="section-card" style="border-top-color: var(--gold);">
+        <h2>Submission Hub Manager</h2>
+        <p style="font-size: 0.75rem; color: #666; margin-bottom: 20px;">
+            Select a project then add Drive links. Toggle locked/released to control client visibility.
+        </p>
+
+        <div class="form-group">
+            <label>Select Project</label>
+            <select id="fileProjectSelector" onchange="loadProjectFiles()">
+                <option value="">-- Select Project --</option>
+            </select>
+        </div>
+
+        <div id="fileManager" style="display:none;">
+            <h3>Add New File</h3>
+            <div class="file-row">
+                <div>
+                    <label>Stage Label</label>
+                    <select id="newFileStage">
+                        <option value="Schematics & Conceptual">Schematics & Conceptual</option>
+                        <option value="Consultant Coordination">Consultant Coordination</option>
+                        <option value="Design Development">Design Development</option>
+                        <option value="Working Drawings">Working Drawings</option>
+                        <option value="Finalization">Finalization</option>
+                        <option value="Permit Documents">Permit Documents</option>
+                        <option value="BoQ & Cost Plan">BoQ & Cost Plan</option>
+                        <option value="Submission">Submission</option>
+                    </select>
+                </div>
+                <div>
+                    <label>File Name</label>
+                    <input type="text" id="newFileName" placeholder="e.g. Schematic Floor Plans Rev A">
+                </div>
+                <div>
+                    <label>File Type</label>
+                    <select id="newFileTag">
+                        <option value="PDF">PDF</option>
+                        <option value="DWG / PDF">DWG / PDF</option>
+                        <option value="XLSX">XLSX</option>
+                        <option value="ZIP">ZIP</option>
+                        <option value="MP4">MP4</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Release Status</label>
+                    <select id="newFileLocked">
+                        <option value="true">Locked (hidden)</option>
+                        <option value="false">Released (visible)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Google Drive Link</label>
+                <input type="url" id="newFileUrl" placeholder="https://drive.google.com/...">
+            </div>
+            <button class="btn-action" style="max-width:300px;" onclick="addProjectFile()">Add File to Hub</button>
+
+            <div class="existing-files">
+                <h3>Current Files for This Project</h3>
+                <div id="existingFilesList">
+                    <p style="font-size:0.75rem; color:#444;">No files added yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── PORTFOLIO UPLOAD ──────────────────────────────────────────── -->
+    <div class="section-card" style="border-top-color: #3498db;">
+        <h2>Upload to Portfolio</h2>
+        <div class="grid-3">
+            <div class="form-group"><label>Project Title</label><input type="text" id="pTitle"></div>
+            <div class="form-group"><label>Category</label>
+                <select id="pCat">
+                    <option value="Exterior">Exterior</option>
+                    <option value="Interior">Interior</option>
+                    <option value="Landscaping">Landscaping</option>
+                    <option value="Construction">Construction</option>
+                    <option value="BoQ Samples">BoQ Samples</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Layout</label>
+                <select id="pLayout">
+                    <option value="landscape">Landscape</option>
+                    <option value="portrait">Portrait</option>
+                    <option value="square">Square</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+    <label>Portfolio Image Source</label>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" id="pUrl" placeholder="Image URL will appear here..." style="flex: 1;">
+        
+        <label class="btn-action" style="width: auto; margin: 0; padding: 10px 15px; cursor: pointer; text-align: center; background-color: #2ecc71;">
+            📁 Upload to Dropbox
+            <input type="file" id="pFileInput" accept="image/*" style="display: none;" onchange="handleDirectUpload('pFileInput', 'pUrl')">
+        </label>
+    </div>
+    <small id="pUploadStatus" style="display: block; margin-top: 5px; color: #7f8c8d;"></small>
+</div>
+        <div class="form-group"><label>Description</label><textarea id="pDesc" rows="3"></textarea></div>
+        <button class="btn-action" onclick="uploadPortfolio()">Publish to Portfolio</button>
+    </div>
+
+    <!-- ── STORE PLAN UPLOAD ─────────────────────────────────────────── -->
+    <div class="section-card" style="border-top-color: #f1c40f;">
+        <h2>Upload New Plan to Store</h2>
+        <div class="grid-3">
+            <div class="form-group"><label>Plan Name</label><input type="text" id="sTitle"></div>
+            <div class="form-group"><label>Price</label><input type="text" id="sPrice"></div>
+            <div class="form-group"><label>Meta (e.g. 4 Beds • 350 SQM)</label><input type="text" id="sMeta"></div>
+        </div>
+        <div class="form-group"><label>Category</label><input type="text" id="sCategory" placeholder="e.g. Tropical Contemporary"></div>
+        <label style="margin-bottom:8px; display:block;">Gallery Image URLs (first = main/cover)</label>
+        <div class="form-group" style="margin-bottom: 10px; background: #fdfaf0; padding: 10px; border-radius: 4px; border: 1px dashed #f1c40f;">
+    <label style="font-weight: bold; color: #b7950b;">⚡ Quick Dropbox Gallery Uploader</label>
+    <div style="display: flex; gap: 10px; margin-top: 5px;">
+        <select id="targetStoreSlot" style="width: auto; padding: 8px;">
+            <option value="sImg1">Main / Cover Image</option>
+            <option value="sImg2">Image 2</option>
+            <option value="sImg3">Image 3</option>
+            <option value="sImg4">Image 4</option>
+            <option value="sImg5">Image 5</option>
+            <option value="sImg6">Image 6</option>
+        </select>
+        <label class="btn-action" style="width: auto; margin: 0; padding: 8px 15px; cursor: pointer; background-color: #f1c40f; color: #333;">
+            Select & Upload File
+            <input type="file" id="sFileInput" accept="image/*" style="display: none;" onchange="handleStoreGalleryUpload()">
+        </label>
+    </div>
+    <small id="sUploadStatus" style="display: block; margin-top: 5px; color: #7f8c8d;"></small>
+</div>
+        <div class="grid-3" style="margin-bottom:15px;">
+            <input type="text" id="sImg1" placeholder="Main Image URL">
+            <input type="text" id="sImg2" placeholder="Image 2">
+            <input type="text" id="sImg3" placeholder="Image 3">
+            <input type="text" id="sImg4" placeholder="Image 4">
+            <input type="text" id="sImg5" placeholder="Image 5">
+            <input type="text" id="sImg6" placeholder="Image 6">
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <input type="checkbox" id="sFeatured" style="width:auto;">
+            <label for="sFeatured" style="margin-bottom:0;">Feature on Homepage</label>
+        </div>
+        <button class="btn-action" onclick="uploadStore()">Publish to Concept Store</button>
+    </div>
+
+<div class="section-card" style="border-top-color: #9b59b6;">
+    <h2>Service Terms Manager</h2>
+    <p style="font-size: 0.75rem; color: #666; margin-bottom: 20px;">Review or customize the service terms assigned to the current project.</p>
+    <div class="form-group">
+        <label>Current Terms (Markdown/HTML Supported)</label>
+        <textarea id="adminTermsArea" style="height: 300px; font-size: 0.8rem; background: #050505;">
+[Intellectual Property Rights]
+All architectural drawings remain the intellectual property of ADA...
+        </textarea>
+    </div>
+    <button class="btn-action" style="background: #9b59b6; color: white;" onclick="updateProjectTerms()">Update Client Terms</button>
+</div>
+
+    <!-- ── REVIEW MODERATION ─────────────────────────────────────────── -->
+    <div class="section-card" style="border-top-color: var(--gold);">
+        <h2>Review Moderation Inbox</h2>
+        <div id="reviewInbox"><p style="font-size:0.8rem; color:#444;">Loading reviews...</p></div>
+    </div>
+
+</div>
+<script>
+// ─── SUPABASE INIT ────────────────────────────────────────────────────────────
+// TODO: Replace these two values with your actual Supabase credentials
+const SUPABASE_URL   = 'https://ofaxbduvnhscxvoakeax.supabase.co';   
+const SUPABASE_KEY   = 'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK'; 
+
+const { createClient } = supabase;
+let _db = null;
+try {
+    _db = createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch(e) {
+    console.warn('Supabase not connected — paste your credentials above');
+}
+
+// ─── HELPERS (INCLUDING DROPBOX COORD) ────────────────────────────────────────
+function generateToken() {
+    const year = new Date().getFullYear();
+    const rand = Math.floor(Math.random() * 9000) + 1000;
+    return `ADA-${year}-${rand}`;
+}
+
+function setVal(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.value = val ?? '';
+}
+
+// Fixed a tiny script fallback evaluation from your original code
+function getVal(id) {
+    return document.getElementById(id)?.value?.trim() ?? '';
+}
+
+// Reads file data and converts it for our Netlify background function
+function getBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+    });
+}
+
+// Handler for the Portfolio image upload
+async function handleDirectUpload(fileInputId, targetInputId) {
+    const fileInput = document.getElementById(fileInputId);
+    const targetInput = document.getElementById(targetInputId);
+    const statusText = document.getElementById('pUploadStatus');
+
+    if (!fileInput.files.length) return;
+    const file = fileInput.files[0];
+
+    statusText.innerText = "⏳ Uploading to Dropbox...";
+    statusText.style.color = "#3498db";
+
+    try {
+        const base64Data = await getBase64(file);
+        
+        const response = await fetch('/.netlify/functions/upload-to-dropbox', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: file.name, filedata: base64Data })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.url) {
+            targetInput.value = data.url; 
+            statusText.innerText = "✅ Uploaded successfully and link attached!";
+            statusText.style.color = "#2ecc71";
+        } else {
+            throw new Error(data.error || "Upload failed");
+        }
+    } catch (err) {
+        statusText.innerText = `❌ Error: ${err.message}`;
+        statusText.style.color = "#e74c3c";
+    }
+}
+
+// Handler for the Store Gallery bulk uploads
+async function handleStoreGalleryUpload() {
+    const fileInput = document.getElementById('sFileInput');
+    const targetSlotId = document.getElementById('targetStoreSlot').value;
+    const targetInput = document.getElementById(targetSlotId);
+    const statusText = document.getElementById('sUploadStatus');
+
+    if (!fileInput.files.length) return;
+    const file = fileInput.files[0];
+
+    statusText.innerText = `⏳ Uploading to ${document.getElementById('targetStoreSlot').selectedOptions[0].text}...`;
+    statusText.style.color = "#f1c40f";
+
+    try {
+        const base64Data = await getBase64(file);
+        
+        const response = await fetch('/.netlify/functions/upload-to-dropbox', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: file.name, filedata: base64Data })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.url) {
+            targetInput.value = data.url; 
+            statusText.innerText = `✅ Successfully mapped to ${document.getElementById('targetStoreSlot').selectedOptions[0].text}!`;
+            statusText.style.color = "#2ecc71";
+        } else {
+            throw new Error(data.error || "Upload failed");
+        }
+    } catch (err) {
+        statusText.innerText = `❌ Error: ${err.message}`;
+        statusText.style.color = "#e74c3c";
+    } finally {
+        fileInput.value = ""; 
+    }
+}
+
+// ─── LOAD PROJECTS INTO SELECTORS ────────────────────────────────────────────
+async function loadProjectSelectors() {
+    if (!_db) return;
+    const { data, error } = await _db
+        .from('projects')
+        .select('token, client_name, project_title')
+        .order('created_at', { ascending: false });
+
+    if (error || !data) return;
+
+    ['projectSelector', 'fileProjectSelector'].forEach(selId => {
+        const sel = document.getElementById(selId);
+        if (!sel) return;
+        sel.innerHTML = `<option value="">-- Select Project --</option>`;
+        data.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.token;
+            opt.textContent = `${p.client_name} — ${p.project_title} (${p.token})`;
+            sel.appendChild(opt);
+        });
+    });
+}
+
+// ─── CREATE NEW PROJECT (UPDATED TO SAVE URL TO DB) ──────────────────────────
+async function createNewProject() {
+    const token = generateToken();
+    const depositPaid = parseFloat(getVal('newDepositPaid')) || 0;
+    const totalSum    = parseFloat(getVal('newTotalSum'))    || 0;
+    
+    // 1. Generate the unique client link first so we can attach it to the database
+    const dashboardUrl = `${window.location.origin}/ada-tracker.html?token=${token}`;
+
+    const payload = {
+        token,
+        client_name:    getVal('newClientName'),
+        client_email:   getVal('newClientEmail'),
+        project_title:  getVal('newProjTitle'),
+        lead_architect: getVal('newLeadArch'),
+        deposit_paid:   depositPaid,
+        total_sum:      totalSum,
+        currency_mode:  getVal('newCurrencyMode'),
+        eval_mode:      getVal('newEvalMode'),
+        client_url:     dashboardUrl // 👈 Saves the exact link to your new column
+    };
+
+    if (!payload.client_name || !payload.project_title) {
+        alert('Please fill in client name and project title.');
+        return;
+    }
+
+    if (_db) {
+        const { error } = await _db.from('projects').insert([payload]);
+        if (error) { alert('Error: ' + error.message); return; }
+    }
+
+    // 2. Display success UI layout parameters safely to screen
+    const resultBox = document.getElementById('creationResult');
+    resultBox.style.display = 'block';
+    resultBox.innerHTML = `
+        <p>✓ Project initialized for <strong>${payload.client_name}</strong></p>
+        <p style="margin-top:10px;">Dashboard Token: <code>${token}</code></p>
+        <p style="margin-top:8px; font-size:0.75rem;">Client Link:</p>
+        <code style="font-size:0.7rem; word-break:break-all;">${dashboardUrl}</code>
+        <p style="margin-top:10px; font-size:0.7rem; color:#888;">Send this link to your client. They need no login — the token in the URL identifies their project.</p>
+    `;
+
+    loadProjectSelectors();
+}
+
+// ─── LOAD PROJECT DETAILS INTO EDITOR ────────────────────────────────────────
+async function loadProjectDetails() {
+    const token = getVal('projectSelector');
+    document.getElementById('editorFields').style.display = token ? 'block' : 'none';
+    if (!token || !_db) return;
+
+    const { data, error } = await _db
+        .from('projects')
+        .select('*')
+        .eq('token', token)
+        .single();
+
+    if (error || !data) return;
+
+    setVal('overallProgress',  data.overall_percent);
+    setVal('projRef',          data.token);
+    setVal('stgBrief',         data.stage_brief);
+    setVal('stgSchem',         data.stage_schematics);
+    setVal('stgCoord',         data.stage_coordination);
+    setVal('stgDev',           data.stage_dev);
+    setVal('stgWork',          data.stage_working);
+    setVal('percArch',         data.perc_architecture);
+    setVal('percVis',          data.perc_3d);
+    setVal('percQS',           data.perc_qs);
+    setVal('percPermit',       data.perc_permit);
+    setVal('editDepositPaid',  data.deposit_paid  ?? '');
+    setVal('editTotalSum',     data.total_sum     ?? '');
+
+// ─── LOAD PROJECT DETAILS INTO EDITOR ────────────────────────────────────────
+async function loadProjectDetails() {
+    const token = getVal('projectSelector');
+    document.getElementById('editorFields').style.display = token ? 'block' : 'none';
+    if (!token || !_db) return;
+
+    const { data, error } = await _db
+        .from('projects')
+        .select('*')
+        .eq('token', token)
+        .single();
+
+    if (error || !data) return;
+
+    setVal('overallProgress',  data.overall_percent);
+    setVal('projRef',          data.token);
+    setVal('stgBrief',         data.stage_brief);
+    setVal('stgSchem',         data.stage_schematics);
+    setVal('stgCoord',         data.stage_coordination);
+    setVal('stgDev',           data.stage_dev);
+    setVal('stgWork',          data.stage_working);
+    setVal('percArch',         data.perc_architecture);
+    setVal('percVis',          data.perc_3d);
+    setVal('percQS',           data.perc_qs);
+    setVal('percPermit',       data.perc_permit);
+    setVal('editDepositPaid',  data.deposit_paid  ?? '');
+    setVal('editTotalSum',     data.total_sum     ?? '');
+
+    if (data.deadline) {
+        const dt = new Date(data.deadline);
+        const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000)
+            .toISOString().slice(0, 16);
+        setVal('projDeadline', local);
+
+        document.getElementById('editRevisionCount').value = data.revision_count || 0;
+    }
+
+    if (data.deadline) {
+        const dt = new Date(data.deadline);
+        const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000)
+            .toISOString().slice(0, 16);
+        setVal('projDeadline', local);
+    }
+
+    // --- EVALUATION & CURRENCY LAYOUT ENGINE TRIGGERS ---
+    const activeCurrency = data.currency_mode || 'NGN';
+    const activeEvalMode = data.eval_mode || 'eval1';
+
+    document.getElementById('editCurrencyMode').value = activeCurrency;
+    document.getElementById('editEvalMode').value = activeEvalMode;
+
+    document.getElementById('eval2Heading').value = data.eval2_heading || '';
+    document.getElementById('eval2Percent').value = data.eval2_percent || 0;
+
+    updateCurrencyLabels(activeCurrency);
+    toggleFormWorkspaces(activeEvalMode);
+}
+    // --- ADD THIS INSIDE loadProjectDetails() ---
+const activeCurrency = data.currency_mode || 'NGN';
+const activeEvalMode = data.eval_mode || 'eval1';
+
+// Set the dropdown selections to match the loaded project
+document.getElementById('editCurrencyMode').value = activeCurrency;
+document.getElementById('editEvalMode').value = activeEvalMode;
+
+// Populate Evaluation 2 inputs if they exist in the database
+document.getElementById('eval2Heading').value = data.eval2_heading || '';
+document.getElementById('eval2Percent').value = data.eval2_percent || 0;
+
+// RUN THE ENGINES IMMEDIATELY TO UPDATE THE SIGN AND VIEW
+updateCurrencyLabels(activeCurrency);
+toggleFormWorkspaces(activeEvalMode);
+}
+
+// ─── UPDATE PROJECT ───────────────────────────────────────────────────────────
+async function updateProject() {
+    const token = getVal('projectSelector');
+    if (!token) { alert('Select a project first.'); return; }
+
+    const payload = {
+        overall_percent:    parseInt(getVal('overallProgress')) || 0,
+        revision_count:     parseInt(document.getElementById('editRevisionCount').value)
+        stage_brief:        getVal('stgBrief'),
+        stage_schematics:   getVal('stgSchem'),
+        stage_coordination: getVal('stgCoord'),
+        stage_dev:          getVal('stgDev'),
+        stage_working:      getVal('stgWork'),
+        perc_architecture:  parseInt(getVal('percArch')) || 0,
+        perc_3d:            parseInt(getVal('percVis'))  || 0,
+        perc_qs:            parseInt(getVal('percQS'))   || 0,
+        perc_permit:        parseInt(getVal('percPermit'))|| 0,
+        deadline:           getVal('projDeadline') || null,
+        deposit_paid:       parseFloat(getVal('editDepositPaid')) || 0,
+        total_sum:          parseFloat(getVal('editTotalSum'))    || 0
+    };
+
+    if (!_db) { alert('Supabase not connected.'); return; }
+
+    const { error } = await _db
+        .from('projects')
+        .update(payload)
+        .eq('token', token);
+
+    if (error) alert('Error: ' + error.message);
+    else alert('✓ Client dashboard updated successfully.');
+}
+
+// ─── SUBMISSION HUB: LOAD FILES ──────────────────────────────────────────────
+async function loadProjectFiles() {
+    const token = getVal('fileProjectSelector');
+    document.getElementById('fileManager').style.display = token ? 'block' : 'none';
+    if (!token || !_db) return;
+
+    const { data, error } = await _db
+        .from('project_files')
+        .select('*')
+        .eq('project_token', token)
+        .order('created_at', { ascending: true });
+
+    const container = document.getElementById('existingFilesList');
+
+    if (error || !data || data.length === 0) {
+        container.innerHTML = '<p style="font-size:0.75rem; color:#444;">No files added yet.</p>';
+        return;
+    }
+
+    container.innerHTML = data.map(f => `
+        <div class="existing-file-item">
+            <div>
+                <div style="font-size:0.8rem; margin-bottom:3px;">${f.file_name}</div>
+                <div style="font-size:0.6rem; color:#666;">${f.stage_label} · ${f.file_tag} · ${f.released_date || 'No date'}</div>
+            </div>
+            <div class="file-actions">
+                <span class="file-status-badge ${f.locked ? 'badge-locked' : 'badge-released'}">
+                    ${f.locked ? '🔒 Locked' : '✓ Released'}
+                </span>
+                <button class="btn-small" onclick="toggleFileLock('${f.id}', ${f.locked})">
+                    ${f.locked ? 'Release' : 'Lock'}
+                </button>
+                <button class="btn-small btn-remove" onclick="deleteFile('${f.id}')">Remove</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ─── SUBMISSION HUB: ADD FILE ────────────────────────────────────────────────
+async function addProjectFile() {
+    const token = getVal('fileProjectSelector');
+    if (!token) { alert('Select a project first.'); return; }
+
+    const name = getVal('newFileName');
+    const url  = getVal('newFileUrl');
+    if (!name) { alert('Please enter a file name.'); return; }
+
+    const payload = {
+        project_token:  token,
+        stage_label:    getVal('newFileStage'),
+        file_name:      name,
+        file_tag:       getVal('newFileTag'),
+        drive_url:      url,
+        locked:         getVal('newFileLocked') === 'true',
+        released_date:  new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })
+    };
+
+    if (!_db) { alert('Supabase not connected.'); return; }
+
+    const { error } = await _db.from('project_files').insert([payload]);
+    if (error) { alert('Error: ' + error.message); return; }
+
+    setVal('newFileName', '');
+    setVal('newFileUrl', '');
+
+    alert('✓ File added to client hub.');
+    loadProjectFiles();
+}
+
+// ─── SUBMISSION HUB: TOGGLE LOCK ─────────────────────────────────────────────
+async function toggleFileLock(fileId, currentLocked) {
+    if (!_db) return;
+    const { error } = await _db
+        .from('project_files')
+        .update({ locked: !currentLocked })
+        .eq('id', fileId);
+
+    if (error) alert('Error: ' + error.message);
+    else loadProjectFiles();
+}
+
+// ─── SUBMISSION HUB: DELETE FILE ─────────────────────────────────────────────
+async function deleteFile(fileId) {
+    if (!confirm('Remove this file from the client hub?')) return;
+    if (!_db) return;
+    const { error } = await _db
+        .from('project_files')
+        .delete()
+        .eq('id', fileId);
+
+    if (error) alert('Error: ' + error.message);
+    else loadProjectFiles();
+}
+
+// ─── PORTFOLIO UPLOAD ─────────────────────────────────────────────────────────
+async function uploadPortfolio() {
+    const payload = {
+        title:       getVal('pTitle'),
+        category:    getVal('pCat'),
+        layout:      getVal('pLayout'),
+        image_url:   getVal('pUrl'),
+        description: getVal('pDesc')
+    };
+    if (!payload.title || !payload.image_url) { alert('Title and image URL required.'); return; }
+    if (!_db) { alert('Supabase not connected.'); return; }
+
+    const { error } = await _db.from('portfolio').insert([payload]);
+    if (error) alert('Error: ' + error.message);
+    else {
+        alert('✓ Published to portfolio.');
+        ['pTitle','pUrl','pDesc'].forEach(id => setVal(id, ''));
+        const pStatus = document.getElementById('pUploadStatus');
+        if (pStatus) pStatus.innerText = ""; // Clear file upload complete layout text
+    }
+}
+
+// ─── STORE UPLOAD (FIXED CLOSING SYNTAX SYNCHRONIZATION) ──────────────────────
+async function uploadStore() {
+    const images = [1,2,3,4,5,6]
+        .map(i => getVal(`sImg${i}`))
+        .filter(u => u);
+
+    if (!images.length) { alert('Add at least one image URL.'); return; }
+
+    const payload = {
+        title:       getVal('sTitle'),
+        price:       getVal('sPrice'),
+        meta:        getVal('sMeta'),
+        category:    getVal('sCategory'),
+        image_urls:  images,
+        main_image:  images[0],
+        is_featured: document.getElementById('sFeatured').checked
+    };
+
+    if (!payload.title) { alert('Plan name required.'); return; }
+    if (!_db) { alert('Supabase not connected.'); return; }
+
+    const { error } = await _db.from('plans').insert([payload]);
+    if (error) {
+        alert('Error: ' + error.message);
+    } else {
+        alert('✓ Plan published to store.');
+        ['sTitle','sPrice','sMeta','sCategory','sImg1','sImg2','sImg3','sImg4','sImg5','sImg6']
+            .forEach(id => setVal(id, ''));
+        document.getElementById('sFeatured').checked = false;
+        const sStatus = document.getElementById('sUploadStatus');
+        if (sStatus) sStatus.innerText = ""; // Clear background process status indicator text
+    }
+}
+
+async function updateProjectTerms() {
+    const token = getVal('projectSelector');
+    const newTerms = document.getElementById('adminTermsArea').value;
+    if (!token) { alert('Select a project first via the Update Active Project section above.'); return; }
+    if (!_db) { alert('Supabase not connected.'); return; }
+
+    const { error } = await _db
+        .from('projects')
+        .update({ service_terms: newTerms })
+        .eq('token', token);
+
+    if (error) alert('Update failed: ' + error.message);
+    else alert('✓ Service Terms updated for client.');
+}
+
+// ─── REVIEW MODERATION ────────────────────────────────────────────────────────
+async function loadPendingReviews() {
+    const inbox = document.getElementById('reviewInbox');
+    if (!inbox) return;
+    if (!_db) { inbox.innerHTML = '<p style="color:#444; font-size:0.75rem;">Supabase not connected.</p>'; return; }
+
+    const { data, error } = await _db
+        .from('reviews')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+        inbox.innerHTML = '<p style="font-size:0.8rem; color:#444;">No pending reviews.</p>';
+        return;
+    }
+
+    inbox.innerHTML = data.map(rev => `
+        <div class="review-card">
+            <p style="font-size:0.65rem; color:var(--gold); letter-spacing:1px;">${rev.client_name} · ${rev.project_token} · ${'★'.repeat(rev.rating)}</p>
+            <p style="margin:10px 0; font-style:italic; font-size:0.9rem;">"${rev.comment}"</p>
+            <div class="mod-btns">
+                <button class="btn-mod" style="background:var(--success);" onclick="moderateReview('${rev.id}','approved')">Approve</button>
+                <button class="btn-mod" style="background:var(--danger);"  onclick="moderateReview('${rev.id}','rejected')">Reject</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function moderateReview(id, status) {
+    if (!_db) return;
+    const { error } = await _db
+        .from('reviews')
+        .update({ status })
+        .eq('id', id);
+
+    if (error) alert('Error: ' + error.message);
+    else { alert(`Review ${status}.`); loadPendingReviews(); }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+    loadProjectSelectors();
+    loadPendingReviews();
+
+    // ✅ FIXED: Moved inside the DOM init block so the element is guaranteed to exist first
+    const newCurrencyDropdown = document.getElementById('newCurrencyMode');
+    if (newCurrencyDropdown) {
+        newCurrencyDropdown.addEventListener('change', function() {
+            const symbol = this.value === 'USD' ? '($)' : '(₦)';
+            // Targets the text labels inside "+ Initialize Client Dashboard"
+            document.querySelector("label[for='newDepositPaid']").innerText = `Initial Deposit Paid ${symbol}`;
+            document.querySelector("label[for='newTotalSum']").innerText = `Total Agreed Sum ${symbol}`;
+        });
+    }
+});
+
+// Switches visibility between Evaluation 1 and Evaluation 2 workspaces
+function toggleFormWorkspaces(mode) {
+    if (mode === 'eval2') {
+        document.getElementById('formWorkspaceEval1').style.display = 'none';
+        document.getElementById('formWorkspaceEval2').style.display = 'block';
+    } else {
+        document.getElementById('formWorkspaceEval1').style.display = 'block';
+        document.getElementById('formWorkspaceEval2').style.display = 'none';
+    }
+}
+
+// Swaps the (₦) text out for ($) dynamically so you don't have hardcoded signs
+function updateCurrencyLabels(currencyMode) {
+    const symbol = currencyMode === 'USD' ? '($)' : '(₦)';
+    document.getElementById('lblEditDepositPaid').innerText = `Initial Deposit Paid ${symbol}`;
+    document.getElementById('lblEditTotalSum').innerText = `Total Agreed Sum ${symbol}`;
+}
+</script>
+</body>
+</html>
