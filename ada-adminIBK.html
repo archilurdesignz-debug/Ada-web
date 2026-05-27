@@ -490,7 +490,6 @@ async function createNewProject() {
         deposit_paid:   depositPaid,
         total_sum:      totalSum,
         currency_mode:  getVal('newCurrencyMode'),
-        eval_mode:      getVal('newEvalMode'),
         client_url:     dashboardUrl
     };
 
@@ -517,20 +516,6 @@ async function createNewProject() {
     loadProjectSelectors();
 }
 
-// Spawns a custom roadmap input block using native layout tokens
-function addTrackRow(heading = '', percent = 0) {
-    const container = document.getElementById('dynamicTracksContainer');
-    const row = document.createElement('div');
-    row.className = 'track-row';
-    row.style.cssText = 'display: grid; grid-template-columns: 1fr 150px auto; gap: 15px; align-items: center; background: rgba(0,0,0,0.2); padding: 10px; border: 1px solid #222; margin-bottom: 10px;';
-    
-    row.innerHTML = `
-        <div class="form-group" style="margin:0;"><input type="text" class="track-heading" value="${heading}" placeholder="Stage Workspace Label Title"></div>
-        <div class="form-group" style="margin:0;"><input type="number" class="track-percent" value="${percent}" min="0" max="100" placeholder="%"></div>
-        <button type="button" class="btn-delete-track" onclick="this.parentElement.remove()" style="background: var(--danger); color: white; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-transform: uppercase; font-size: 0.7rem;">Remove</button>
-    `;
-    container.appendChild(row);
-}
 // ─── LOAD PROJECT DETAILS INTO EDITOR ────────────────────────────────────────
 async function loadProjectDetails() {
     const token = getVal('projectSelector');
@@ -849,16 +834,6 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
-function toggleFormWorkspaces(mode) {
-    if (mode === 'eval2') {
-        document.getElementById('formWorkspaceEval1').style.display = 'none';
-        document.getElementById('formWorkspaceEval2').style.display = 'block';
-    } else {
-        document.getElementById('formWorkspaceEval1').style.display = 'block';
-        document.getElementById('formWorkspaceEval2').style.display = 'none';
-    }
-}
 
 function updateCurrencyLabels(currencyMode) {
     const symbol = currencyMode === 'USD' ? '($)' : '(₦)';
