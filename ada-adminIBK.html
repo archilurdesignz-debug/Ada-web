@@ -59,23 +59,14 @@
         </div>
         <div class="form-group"><label>Lead Architect</label><input type="text" id="newLeadArch" value="Arc. Ibukunoluwa"></div>
         
-        <div class="grid-2" style="margin-top: 15px;">
-            <div class="form-group">
+                  <div class="form-group">
                 <label>Currency Option</label>
                 <select id="newCurrencyMode">
                     <option value="NGN">Naira (₦)</option>
                     <option value="USD">US Dollar ($)</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label>Evaluation Architecture Protocol</label>
-                <select id="newEvalMode" onchange="toggleFormWorkspaces(this.value)">
-                    <option value="eval1">Evaluation 1 (Full Matrix Scheme)</option>
-                    <option value="eval2">Evaluation 2 (Universal Custom Single Bar)</option>
-                </select>
-            </div>
-        </div>
-        
+               
         <div class="grid-2" style="margin-top:10px;">
             <div class="form-group">
                 <label for="newDepositPaid">Initial Deposit Paid (₦)</label>
@@ -103,16 +94,11 @@
         
         <div id="editorFields" style="display:none;">
             <div class="grid-3">
-                <div class="form-group"><label>Overall Completion (%)</label><input type="number" id="overallProgress" min="0" max="100"></div>
-                <div class="form-group">
-                    <label>Current Revision Count</label>
-                    <select id="editRevisionCount">
-                        <option value="0">0 Revisions Used</option>
-                        <option value="1">1 Revision Used</option>
-                        <option value="2">2 Revisions Used</option>
-                        <option value="3">3 Revisions Used</option>
-                    </select>
-                </div>
+          <div class="form-group">
+    <label for="editRevisionCount">Design Revision Count</label>
+    <input type="number" id="editRevisionCount" placeholder="0" min="0" value="0">
+    <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">Current active design iteration phases.</p>
+</div>
                 <div class="form-group"><label>Project Reference</label><input type="text" id="projRef" readonly style="color:#666;"></div>
             </div>
 
@@ -124,79 +110,50 @@
                 </p>
             </div>
 
-            <div class="grid-2" style="margin-top: 15px; margin-bottom: 15px;">
+<div class="grid-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 15px; margin-bottom: 25px;">
+                
                 <div class="form-group">
                     <label>Active Project Currency</label>
                     <select id="editCurrencyMode" onchange="updateCurrencyLabels(this.value)">
                         <option value="NGN">Naira (₦)</option>
                         <option value="USD">US Dollar ($)</option>
                     </select>
+                    <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">Base display currency.</p>
                 </div>
-                <div class="form-group">
-                    <label>Active Evaluation Mode Type</label>
-                    <select id="editEvalMode" onchange="toggleFormWorkspaces(this.value)">
-                        <option value="eval1">Evaluation 1 (Full Matrix Scheme)</option>
-                        <option value="eval2">Evaluation 2 (Universal Custom Single Bar)</option>
-                    </select>
-                </div>
-            </div>
 
-            <div class="grid-2" style="margin-top:15px; margin-bottom:5px;">
                 <div class="form-group">
                     <label id="lblEditDepositPaid">Initial Deposit Paid (₦)</label>
                     <input type="number" id="editDepositPaid" placeholder="e.g. 150000" min="0">
                     <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">Amount client has paid so far.</p>
                 </div>
+                
                 <div class="form-group">
                     <label id="lblEditTotalSum">Total Agreed Sum (₦)</label>
                     <input type="number" id="editTotalSum" placeholder="e.g. 500000" min="0">
                     <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">Full agreed project package fee.</p>
                 </div>
+
             </div>
 
-            <div id="formWorkspaceEval1">
-                <h3>Architectural Sub-Stages</h3>
-                <div class="stage-grid">
-                    <div class="stage-item"><label>Design Brief</label>
-                        <select id="stgBrief"><option value="pending">Pending</option><option value="started">Started</option><option value="completed">Completed</option></select></div>
-                    <div class="stage-item"><label>Schematics</label>
-                        <select id="stgSchem"><option value="pending">Pending</option><option value="started">Started</option><option value="completed">Completed</option></select></div>
-                    <div class="stage-item"><label>Coordination</label>
-                        <select id="stgCoord"><option value="pending">Pending</option><option value="started">Started</option><option value="completed">Completed</option></select></div>
-                    <div class="stage-item"><label>Design Dev.</label>
-                        <select id="stgDev"><option value="pending">Pending</option><option value="started">Started</option><option value="completed">Completed</option></select></div>
-                    <div class="stage-item"><label>Working Drawings</label>
-                        <select id="stgWork"><option value="pending">Pending</option><option value="started">Started</option><option value="completed">Completed</option></select></div>
+            <h3 style="display: block; margin-top: 25px; margin-bottom: 15px;">Project Evaluation Roadmap Modules</h3>
+            
+            <div id="dynamicTracksContainer" style="display: block; margin-bottom: 15px;">
                 </div>
-
-                <h3>Service Percentages</h3>
-                <div class="stage-grid">
-                    <div class="stage-item"><label>Architecture %</label><input type="number" id="percArch" min="0" max="100"></div>
-                    <div class="stage-item"><label>3D Vis %</label><input type="number" id="percVis" min="0" max="100"></div>
-                    <div class="stage-item"><label>QS %</label><input type="number" id="percQS" min="0" max="100"></div>
-                    <div class="stage-item"><label>Permit %</label><input type="number" id="percPermit" min="0" max="100"></div>
-                </div>
+            
+            <div style="display: block; margin-bottom: 35px;">
+                <button type="button" class="btn-small" onclick="addTrackRow('', 0)" style="background: var(--success); color: white;">
+                    + Add Custom Progress Track
+                </button>
             </div>
-
-            <div id="formWorkspaceEval2" style="display: none;">
-                <h3>Evaluation 2: Single Metric Customization</h3>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Custom Tracker Heading Label Title</label>
-                        <input type="text" id="eval2Heading" placeholder="e.g., General Site Mobilization & Substructure Construction">
-                    </div>
-                    <div class="form-group">
-                        <label>Tracker Progress Percentage Value (%)</label>
-                        <input type="number" id="eval2Percent" value="0" min="0" max="100">
-                    </div>
-                </div>
+            <div style="display: block;">
+                <button class="btn-action" onclick="updateProject()" style="margin-top: 0; width: 100%;">
+                    Publish Updates to Client
+                </button>
             </div>
-
-            <button class="btn-action" onclick="updateProject()" style="margin-top:25px;">Publish Updates to Client</button>
         </div>
-    </div>
+        </div>
 
-    <div class="section-card" style="border-top-color: var(--gold);">
+            <div class="section-card" style="border-top-color: var(--gold);">
         <h2>Submission Hub Manager</h2>
         <p style="font-size: 0.75rem; color: #666; margin-bottom: 20px;">
             Select a project then add Drive links. Toggle locked/released to control client visibility.
@@ -215,13 +172,6 @@
                 <div>
                     <label>Stage Label</label>
                     <select id="newFileStage">
-                        <option value="Schematics & Conceptual">Schematics & Conceptual</option>
-                        <option value="Consultant Coordination">Consultant Coordination</option>
-                        <option value="Design Development">Design Development</option>
-                        <option value="Working Drawings">Working Drawings</option>
-                        <option value="Finalization">Finalization</option>
-                        <option value="Permit Documents">Permit Documents</option>
-                        <option value="BoQ & Cost Plan">BoQ & Cost Plan</option>
                         <option value="Submission">Submission</option>
                     </select>
                 </div>
@@ -237,6 +187,7 @@
                         <option value="XLSX">XLSX</option>
                         <option value="ZIP">ZIP</option>
                         <option value="MP4">MP4</option>
+                        <option value="OTHERS">OTHERS</option>
                     </select>
                 </div>
                 <div>
@@ -261,7 +212,6 @@
             </div>
         </div>
     </div>
-
     <div class="section-card" style="border-top-color: #3498db;">
         <h2>Upload to Portfolio</h2>
         <div class="grid-3">
@@ -472,6 +422,34 @@ async function handleStoreGalleryUpload() {
     }
 }
 
+// PASTE THE NEW FUNCTION RIGHT HERE 👇
+// ==========================================
+function addTrackRow(label = '', progress = 0) {
+    const container = document.getElementById('dynamicTracksContainer');
+    if (!container) return;
+
+    const rowId = 'track_' + Math.random().toString(36).substr(2, 9);
+    const rowHTML = `
+        <div id="${rowId}" class="file-row" style="grid-template-columns: 2fr 1fr auto; margin-bottom: 10px; align-items: center;">
+            <div>
+                <label>Track Module Label</label>
+                <input type="text" class="track-label" value="${label}" placeholder="e.g. Substructure & Foundation Work">
+            </div>
+            <div>
+                <label>Progress (%)</label>
+                <input type="number" class="track-percent" value="${progress}" min="0" max="100" placeholder="0">
+            </div>
+            <div>
+                <button type="button" class="btn-small btn-remove" onclick="document.getElementById('${rowId}').remove()" style="margin-top: 18px;">
+                    Remove
+                </button>
+            </div>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', rowHTML);
+}
+// ==========================================
+
 // ─── LOAD PROJECTS INTO SELECTORS ────────────────────────────────────────────
 async function loadProjectSelectors() {
     if (!_db) return;
@@ -539,6 +517,20 @@ async function createNewProject() {
     loadProjectSelectors();
 }
 
+// Spawns a custom roadmap input block using native layout tokens
+function addTrackRow(heading = '', percent = 0) {
+    const container = document.getElementById('dynamicTracksContainer');
+    const row = document.createElement('div');
+    row.className = 'track-row';
+    row.style.cssText = 'display: grid; grid-template-columns: 1fr 150px auto; gap: 15px; align-items: center; background: rgba(0,0,0,0.2); padding: 10px; border: 1px solid #222; margin-bottom: 10px;';
+    
+    row.innerHTML = `
+        <div class="form-group" style="margin:0;"><input type="text" class="track-heading" value="${heading}" placeholder="Stage Workspace Label Title"></div>
+        <div class="form-group" style="margin:0;"><input type="number" class="track-percent" value="${percent}" min="0" max="100" placeholder="%"></div>
+        <button type="button" class="btn-delete-track" onclick="this.parentElement.remove()" style="background: var(--danger); color: white; border: none; padding: 10px; cursor: pointer; font-weight: 600; text-transform: uppercase; font-size: 0.7rem;">Remove</button>
+    `;
+    container.appendChild(row);
+}
 // ─── LOAD PROJECT DETAILS INTO EDITOR ────────────────────────────────────────
 async function loadProjectDetails() {
     const token = getVal('projectSelector');
@@ -553,22 +545,16 @@ async function loadProjectDetails() {
 
     if (error || !data) return;
 
+    // Standard Project Parameters
     setVal('overallProgress',  data.overall_percent);
     setVal('projRef',          data.token);
-    setVal('stgBrief',         data.stage_brief);
-    setVal('stgSchem',         data.stage_schematics);
-    setVal('stgCoord',         data.stage_coordination);
-    setVal('stgDev',           data.stage_dev);
-    setVal('stgWork',          data.stage_working);
-    setVal('percArch',         data.perc_architecture);
-    setVal('percVis',          data.perc_3d);
-    setVal('percQS',           data.perc_qs);
-    setVal('percPermit',       data.perc_permit);
     setVal('editDepositPaid',  data.deposit_paid  ?? '');
     setVal('editTotalSum',     data.total_sum     ?? '');
     
+    // Revision Count Field
     document.getElementById('editRevisionCount').value = data.revision_count || 0;
 
+    // Timeline Configuration Handling
     if (data.deadline) {
         const dt = new Date(data.deadline);
         const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000)
@@ -576,68 +562,74 @@ async function loadProjectDetails() {
         setVal('projDeadline', local);
     }
 
+    // Currency Setting Application
     const activeCurrency = data.currency_mode || 'NGN';
-    const activeEvalMode = data.eval_mode || 'eval1';
-
     document.getElementById('editCurrencyMode').value = activeCurrency;
-    document.getElementById('editEvalMode').value = activeEvalMode;
-
-    document.getElementById('eval2Heading').value = data.eval2_heading || '';
-    document.getElementById('eval2Percent').value = data.eval2_percent || 0;
-
     updateCurrencyLabels(activeCurrency);
-    toggleFormWorkspaces(activeEvalMode);
-}
 
-// ─── UPDATE PROJECT ───────────────────────────────────────────────────────────
+    // ─── DYNAMIC PROGRESS TRACKS PIPELINE ────────────────────────────────────
+    const container = document.getElementById('dynamicTracksContainer');
+    if (container) {
+        container.innerHTML = ''; // Flush previous tracking components from view
+        
+        const tracks = data.custom_tracks || [];
+        
+        if (tracks.length === 0) {
+            // Drop a fresh placeholder row if it's a newly initialized project
+            addTrackRow('Architectural Plan Schemes', 0);
+        } else {
+            // Hydrate every custom progress bar stored in the database row
+            tracks.forEach(t => {
+                addTrackRow(t.heading, t.percent);
+            });
+        }
+    }
+}
+// ─── UPDATE PROJECT (INTEGRATED FOR MULTI-TRACKS ARCHITECTURE) ───────────────
 async function updateProject() {
     const token = getVal('projectSelector');
     if (!token) { alert('Select a project first.'); return; }
 
-    const evalMode = getVal('editEvalMode');
+    // 1. Scrape and compile all active roadmap rows from the UI screen
+    const trackRows = document.querySelectorAll('#dynamicTracksContainer > div');
+    const customTracksCompiledArray = [];
+    
+    trackRows.forEach(row => {
+        const heading = row.querySelector('.track-label')?.value.trim();
+        const percent = parseInt(row.querySelector('.track-percent')?.value) || 0;
+        if (heading) {
+            customTracksCompiledArray.push({ heading: heading, percent: percent });
+        }
+    });
 
+    // 2. Build the unified database payload mapping directly to your JSONB column
     const payload = {
         overall_percent:    parseInt(getVal('overallProgress')) || 0,
+        
+        // 2. THIS IS WHERE THE COLON LINE GOES (Reads input box value -> structures for payload)
         revision_count:     parseInt(document.getElementById('editRevisionCount').value) || 0,
+        
         deadline:           getVal('projDeadline') || null,
         deposit_paid:       parseFloat(getVal('editDepositPaid')) || 0,
         total_sum:          parseFloat(getVal('editTotalSum'))    || 0,
         currency_mode:      getVal('editCurrencyMode'),
-        eval_mode:          evalMode
+        custom_tracks:      customTracksCompiledArray 
     };
-
-    if (evalMode === 'eval2') {
-        payload.eval2_heading = getVal('eval2Heading');
-        payload.eval2_percent = parseInt(getVal('eval2Percent')) || 0;
-        
-        payload.stage_brief = 'pending'; payload.stage_schematics = 'pending'; 
-        payload.stage_coordination = 'pending'; payload.stage_dev = 'pending'; payload.stage_working = 'pending';
-        payload.perc_architecture = 0; payload.perc_3d = 0; payload.perc_qs = 0; payload.perc_permit = 0;
-    } else {
-        payload.stage_brief =        getVal('stgBrief');
-        payload.stage_schematics =   getVal('stgSchem');
-        payload.stage_coordination = getVal('stgCoord');
-        payload.stage_dev =          getVal('stgDev');
-        payload.stage_working =      getVal('stgWork');
-        payload.perc_architecture =  parseInt(getVal('percArch')) || 0;
-        payload.perc_3d =            parseInt(getVal('percVis'))  || 0;
-        payload.perc_qs =            parseInt(getVal('percQS'))   || 0;
-        payload.perc_permit =        parseInt(getVal('percPermit'))|| 0;
-        payload.eval2_heading =      '';
-        payload.eval2_percent =      0;
-    }
 
     if (!_db) { alert('Supabase not connected.'); return; }
 
+    // 3. Execute the database live synchronization call via the API reference token
     const { error } = await _db
         .from('projects')
         .update(payload)
         .eq('token', token);
 
-    if (error) alert('Error: ' + error.message);
-    else alert('✓ Client dashboard updated successfully.');
+    if (error) {
+        alert('Error: ' + error.message);
+    } else {
+        alert('✓ Client dashboard updated successfully.');
+    }
 }
-
 // ─── SUBMISSION HUB: LOAD FILES ──────────────────────────────────────────────
 async function loadProjectFiles() {
     const token = getVal('fileProjectSelector');
