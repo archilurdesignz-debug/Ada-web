@@ -471,32 +471,66 @@
             .payment-band { grid-template-columns: 1fr; }
             .tracker-grid { grid-template-columns: 1fr; }
         }
-        /* Base style for the countdown container (optional, assuming a dark background so white text shows) */
+/* The main container box */
+.countdown-bar {
+    background-color: #1a1a1a; /* Your black box background */
+    padding: 20px;
+    border-radius: 8px;
+    
+    /* Triple the existing width layout space */
+    width: 100%; 
+    max-width: 600px; /* Adjust this max-width to match 3x your original compact width */
+    margin: 0 auto;   /* Centers the box on the page */
+}
+
+/* Label above the countdown */
+.countdown-label {
+    display: block;
+    color: #ffffff;
+    margin-bottom: 15px;
+    font-size: 24px; /* Scaled up by 1.5x */
+    text-align: center;
+}
+
+/* The wrapper holding the time units */
 .countdown-units {
     display: flex;
-    gap: 15px;
-    background-color: #1a1a1a; /* Example background to see white text clearly */
-    padding: 10px;
+    justify-content: space-between; /* Spreads the units evenly across the box */
+    gap: 20px;
 }
 
-/* Default color for Days, Hours, and Minutes digits */
+/* Targets each individual column (Days, Hours, Mins, Secs) */
+.countdown-units > div {
+    flex: 1;            /* Forces each unit to grow equally and fill the wider black box */
+    text-align: center; /* Centers the text inside its allocated wider space */
+}
+
+/* Base style for Days, Hours, and Minutes digits (Scaled 1.5x bigger) */
 #cdDays, #cdHours, #cdMins {
+    display: block;
     color: #ffffff; /* White */
+    font-size: 48px; /* Scaled up by 1.5x from a standard ~32px */
     font-weight: bold;
+    line-height: 1;
 }
 
-/* Specific color for the Seconds digits */
+/* Specific color for the Seconds digits (Scaled 1.5x bigger) */
 #cdSecs {
+    display: block;
     color: #ff3333; /* Red */
+    font-size: 48px; /* Scaled up by 1.5x */
     font-weight: bold;
+    line-height: 1;
 }
 
-/* Optional: Style for the labels (Days, Hours, etc.) under the numbers */
+/* Text labels under the numbers (Days, Hours, etc. - Scaled 1.5x bigger) */
 .countdown-units label {
     display: block;
-    color: #aaaaaa; /* Light gray for readability */
-    font-size: 12px;
-    text-align: center;
+    color: #aaaaaa; 
+    font-size: 18px; /* Scaled up by 1.5x from a standard 12px */
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
     </style>
 </head>
