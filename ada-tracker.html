@@ -825,10 +825,18 @@ function showPanel(name, el) {
     if (name === 'hub') renderHub();
 }
 
-// ─── FORMATTERS ───────────────────────────────────────────────────────────────
-function formatNaira(val) {
+// ─── CURRENCY FORMATTER ───────────────────────────────────────────────────────
+function formatCurrency(val, mode) {
     if (!val && val !== 0) return '—';
-    return '₦' + Number(val).toLocaleString('en-NG');
+    const amount = Number(val);
+    if (mode === 'USD') {
+        return '$' + amount.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+    // Default: Naira
+    return '₦' + amount.toLocaleString('en-NG');
 }
 
 // ─── STAGE HELPERS ────────────────────────────────────────────────────────────
@@ -860,16 +868,18 @@ function populateDashboard(d) {
     document.getElementById('totalPercentText').textContent  = `${d.overall_percent}%`;
     document.getElementById('leadArch').textContent          = d.lead_architect;
 
-    // Payment band
-    const deposit = d.deposit_paid;
-    const total   = d.total_sum;
-    if (deposit || total) {
-        const balance = (total || 0) - (deposit || 0);
-        document.getElementById('depositDisplay').textContent = formatNaira(deposit);
-        document.getElementById('totalSumDisplay').textContent = formatNaira(total);
-        document.getElementById('balanceDisplay').textContent  = formatNaira(balance > 0 ? balance : 0);
-        document.getElementById('paymentBand').style.display = 'grid';
-    }
+  // Payment band
+const deposit  = d.deposit_paid;
+const total    = d.total_sum;
+const currency = d.currency_mode || 'NGN';   // ← reads from DB
+
+if (deposit || total) {
+    const balance = (total || 0) - (deposit || 0);
+    document.getElementById('depositDisplay').textContent  = formatCurrency(deposit, currency);
+    document.getElementById('totalSumDisplay').textContent = formatCurrency(total, currency);
+    document.getElementById('balanceDisplay').textContent  = formatCurrency(balance > 0 ? balance : 0, currency);
+    document.getElementById('paymentBand').style.display   = 'grid';
+}
 
     // ── CUSTOM TRACKS (replaces hardcoded perc_architecture etc.) ────────────
 const grid = document.getElementById('customTracksGrid');
@@ -1149,7 +1159,7 @@ function toggleRevisionNotice() {
     if (noticeBox.style.display === 'none') {
         noticeBox.innerHTML = `
             <strong>Revision Policy Notice:</strong> You have currently utilized 
-            <span style="color: var(--gold); font-weight: bold;">${currentCount}</span> 
+            <span style="color: var(--ink); font-weight: bold;">${currentCount}</span> 
             of 3 complimentary revision phases assigned to this project. Please note that upon reaching the maximum allocation of 3/3 revisions, any subsequent modification requests will require a formal project scope adjustment, incurring a 10% increment on the initial aggregate project sum. Furthermore, each approved revision extension request will automatically extend the contract delivery timeline by an additional three (3) business days.
         `;
         noticeBox.style.display = 'block';
