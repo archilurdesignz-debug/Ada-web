@@ -567,4 +567,372 @@ const badge = document.getElementById('lockStatusBadge');
 if (badge) {
     const locked = data.dashboard_locked;
     badge.textContent  = locked ? 'Status: LOCKED' : 'Status: OPEN';
-    badge.style.background = locked ? '#7d2e2e' : '#2e7
+    badge.style.background = locked ? '#7d2e2e' : '#2e7d52';
+    badge.style.color  = 'white';
+}
+
+    // Revision Count Field
+    document.getElementById('editRevisionCount').value = data.revision_count || 0;
+
+    // Currency Setting Application
+    const activeCurrency = data.currency_mode || 'NGN';
+    document.getElementById('editCurrencyMode').value = activeCurrency;
+    updateCurrencyLabels(activeCurrency);
+
+    // ─── DYNAMIC PROGRESS TRACKS PIPELINE ────────────────────────────────────
+    const container = document.getElementById('dynamicTracksContainer');
+    if (container) {
+        container.innerHTML = ''; 
+        
+        const tracks = data.custom_tracks || [];
+        
+        if (tracks.length === 0) {
+            addTrackRow('Architectural Plan Schemes', 0);
+        } else {
+            tracks.forEach(t => {
+                addTrackRow(t.heading, t.percent);
+            });
+        }
+    }
+}
+
+// ─── UPDATE PROJECT (INTEGRATED FOR MULTI-TRACKS ARCHITECTURE) ───────────────
+async function updateProject() {
+    const token = getVal('projectSelector');
+
+    if (!token) {
+        alert('Select a project first.');
+        return;
+    }
+
+    // Compile custom roadmap tracks
+    const trackRows = document.querySelectorAll('#dynamicTracksContainer > div');
+
+    const customTracksCompiledArray = [];
+
+    trackRows.forEach(row => {
+        const heading = row.querySelector('.track-label')?.value.trim();
+
+        const percent = parseInt(
+            row.querySelector('.track-percent')?.value
+        ) || 0;
+
+        if (heading) {
+            customTracksCompiledArray.push({
+                heading,
+                percent
+            });
+        }
+    });
+
+    // Final payload
+ const payload = {
+    overall_percent: parseInt(getVal('overallProgress')) || 0,
+
+    revision_count: parseInt(
+        document.getElementById('editRevisionCount').value
+    ) || 0,
+
+    deposit_paid: parseFloat(
+        getVal('editDepositPaid')
+    ) || 0,
+
+    total_sum: parseFloat(
+        getVal('editTotalSum')
+    ) || 0,
+
+    currency_mode: getVal('editCurrencyMode'),
+
+    custom_tracks: customTracksCompiledArray
+};
+    if (!_db) {
+    alert('Supabase not connected.');
+    return;
+}
+
+// DEBUG OUTPUT
+console.log("Submitting Payload:", payload);
+
+const { data, error } = await _db
+    .from('projects')
+    .update(payload)
+        .eq('token', token)
+        .select();
+
+    if (error) {
+        console.error(error);
+        alert('Error: ' + error.message);
+    } else {
+        console.log(data);
+        alert('✓ Client dashboard updated successfully.');
+    }
+}
+
+// ─── SUBMISSION HUB: LOAD FILES ──────────────────────────────────────────────
+async function loadProjectFiles() {
+    const token = getVal('fileProjectSelector');
+    document.getElementById('fileManager').style.display = token ? 'block' : 'none';
+    if (!token || !_db) return;
+
+    const { data, error } = await _db
+        .from('project_files')
+        .select('*')
+        .eq('project_token', token)
+        .order('created_at', { ascending: true });
+
+    const container = document.getElementById('existingFilesList');
+
+    if (error || !data || data.length === 0) {
+        container.innerHTML = '<p style="font-size:0.75rem; color:#444;">No files added yet.</p>';
+        return;
+    }
+
+    container.innerHTML = data.map(f => `
+        <div class="existing-file-item">
+            <div>
+                <div style="font-size:0.8rem; margin-bottom:3px;">${f.file_name}</div>
+                <div style="font-size:0.6rem; color:#666;">${f.stage_label} · ${f.file_tag} · ${f.released_date || 'No date'}</div>
+            </div>
+            <div class="file-actions">
+                <span class="file-status-badge ${f.locked ? 'badge-locked' : 'badge-released'}">
+                    ${f.locked ? '🔒 Locked' : '✓ Released'}
+                </span>
+                <button class="btn-small" onclick="toggleFileLock('${f.id}', ${f.locked})">
+                    ${f.locked ? 'Release' : 'Lock'}
+                </button>
+                <button class="btn-small btn-remove" onclick="deleteFile('${f.id}')">Remove</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ─── SUBMISSION HUB: ADD FILE ────────────────────────────────────────────────
+async function addProjectFile() {
+    const token = getVal('fileProjectSelector');
+    if (!token) { alert('Select a project first.'); return; }
+
+    const name = getVal('newFileName');
+    const url  = getVal('newFileUrl');
+    if (!name) { alert('Please enter a file name.'); return; }
+
+    const payload = {
+        project_token:  token,
+        stage_label:    getVal('newFileStage'),
+        file_name:      name,
+        file_tag:       getVal('newFileTag'),
+        drive_url:      url,
+        locked:         getVal('newFileLocked') === 'true',
+        released_date:  new Date().toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' })
+    };
+
+    if (!_db) { alert('Supabase not connected.'); return; }
+
+    const { error } = await _db.from('project_files').insert([payload]);
+    if (error) { alert('Error: ' + error.message); return; }
+
+    setVal('newFileName', '');
+    setVal('newFileUrl', '');
+
+    alert('✓ File added to client hub.');
+    loadProjectFiles();
+}
+
+// ─── SUBMISSION HUB: TOGGLE LOCK ─────────────────────────────────────────────
+async function toggleFileLock(fileId, currentLocked) {
+    if (!_db) return;
+    const { error } = await _db
+        .from('project_files')
+        .update({ locked: !currentLocked })
+        .eq('id', fileId);
+
+    if (error) alert('Error: ' + error.message);
+    else loadProjectFiles();
+}
+
+// ─── SUBMISSION HUB: DELETE FILE ─────────────────────────────────────────────
+async function deleteFile(fileId) {
+    if (!confirm('Remove this file from the client hub?')) return;
+    if (!_db) return;
+    const { error } = await _db
+        .from('project_files')
+        .delete()
+        .eq('id', fileId);
+
+    if (error) alert('Error: ' + error.message);
+    else loadProjectFiles();
+}
+
+// ─── PORTFOLIO UPLOAD ─────────────────────────────────────────────────────────
+async function uploadPortfolio() {
+    const payload = {
+        title:       getVal('pTitle'),
+        category:    getVal('pCat'),
+        layout:      getVal('pLayout'),
+        image_url:   getVal('pUrl'),
+        description: getVal('pDesc')
+    };
+    if (!payload.title || !payload.image_url) { alert('Title and image URL required.'); return; }
+    if (!_db) { alert('Supabase not connected.'); return; }
+
+    const { error } = await _db.from('portfolio').insert([payload]);
+    if (error) alert('Error: ' + error.message);
+    else {
+        alert('✓ Published to portfolio.');
+        ['pTitle','pUrl','pDesc'].forEach(id => setVal(id, ''));
+        const pStatus = document.getElementById('pUploadStatus');
+        if (pStatus) pStatus.innerText = ""; 
+    }
+}
+
+// ─── STORE UPLOAD ─────────────────────────────────────────────────────────────
+async function uploadStore() {
+    const images = [1,2,3,4,5,6]
+        .map(i => getVal(`sImg${i}`))
+        .filter(u => u);
+
+    if (!images.length) { alert('Add at least one image URL.'); return; }
+
+    const payload = {
+        title:       getVal('sTitle'),
+        price:       getVal('sPrice'),
+        meta:        getVal('sMeta'),
+        category:    getVal('sCategory'),
+        image_urls:  images,
+        main_image:  images[0],
+        is_featured: document.getElementById('sFeatured').checked
+    };
+
+    if (!payload.title) { alert('Plan name required.'); return; }
+    if (!_db) { alert('Supabase not connected.'); return; }
+
+    const { error } = await _db.from('plans').insert([payload]);
+    if (error) {
+        alert('Error: ' + error.message);
+    } else {
+        alert('✓ Plan published to store.');
+        ['sTitle','sPrice','sMeta','sCategory','sImg1','sImg2','sImg3','sImg4','sImg5','sImg6']
+            .forEach(id => setVal(id, ''));
+        document.getElementById('sFeatured').checked = false;
+        const sStatus = document.getElementById('sUploadStatus');
+        if (sStatus) sStatus.innerText = ""; 
+    }
+}
+
+async function updateProjectTerms() {
+    const token = getVal('projectSelector');
+    const newTerms = document.getElementById('adminTermsArea').value;
+    if (!token) { alert('Select a project first via the Update Active Project section above.'); return; }
+    if (!_db) { alert('Supabase not connected.'); return; }
+
+    const { error } = await _db
+        .from('projects')
+        .update({ service_terms: newTerms })
+        .eq('token', token);
+
+    if (error) alert('Update failed: ' + error.message);
+    else alert('✓ Service Terms updated for client.');
+}
+
+// ─── REVIEW MODERATION ────────────────────────────────────────────────────────
+async function loadPendingReviews() {
+    const inbox = document.getElementById('reviewInbox');
+    if (!inbox) return;
+    if (!_db) { inbox.innerHTML = '<p style="color:#444; font-size:0.75rem;">Supabase not connected.</p>'; return; }
+
+    const { data, error } = await _db
+        .from('reviews')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+        inbox.innerHTML = '<p style="font-size:0.8rem; color:#444;">No pending reviews.</p>';
+        return;
+    }
+
+    inbox.innerHTML = data.map(rev => `
+        <div class="review-card">
+            <p style="font-size:0.65rem; color:var(--gold); letter-spacing:1px;">${rev.client_name} · ${rev.project_token} · ${'★'.repeat(rev.rating)}</p>
+            <p style="margin:10px 0; font-style:italic; font-size:0.9rem;">"${rev.comment}"</p>
+            <div class="mod-btns">
+                <button class="btn-mod" style="background:var(--success);" onclick="moderateReview('${rev.id}','approved')">Approve</button>
+                <button class="btn-mod" style="background:var(--danger);"  onclick="moderateReview('${rev.id}','rejected')">Reject</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function moderateReview(id, status) {
+    if (!_db) return;
+    const { error } = await _db
+        .from('reviews')
+        .update({ status })
+        .eq('id', id);
+
+    if (error) alert('Error: ' + error.message);
+    else { alert(`Review ${status}.`); loadPendingReviews(); }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+    loadProjectSelectors();
+    loadPendingReviews();
+
+    const newCurrencyDropdown = document.getElementById('newCurrencyMode');
+    if (newCurrencyDropdown) {
+        newCurrencyDropdown.addEventListener('change', function() {
+            const symbol = this.value === 'USD' ? '($)' : '(₦)';
+            document.querySelector("label[for='newDepositPaid']").innerText = `Initial Deposit Paid ${symbol}`;
+            document.querySelector("label[for='newTotalSum']").innerText = `Total Agreed Sum ${symbol}`;
+        });
+    }
+});
+
+function updateCurrencyLabels(currencyMode) {
+    const symbol = currencyMode === 'USD' ? '($)' : '(₦)';
+    document.getElementById('lblEditDepositPaid').innerText = `Initial Deposit Paid ${symbol}`;
+    document.getElementById('lblEditTotalSum').innerText = `Total Agreed Sum ${symbol}`;
+}
+// ─── DASHBOARD LOCK / UNLOCK ──────────────────────────────────────────────────
+async function lockDashboard() {
+    const token = getVal('projectSelector');
+    if (!token) { alert('Select a project first.'); return; }
+    if (!_db)   { alert('Supabase not connected.'); return; }
+
+    if (!confirm(`Lock the dashboard for this project?\n\nThe client will see a "Review Required" screen and cannot access their tracker until you unlock it.`)) return;
+
+    const { error } = await _db
+        .from('projects')
+        .update({ dashboard_locked: true })
+        .eq('token', token);
+
+    if (error) { alert('Error: ' + error.message); return; }
+
+    const badge = document.getElementById('lockStatusBadge');
+    badge.textContent = 'Status: LOCKED';
+    badge.style.background = '#7d2e2e';
+    badge.style.color = 'white';
+    alert('✓ Dashboard locked. Client will see the review prompt on next visit.');
+}
+
+async function unlockDashboard() {
+    const token = getVal('projectSelector');
+    if (!token) { alert('Select a project first.'); return; }
+    if (!_db)   { alert('Supabase not connected.'); return; }
+
+    const { error } = await _db
+        .from('projects')
+        .update({ dashboard_locked: false })
+        .eq('token', token);
+
+    if (error) { alert('Error: ' + error.message); return; }
+
+    const badge = document.getElementById('lockStatusBadge');
+    badge.textContent = 'Status: OPEN';
+    badge.style.background = '#2e7d52';
+    badge.style.color = 'white';
+    alert('✓ Dashboard unlocked. Client can now access their tracker.');
+}
+</script>
+</body>
+</html>
