@@ -583,8 +583,8 @@ if (badge) {
     document.getElementById('editRevisionCount').value = data.revision_count || 0;
 
     // Timeline Configuration Handling with Validation Check
-    if (data.deadline) {
-        const dt = new Date(data.deadline);
+    if (data.project_timeline) {
+        const dt = new Date(data.project_timeline);
         if (!isNaN(dt.getTime())) {
             const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000)
                 .toISOString().slice(0, 16);
@@ -676,7 +676,7 @@ console.log('FINAL DEADLINE ISO:', formattedDeadline);
         document.getElementById('editRevisionCount').value
     ) || 0,
 
-    deadline: formattedDeadline,
+    project_timeline: formattedDeadline,
 
     deposit_paid: parseFloat(
         getVal('editDepositPaid')
