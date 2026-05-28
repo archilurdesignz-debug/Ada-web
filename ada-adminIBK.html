@@ -645,12 +645,13 @@ async function updateProject() {
 // Deadline — parse datetime-local safely across all browsers
 let formattedDeadline = null;
 const rawDeadline = document.getElementById('editProjDeadline').value;
-if (rawDeadline && rawDeadline.trim().length >= 16) {
-    // datetime-local format: "YYYY-MM-DDTHH:MM"
-    // Manually split so no browser treats it as UTC or rejects it
-    const [datePart, timePart] = rawDeadline.trim().split('T');
+if (rawDeadline && rawDeadline.trim()) {
+    // Falls back to mid-day 12:00 if the time string components are missing
+    const sanitizedRaw = rawDeadline.trim().length < 16 ? rawDeadline.trim() + "T12:00" : rawDeadline.trim();
+    const [datePart, timePart] = sanitizedRaw.split('T');
     const [year, month, day]   = datePart.split('-').map(Number);
-    const [hour, minute]       = (timePart || '00:00').split(':').map(Number);
+    const [hour, minute]       = (timePart || '12:00').split(':').map(Number);
+    
     const localDate = new Date(year, month - 1, day, hour, minute, 0, 0);
     if (!isNaN(localDate.getTime())) {
         formattedDeadline = localDate.toISOString();
