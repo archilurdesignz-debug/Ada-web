@@ -1286,9 +1286,7 @@ async function submitLockedReview() {
     }, 2000);
 }
 
-// ─── START ────────────────────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', initDashboard);
-
+// ─── REVISION NOTICE CONTROL ──────────────────────────────────────────────────
 function toggleRevisionNotice() {
     const noticeBox = document.getElementById('revisionNoticeContent');
     const currentCount = projectData?.revision_count || 0; 
@@ -1296,16 +1294,28 @@ function toggleRevisionNotice() {
     if (!noticeBox) return;
     
     if (noticeBox.style.display === 'none') {
-        noticeBox.innerHTML = `
-            <strong>Revision Policy Notice:</strong> You have currently utilized 
-            <span style="color: var(--ink); font-weight: bold;">${currentCount}</span> 
-            of 3 complimentary revision phases assigned to this project. Please note that upon reaching the maximum allocation of 3/3 revisions, any subsequent modification requests will require a formal project scope adjustment, incurring a 10% increment on the initial aggregate project sum. Furthermore, each approved revision extension request will automatically extend the contract delivery timeline by an additional three (3) business days.
-        `;
+        // If the project is at 100% and dashboard_locked is false (meaning they completed the forced review bypass)
+        if (projectData && projectData.overall_percent >= 100 && !projectData.dashboard_locked) {
+            noticeBox.innerHTML = `
+                <div style="text-align: center; padding: 10px 0; color: var(--accent);">
+                    <strong>Protocol Locked:</strong> You have already submitted your final project experience review. Revisions are closed for completed phases.
+                </div>
+            `;
+        } else {
+            // Standard active tracking text
+            noticeBox.innerHTML = `
+                <strong>Revision Policy Notice:</strong> You have currently utilized 
+                <span style="color: var(--ink); font-weight: bold;">${currentCount}</span> 
+                of 3 complimentary revision phases assigned to this project. Please note that upon reaching the maximum allocation of 3/3 revisions, any subsequent modification requests will require a formal project scope adjustment, incurring a 10% increment on the initial aggregate project sum. Furthermore, each approved revision extension request will automatically extend the contract delivery timeline by an additional three (3) business days.
+            `;
+        }
         noticeBox.style.display = 'block';
     } else {
         noticeBox.style.display = 'none';
     }
 }
+    // ─── START ────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', initDashboard);
 </script>
 </body>
 </html>
