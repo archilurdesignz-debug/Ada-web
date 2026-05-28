@@ -471,6 +471,33 @@
             .payment-band { grid-template-columns: 1fr; }
             .tracker-grid { grid-template-columns: 1fr; }
         }
+        /* Base style for the countdown container (optional, assuming a dark background so white text shows) */
+.countdown-units {
+    display: flex;
+    gap: 15px;
+    background-color: #1a1a1a; /* Example background to see white text clearly */
+    padding: 10px;
+}
+
+/* Default color for Days, Hours, and Minutes digits */
+#cdDays, #cdHours, #cdMins {
+    color: #ffffff; /* White */
+    font-weight: bold;
+}
+
+/* Specific color for the Seconds digits */
+#cdSecs {
+    color: #ff3333; /* Red */
+    font-weight: bold;
+}
+
+/* Optional: Style for the labels (Days, Hours, etc.) under the numbers */
+.countdown-units label {
+    display: block;
+    color: #aaaaaa; /* Light gray for readability */
+    font-size: 12px;
+    text-align: center;
+}
     </style>
 </head>
 <body>
