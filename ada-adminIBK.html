@@ -44,6 +44,104 @@
         .badge-released { background: var(--success); color: white; }
         .badge-locked { background: #333; color: #888; }
         .file-actions { display: flex; gap: 8px; }
+        /* ── PROJECT DEADLINE COUNTDOWN ──────────────────────────────────── */
+.deadline-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid #1a1a1a;
+}
+.deadline-section label {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+}
+.deadline-section input[type="datetime-local"] {
+    width: 100%;
+    background: #000;
+    border: 1px solid #333;
+    color: white;
+    padding: 10px;
+    font-family: 'Inter';
+    outline: none;
+    margin-bottom: 6px;
+}
+.deadline-section input[type="datetime-local"]:focus {
+    border-color: var(--gold);
+}
+.deadline-hint {
+    font-size: 0.6rem;
+    color: #555;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+}
+
+/* Live preview strip */
+.deadline-preview {
+    display: none;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 16px 20px;
+    background: #050505;
+    border: 1px solid #1a1a1a;
+    margin-top: 12px;
+}
+.deadline-preview.visible { display: flex; }
+.preview-label {
+    font-size: 0.6rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #555;
+    white-space: nowrap;
+}
+.preview-units { display: flex; gap: 16px; flex-wrap: wrap; }
+.preview-unit  { text-align: center; min-width: 52px; }
+.preview-unit .p-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    color: var(--gold);
+    line-height: 1;
+    display: block;
+}
+.preview-unit .p-lbl {
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    color: #555;
+    text-transform: uppercase;
+    display: block;
+    margin-top: 4px;
+}
+.deadline-iso-display {
+    font-size: 0.65rem;
+    color: #555;
+    letter-spacing: 1px;
+    margin-top: 10px;
+    font-family: monospace;
+}
+.deadline-iso-display span {
+    color: var(--gold);
+}
+.deadline-clear-btn {
+    background: none;
+    border: 1px solid #333;
+    color: #666;
+    font-family: 'Inter';
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.3s;
+}
+.deadline-clear-btn:hover {
+    border-color: var(--danger);
+    color: #e07070;
+}
     </style>
 </head>
 <body>
@@ -116,13 +214,52 @@
         Master completion percentage for client dashboard.
     </p>
 </div>
-            <div class="form-group" style="margin-top: 10px;">
-                <label>Project Deadline (Date & Time)</label>
-                <input type="datetime-local" id="editProjDeadline">
-                <p style="font-size: 0.6rem; color: #555; margin-top: 5px; letter-spacing: 1px;">
-                    Countdown timer starts immediately when you publish updates. Client sees days, hours, minutes, seconds.
-                </p>
+            <!-- ── PROJECT DEADLINE COUNTDOWN ──────────────────────────────── -->
+<div class="deadline-section">
+    <label for="editProjDeadline">Project Deadline</label>
+    <input
+        type="datetime-local"
+        id="editProjDeadline"
+        onchange="handleDeadlineChange(this.value)"
+        oninput="handleDeadlineChange(this.value)"
+    >
+    <p class="deadline-hint">
+        Set the final delivery deadline. The client's tracker will show a live countdown in days, hours, minutes and seconds the moment you publish.
+    </p>
+
+    <!-- Live preview — appears as soon as a date is picked -->
+    <div class="deadline-preview" id="deadlinePreview">
+        <span class="preview-label">Preview Countdown</span>
+        <div class="preview-units">
+            <div class="preview-unit">
+                <span class="p-num" id="pdDays">00</span>
+                <span class="p-lbl">Days</span>
             </div>
+            <div class="preview-unit">
+                <span class="p-num" id="pdHours">00</span>
+                <span class="p-lbl">Hours</span>
+            </div>
+            <div class="preview-unit">
+                <span class="p-num" id="pdMins">00</span>
+                <span class="p-lbl">Mins</span>
+            </div>
+            <div class="preview-unit">
+                <span class="p-num" id="pdSecs">00</span>
+                <span class="p-lbl">Secs</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shows the exact ISO string that will be sent to Supabase -->
+    <div class="deadline-iso-display" id="deadlineIsoDisplay" style="display:none;">
+        Saving to Supabase as: <span id="deadlineIsoValue">—</span>
+    </div>
+
+    <button type="button" class="deadline-clear-btn" id="deadlineClearBtn"
+            style="display:none;" onclick="clearDeadline()">
+        ✕ Clear Deadline
+    </button>
+</div>
 
 <div class="grid-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 15px; margin-bottom: 25px;">
                 
@@ -166,6 +303,7 @@
             </div>
         </div>
         </div>
+
         <!-- ── DASHBOARD ACCESS LOCK ───────────────────────── -->
 <div style="margin-top:20px; padding:20px; background:rgba(0,0,0,0.3); border:1px solid #1a1a1a;">
     <h3 style="margin-top:0; margin-bottom:12px;">Client Dashboard Access</h3>
@@ -582,19 +720,24 @@ if (badge) {
     // Revision Count Field
     document.getElementById('editRevisionCount').value = data.revision_count || 0;
 
-    // Timeline Configuration Handling with Validation Check
-    if (data.project_timeline) {
-        const dt = new Date(data.project_timeline);
-        if (!isNaN(dt.getTime())) {
-            const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000)
-                .toISOString().slice(0, 16);
-            setVal('editProjDeadline', local);
-        } else {
-            setVal('editProjDeadline', '');
+ // Load deadline into input and trigger the preview system
+if (data.deadline) {
+    const dt = new Date(data.deadline);
+    if (!isNaN(dt.getTime())) {
+        // Convert UTC back to local datetime-local format YYYY-MM-DDTHH:MM
+        const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000)
+            .toISOString().slice(0, 16);
+        const input = document.getElementById('editProjDeadline');
+        if (input) {
+            input.value = local;
+            handleDeadlineChange(local); // triggers preview + sets _deadlineISO
         }
     } else {
-        setVal('editProjDeadline', '');
+        clearDeadline();
     }
+} else {
+    clearDeadline();
+}
 
     // Currency Setting Application
     const activeCurrency = data.currency_mode || 'NGN';
@@ -647,24 +790,9 @@ async function updateProject() {
         }
     });
 
-// ─── PROJECT TIMELINE COUNTDOWN HANDLER ─────────────────────────
-let formattedDeadline = null;
+// Deadline is managed by the dedicated deadline system above
+const formattedDeadline = _deadlineISO;
 
-const deadlineInput = document.getElementById('editProjDeadline');
-
-if (deadlineInput?.value) {
-
-    /*
-        datetime-local already returns:
-        YYYY-MM-DDTHH:mm
-
-        Simply append seconds and let Supabase
-        parse it directly as timestamptz.
-    */
-
-    formattedDeadline = deadlineInput.value + ':00';
-}
-    
 // DEBUG
 console.log('FINAL DEADLINE ISO:', formattedDeadline);
 
@@ -676,7 +804,7 @@ console.log('FINAL DEADLINE ISO:', formattedDeadline);
         document.getElementById('editRevisionCount').value
     ) || 0,
 
-    project_timeline: formattedDeadline,
+    deadline: formattedDeadline,
 
     deposit_paid: parseFloat(
         getVal('editDepositPaid')
@@ -977,6 +1105,82 @@ async function unlockDashboard() {
     badge.style.background = '#2e7d52';
     badge.style.color = 'white';
     alert('✓ Dashboard unlocked. Client can now access their tracker.');
+}
+// ─── DEADLINE SYSTEM ─────────────────────────────────────────────────────────
+let _deadlineInterval = null;
+let _deadlineISO      = null;   // the value updateProject() will read
+
+function handleDeadlineChange(raw) {
+    // Clear any running preview tick
+    if (_deadlineInterval) { clearInterval(_deadlineInterval); _deadlineInterval = null; }
+
+    const preview    = document.getElementById('deadlinePreview');
+    const isoDisplay = document.getElementById('deadlineIsoDisplay');
+    const isoValue   = document.getElementById('deadlineIsoValue');
+    const clearBtn   = document.getElementById('deadlineClearBtn');
+
+    if (!raw || raw.trim().length < 16) {
+        // No date selected — hide everything
+        preview.classList.remove('visible');
+        isoDisplay.style.display = 'none';
+        clearBtn.style.display   = 'none';
+        _deadlineISO = null;
+        return;
+    }
+
+    // Parse using individual parts so every browser (incl. Safari) treats
+    // the value as LOCAL time, never as UTC
+    const [datePart, timePart] = raw.trim().split('T');
+    const [year, month, day]   = datePart.split('-').map(Number);
+    const [hour, minute]       = (timePart || '00:00').split(':').map(Number);
+    const localDate = new Date(year, month - 1, day, hour, minute, 0, 0);
+
+    if (isNaN(localDate.getTime())) {
+        _deadlineISO = null;
+        preview.classList.remove('visible');
+        return;
+    }
+
+    // Store as ISO string — this is what goes to Supabase
+    _deadlineISO = localDate.toISOString();
+
+    // Show ISO string and clear button
+    isoValue.textContent     = _deadlineISO;
+    isoDisplay.style.display = 'block';
+    clearBtn.style.display   = 'inline-block';
+
+    // Start live countdown preview
+    preview.classList.add('visible');
+
+    function tickPreview() {
+        const diff = localDate.getTime() - Date.now();
+        if (diff <= 0) {
+            ['pdDays','pdHours','pdMins','pdSecs'].forEach(id => {
+                document.getElementById(id).textContent = '00';
+            });
+            clearInterval(_deadlineInterval);
+            return;
+        }
+        document.getElementById('pdDays').textContent  = String(Math.floor(diff / 86400000)).padStart(2,'0');
+        document.getElementById('pdHours').textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0');
+        document.getElementById('pdMins').textContent  = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+        document.getElementById('pdSecs').textContent  = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
+    }
+
+    tickPreview();
+    _deadlineInterval = setInterval(tickPreview, 1000);
+}
+
+function clearDeadline() {
+    if (_deadlineInterval) { clearInterval(_deadlineInterval); _deadlineInterval = null; }
+    _deadlineISO = null;
+
+    const input = document.getElementById('editProjDeadline');
+    if (input) input.value = '';
+
+    document.getElementById('deadlinePreview').classList.remove('visible');
+    document.getElementById('deadlineIsoDisplay').style.display = 'none';
+    document.getElementById('deadlineClearBtn').style.display   = 'none';
 }
 </script>
 </body>
