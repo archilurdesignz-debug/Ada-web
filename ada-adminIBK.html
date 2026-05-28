@@ -674,25 +674,15 @@ if (deadlineInput && deadlineInput.value) {
 console.log('FINAL DEADLINE ISO:', formattedDeadline);
 
     // Final payload
- const payload = {
+const payload = {
     overall_percent: parseInt(getVal('overallProgress')) || 0,
+    revision_count: parseInt(document.getElementById('editRevisionCount').value) || 0,
 
-    revision_count: parseInt(
-        document.getElementById('editRevisionCount').value
-    ) || 0,
+    project_timeline: formattedDeadline, // Corrected to a valid database column key string
 
-    data.project_timeline: formattedDeadline,
-
-    deposit_paid: parseFloat(
-        getVal('editDepositPaid')
-    ) || 0,
-
-    total_sum: parseFloat(
-        getVal('editTotalSum')
-    ) || 0,
-
+    deposit_paid: parseFloat(getVal('editDepositPaid')) || 0,
+    total_sum: parseFloat(getVal('editTotalSum')) || 0,
     currency_mode: getVal('editCurrencyMode'),
-
     custom_tracks: customTracksCompiledArray
 };
     if (!_db) {
