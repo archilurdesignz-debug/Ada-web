@@ -518,7 +518,12 @@ async function createNewProject() {
         deposit_paid:   depositPaid,
         total_sum:      totalSum,
         currency_mode:  getVal('newCurrencyMode'),
-        custom_tracks:  [{"heading": "Architectural Plan Schemes", "percent": 0}], 
+        custom_tracks: [
+    {
+        heading: "Architectural Plan Schemes",
+        percent: 0
+    }
+],
         client_url:     dashboardUrl
     };
 
@@ -642,38 +647,32 @@ async function updateProject() {
         }
     });
 
-// ─── EXTRACT AND FORMAT DEADLINE TIMELINE ───────────────────────
-    let formattedDeadline = null;
-    
-    // Explicitly target the verified layout input ID tag
-    const deadlineInput = document.getElementById('editProjDeadline');
-    
-    // Safety check: force value extraction directly from the layout state
-    if (deadlineInput) {
-        const rawDeadline = (deadlineInput.value || "").trim();
-        
-        console.log("ACTUAL EXTRACTION CRITERIA:", rawDeadline);
-        
-        if (rawDeadline !== "") {
-            // Safety Fallback: Automatically append hours and minutes if only date is present
-            const sanitizedRaw = rawDeadline.length < 16 ? rawDeadline + "T12:00" : rawDeadline;
-            
-            // Robust Extraction Regex to handle formatting variations seamlessly
-            const match = sanitizedRaw.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
-            if (match) {
-                const [_, year, month, day, hour, minute] = match.map(Number);
-                
-                // Construct local time array safely mapping the correct JavaScript 0-11 month range
-                const localDate = new Date(year, month - 1, day, hour, minute, 0, 0);
-                
-                if (!isNaN(localDate.getTime())) {
-                    formattedDeadline = localDate.toISOString(); // Convert straight to valid ISO UTC for database
-                }
-            }
-        }
-    }
+// ─── PROJECT TIMELINE COUNTDOWN HANDLER ─────────────────────────
+let formattedDeadline = null;
 
-console.log("FINAL ISO TARGET:", formattedDeadline);
+const deadlineInput = document.getElementById('editProjDeadline');
+
+if (deadlineInput && deadlineInput.value) {
+
+    /*
+        datetime-local returns:
+        "2026-05-28T18:30"
+
+        Convert directly into ISO UTC format
+        for Supabase timestamptz storage.
+    */
+
+    const localDate = new Date(deadlineInput.value);
+
+    // Validate date before submission
+    if (!isNaN(localDate.getTime())) {
+        formattedDeadline = localDate.toISOString();
+    }
+}
+
+// DEBUG
+console.log('FINAL DEADLINE ISO:', formattedDeadline);
+
     // Final payload
  const payload = {
     overall_percent: parseInt(getVal('overallProgress')) || 0,
