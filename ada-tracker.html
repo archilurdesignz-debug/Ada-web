@@ -489,6 +489,57 @@
     <a href="https://wa.me/2348138580315" class="error-contact">Contact ADA</a>
 </div>
 
+<!-- ── LOCKED SCREEN (shown when admin locks at 100%) ─── -->
+<div id="lockedScreen" style="display:none; min-height:100vh; background:var(--bg); flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:60px 10%;">
+    <span style="font-family:var(--f-display); font-size:2rem; letter-spacing:8px; color:var(--ink); display:block; margin-bottom:6px;">ADA</span>
+    <span style="font-size:0.65rem; letter-spacing:2px; color:var(--gold); text-transform:uppercase; display:block; margin-bottom:48px;">Archilurdesignz and Architecture</span>
+
+    <div style="max-width:520px; margin:0 auto;">
+        <div style="font-size:2.4rem; margin-bottom:20px;">🏆</div>
+        <h2 style="font-family:var(--f-display); font-size:clamp(1.6rem,3vw,2.2rem); color:var(--ink); margin-bottom:16px; font-weight:500;">
+            Your Project is Complete
+        </h2>
+        <p style="font-size:1rem; color:var(--ink3); line-height:1.8; margin-bottom:12px;">
+            Congratulations, <strong id="lockedClientName" style="color:var(--ink);">—</strong>. Your project has reached 100% completion.
+        </p>
+        <p style="font-size:0.9rem; color:var(--mist); line-height:1.8; margin-bottom:40px;">
+            To re-access your dashboard and download your final documents, please take a moment to share your experience with the ADA team. Your feedback helps us serve future clients better.
+        </p>
+
+        <!-- Review form embedded directly in locked screen -->
+        <div style="background:var(--bg2); border:1px solid var(--rule); padding:36px; text-align:left; margin-bottom:24px;">
+            <h3 style="font-family:var(--f-display); font-size:1.1rem; color:var(--ink); margin-bottom:20px; font-weight:500;">Share Your ADA Experience</h3>
+
+            <div style="margin-bottom:20px;">
+                <label style="font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; color:var(--gold); display:block; margin-bottom:10px;">Your Rating</label>
+                <div id="lockedStarSelect" style="display:flex; gap:12px; font-size:2rem;">
+                    <span onclick="setLockedRating(1)" style="cursor:pointer; color:var(--bg3); transition:0.2s;">★</span>
+                    <span onclick="setLockedRating(2)" style="cursor:pointer; color:var(--bg3); transition:0.2s;">★</span>
+                    <span onclick="setLockedRating(3)" style="cursor:pointer; color:var(--bg3); transition:0.2s;">★</span>
+                    <span onclick="setLockedRating(4)" style="cursor:pointer; color:var(--bg3); transition:0.2s;">★</span>
+                    <span onclick="setLockedRating(5)" style="cursor:pointer; color:var(--bg3); transition:0.2s;">★</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <label style="font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; color:var(--gold); display:block; margin-bottom:10px;">Your Review</label>
+                <textarea id="lockedReviewComment"
+                    style="width:100%; background:var(--bg); border:1px solid var(--rule); color:var(--ink); padding:16px 18px; font-family:var(--f-body); font-size:0.9rem; line-height:1.7; outline:none; resize:vertical; min-height:110px;"
+                    placeholder="Tell us about your design experience with ADA..."></textarea>
+            </div>
+
+            <button onclick="submitLockedReview()"
+                style="width:100%; padding:15px; background:var(--ink2); color:var(--bg); font-family:var(--f-body); font-size:0.72rem; font-weight:500; letter-spacing:2.5px; text-transform:uppercase; border:none; cursor:pointer; transition:all 0.3s;">
+                Submit Review &amp; Access Dashboard →
+            </button>
+        </div>
+
+        <a href="https://wa.me/2348138580315" target="_blank"
+           style="font-size:0.72rem; letter-spacing:2px; text-transform:uppercase; color:var(--gold); text-decoration:none; border-bottom:1px solid rgba(138,106,60,0.3); padding-bottom:2px;">
+            Need help? Contact ADA directly
+        </a>
+    </div>
+</div>
 <!-- ── DASHBOARD ───────────────────────────────────────────────────── -->
 <div id="dashboardMain" style="display:none;">
     <div class="dashboard-wrapper">
@@ -564,45 +615,7 @@
 
                 <!-- Service Cards -->
                 <p class="tracker-section-label">Service Execution Tracker</p>
-                <div class="tracker-grid">
-                    <div class="service-card clickable" onclick="toggleSubModal(true)">
-                        <h4>Architectural Design</h4>
-                        <div class="progress-container"><div class="progress-fill" id="fillArch"></div></div>
-                        <span class="pkg-status" id="statusArch">—</span>
-                    </div>
-                    <div class="service-card">
-                        <h4>3D Visualization</h4>
-                        <div class="progress-container"><div class="progress-fill" id="fill3d"></div></div>
-                        <span class="pkg-status" id="status3d">—</span>
-                    </div>
-                    <div class="service-card locked-dependency eng-card">
-                        <span class="lock-overlay">🔒 Locked</span>
-                        <h4>Structural Engineering</h4>
-                        <div class="progress-container"><div class="progress-fill" style="width:0%"></div></div>
-                        <span class="pkg-status">Awaiting Coordination</span>
-                    </div>
-                    <div class="service-card locked-dependency eng-card">
-                        <span class="lock-overlay">🔒 Locked</span>
-                        <h4>Mechanical Engineering</h4>
-                        <div class="progress-container"><div class="progress-fill" style="width:0%"></div></div>
-                        <span class="pkg-status">Awaiting Coordination</span>
-                    </div>
-                    <div class="service-card locked-dependency eng-card">
-                        <span class="lock-overlay">🔒 Locked</span>
-                        <h4>Electrical Engineering</h4>
-                        <div class="progress-container"><div class="progress-fill" style="width:0%"></div></div>
-                        <span class="pkg-status">Awaiting Coordination</span>
-                    </div>
-                    <div class="service-card">
-                        <h4>Quantity Surveying (BoQ)</h4>
-                        <div class="progress-container"><div class="progress-fill" id="fillQS"></div></div>
-                        <span class="pkg-status" id="statusQS">—</span>
-                    </div>
-                    <div class="service-card">
-                        <h4>Permit Approval</h4>
-                        <div class="progress-container"><div class="progress-fill" id="fillPermit"></div></div>
-                        <span class="pkg-status" id="statusPermit">—</span>
-                    </div>
+                <div class="tracker-grid" id="customTracksGrid">
                 </div>
 
                 <!-- Review -->
@@ -653,7 +666,15 @@
                     Open WhatsApp Chat
                 </a>
             </div>
-
+            <div class="revision-status-box" style="margin-bottom: 20px;">
+        <div id="revisionDropdownTrigger" onclick="toggleRevisionNotice()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 15px; border: 1px solid #333;">
+        <span style="font-family: 'Cormorant Garamond'; color: var(--gold); letter-spacing: 2px; font-weight: bold;">REVISION PROTOCOL</span>
+        <span id="clientRevisionCounter" style="font-family: 'Inter'; font-weight: 600; color: #fff;">REVISION COUNT (0/3)</span>
+    </div>
+    
+    <div id="revisionNoticeContent" style="display: none; background: rgba(125, 46, 46, 0.1); border: 1px solid var(--danger); padding: 20px; margin-top: 5px; font-size: 0.85rem; line-height: 1.6; color: #f5f2ec;">
+        </div>
+        </div>
             <!-- ── SERVICE TERMS PANEL ───────────────────────── -->
             <div class="panel" id="panel-terms">
                 <div class="hub-header">
@@ -760,7 +781,14 @@ async function initDashboard() {
             .eq('token', projectToken).single();
 
         if (error || !data) { showError(); return; }
-        projectData = data;
+    projectData = data;
+
+        // Check if admin has locked the dashboard
+        if (data.dashboard_locked && data.overall_percent >= 100) {
+            showLockedScreen(data);
+            return;
+        }
+
         populateDashboard(data);
         loadHubFiles();
     } catch(e) { showError(); }
@@ -843,17 +871,32 @@ function populateDashboard(d) {
         document.getElementById('paymentBand').style.display = 'grid';
     }
 
-    // Progress bars
-    document.getElementById('fillArch').style.width   = (d.perc_architecture || 0) + '%';
-    document.getElementById('fill3d').style.width     = (d.perc_3d           || 0) + '%';
-    document.getElementById('fillQS').style.width     = (d.perc_qs           || 0) + '%';
-    document.getElementById('fillPermit').style.width = (d.perc_permit        || 0) + '%';
+    // ── CUSTOM TRACKS (replaces hardcoded perc_architecture etc.) ────────────
+const grid = document.getElementById('customTracksGrid');
+if (grid) {
+    let tracks = [];
+    try {
+        tracks = typeof d.custom_tracks === 'string'
+            ? JSON.parse(d.custom_tracks)
+            : (d.custom_tracks || []);
+    } catch(e) { tracks = []; }
 
-    // Status text
-    document.getElementById('statusArch').textContent   = `Architecture: ${d.perc_architecture || 0}%`;
-    document.getElementById('status3d').textContent     = `3D Visualization: ${d.perc_3d || 0}%`;
-    document.getElementById('statusQS').textContent     = `Quantity Surveying: ${d.perc_qs || 0}%`;
-    document.getElementById('statusPermit').textContent = `Permit: ${d.perc_permit || 0}%`;
+    if (tracks.length === 0) {
+        grid.innerHTML = `<div class="service-card">
+            <h4>No progress tracks set yet</h4>
+            <p style="font-size:0.85rem; color:var(--mist);">Your architect will update progress shortly.</p>
+        </div>`;
+    } else {
+        grid.innerHTML = tracks.map(t => `
+            <div class="service-card">
+                <h4>${t.heading || t.label || 'Unnamed Track'}</h4>
+                <div class="progress-container">
+                    <div class="progress-fill" style="width:${t.percent || 0}%"></div>
+                </div>
+                <span class="pkg-status">${t.heading || t.label || ''}: ${t.percent || 0}%</span>
+            </div>`).join('');
+    }
+}
 
     // Sub-modal stages
     setStageEl('subBrief', d.stage_brief);
@@ -881,6 +924,11 @@ function populateDashboard(d) {
     // Service terms
     if (d.service_terms) {
         document.getElementById('termsDisplay').innerHTML = d.service_terms;
+    }
+const activeRevisions = d.revision_count || 0;
+    const revCounterEl = document.getElementById('clientRevisionCounter');
+    if (revCounterEl) {
+        revCounterEl.innerText = `REVISION COUNT (${activeRevisions}/3)`;
     }
 
     // Countdown
@@ -1013,8 +1061,102 @@ wa.addEventListener('mousedown', e=>{dr=true;ox=e.clientX-wa.offsetLeft;oy=e.cli
 document.addEventListener('mousemove', e=>{if(dr){wa.style.left=(e.clientX-ox)+'px';wa.style.top=(e.clientY-oy)+'px';wa.style.right=wa.style.bottom='auto';}});
 document.addEventListener('mouseup', ()=>{dr=false;wa.style.transition='transform 0.3s';});
 
+// ─── LOCKED SCREEN ────────────────────────────────────────────────────────────
+let lockedRating = 5;
+
+function showLockedScreen(d) {
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('dashboardMain').style.display = 'none';
+    document.getElementById('errorScreen').style.display   = 'none';
+
+    const screen = document.getElementById('lockedScreen');
+    screen.style.display = 'flex';
+
+    // Fill in client name
+    const nameEl = document.getElementById('lockedClientName');
+    if (nameEl) nameEl.textContent = d.client_name || 'Valued Client';
+}
+
+function setLockedRating(n) {
+    lockedRating = n;
+    document.querySelectorAll('#lockedStarSelect span').forEach((s, i) => {
+        s.style.color = i < n ? 'var(--gold2)' : 'var(--bg3)';
+    });
+}
+
+async function submitLockedReview() {
+    const comment = document.getElementById('lockedReviewComment').value.trim();
+    if (!comment) { alert('Please write a short review before continuing.'); return; }
+
+    if (_db) {
+        await _db.from('reviews').insert([{
+            project_token: projectToken,
+            client_name:   projectData?.client_name || 'Anonymous',
+            rating:        lockedRating,
+            comment,
+            location:      'NIGERIA',
+            status:        'pending'
+        }]);
+    }
+
+    // Unlock the dashboard in DB so they aren't blocked again on next visit
+    if (_db) {
+        await _db
+            .from('projects')
+            .update({ dashboard_locked: false })
+            .eq('token', projectToken);
+    }
+
+    // Show thank-you then load dashboard
+    document.getElementById('lockedScreen').innerHTML = `
+        <div style="text-align:center; padding:80px 10%;">
+            <span style="font-family:var(--f-display); font-size:2rem; letter-spacing:8px; color:var(--ink); display:block; margin-bottom:40px;">ADA</span>
+            <div style="font-size:2rem; margin-bottom:20px;">✓</div>
+            <h2 style="font-family:var(--f-display); font-size:1.8rem; color:var(--ink); margin-bottom:16px;">Thank You</h2>
+            <p style="font-size:0.95rem; color:var(--mist); line-height:1.8; margin-bottom:32px;">
+                Your review has been received. Loading your dashboard now...
+            </p>
+        </div>`;
+
+    // Brief pause then load the real dashboard
+    setTimeout(async () => {
+        try {
+            const { data, error } = await _db
+                .from('projects').select('*')
+                .eq('token', projectToken).single();
+            if (!error && data) {
+                projectData = data;
+                document.getElementById('lockedScreen').style.display = 'none';
+                populateDashboard(data);
+                loadHubFiles();
+            }
+        } catch(e) {
+            document.getElementById('lockedScreen').style.display = 'none';
+            populateDashboard(projectData);
+        }
+    }, 2000);
+}
+
 // ─── START ────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', initDashboard);
+
+function toggleRevisionNotice() {
+    const noticeBox = document.getElementById('revisionNoticeContent');
+    const currentCount = projectData?.revision_count || 0; 
+    
+    if (!noticeBox) return;
+    
+    if (noticeBox.style.display === 'none') {
+        noticeBox.innerHTML = `
+            <strong>Revision Policy Notice:</strong> You have currently utilized 
+            <span style="color: var(--gold); font-weight: bold;">${currentCount}</span> 
+            of 3 complimentary revision phases assigned to this project. Please note that upon reaching the maximum allocation of 3/3 revisions, any subsequent modification requests will require a formal project scope adjustment, incurring a 10% increment on the initial aggregate project sum. Furthermore, each approved revision extension request will automatically extend the contract delivery timeline by an additional three (3) business days.
+        `;
+        noticeBox.style.display = 'block';
+    } else {
+        noticeBox.style.display = 'none';
+    }
+}
 </script>
 </body>
 </html>
