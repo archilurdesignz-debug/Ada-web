@@ -195,28 +195,61 @@
 
         /* ── COUNTDOWN ───────────────────────────────────────────── */
         .countdown-bar {
-            display: flex; align-items: center; gap: 24px;
-            flex-wrap: wrap; margin-bottom: 36px;
-            padding: 22px 24px;
-            background: var(--ink2);
-            border-radius: 2px;
+            background-color: #1a1a1a;
+            border: 2px solid #d4af37;
+            padding: 20px 40px;
+            border-radius: 4px;
+            box-sizing: border-box;
+            width: 100%; 
+            display: grid;
+            grid-template-columns: 1fr auto; 
+            align-items: center;
+            gap: 40px;
         }
+
         .countdown-label {
-            font-size: 0.65rem; letter-spacing: 3px;
-            color: rgba(201,191,176,0.5);
-            text-transform: uppercase; white-space: nowrap;
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
-        .countdown-units { display: flex; gap: 20px; flex-wrap: wrap; }
-        .countdown-unit { text-align: center; min-width: 60px; }
-        .countdown-unit .num {
-            font-family: var(--f-display);
-            font-size: 2rem; color: var(--accent);
-            line-height: 1; display: block;
+
+        .countdown-units {
+            display: flex;
+            justify-content: space-between;
+            gap: 50px;
+            min-width: 50%;
         }
-        .countdown-unit .lbl {
-            font-size: 0.6rem; letter-spacing: 2px;
-            color: rgba(201,191,176,0.4);
-            text-transform: uppercase; display: block; margin-top: 4px;
+
+        .countdown-units > div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #cdDays, #cdHours, #cdMins {
+            display: block;
+            color: #ffffff;
+            font-size: 48px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        #cdSecs {
+            display: block;
+            color: #ff3333;
+            font-size: 48px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .countdown-units label {
+            display: block;
+            color: #aaaaaa; 
+            font-size: 18px;
+            margin-top: 8px;
+            font-weight: normal;
         }
         .countdown-expired {
             font-size: 0.8rem; letter-spacing: 2px; color: var(--accent);
@@ -471,92 +504,22 @@
             .payment-band { grid-template-columns: 1fr; }
             .tracker-grid { grid-template-columns: 1fr; }
         }
-/* The main container box with a gold border edge */
-.countdown-bar {
-    background-color: #1a1a1a;    /* The black box background */
-    border: 2px solid #d4af37;     /* Gold border edge */
-    padding: 20px 40px;            /* Generous padding for full-width look */
-    border-radius: 4px;
-    box-sizing: border-box;
-    
-    /* Fill the entire grid session / width */
-    width: 100%; 
-    display: grid;
-    /* Allocates space: Left side for label, Right side takes the remaining space */
-    grid-template-columns: 1fr auto; 
-    align-items: center;           /* Vertically centers the text and numbers */
-    gap: 40px;
-}
-
-/* "PROJECT DEADLINE" text styled on the left */
-.countdown-label {
-    color: #ffffff;
-    font-size: 24px;               /* 1.5x scaled size */
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-/* The wrapper holding the time units, spreading across the right side */
-.countdown-units {
-    display: flex;
-    justify-content: space-between;
-    gap: 50px;                     /* Generous spacing between the columns */
-    min-width: 50%;                /* Ensures it stretches nicely across the right */
-}
-
-/* Column container for each number + label pair */
-.countdown-units > div {
-    display: flex;
-    flex-direction: column;        /* Stacks the digit on top of the text */
-    align-items: center;           /* Centers them relative to each other */
-}
-
-/* Default color for Days, Hours, and Minutes digits */
-#cdDays, #cdHours, #cdMins {
-    display: block;
-    color: #ffffff;                /* White */
-    font-size: 48px;               /* 1.5x scaled size */
-    font-weight: bold;
-    line-height: 1;
-}
-
-/* Specific color for the Seconds digits */
-#cdSecs {
-    display: block;
-    color: #ff3333;                /* Red */
-    font-size: 48px;               /* 1.5x scaled size */
-    font-weight: bold;
-    line-height: 1;
-}
-
-/* Labels positioned perfectly underneath the numbers */
-.countdown-units label {
-    display: block;
-    color: #aaaaaa; 
-    font-size: 18px;               /* 1.5x scaled size */
-    margin-top: 8px;               /* Pushes it right below the digit */
-    font-weight: normal;
-}
     </style>
 </head>
 <body>
 
-<!-- ── LOADING ─────────────────────────────────────────────────────── -->
 <div id="loadingScreen" class="loading-screen">
     <span class="logo">ADA</span>
     <div class="spinner"></div>
     <p>Loading your project...</p>
 </div>
 
-<!-- ── ERROR ───────────────────────────────────────────────────────── -->
 <div id="errorScreen" class="error-screen" style="display:none;">
     <h2>Project Not Found</h2>
     <p>The link you used is invalid or has expired.<br>Please contact ADA for assistance.</p>
     <a href="https://wa.me/2348138580315" class="error-contact">Contact ADA</a>
 </div>
 
-<!-- ── LOCKED SCREEN (shown when admin locks at 100%) ─── -->
 <div id="lockedScreen" style="display:none; min-height:100vh; background:var(--bg); flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:60px 10%;">
     <span style="font-family:var(--f-display); font-size:2rem; letter-spacing:8px; color:var(--ink); display:block; margin-bottom:6px;">ADA</span>
     <span style="font-size:0.65rem; letter-spacing:2px; color:var(--gold); text-transform:uppercase; display:block; margin-bottom:48px;">Archilurdesignz and Architecture</span>
@@ -573,7 +536,6 @@
             To re-access your dashboard and download your final documents, please take a moment to share your experience with the ADA team. Your feedback helps us serve future clients better.
         </p>
 
-        <!-- Review form embedded directly in locked screen -->
         <div style="background:var(--bg2); border:1px solid var(--rule); padding:36px; text-align:left; margin-bottom:24px;">
             <h3 style="font-family:var(--f-display); font-size:1.1rem; color:var(--ink); margin-bottom:20px; font-weight:500;">Share Your ADA Experience</h3>
 
@@ -607,11 +569,9 @@
         </a>
     </div>
 </div>
-<!-- ── DASHBOARD ───────────────────────────────────────────────────── -->
 <div id="dashboardMain" style="display:none;">
     <div class="dashboard-wrapper">
 
-        <!-- SIDEBAR -->
         <aside>
             <span class="aside-logo">ADA</span>
             <span class="aside-rc">RC: 9176834</span>
@@ -623,13 +583,10 @@
             </ul>
         </aside>
 
-        <!-- MAIN -->
         <main>
 
-            <!-- ── TRACKER PANEL ──────────────────────────────── -->
             <div class="panel active" id="panel-tracker">
 
-                <!-- Header: project name / client / ref / completion % -->
                 <div class="header-bar">
                     <div class="header-left">
                         <h2 id="projTitle">—</h2>
@@ -642,7 +599,6 @@
                     </div>
                 </div>
 
-                <!-- Payment Summary Band -->
                 <div class="payment-band" id="paymentBand" style="display:none;">
                     <div class="pay-cell deposit">
                         <span class="pay-label">Initial Deposit Paid</span>
@@ -661,7 +617,6 @@
                     </div>
                 </div>
 
-                <!-- Architect -->
                 <div class="architect-info">
                     <div>
                         <span class="arch-label">Lead Architect</span>
@@ -669,24 +624,27 @@
                     </div>
                 </div>
 
-                <!-- Countdown -->
                 <div class="countdown-bar" id="countdownBar" style="display:none;">
                     <span class="countdown-label">Project Deadline</span>
                     <div class="countdown-units">
-        <div><span id="cdDays">00</span><label>Days</label></div>
-        <div><span id="cdHours">00</span><label>Hours</label></div>
-        <div><span id="cdMins">00</span><label>Mins</label></div>
-        <div><span id="cdSecs">00</span><label>Secs</label></div>
-    </div>
-</div>
+                        <div><span id="cdDays">00</span><label>Days</label></div>
+                        <div><span id="cdHours">00</span><label>Hours</label></div>
+                        <div><span id="cdMins">00</span><label>Mins</label></div>
+                        <div><span id="cdSecs">00</span><label>Secs</label></div>
+                    </div>
                 </div>
 
-                <!-- Service Cards -->
-                <p class="tracker-section-label">Service Execution Tracker</p>
-                <div class="tracker-grid" id="customTracksGrid">
+                <p class="tracker-section-label" style="margin-top: 36px;">Service Execution Tracker</p>
+                <div class="tracker-grid" id="customTracksGrid"></div>
+
+                <div class="revision-status-box" style="margin-bottom: 20px;">
+                    <div id="revisionDropdownTrigger" onclick="toggleRevisionNotice()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 15px; border: 1px solid #333;">
+                        <span style="font-family: var(--f-display); color: var(--gold); letter-spacing: 2px; font-weight: bold; font-size: 0.85rem;">REVISION PROTOCOL</span>
+                        <span id="clientRevisionCounter" style="font-family: var(--f-body); font-weight: 600; color: #fff; font-size: 0.8rem;">REVISION COUNT (0/3)</span>
+                    </div>
+                    <div id="revisionNoticeContent" style="display: none; background: rgba(138, 106, 60, 0.05); border: 1px solid var(--rule); padding: 20px; margin-top: 5px; font-size: 0.85rem; line-height: 1.6; color: #f5f2ec;"></div>
                 </div>
 
-                <!-- Review -->
                 <div class="review-section" id="reviewArea">
                     <div id="reviewLockedContent">
                         <h3 style="color:var(--mist); font-size:1.2rem;">Project Experience Review</h3>
@@ -708,9 +666,9 @@
                         <button class="submit-review-btn" onclick="submitReview()">Submit Verified Review</button>
                     </div>
                 </div>
+
             </div>
 
-            <!-- ── SUBMISSION HUB PANEL ───────────────────────── -->
             <div class="panel" id="panel-hub">
                 <div class="hub-header">
                     <h2>Submission Hub</h2>
@@ -721,7 +679,6 @@
                 </div>
             </div>
 
-            <!-- ── CONSULTATION PANEL ─────────────────────────── -->
             <div class="panel" id="panel-consultation">
                 <div class="hub-header">
                     <h2>Consultation</h2>
@@ -734,16 +691,7 @@
                     Open WhatsApp Chat
                 </a>
             </div>
-            <div class="revision-status-box" style="margin-bottom: 20px;">
-        <div id="revisionDropdownTrigger" onclick="toggleRevisionNotice()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 15px; border: 1px solid #333;">
-        <span style="font-family: 'Cormorant Garamond'; color: var(--gold); letter-spacing: 2px; font-weight: bold;">REVISION PROTOCOL</span>
-        <span id="clientRevisionCounter" style="font-family: 'Inter'; font-weight: 600; color: #fff;">REVISION COUNT (0/3)</span>
-    </div>
-    
-    <div id="revisionNoticeContent" style="display: none; background: rgba(125, 46, 46, 0.1); border: 1px solid var(--danger); padding: 20px; margin-top: 5px; font-size: 0.85rem; line-height: 1.6; color: #f5f2ec;">
-        </div>
-        </div>
-            <!-- ── SERVICE TERMS PANEL ───────────────────────── -->
+
             <div class="panel" id="panel-terms">
                 <div class="hub-header">
                     <h2>ADA Client Service Terms</h2>
@@ -774,7 +722,6 @@
     </div>
 </div>
 
-<!-- ── ARCHITECTURAL SUB-MODAL ─────────────────────────────────────── -->
 <div id="subModal" class="sub-modal">
     <button class="close-sub" onclick="toggleSubModal(false)">Close ✕</button>
     <h2>Architectural Progress</h2>
@@ -802,7 +749,6 @@
     </div>
 </div>
 
-<!-- ── WHATSAPP ─────────────────────────────────────────────────────── -->
 <div id="waDraggable">
     <a href="https://wa.me/2348138580315" target="_blank">
         <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.7 17.7 68.9 27.1 106.1 27.1h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.1 0-65.6-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-5.5-2.8-23.2-8.5-44.2-27.1-16.4-14.6-27.4-32.7-30.6-38.1-3.2-5.5-.3-8.4 2.4-11.2 2.5-2.5 5.5-6.4 8.3-9.6 2.8-3.2 3.7-5.5 5.5-9.3 1.9-3.7 1-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 13.2 5.7 23.5 9.2 31.6 11.8 13.3 4.2 25.4 3.6 35 2.2 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
@@ -831,15 +777,12 @@ async function initDashboard() {
     const params = new URLSearchParams(window.location.search);
     projectToken = params.get('token');
 
-    // No token at all — show preview so the page isn't blank during dev
     if (!projectToken) {
         if (!_db) { showPreview(); return; }
         showError(); return;
     }
 
-    // Token present — try to load from DB
     if (!_db) {
-        // Supabase not connected at all — fall back to preview with token visible
         showPreview(); return;
     }
 
@@ -851,7 +794,6 @@ async function initDashboard() {
         if (error || !data) { showError(); return; }
         projectData = data;
 
-        // Check if admin has locked the dashboard
         if (data.dashboard_locked && data.overall_percent >= 100) {
             showLockedScreen(data);
             return;
@@ -910,7 +852,6 @@ function formatCurrency(val, mode) {
             maximumFractionDigits: 2
         });
     }
-    // Default: Naira
     return '₦' + amount.toLocaleString('en-NG');
 }
 
@@ -937,7 +878,6 @@ function populateDashboard(d) {
     if (!d) return;
     document.title = `${d.project_title || 'Project'} | ADA Tracker`;
 
-    // Header Elements Protection Layer
     const tEl = document.getElementById('projTitle');
     const cEl = document.getElementById('clientNameDisplay');
     const tkEl = document.getElementById('projToken');
@@ -950,7 +890,6 @@ function populateDashboard(d) {
     if (pctEl) pctEl.textContent = `${d.overall_percent || 0}%`;
     if (archEl) archEl.textContent = d.lead_architect || '—';
 
-    // Payment band
     const deposit  = d.deposit_paid;
     const total    = d.total_sum;
     const currency = d.currency_mode || 'NGN';
@@ -995,14 +934,12 @@ function populateDashboard(d) {
         }
     }
 
-    // Sub-modal stages
     setStageEl('subBrief', d.stage_brief);
     setStageEl('subSchem', d.stage_schematics);
     setStageEl('subCoord', d.stage_coordination);
     setStageEl('subDev',   d.stage_dev);
     setStageEl('subWork',  d.stage_working);
 
-    // Unlock engineering
     if (d.stage_coordination === 'started' || d.stage_coordination === 'completed') {
         document.querySelectorAll('.eng-card').forEach(card => {
             card.classList.remove('locked-dependency');
@@ -1011,7 +948,6 @@ function populateDashboard(d) {
         });
     }
 
-    // Unlock review at 100%
     if (d.overall_percent >= 100) {
         const revArea = document.getElementById('reviewArea');
         const revLock = document.getElementById('reviewLockedContent');
@@ -1022,7 +958,6 @@ function populateDashboard(d) {
         if (revUnlock) revUnlock.style.display = 'block';
     }
 
-    // Service terms
     const termsDisp = document.getElementById('termsDisplay');
     if (termsDisp && d.service_terms) {
         termsDisp.innerHTML = d.service_terms;
@@ -1034,20 +969,18 @@ function populateDashboard(d) {
         revCounterEl.innerText = `REVISION COUNT (${activeRevisions}/3)`;
     }
 
-    // Countdown Execution Block Check
     const finalDeadline = d.deadline || d.proj_deadline;
     const cDownBar = document.getElementById('countdownBar');
 
     if (finalDeadline) {
         if (cDownBar) {
-            cDownBar.style.display = 'flex'; 
+            cDownBar.style.display = 'grid'; 
         }
         startCountdown(finalDeadline);
     } else {
         if (cDownBar) cDownBar.style.display = 'none';
     }
 
-    // Show dashboard
     const loadScreen = document.getElementById('loadingScreen');
     const dashMain = document.getElementById('dashboardMain');
     if (loadScreen) loadScreen.style.display = 'none';
@@ -1152,7 +1085,7 @@ function startCountdown(deadlineStr) {
     const deadline = new Date(deadlineStr).getTime();
     if (isNaN(deadline)) { if (bar) bar.style.display = 'none'; return; }
 
-    if (bar) bar.style.display = 'flex';
+    if (bar) bar.style.display = 'grid';
     
     if (countdownInterval) {
         clearInterval(countdownInterval);
@@ -1294,7 +1227,6 @@ function toggleRevisionNotice() {
     if (!noticeBox) return;
     
     if (noticeBox.style.display === 'none') {
-        // If the project is at 100% and dashboard_locked is false (meaning they completed the forced review bypass)
         if (projectData && projectData.overall_percent >= 100 && !projectData.dashboard_locked) {
             noticeBox.innerHTML = `
                 <div style="text-align: center; padding: 10px 0; color: var(--accent);">
@@ -1302,7 +1234,6 @@ function toggleRevisionNotice() {
                 </div>
             `;
         } else {
-            // Standard active tracking text
             noticeBox.innerHTML = `
                 <strong>Revision Policy Notice:</strong> You have currently utilized 
                 <span style="color: var(--ink); font-weight: bold;">${currentCount}</span> 
@@ -1314,8 +1245,6 @@ function toggleRevisionNotice() {
         noticeBox.style.display = 'none';
     }
 }
-    // ─── START ────────────────────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', initDashboard);
 </script>
 </body>
 </html>
