@@ -1056,11 +1056,7 @@ if (revCounterEl) {
     if (loadScreen) loadScreen.style.display = 'none';
     if (dashMain) dashMain.style.display = 'block';
 }
-const triggerBox = document.getElementById('revisionDropdownTrigger');
-if (triggerBox && (d.overall_percent >= 100 || !d.dashboard_locked)) {
-    triggerBox.style.opacity = '0.6';
-    triggerBox.style.cursor = 'not-allowed';
-}
+
 // ─── HUB ─────────────────────────────────────────────────────────────────────
 async function loadHubFiles() {
     if (!projectToken || !_db) return;
