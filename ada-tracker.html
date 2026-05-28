@@ -471,66 +471,72 @@
             .payment-band { grid-template-columns: 1fr; }
             .tracker-grid { grid-template-columns: 1fr; }
         }
-/* The main container box */
+/* The main container box with a gold border edge */
 .countdown-bar {
-    background-color: #1a1a1a; /* Your black box background */
-    padding: 20px;
-    border-radius: 8px;
+    background-color: #1a1a1a;    /* The black box background */
+    border: 2px solid #d4af37;     /* Gold border edge */
+    padding: 20px 40px;            /* Generous padding for full-width look */
+    border-radius: 4px;
+    box-sizing: border-box;
     
-    /* Triple the existing width layout space */
+    /* Fill the entire grid session / width */
     width: 100%; 
-    max-width: 600px; /* Adjust this max-width to match 3x your original compact width */
-    margin: 0 auto;   /* Centers the box on the page */
+    display: grid;
+    /* Allocates space: Left side for label, Right side takes the remaining space */
+    grid-template-columns: 1fr auto; 
+    align-items: center;           /* Vertically centers the text and numbers */
+    gap: 40px;
 }
 
-/* Label above the countdown */
+/* "PROJECT DEADLINE" text styled on the left */
 .countdown-label {
-    display: block;
     color: #ffffff;
-    margin-bottom: 15px;
-    font-size: 24px; /* Scaled up by 1.5x */
-    text-align: center;
+    font-size: 24px;               /* 1.5x scaled size */
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
-/* The wrapper holding the time units */
+/* The wrapper holding the time units, spreading across the right side */
 .countdown-units {
     display: flex;
-    justify-content: space-between; /* Spreads the units evenly across the box */
-    gap: 20px;
+    justify-content: space-between;
+    gap: 50px;                     /* Generous spacing between the columns */
+    min-width: 50%;                /* Ensures it stretches nicely across the right */
 }
 
-/* Targets each individual column (Days, Hours, Mins, Secs) */
+/* Column container for each number + label pair */
 .countdown-units > div {
-    flex: 1;            /* Forces each unit to grow equally and fill the wider black box */
-    text-align: center; /* Centers the text inside its allocated wider space */
+    display: flex;
+    flex-direction: column;        /* Stacks the digit on top of the text */
+    align-items: center;           /* Centers them relative to each other */
 }
 
-/* Base style for Days, Hours, and Minutes digits (Scaled 1.5x bigger) */
+/* Default color for Days, Hours, and Minutes digits */
 #cdDays, #cdHours, #cdMins {
     display: block;
-    color: #ffffff; /* White */
-    font-size: 48px; /* Scaled up by 1.5x from a standard ~32px */
+    color: #ffffff;                /* White */
+    font-size: 48px;               /* 1.5x scaled size */
     font-weight: bold;
     line-height: 1;
 }
 
-/* Specific color for the Seconds digits (Scaled 1.5x bigger) */
+/* Specific color for the Seconds digits */
 #cdSecs {
     display: block;
-    color: #ff3333; /* Red */
-    font-size: 48px; /* Scaled up by 1.5x */
+    color: #ff3333;                /* Red */
+    font-size: 48px;               /* 1.5x scaled size */
     font-weight: bold;
     line-height: 1;
 }
 
-/* Text labels under the numbers (Days, Hours, etc. - Scaled 1.5x bigger) */
+/* Labels positioned perfectly underneath the numbers */
 .countdown-units label {
     display: block;
     color: #aaaaaa; 
-    font-size: 18px; /* Scaled up by 1.5x from a standard 12px */
-    margin-top: 8px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-size: 18px;               /* 1.5x scaled size */
+    margin-top: 8px;               /* Pushes it right below the digit */
+    font-weight: normal;
 }
     </style>
 </head>
