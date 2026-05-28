@@ -1029,11 +1029,21 @@ function populateDashboard(d) {
     
 const activeRevisions = d.revision_count || 0;
 const revCounterEl = document.getElementById('clientRevisionCounter');
+const triggerBox = document.getElementById('revisionDropdownTrigger');
+
 if (revCounterEl) {
     if (d.overall_percent >= 100 || !d.dashboard_locked) {
         revCounterEl.innerText = "PROTOCOL LOCKED";
+        if (triggerBox) {
+            triggerBox.style.opacity = '0.6';
+            triggerBox.style.cursor = 'not-allowed';
+        }
     } else {
         revCounterEl.innerText = `REVISION COUNT (${activeRevisions}/3)`;
+        if (triggerBox) {
+            triggerBox.style.opacity = '1';
+            triggerBox.style.cursor = 'pointer';
+        }
     }
 }
 
@@ -1056,7 +1066,11 @@ if (revCounterEl) {
     if (loadScreen) loadScreen.style.display = 'none';
     if (dashMain) dashMain.style.display = 'block';
 }
-
+const triggerBox = document.getElementById('revisionDropdownTrigger');
+if (triggerBox && (d.overall_percent >= 100 || !d.dashboard_locked)) {
+    triggerBox.style.opacity = '0.6';
+    triggerBox.style.cursor = 'not-allowed';
+}
 // ─── HUB ─────────────────────────────────────────────────────────────────────
 async function loadHubFiles() {
     if (!projectToken || !_db) return;
