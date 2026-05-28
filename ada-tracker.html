@@ -1011,26 +1011,47 @@ function populateDashboard(d) {
     }
 
  // Dynamic review container assignment logic
-if (d.overall_percent >= 100) {
-    const revArea = document.getElementById('reviewArea');
-    const revLock = document.getElementById('reviewLockedContent');
-    const revUnlock = document.getElementById('reviewUnlockedContent');
-    
-    if (revArea) revArea.classList.add('unlocked');
-    if (revLock) revLock.style.display  = 'none';
-    
-    if (revUnlock) {
-        if (!d.dashboard_locked) {
-            // Display locked review state if they already finished it
-            revUnlock.innerHTML = `
-                <h3 style="color:var(--gold);">Thank You</h3>
-                <p style="margin-top:15px; font-size:0.95rem; color:var(--mist); line-height: 1.8;">
-                    Your experience review has been recorded. Revisions and feedback channels are locked for completed phases.
-                </p>`;
+    if (d.overall_percent >= 100) {
+        const revArea = document.getElementById('reviewArea');
+        const revLock = document.getElementById('reviewLockedContent');
+        const revUnlock = document.getElementById('reviewUnlockedContent');
+        
+        if (revArea) revArea.classList.add('unlocked');
+        if (revLock) revLock.style.display  = 'none';
+        
+        if (revUnlock) {
+            // Check if they completed a submission during this session or if admin explicitly flagged it complete
+            const reviewAlreadySubmitted = sessionStorage.getItem(`submitted_review_${d.token}`) || d.review_approved; 
+
+            if (reviewAlreadySubmitted) {
+                // RULE 2 & 3: Display static thank you and lock channels down
+                revUnlock.innerHTML = `
+                    <h3 style="color:var(--gold);">Thank You</h3>
+                    <p style="margin-top:15px; font-size:0.95rem; color:var(--mist); line-height: 1.8;">
+                        Your experience review has been recorded. Revisions and feedback channels are locked for completed phases.
+                    </p>`;
+            } else {
+                // RULE 1: Fresh 100% milestone reached — present the entry form fields clearly
+                // Restores the original form HTML layout to prevent the premature "Thank You" message
+                revUnlock.innerHTML = `
+                    <h3 style="font-size:1.3rem; color:var(--ink);">Share Your ADA Experience</h3>
+                    <p style="font-size:0.9rem; color:var(--gold); margin-top:10px;">Congratulations on your project completion.</p>
+                    <div class="star-select" id="starSelect">
+                        <span onclick="setRating(1)">★</span>
+                        <span onclick="setRating(2)">★</span>
+                        <span onclick="setRating(3)">★</span>
+                        <span onclick="setRating(4)">★</span>
+                        <span onclick="setRating(5)">★</span>
+                    </div>
+                    <textarea class="review-textarea" id="reviewComment" placeholder="Tell us about your design experience..." rows="5"></textarea><br>
+                    <button class="submit-review-btn" onclick="submitReview()">Submit Verified Review</button>
+                `;
+                // Initialize star display state
+                setRating(selectedRating);
+            }
+            revUnlock.style.display = 'block';
         }
-        revUnlock.style.display = 'block';
     }
-}
 
     // Service terms
     const termsDisp = document.getElementById('termsDisplay');
@@ -1038,27 +1059,30 @@ if (d.overall_percent >= 100) {
         termsDisp.innerHTML = d.service_terms;
     }
     
-const activeRevisions = d.revision_count || 0;
-const revCounterEl = document.getElementById('clientRevisionCounter');
-const triggerBox = document.getElementById('revisionDropdownTrigger');
+// Revision Protocol Configuration
+    const activeRevisions = d.revision_count || 0;
+    const revCounterEl = document.getElementById('clientRevisionCounter');
+    const triggerBox = document.getElementById('revisionDropdownTrigger');
 
-if (revCounterEl) {
-    // ONLY lock if the project is at 100% AND the client completed the required review unlock step
-    if (d.overall_percent >= 100 && !d.dashboard_locked) {
-        revCounterEl.innerText = "PROTOCOL LOCKED";
-        if (triggerBox) {
-            triggerBox.style.opacity = '0.6';
-            triggerBox.style.cursor = 'not-allowed';
-        }
-    } else {
-        // Fix: Populates active tracking data if the project isn't locked yet
-        revCounterEl.innerText = `REVISION COUNT (${activeRevisions}/3)`;
-        if (triggerBox) {
-            triggerBox.style.opacity = '1';
-            triggerBox.style.cursor = 'pointer';
+    if (revCounterEl) {
+        const reviewAlreadySubmitted = sessionStorage.getItem(`submitted_review_${d.token}`) || d.review_approved;
+
+        // RULE 2: Only freeze the protocol tracking block IF progress is maxed out AND they have submitted their text
+        if (d.overall_percent >= 100 && reviewAlreadySubmitted) {
+            revCounterEl.innerText = "PROTOCOL LOCKED";
+            if (triggerBox) {
+                triggerBox.style.opacity = '0.6';
+                triggerBox.style.cursor = 'not-allowed';
+            }
+        } else {
+            // RULE 1: Keep tracking actively open if they haven't sent the form yet
+            revCounterEl.innerText = `REVISION COUNT (${activeRevisions}/3)`;
+            if (triggerBox) {
+                triggerBox.style.opacity = '1';
+                triggerBox.style.cursor = 'pointer';
+            }
         }
     }
-}
 
    // Countdown Execution Block Check
     const finalDeadline = d.deadline || d.proj_deadline;
@@ -1156,13 +1180,33 @@ async function submitReview() {
     if (error) {
         alert('Submission failed. Please try again.');
     } else {
+        // 1. Track submission state locally so the box stays locked if they refresh
+        sessionStorage.setItem(`submitted_review_${projectToken}`, 'true');
+        
+        // 2. Force countdown values to zero out instantly
+        if (countdownInterval) clearInterval(countdownInterval);
+        ['cdDays', 'cdHours', 'cdMins', 'cdSecs'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '00';
+        });
+
+        // 3. Render the Thank You state inside the review area immediately
         const revUnlock = document.getElementById('reviewUnlockedContent');
         if (revUnlock) {
             revUnlock.innerHTML = `
                 <h3 style="color:var(--gold);">Thank You</h3>
                 <p style="margin-top:15px; font-size:0.95rem; color:var(--mist); line-height: 1.8;">
-                    Your review has been submitted and will appear once approved by ADA.
+                    Your experience review has been recorded. Revisions and feedback channels are locked for completed phases.
                 </p>`;
+        }
+        
+        // 4. Lock the protocol bar header block visually immediately
+        const revCounterEl = document.getElementById('clientRevisionCounter');
+        const triggerBox = document.getElementById('revisionDropdownTrigger');
+        if (revCounterEl) revCounterEl.innerText = "PROTOCOL LOCKED";
+        if (triggerBox) {
+            triggerBox.style.opacity = '0.6';
+            triggerBox.style.cursor = 'not-allowed';
         }
     }
 }
@@ -1282,7 +1326,8 @@ async function submitLockedReview() {
             .update({ dashboard_locked: false })
             .eq('token', projectToken);
     }
-
+    // Set storage key flag before reloading dashboard views
+    sessionStorage.setItem(`submitted_review_${projectToken}`, 'true');
     document.getElementById('lockedScreen').innerHTML = `
         <div style="text-align:center; padding:80px 10%;">
             <span style="font-family:var(--f-display); font-size:2rem; letter-spacing:8px; color:var(--ink); display:block; margin-bottom:40px;">ADA</span>
@@ -1320,8 +1365,8 @@ function toggleRevisionNotice() {
     if (!noticeBox) return;
     
   // Check if the protocol is explicitly locked (Strictly at 100% completion AND review cleared)
-const isProtocolLocked = projectData && (projectData.overall_percent >= 100 && !projectData.dashboard_locked);
-
+    const reviewAlreadySubmitted = sessionStorage.getItem(`submitted_review_${projectToken}`) || projectData?.review_approved;
+    const isProtocolLocked = projectData && (projectData.overall_percent >= 100 && reviewAlreadySubmitted);
     if (noticeBox.style.display === 'none') {
         if (isProtocolLocked) {
             // Update the counter header dynamically to show it's locked
