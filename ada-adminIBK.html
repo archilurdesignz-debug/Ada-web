@@ -644,30 +644,36 @@ async function updateProject() {
 
 // ─── EXTRACT AND FORMAT DEADLINE TIMELINE ───────────────────────
     let formattedDeadline = null;
+    
+    // Explicitly target the verified layout input ID tag
     const deadlineInput = document.getElementById('editProjDeadline');
     
-    if (deadlineInput && deadlineInput.value) {
-        const rawDeadline = deadlineInput.value.trim();
+    // Safety check: force value extraction directly from the layout state
+    if (deadlineInput) {
+        const rawDeadline = (deadlineInput.value || "").trim();
         
-        // Safety Fallback: Automatically append hours and minutes if only date is present
-        const sanitizedRaw = rawDeadline.length < 16 ? rawDeadline + "T12:00" : rawDeadline;
+        console.log("ACTUAL EXTRACTION CRITERIA:", rawDeadline);
         
-        // Robust Extraction Regex to handle formatting variations seamlessly
-        const match = sanitizedRaw.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
-        if (match) {
-            const [_, year, month, day, hour, minute] = match.map(Number);
+        if (rawDeadline !== "") {
+            // Safety Fallback: Automatically append hours and minutes if only date is present
+            const sanitizedRaw = rawDeadline.length < 16 ? rawDeadline + "T12:00" : rawDeadline;
             
-            // Construct local time array safely mapping the correct JavaScript 0-11 month range
-            const localDate = new Date(year, month - 1, day, hour, minute, 0, 0);
-            
-            if (!isNaN(localDate.getTime())) {
-                formattedDeadline = localDate.toISOString(); // Convert straight to valid ISO UTC for database
+            // Robust Extraction Regex to handle formatting variations seamlessly
+            const match = sanitizedRaw.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+            if (match) {
+                const [_, year, month, day, hour, minute] = match.map(Number);
+                
+                // Construct local time array safely mapping the correct JavaScript 0-11 month range
+                const localDate = new Date(year, month - 1, day, hour, minute, 0, 0);
+                
+                if (!isNaN(localDate.getTime())) {
+                    formattedDeadline = localDate.toISOString(); // Convert straight to valid ISO UTC for database
+                }
             }
         }
     }
 
-console.log("FINAL ISO:", formattedDeadline);
-
+console.log("FINAL ISO TARGET:", formattedDeadline);
     // Final payload
  const payload = {
     overall_percent: parseInt(getVal('overallProgress')) || 0,
