@@ -1027,11 +1027,15 @@ function populateDashboard(d) {
         termsDisp.innerHTML = d.service_terms;
     }
     
-    const activeRevisions = d.revision_count || 0;
-    const revCounterEl = document.getElementById('clientRevisionCounter');
-    if (revCounterEl) {
+const activeRevisions = d.revision_count || 0;
+const revCounterEl = document.getElementById('clientRevisionCounter');
+if (revCounterEl) {
+    if (d.overall_percent >= 100 || !d.dashboard_locked) {
+        revCounterEl.innerText = "PROTOCOL LOCKED";
+    } else {
         revCounterEl.innerText = `REVISION COUNT (${activeRevisions}/3)`;
     }
+}
 
     // Countdown Execution Block Check
     const finalDeadline = d.deadline || d.proj_deadline;
@@ -1052,7 +1056,11 @@ function populateDashboard(d) {
     if (loadScreen) loadScreen.style.display = 'none';
     if (dashMain) dashMain.style.display = 'block';
 }
-
+const triggerBox = document.getElementById('revisionDropdownTrigger');
+if (triggerBox && (d.overall_percent >= 100 || !d.dashboard_locked)) {
+    triggerBox.style.opacity = '0.6';
+    triggerBox.style.cursor = 'not-allowed';
+}
 // ─── HUB ─────────────────────────────────────────────────────────────────────
 async function loadHubFiles() {
     if (!projectToken || !_db) return;
@@ -1288,20 +1296,27 @@ async function submitLockedReview() {
 // ─── REVISION NOTICE CONTROL ──────────────────────────────────────────────────
 function toggleRevisionNotice() {
     const noticeBox = document.getElementById('revisionNoticeContent');
+    const revCounterEl = document.getElementById('clientRevisionCounter');
     const currentCount = projectData?.revision_count || 0; 
     
     if (!noticeBox) return;
     
+    // Check if the protocol is explicitly locked (100% completion or bypassed lock screen)
+    const isProtocolLocked = projectData && (projectData.overall_percent >= 100 || !projectData.dashboard_locked);
+
     if (noticeBox.style.display === 'none') {
-        // If the project is at 100% and dashboard_locked is false (meaning they completed the forced review bypass)
-        if (projectData && projectData.overall_percent >= 100 && !projectData.dashboard_locked) {
+        if (isProtocolLocked) {
+            // Update the counter header dynamically to show it's locked
+            if (revCounterEl) revCounterEl.innerText = "PROTOCOL LOCKED";
+            
             noticeBox.innerHTML = `
                 <div style="text-align: center; padding: 10px 0; color: var(--accent);">
-                    <strong>Protocol Locked:</strong> You have already submitted your final project experience review. Revisions are closed for completed phases.
+                    <strong>Protocol Locked:</strong> You have already left a review. The revision box and architectural modifications are now permanently locked.
                 </div>
             `;
         } else {
             // Standard active tracking text
+            if (revCounterEl) revCounterEl.innerText = `REVISION COUNT (${currentCount}/3)`;
             noticeBox.innerHTML = `
                 <strong>Revision Policy Notice:</strong> You have currently utilized 
                 <span style="color: var(--ink); font-weight: bold;">${currentCount}</span> 
