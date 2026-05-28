@@ -1059,7 +1059,7 @@ if (revCounterEl) {
     }
 }
 
-    // Countdown Execution Block Check
+   // Countdown Execution Block Check
     const finalDeadline = d.deadline || d.proj_deadline;
     const cDownBar = document.getElementById('countdownBar');
 
@@ -1077,11 +1077,6 @@ if (revCounterEl) {
     const dashMain = document.getElementById('dashboardMain');
     if (loadScreen) loadScreen.style.display = 'none';
     if (dashMain) dashMain.style.display = 'block';
-}
-const triggerBox = document.getElementById('revisionDropdownTrigger');
-if (triggerBox && (d.overall_percent >= 100 || !d.dashboard_locked)) {
-    triggerBox.style.opacity = '0.6';
-    triggerBox.style.cursor = 'not-allowed';
 }
 // ─── HUB ─────────────────────────────────────────────────────────────────────
 async function loadHubFiles() {
