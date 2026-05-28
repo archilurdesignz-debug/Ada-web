@@ -652,24 +652,19 @@ let formattedDeadline = null;
 
 const deadlineInput = document.getElementById('editProjDeadline');
 
-if (deadlineInput && deadlineInput.value) {
+if (deadlineInput?.value) {
 
     /*
-        datetime-local returns:
-        "2026-05-28T18:30"
+        datetime-local already returns:
+        YYYY-MM-DDTHH:mm
 
-        Convert directly into ISO UTC format
-        for Supabase timestamptz storage.
+        Simply append seconds and let Supabase
+        parse it directly as timestamptz.
     */
 
-    const localDate = new Date(deadlineInput.value);
-
-    // Validate date before submission
-    if (!isNaN(localDate.getTime())) {
-        formattedDeadline = localDate.toISOString();
-    }
+    formattedDeadline = deadlineInput.value + ':00';
 }
-
+    
 // DEBUG
 console.log('FINAL DEADLINE ISO:', formattedDeadline);
 
