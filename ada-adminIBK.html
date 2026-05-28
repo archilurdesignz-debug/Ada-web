@@ -642,37 +642,29 @@ async function updateProject() {
         }
     });
 
-// ─── DEADLINE HANDLING ─────────────────────────────────────
-let formattedDeadline = null;
-
-const rawDeadline = document.getElementById('editProjDeadline')?.value;
-
-console.log("INPUT VALUE:", rawDeadline);
-
-if (rawDeadline && rawDeadline !== "") {
-
-    // Split manually
-    const [datePart, timePart] = rawDeadline.split('T');
-
-    if (datePart && timePart) {
-
-        const [year, month, day] = datePart.split('-').map(Number);
-        const [hour, minute] = timePart.split(':').map(Number);
-
-        // Create LOCAL datetime
-        const localDate = new Date(
-            year,
-            month - 1,
-            day,
-            hour,
-            minute
-        );
-
-        if (!isNaN(localDate.getTime())) {
-            formattedDeadline = localDate.toISOString();
+// ─── EXTRACT AND FORMAT DEADLINE TIMELINE ───────────────────────
+    let formattedDeadline = null;
+    const deadlineInput = document.getElementById('editProjDeadline');
+    
+    if (deadlineInput && deadlineInput.value) {
+        const rawDeadline = deadlineInput.value.trim();
+        
+        // Safety Fallback: Automatically append hours and minutes if only date is present
+        const sanitizedRaw = rawDeadline.length < 16 ? rawDeadline + "T12:00" : rawDeadline;
+        
+        // Robust Extraction Regex to handle formatting variations seamlessly
+        const match = sanitizedRaw.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+        if (match) {
+            const [_, year, month, day, hour, minute] = match.map(Number);
+            
+            // Construct local time array safely mapping the correct JavaScript 0-11 month range
+            const localDate = new Date(year, month - 1, day, hour, minute, 0, 0);
+            
+            if (!isNaN(localDate.getTime())) {
+                formattedDeadline = localDate.toISOString(); // Convert straight to valid ISO UTC for database
+            }
         }
     }
-}
 
 console.log("FINAL ISO:", formattedDeadline);
 
