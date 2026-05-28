@@ -1010,16 +1010,27 @@ function populateDashboard(d) {
         });
     }
 
-    // Unlock review at 100%
-    if (d.overall_percent >= 100) {
-        const revArea = document.getElementById('reviewArea');
-        const revLock = document.getElementById('reviewLockedContent');
-        const revUnlock = document.getElementById('reviewUnlockedContent');
-        
-        if (revArea) revArea.classList.add('unlocked');
-        if (revLock) revLock.style.display  = 'none';
-        if (revUnlock) revUnlock.style.display = 'block';
+ // Dynamic review container assignment logic
+if (d.overall_percent >= 100) {
+    const revArea = document.getElementById('reviewArea');
+    const revLock = document.getElementById('reviewLockedContent');
+    const revUnlock = document.getElementById('reviewUnlockedContent');
+    
+    if (revArea) revArea.classList.add('unlocked');
+    if (revLock) revLock.style.display  = 'none';
+    
+    if (revUnlock) {
+        if (!d.dashboard_locked) {
+            // Display locked review state if they already finished it
+            revUnlock.innerHTML = `
+                <h3 style="color:var(--gold);">Thank You</h3>
+                <p style="margin-top:15px; font-size:0.95rem; color:var(--mist); line-height: 1.8;">
+                    Your experience review has been recorded. Revisions and feedback channels are locked for completed phases.
+                </p>`;
+        }
+        revUnlock.style.display = 'block';
     }
+}
 
     // Service terms
     const termsDisp = document.getElementById('termsDisplay');
@@ -1039,6 +1050,7 @@ if (revCounterEl) {
             triggerBox.style.cursor = 'not-allowed';
         }
     } else {
+        // Fix: Populates active tracking data if the project isn't locked yet
         revCounterEl.innerText = `REVISION COUNT (${activeRevisions}/3)`;
         if (triggerBox) {
             triggerBox.style.opacity = '1';
