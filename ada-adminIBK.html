@@ -647,19 +647,35 @@ let formattedDeadline = null;
 
 const rawDeadline = document.getElementById('editProjDeadline')?.value;
 
-if (rawDeadline) {
-    // datetime-local returns: "2026-05-28T14:30"
-    
-    // Convert safely to ISO UTC format for Supabase timestamptz
-    const localDate = new Date(rawDeadline);
+console.log("INPUT VALUE:", rawDeadline);
 
-    if (!isNaN(localDate.getTime())) {
-        formattedDeadline = localDate.toISOString();
+if (rawDeadline && rawDeadline !== "") {
+
+    // Split manually
+    const [datePart, timePart] = rawDeadline.split('T');
+
+    if (datePart && timePart) {
+
+        const [year, month, day] = datePart.split('-').map(Number);
+        const [hour, minute] = timePart.split(':').map(Number);
+
+        // Create LOCAL datetime
+        const localDate = new Date(
+            year,
+            month - 1,
+            day,
+            hour,
+            minute
+        );
+
+        if (!isNaN(localDate.getTime())) {
+            formattedDeadline = localDate.toISOString();
+        }
     }
 }
 
-console.log("RAW DEADLINE:", rawDeadline);
-console.log("FORMATTED DEADLINE:", formattedDeadline);
+console.log("FINAL ISO:", formattedDeadline);
+
     // Final payload
  const payload = {
     overall_percent: parseInt(getVal('overallProgress')) || 0,
@@ -682,17 +698,17 @@ console.log("FORMATTED DEADLINE:", formattedDeadline);
 
     custom_tracks: customTracksCompiledArray
 };
-
-    console.log('Submitting Payload:', payload);
-
     if (!_db) {
-        alert('Supabase not connected.');
-        return;
-    }
+    alert('Supabase not connected.');
+    return;
+}
 
-    const { data, error } = await _db
-        .from('projects')
-        .update(payload)
+// DEBUG OUTPUT
+console.log("Submitting Payload:", payload);
+
+const { data, error } = await _db
+    .from('projects')
+    .update(payload)
         .eq('token', token)
         .select();
 
