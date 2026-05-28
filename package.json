@@ -1,0 +1,16 @@
+{
+  "name": "ada-archilurdesignz-backend",
+  "version": "1.0.0",
+  "description": "Backend services for ADA Archilurdesignz portfolio and store",
+  "main": "index.html",
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.43.0",
+    "dropbox": "^10.30.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0"
+  }
+}
