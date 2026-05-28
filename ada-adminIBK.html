@@ -642,23 +642,24 @@ async function updateProject() {
         }
     });
 
-// Deadline — parse datetime-local safely across all browsers
+// ─── DEADLINE HANDLING ─────────────────────────────────────
 let formattedDeadline = null;
-const rawDeadline = document.getElementById('editProjDeadline').value;
-if (rawDeadline && rawDeadline.trim()) {
-    // Falls back to mid-day 12:00 if the time string components are missing
-    const sanitizedRaw = rawDeadline.trim().length < 16 ? rawDeadline.trim() + "T12:00" : rawDeadline.trim();
-    const [datePart, timePart] = sanitizedRaw.split('T');
-    const [year, month, day]   = datePart.split('-').map(Number);
-    const [hour, minute]       = (timePart || '12:00').split(':').map(Number);
+
+const rawDeadline = document.getElementById('editProjDeadline')?.value;
+
+if (rawDeadline) {
+    // datetime-local returns: "2026-05-28T14:30"
     
-    const localDate = new Date(year, month - 1, day, hour, minute, 0, 0);
+    // Convert safely to ISO UTC format for Supabase timestamptz
+    const localDate = new Date(rawDeadline);
+
     if (!isNaN(localDate.getTime())) {
         formattedDeadline = localDate.toISOString();
     }
 }
-// formattedDeadline is now either a valid ISO string or null — never throws
 
+console.log("RAW DEADLINE:", rawDeadline);
+console.log("FORMATTED DEADLINE:", formattedDeadline);
     // Final payload
  const payload = {
     overall_percent: parseInt(getVal('overallProgress')) || 0,
