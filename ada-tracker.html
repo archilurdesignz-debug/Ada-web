@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Tracker | ADA Archilurdesignz</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ── TOKENS ──────────────────────────────────────────────── */
+        :root {
+            --bg:        #f5f2ed;
+            --bg2:       #eceae4;
+            --bg3:       #e2ddd6;
+            --ink:       #1a1714;
+            --ink2:      #2e2b26;
+            --ink3:      #4a4540;
+            --mist:      #6b6560;
+            --rule:      rgba(26,23,20,0.1);
+            --gold:      #8a6a3c;
+            --gold2:     #b08a50;
+            --accent:    #c8a87a;
+            --green:     #2d6a4f;
+            --amber:     #b45309;
+            --slate:     #9ca3af;
+            --wa:        #25D366;
+            --f-display: 'Playfair Display', Georgia, serif;
+            --f-body:    'Outfit', sans-serif;
+            --ease:      cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html, body { width:100%; overflow-x:hidden; }
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: var(--f-body);
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: var(--f-display);
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+
+        /* ── LAYOUT ──────────────────────────────────────────────── */
+        .dashboard-wrapper { display: flex; min-height: 100vh; }
+
+        /* ── SIDEBAR ─────────────────────────────────────────────── */
+        aside {
+            width: 280px; flex-shrink: 0;
+            background: var(--ink2);
+            display: flex; flex-direction: column;
+            padding: 48px 36px;
+            position: sticky; top: 0; height: 100vh;
+            overflow-y: auto;
+        }
+
+        .aside-logo {
+            font-family: var(--f-display);
+            font-size: 1.6rem; letter-spacing: 6px;
+            color: var(--accent); text-transform: uppercase;
+            display: block; margin-bottom: 4px;
+        }
+        .aside-rc {
+            font-family: var(--f-body);
+            font-size: 0.65rem; letter-spacing: 2px;
+            color: rgba(201,191,176,0.4);
+            text-transform: uppercase; display: block;
+            margin-bottom: 56px;
+        }
+
+        .aside-nav { list-style: none; }
+        .aside-nav li {
+            margin-bottom: 6px;
+        }
+        .aside-nav li button {
+            background: none; border: none;
+            width: 100%; text-align: left;
+            font-family: var(--f-body); font-size: 0.8rem;
+            font-weight: 400; letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(201,191,176,0.45);
+            padding: 12px 16px;
+            cursor: pointer; transition: all 0.25s;
+            border-radius: 2px;
+            position: relative;
+        }
+        .aside-nav li button::before {
+            content: '';
+            position: absolute; left: 0; top: 50%;
+            transform: translateY(-50%);
+            width: 2px; height: 0;
+            background: var(--accent);
+            transition: height 0.25s var(--ease);
+        }
+        .aside-nav li button:hover { color: rgba(201,191,176,0.8); }
+        .aside-nav li button.active {
+            color: var(--accent);
+            background: rgba(200,168,122,0.08);
+        }
+        .aside-nav li button.active::before { height: 60%; }
+
+        /* ── MAIN ────────────────────────────────────────────────── */
+        main { flex: 1; padding: 56px 6%; overflow-x: hidden; }
+
+        /* ── PANELS ──────────────────────────────────────────────── */
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        /* ── HEADER BAR ──────────────────────────────────────────── */
+        .header-bar {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 8px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--rule);
+        }
+        .header-left h2 {
+            font-family: var(--f-display);
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            font-weight: 500; color: var(--ink);
+            letter-spacing: 0.5px; margin-bottom: 4px;
+        }
+        .client-name-display {
+            font-family: var(--f-body);
+            font-size: 1rem; font-weight: 400;
+            color: var(--ink3); margin-bottom: 4px;
+        }
+        .ref-tag {
+            font-size: 0.72rem; letter-spacing: 2px;
+            color: var(--gold); text-transform: uppercase;
+        }
+        .completion-display {
+            text-align: right;
+        }
+        .completion-display .pct {
+            font-family: var(--f-display);
+            font-size: 2.8rem; color: var(--gold);
+            line-height: 1; display: block;
+        }
+        .completion-display .pct-label {
+            font-size: 0.65rem; letter-spacing: 2.5px;
+            color: var(--mist); text-transform: uppercase;
+        }
+
+        /* ── PAYMENT SUMMARY BAND ────────────────────────────────── */
+        .payment-band {
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            gap: 1px; background: var(--rule);
+            margin-bottom: 32px;
+            border: 1px solid var(--rule);
+        }
+        .pay-cell {
+            background: var(--bg);
+            padding: 20px 24px;
+        }
+        .pay-cell .pay-label {
+            font-size: 0.65rem; letter-spacing: 2px;
+            color: var(--mist); text-transform: uppercase;
+            display: block; margin-bottom: 6px;
+        }
+        .pay-cell .pay-value {
+            font-family: var(--f-display);
+            font-size: 1.4rem; font-weight: 500;
+            color: var(--ink); letter-spacing: -0.5px;
+        }
+        .pay-cell.deposit .pay-value { color: var(--green); }
+        .pay-cell.balance .pay-value { color: var(--amber); }
+        .pay-cell .pay-sub {
+            font-size: 0.72rem; color: var(--mist);
+            margin-top: 3px; display: block;
+        }
+
+        /* ── ARCHITECT INFO ──────────────────────────────────────── */
+        .architect-info {
+            margin-bottom: 32px; padding: 20px 24px;
+            background: var(--bg2);
+            border-left: 3px solid var(--gold);
+            display: flex; align-items: center; gap: 24px;
+        }
+        .arch-label {
+            font-size: 0.65rem; letter-spacing: 2px;
+            color: var(--mist); text-transform: uppercase;
+            display: block; margin-bottom: 4px;
+        }
+        .arch-name {
+            font-family: var(--f-display);
+            font-size: 1.1rem; color: var(--ink); font-weight: 500;
+        }
+
+        /* ── COUNTDOWN ───────────────────────────────────────────── */
+        .countdown-bar {
+            display: flex; align-items: center; gap: 24px;
+            flex-wrap: wrap; margin-bottom: 36px;
+            padding: 22px 24px;
+            background: var(--ink2);
+            border-radius: 2px;
+        }
+        .countdown-label {
+            font-size: 0.65rem; letter-spacing: 3px;
+            color: rgba(201,191,176,0.5);
+            text-transform: uppercase; white-space: nowrap;
+        }
+        .countdown-units { display: flex; gap: 20px; flex-wrap: wrap; }
+        .countdown-unit { text-align: center; min-width: 60px; }
+        .countdown-unit .num {
+            font-family: var(--f-display);
+            font-size: 2rem; color: var(--accent);
+            line-height: 1; display: block;
+        }
+        .countdown-unit .lbl {
+            font-size: 0.6rem; letter-spacing: 2px;
+            color: rgba(201,191,176,0.4);
+            text-transform: uppercase; display: block; margin-top: 4px;
+        }
+        .countdown-expired {
+            font-size: 0.8rem; letter-spacing: 2px; color: var(--accent);
+        }
+
+        /* ── SERVICE CARDS GRID ──────────────────────────────────── */
+        .tracker-section-label {
+            font-size: 0.7rem; letter-spacing: 3px;
+            color: var(--mist); text-transform: uppercase;
+            margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
+        }
+        .tracker-section-label::after {
+            content: ''; flex: 1; height: 1px; background: var(--rule);
+        }
+
+        .tracker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 16px; margin-bottom: 48px;
+        }
+
+        .service-card {
+            background: var(--bg);
+            border: 1px solid var(--rule);
+            padding: 24px; position: relative;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .service-card:hover { border-color: var(--gold2); box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        .service-card.clickable { cursor: pointer; }
+        .service-card.locked-dependency {
+            opacity: 0.5;
+            background: var(--bg2);
+            cursor: not-allowed;
+        }
+        .service-card.locked-dependency:hover { border-color: var(--rule); box-shadow: none; }
+
+        .lock-overlay {
+            position: absolute; top: 14px; right: 16px;
+            font-size: 0.6rem; color: var(--mist);
+            letter-spacing: 1px; text-transform: uppercase;
+        }
+
+        .service-card h4 {
+            font-family: var(--f-display);
+            font-size: 1rem; font-weight: 500;
+            color: var(--ink); margin-bottom: 16px;
+        }
+
+        .progress-container {
+            width: 100%; height: 5px;
+            background: var(--bg3); margin-bottom: 10px;
+            border-radius: 3px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; background: var(--gold2);
+            width: 0%; transition: width 1.5s var(--ease);
+            border-radius: 3px;
+        }
+        .pkg-status {
+            font-size: 0.75rem; color: var(--mist);
+            letter-spacing: 0.5px;
+        }
+
+        /* ── SUB-MODAL ───────────────────────────────────────────── */
+        .sub-modal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(245,242,237,0.97);
+            backdrop-filter: blur(12px);
+            z-index: 3000; padding: 80px 8%; overflow-y: auto;
+        }
+        .sub-modal.open { display: block; }
+        .close-sub {
+            position: fixed; top: 32px; right: 40px;
+            cursor: pointer; color: var(--mist);
+            font-family: var(--f-body);
+            font-size: 0.7rem; letter-spacing: 2px;
+            text-transform: uppercase; transition: color 0.3s;
+            background: none; border: none;
+        }
+        .close-sub:hover { color: var(--ink); }
+        .sub-modal h2 {
+            font-size: clamp(1.6rem, 3vw, 2.4rem);
+            color: var(--ink); margin-bottom: 40px;
+        }
+        .sub-step {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 22px 0; border-bottom: 1px solid var(--rule);
+        }
+        .step-label {
+            font-size: 1rem; color: var(--ink); font-weight: 400;
+        }
+        .step-status {
+            font-size: 0.65rem; padding: 5px 16px;
+            border-radius: 20px; text-transform: uppercase;
+            letter-spacing: 1px; min-width: 110px; text-align: center;
+            font-weight: 500;
+        }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-started   { background: #fef3c7; color: #92400e; }
+        .status-pending   { background: var(--bg3); color: var(--mist); }
+
+        /* ── SUBMISSION HUB ──────────────────────────────────────── */
+        .hub-header { margin-bottom: 36px; border-bottom: 1px solid var(--rule); padding-bottom: 20px; }
+        .hub-header h2 { font-size: clamp(1.6rem,3vw,2.2rem); color: var(--ink); margin-bottom: 6px; }
+        .hub-header p { font-size: 0.85rem; color: var(--mist); }
+        .hub-empty { text-align: center; padding: 80px 20px; color: var(--mist); font-size: 0.85rem; letter-spacing: 1px; }
+
+        .file-list { display: flex; flex-direction: column; gap: 10px; }
+        .stage-label {
+            font-size: 0.65rem; letter-spacing: 3px; color: var(--gold);
+            text-transform: uppercase; margin: 24px 0 8px;
+            padding-left: 12px; border-left: 2px solid var(--gold);
+        }
+        .file-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 18px 22px; background: var(--bg);
+            border: 1px solid var(--rule); transition: border-color 0.3s;
+        }
+        .file-item:hover { border-color: var(--gold2); }
+        .file-meta { display: flex; flex-direction: column; gap: 4px; }
+        .file-name { font-size: 0.95rem; font-family: var(--f-display); color: var(--ink); }
+        .file-date { font-size: 0.72rem; color: var(--mist); }
+        .file-tag {
+            font-size: 0.6rem; letter-spacing: 1px;
+            padding: 3px 10px; border: 1px solid var(--gold2);
+            color: var(--gold); text-transform: uppercase;
+            display: inline-block; margin-top: 4px;
+        }
+        .download-btn {
+            padding: 10px 24px;
+            border: 1px solid var(--ink2); background: transparent;
+            color: var(--ink); font-size: 0.72rem;
+            letter-spacing: 1.5px; text-transform: uppercase;
+            cursor: pointer; text-decoration: none; transition: all 0.3s;
+            white-space: nowrap; font-family: var(--f-body);
+        }
+        .download-btn:hover { background: var(--ink2); color: var(--bg); }
+
+        /* ── REVIEW ──────────────────────────────────────────────── */
+        .review-section {
+            padding: 52px; border: 1px solid var(--rule);
+            background: var(--bg2); text-align: center; margin-top: 56px;
+        }
+        .review-section.unlocked { border-color: var(--gold2); }
+        .stars-display { font-size: 2.2rem; color: var(--bg3); margin: 20px 0; }
+        .review-section.unlocked .stars-display { color: var(--gold2); }
+        .star-select { display: flex; justify-content: center; gap: 12px; font-size: 2.2rem; margin: 20px 0; }
+        .star-select span { cursor: pointer; color: var(--bg3); transition: 0.2s; }
+        .star-select span.active { color: var(--gold2); }
+        .review-textarea {
+            width: 100%; max-width: 640px;
+            background: var(--bg); border: 1px solid var(--rule);
+            color: var(--ink); padding: 18px 20px;
+            margin-bottom: 20px; font-family: var(--f-body);
+            font-size: 0.9rem; outline: none; resize: vertical;
+            line-height: 1.7;
+        }
+        .review-textarea:focus { border-color: var(--gold2); }
+        .submit-review-btn {
+            padding: 14px 48px; border: 1px solid var(--rule);
+            background: transparent; color: var(--mist);
+            cursor: not-allowed; text-transform: uppercase;
+            letter-spacing: 2px; font-size: 0.8rem;
+            font-family: var(--f-body); transition: all 0.3s;
+        }
+        .unlocked .submit-review-btn {
+            border-color: var(--ink2); color: var(--ink); cursor: pointer;
+        }
+        .unlocked .submit-review-btn:hover {
+            background: var(--ink2); color: var(--bg);
+        }
+
+        /* ── TERMS ───────────────────────────────────────────────── */
+        .terms-content { max-width: 780px; line-height: 1.85; }
+        .terms-content h3 {
+            font-family: var(--f-display); color: var(--ink);
+            font-size: 1.1rem; margin: 32px 0 12px;
+            padding-bottom: 8px; border-bottom: 1px solid var(--rule);
+        }
+        .terms-content p, .terms-content li {
+            font-size: 0.95rem; color: var(--ink3);
+            margin-bottom: 14px; font-weight: 300;
+        }
+        .terms-content ul { padding-left: 20px; margin-bottom: 20px; }
+        .terms-content strong { font-weight: 600; color: var(--ink); }
+
+        /* ── LOADING / ERROR ─────────────────────────────────────── */
+        .loading-screen {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            height: 100vh; gap: 20px; background: var(--bg);
+        }
+        .loading-screen .logo {
+            font-family: var(--f-display); font-size: 2rem;
+            letter-spacing: 8px; color: var(--ink);
+        }
+        .loading-screen p {
+            font-size: 0.72rem; letter-spacing: 3px;
+            color: var(--mist); text-transform: uppercase;
+        }
+        .spinner {
+            width: 36px; height: 36px;
+            border: 2px solid var(--rule);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .error-screen {
+            text-align: center; padding: 100px 10%;
+            background: var(--bg); min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .error-screen h2 { font-family: var(--f-display); font-size: 2rem; color: var(--ink); margin-bottom: 16px; }
+        .error-screen p { font-size: 0.95rem; color: var(--mist); margin-bottom: 32px; line-height: 1.7; }
+        .error-contact {
+            display: inline-block; padding: 14px 32px;
+            border: 1px solid var(--gold); color: var(--gold);
+            font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase;
+            text-decoration: none; transition: all 0.3s;
+        }
+        .error-contact:hover { background: var(--gold); color: var(--bg); }
+
+        /* ── WA ──────────────────────────────────────────────────── */
+        #waDraggable {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 58px; height: 58px; background: var(--wa);
+            border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
+            z-index: 9999; cursor: move; touch-action: none;
+            box-shadow: 0 8px 24px rgba(37,211,102,0.3);
+            transition: transform 0.3s;
+        }
+        #waDraggable:hover { transform: scale(1.08); }
+        #waDraggable svg { width: 28px; fill: white; pointer-events: none; }
+
+        /* ── RESPONSIVE ──────────────────────────────────────────── */
+        @media (max-width: 900px) {
+            .dashboard-wrapper { flex-direction: column; }
+            aside { width: 100%; height: auto; padding: 24px 20px; position: relative; }
+            .aside-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+            .aside-nav li button { padding: 8px 16px; width: auto; }
+            .aside-rc { margin-bottom: 0; }
+            main { padding: 32px 5%; }
+            .payment-band { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 600px) {
+            .header-bar { flex-direction: column; gap: 16px; }
+            .completion-display { text-align: left; }
+            .payment-band { grid-template-columns: 1fr; }
+            .tracker-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── LOADING ─────────────────────────────────────────────────────── -->
+<div id="loadingScreen" class="loading-screen">
+    <span class="logo">ADA</span>
+    <div class="spinner"></div>
+    <p>Loading your project...</p>
+</div>
+
+<!-- ── ERROR ───────────────────────────────────────────────────────── -->
+<div id="errorScreen" class="error-screen" style="display:none;">
+    <h2>Project Not Found</h2>
+    <p>The link you used is invalid or has expired.<br>Please contact ADA for assistance.</p>
+    <a href="https://wa.me/2348138580315" class="error-contact">Contact ADA</a>
+</div>
+
+<!-- ── DASHBOARD ───────────────────────────────────────────────────── -->
+<div id="dashboardMain" style="display:none;">
+    <div class="dashboard-wrapper">
+
+        <!-- SIDEBAR -->
+        <aside>
+            <span class="aside-logo">ADA</span>
+            <span class="aside-rc">RC: 9176834</span>
+            <ul class="aside-nav">
+                <li><button class="active" onclick="showPanel('tracker', this)">Project Tracker</button></li>
+                <li><button onclick="showPanel('hub', this)">Submission Hub</button></li>
+                <li><button onclick="showPanel('consultation', this)">Consultation</button></li>
+                <li><button onclick="showPanel('terms', this)">Service Terms</button></li>
+            </ul>
+        </aside>
+
+        <!-- MAIN -->
+        <main>
+
+            <!-- ── TRACKER PANEL ──────────────────────────────── -->
+            <div class="panel active" id="panel-tracker">
+
+                <!-- Header: project name / client / ref / completion % -->
+                <div class="header-bar">
+                    <div class="header-left">
+                        <h2 id="projTitle">—</h2>
+                        <p class="client-name-display" id="clientNameDisplay">—</p>
+                        <span class="ref-tag" id="projToken"></span>
+                    </div>
+                    <div class="completion-display">
+                        <span class="pct" id="totalPercentText">0%</span>
+                        <span class="pct-label">Overall Completion</span>
+                    </div>
+                </div>
+
+                <!-- Payment Summary Band -->
+                <div class="payment-band" id="paymentBand" style="display:none;">
+                    <div class="pay-cell deposit">
+                        <span class="pay-label">Initial Deposit Paid</span>
+                        <span class="pay-value" id="depositDisplay">—</span>
+                        <span class="pay-sub">Confirmed payment received</span>
+                    </div>
+                    <div class="pay-cell">
+                        <span class="pay-label">Total Agreed Sum</span>
+                        <span class="pay-value" id="totalSumDisplay">—</span>
+                        <span class="pay-sub">Full project package fee</span>
+                    </div>
+                    <div class="pay-cell balance">
+                        <span class="pay-label">Outstanding Balance</span>
+                        <span class="pay-value" id="balanceDisplay">—</span>
+                        <span class="pay-sub">Payable at completion</span>
+                    </div>
+                </div>
+
+                <!-- Architect -->
+                <div class="architect-info">
+                    <div>
+                        <span class="arch-label">Lead Architect</span>
+                        <span class="arch-name" id="leadArch">—</span>
+                    </div>
+                </div>
+
+                <!-- Countdown -->
+                <div class="countdown-bar" id="countdownBar" style="display:none;">
+                    <span class="countdown-label">Project Deadline</span>
+                    <div class="countdown-units">
+                        <div class="countdown-unit"><span class="num" id="cdDays">00</span><span class="lbl">Days</span></div>
+                        <div class="countdown-unit"><span class="num" id="cdHours">00</span><span class="lbl">Hours</span></div>
+                        <div class="countdown-unit"><span class="num" id="cdMins">00</span><span class="lbl">Minutes</span></div>
+                        <div class="countdown-unit"><span class="num" id="cdSecs">00</span><span class="lbl">Seconds</span></div>
+                    </div>
+                </div>
+
+                <!-- Service Cards -->
+                <p class="tracker-section-label">Service Execution Tracker</p>
+                <div class="tracker-grid">
+                    <div class="service-card clickable" onclick="toggleSubModal(true)">
+                        <h4>Architectural Design</h4>
+                        <div class="progress-container"><div class="progress-fill" id="fillArch"></div></div>
+                        <span class="pkg-status" id="statusArch">—</span>
+                    </div>
+                    <div class="service-card">
+                        <h4>3D Visualization</h4>
+                        <div class="progress-container"><div class="progress-fill" id="fill3d"></div></div>
+                        <span class="pkg-status" id="status3d">—</span>
+                    </div>
+                    <div class="service-card locked-dependency eng-card">
+                        <span class="lock-overlay">🔒 Locked</span>
+                        <h4>Structural Engineering</h4>
+                        <div class="progress-container"><div class="progress-fill" style="width:0%"></div></div>
+                        <span class="pkg-status">Awaiting Coordination</span>
+                    </div>
+                    <div class="service-card locked-dependency eng-card">
+                        <span class="lock-overlay">🔒 Locked</span>
+                        <h4>Mechanical Engineering</h4>
+                        <div class="progress-container"><div class="progress-fill" style="width:0%"></div></div>
+                        <span class="pkg-status">Awaiting Coordination</span>
+                    </div>
+                    <div class="service-card locked-dependency eng-card">
+                        <span class="lock-overlay">🔒 Locked</span>
+                        <h4>Electrical Engineering</h4>
+                        <div class="progress-container"><div class="progress-fill" style="width:0%"></div></div>
+                        <span class="pkg-status">Awaiting Coordination</span>
+                    </div>
+                    <div class="service-card">
+                        <h4>Quantity Surveying (BoQ)</h4>
+                        <div class="progress-container"><div class="progress-fill" id="fillQS"></div></div>
+                        <span class="pkg-status" id="statusQS">—</span>
+                    </div>
+                    <div class="service-card">
+                        <h4>Permit Approval</h4>
+                        <div class="progress-container"><div class="progress-fill" id="fillPermit"></div></div>
+                        <span class="pkg-status" id="statusPermit">—</span>
+                    </div>
+                </div>
+
+                <!-- Review -->
+                <div class="review-section" id="reviewArea">
+                    <div id="reviewLockedContent">
+                        <h3 style="color:var(--mist); font-size:1.2rem;">Project Experience Review</h3>
+                        <p style="font-size:0.9rem; color:var(--mist); margin-top:10px;">Unlocks when project reaches 100% completion.</p>
+                        <div class="stars-display">★★★★★</div>
+                        <button class="submit-review-btn" disabled>Review Locked</button>
+                    </div>
+                    <div id="reviewUnlockedContent" style="display:none;">
+                        <h3 style="font-size:1.3rem; color:var(--ink);">Share Your ADA Experience</h3>
+                        <p style="font-size:0.9rem; color:var(--gold); margin-top:10px;">Congratulations on your project completion.</p>
+                        <div class="star-select" id="starSelect">
+                            <span onclick="setRating(1)">★</span>
+                            <span onclick="setRating(2)">★</span>
+                            <span onclick="setRating(3)">★</span>
+                            <span onclick="setRating(4)">★</span>
+                            <span onclick="setRating(5)">★</span>
+                        </div>
+                        <textarea class="review-textarea" id="reviewComment" placeholder="Tell us about your design experience..." rows="5"></textarea><br>
+                        <button class="submit-review-btn" onclick="submitReview()">Submit Verified Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── SUBMISSION HUB PANEL ───────────────────────── -->
+            <div class="panel" id="panel-hub">
+                <div class="hub-header">
+                    <h2>Submission Hub</h2>
+                    <p>Files released by ADA at each project stage.</p>
+                </div>
+                <div id="hubContent">
+                    <div class="hub-empty">Loading files...</div>
+                </div>
+            </div>
+
+            <!-- ── CONSULTATION PANEL ─────────────────────────── -->
+            <div class="panel" id="panel-consultation">
+                <div class="hub-header">
+                    <h2>Consultation</h2>
+                    <p>Contact your lead architect directly.</p>
+                </div>
+                <a href="https://wa.me/2348138580315" target="_blank"
+                   style="display:inline-block; margin-top:20px; padding:15px 40px; border:1px solid var(--gold); color:var(--gold); font-size:0.8rem; letter-spacing:2px; text-transform:uppercase; text-decoration:none; transition:0.3s; font-family:var(--f-body);"
+                   onmouseover="this.style.background='var(--gold)';this.style.color='var(--bg)'"
+                   onmouseout="this.style.background='transparent';this.style.color='var(--gold)'">
+                    Open WhatsApp Chat
+                </a>
+            </div>
+
+            <!-- ── SERVICE TERMS PANEL ───────────────────────── -->
+            <div class="panel" id="panel-terms">
+                <div class="hub-header">
+                    <h2>ADA Client Service Terms</h2>
+                    <p>Legal &amp; Compliance — your project agreement.</p>
+                </div>
+                <div class="terms-content" id="termsDisplay">
+                    <h3>Intellectual Property Rights</h3>
+                    <p>All architectural drawings and design documents produced for this project remain the exclusive intellectual property of Archilurdesignz and Architecture (ADA). ADA retains full authorship rights at all times.</p>
+                    <p>The Client is granted a limited, non-transferable license to use the drawings strictly for the execution of this specific project. Any reproduction, modification, or reuse is prohibited without prior written consent.</p>
+                    <h3>Payment Terms</h3>
+                    <p>Project execution commences upon receipt of at least <strong>70%</strong> of the agreed fee. The balance is payable upon delivery. Accelerated delivery requests attract a 30% express fee.</p>
+                    <h3>Work Process</h3>
+                    <ul>
+                        <li>Site contextualization and analysis</li>
+                        <li>Preparation of conceptual sketches</li>
+                        <li>Design development and detailed drawings</li>
+                        <li>Consultant coordination</li>
+                    </ul>
+                    <h3>Revisions Policy</h3>
+                    <p>A maximum of <strong>three (3) revisions</strong> are permitted. Additional revisions attract extra fees as per the separate fee structure.</p>
+                    <p style="margin-top:48px; font-size:0.75rem; color:var(--mist); border-top:1px solid var(--rule); padding-top:20px;">
+                        Last Updated: May 2026 | Document Ref: ADA-CST-V2
+                    </p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<!-- ── ARCHITECTURAL SUB-MODAL ─────────────────────────────────────── -->
+<div id="subModal" class="sub-modal">
+    <button class="close-sub" onclick="toggleSubModal(false)">Close ✕</button>
+    <h2>Architectural Progress</h2>
+    <div class="sub-timeline">
+        <div class="sub-step">
+            <p class="step-label">Full Design Brief</p>
+            <span class="step-status" id="subBrief">—</span>
+        </div>
+        <div class="sub-step">
+            <p class="step-label">Schematics &amp; Conceptual Development</p>
+            <span class="step-status" id="subSchem">—</span>
+        </div>
+        <div class="sub-step">
+            <p class="step-label">Consultants Coordination</p>
+            <span class="step-status" id="subCoord">—</span>
+        </div>
+        <div class="sub-step">
+            <p class="step-label">Design Development</p>
+            <span class="step-status" id="subDev">—</span>
+        </div>
+        <div class="sub-step">
+            <p class="step-label">Working Drawings</p>
+            <span class="step-status" id="subWork">—</span>
+        </div>
+    </div>
+</div>
+
+<!-- ── WHATSAPP ─────────────────────────────────────────────────────── -->
+<div id="waDraggable">
+    <a href="https://wa.me/2348138580315" target="_blank">
+        <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.7 17.7 68.9 27.1 106.1 27.1h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.1 0-65.6-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-5.5-2.8-23.2-8.5-44.2-27.1-16.4-14.6-27.4-32.7-30.6-38.1-3.2-5.5-.3-8.4 2.4-11.2 2.5-2.5 5.5-6.4 8.3-9.6 2.8-3.2 3.7-5.5 5.5-9.3 1.9-3.7 1-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 13.2 5.7 23.5 9.2 31.6 11.8 13.3 4.2 25.4 3.6 35 2.2 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+    </a>
+</div>
+
+<script>
+// ─── SUPABASE ─────────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://ofaxbduvnhscxvoakeax.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK';
+
+let _db = null;
+try {
+    const { createClient } = supabase;
+    _db = createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch(e) { console.warn('Supabase not connected'); }
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let projectToken = null;
+let projectData  = null;
+let selectedRating = 5;
+let hubFiles = [];
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+async function initDashboard() {
+    const params = new URLSearchParams(window.location.search);
+    projectToken = params.get('token');
+
+    // No token at all — show preview so the page isn't blank during dev
+    if (!projectToken) {
+        if (!_db) { showPreview(); return; }
+        showError(); return;
+    }
+
+    // Token present — try to load from DB
+    if (!_db) {
+        // Supabase not connected at all — fall back to preview with token visible
+        showPreview(); return;
+    }
+
+    try {
+        const { data, error } = await _db
+            .from('projects').select('*')
+            .eq('token', projectToken).single();
+
+        if (error || !data) { showError(); return; }
+        projectData = data;
+        populateDashboard(data);
+        loadHubFiles();
+    } catch(e) { showError(); }
+}
+
+// ─── PREVIEW ─────────────────────────────────────────────────────────────────
+function showPreview() {
+    populateDashboard({
+        project_title: 'Sample Residence',
+        client_name:   'Emeka Okafor',
+        token:         'ADA-2026-0001',
+        lead_architect:'Arc. Ibukunoluwa',
+        overall_percent: 55,
+        perc_architecture: 70, perc_3d: 40, perc_qs: 20, perc_permit: 0,
+        stage_brief: 'completed', stage_schematics: 'completed',
+        stage_coordination: 'started', stage_dev: 'pending', stage_working: 'pending',
+        deposit_paid: 150000, total_sum: 500000,
+        deadline: null, service_terms: null
+    });
+}
+
+function showError() {
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('errorScreen').style.display  = 'flex';
+    document.getElementById('dashboardMain').style.display = 'none';
+}
+
+// ─── PANEL SWITCHER ───────────────────────────────────────────────────────────
+function showPanel(name, el) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.aside-nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    if (el) el.classList.add('active');
+    if (name === 'hub') renderHub();
+}
+
+// ─── FORMATTERS ───────────────────────────────────────────────────────────────
+function formatNaira(val) {
+    if (!val && val !== 0) return '—';
+    return '₦' + Number(val).toLocaleString('en-NG');
+}
+
+// ─── STAGE HELPERS ────────────────────────────────────────────────────────────
+function stageClass(s) {
+    if (s === 'completed') return 'status-completed';
+    if (s === 'started')   return 'status-started';
+    return 'status-pending';
+}
+function stageLabel(s) {
+    if (s === 'completed') return 'Completed';
+    if (s === 'started')   return 'In Progress';
+    return 'Not Started';
+}
+function setStageEl(id, status) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className  = 'step-status ' + stageClass(status);
+    el.textContent = stageLabel(status);
+}
+
+// ─── POPULATE DASHBOARD ───────────────────────────────────────────────────────
+function populateDashboard(d) {
+    document.title = `${d.project_title} | ADA Tracker`;
+
+    // Header
+    document.getElementById('projTitle').textContent         = d.project_title;
+    document.getElementById('clientNameDisplay').textContent = d.client_name || '—';
+    document.getElementById('projToken').textContent         = `REF: ${d.token}`;
+    document.getElementById('totalPercentText').textContent  = `${d.overall_percent}%`;
+    document.getElementById('leadArch').textContent          = d.lead_architect;
+
+    // Payment band
+    const deposit = d.deposit_paid;
+    const total   = d.total_sum;
+    if (deposit || total) {
+        const balance = (total || 0) - (deposit || 0);
+        document.getElementById('depositDisplay').textContent = formatNaira(deposit);
+        document.getElementById('totalSumDisplay').textContent = formatNaira(total);
+        document.getElementById('balanceDisplay').textContent  = formatNaira(balance > 0 ? balance : 0);
+        document.getElementById('paymentBand').style.display = 'grid';
+    }
+
+    // Progress bars
+    document.getElementById('fillArch').style.width   = (d.perc_architecture || 0) + '%';
+    document.getElementById('fill3d').style.width     = (d.perc_3d           || 0) + '%';
+    document.getElementById('fillQS').style.width     = (d.perc_qs           || 0) + '%';
+    document.getElementById('fillPermit').style.width = (d.perc_permit        || 0) + '%';
+
+    // Status text
+    document.getElementById('statusArch').textContent   = `Architecture: ${d.perc_architecture || 0}%`;
+    document.getElementById('status3d').textContent     = `3D Visualization: ${d.perc_3d || 0}%`;
+    document.getElementById('statusQS').textContent     = `Quantity Surveying: ${d.perc_qs || 0}%`;
+    document.getElementById('statusPermit').textContent = `Permit: ${d.perc_permit || 0}%`;
+
+    // Sub-modal stages
+    setStageEl('subBrief', d.stage_brief);
+    setStageEl('subSchem', d.stage_schematics);
+    setStageEl('subCoord', d.stage_coordination);
+    setStageEl('subDev',   d.stage_dev);
+    setStageEl('subWork',  d.stage_working);
+
+    // Unlock engineering
+    if (d.stage_coordination === 'started' || d.stage_coordination === 'completed') {
+        document.querySelectorAll('.eng-card').forEach(card => {
+            card.classList.remove('locked-dependency');
+            const lock = card.querySelector('.lock-overlay');
+            if (lock) lock.style.display = 'none';
+        });
+    }
+
+    // Unlock review at 100%
+    if (d.overall_percent >= 100) {
+        document.getElementById('reviewArea').classList.add('unlocked');
+        document.getElementById('reviewLockedContent').style.display  = 'none';
+        document.getElementById('reviewUnlockedContent').style.display = 'block';
+    }
+
+    // Service terms
+    if (d.service_terms) {
+        document.getElementById('termsDisplay').innerHTML = d.service_terms;
+    }
+
+    // Countdown
+    startCountdown(d.deadline);
+
+    // Show dashboard
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('dashboardMain').style.display = 'block';
+}
+
+// ─── HUB ─────────────────────────────────────────────────────────────────────
+async function loadHubFiles() {
+    if (!projectToken || !_db) return;
+    const { data, error } = await _db
+        .from('project_files').select('*')
+        .eq('project_token', projectToken)
+        .order('created_at', { ascending: true });
+    hubFiles = (error || !data) ? [] : data;
+}
+
+function renderHub() {
+    const container = document.getElementById('hubContent');
+    const visible   = hubFiles.filter(f => !f.locked);
+
+    if (!visible.length) {
+        container.innerHTML = `<div class="hub-empty">No files have been released yet.</div>`;
+        return;
+    }
+
+    const groups = {};
+    visible.forEach(f => {
+        if (!groups[f.stage_label]) groups[f.stage_label] = [];
+        groups[f.stage_label].push(f);
+    });
+
+    let html = '<div class="file-list">';
+    Object.entries(groups).forEach(([stage, files]) => {
+        html += `<div class="stage-label">${stage}</div>`;
+        files.forEach(f => {
+            html += `
+            <div class="file-item">
+                <div class="file-meta">
+                    <span class="file-name">${f.file_name}</span>
+                    <span class="file-date">Released: ${f.release_date || f.released_date || '—'}</span>
+                    <span class="file-tag">${f.file_tag}</span>
+                </div>
+                <a href="${f.drive_url}" target="_blank" class="download-btn">Download ↗</a>
+            </div>`;
+        });
+    });
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// ─── SUB-MODAL ────────────────────────────────────────────────────────────────
+function toggleSubModal(show) {
+    document.getElementById('subModal').classList.toggle('open', show);
+}
+
+// ─── REVIEW ───────────────────────────────────────────────────────────────────
+function setRating(n) {
+    selectedRating = n;
+    document.querySelectorAll('#starSelect span').forEach((s, i) => {
+        s.classList.toggle('active', i < n);
+    });
+}
+
+async function submitReview() {
+    const comment = document.getElementById('reviewComment').value.trim();
+    if (!comment) { alert('Please write a comment before submitting.'); return; }
+
+    const { error } = await _db.from('reviews').insert([{
+        project_token: projectToken,
+        client_name:   projectData?.client_name || 'Anonymous',
+        rating:        selectedRating,
+        comment,
+        location:      'NIGERIA',
+        status:        'pending'
+    }]);
+
+    if (error) {
+        alert('Submission failed. Please try again.');
+    } else {
+        document.getElementById('reviewUnlockedContent').innerHTML = `
+            <h3 style="color:var(--gold);">Thank You</h3>
+            <p style="margin-top:15px; font-size:0.95rem; color:var(--mist);">
+                Your review has been submitted and will appear once approved by ADA.
+            </p>`;
+    }
+}
+
+// ─── COUNTDOWN ────────────────────────────────────────────────────────────────
+let countdownInterval = null;
+
+function startCountdown(deadlineStr) {
+    const bar = document.getElementById('countdownBar');
+    if (!deadlineStr) { bar.style.display = 'none'; return; }
+    const deadline = new Date(deadlineStr).getTime();
+    if (isNaN(deadline)) { bar.style.display = 'none'; return; }
+
+    bar.style.display = 'flex';
+    if (countdownInterval) clearInterval(countdownInterval);
+
+    function tick() {
+        const diff = deadline - new Date().getTime();
+        if (diff <= 0) {
+            clearInterval(countdownInterval);
+            ['cdDays','cdHours','cdMins','cdSecs'].forEach(id => document.getElementById(id).textContent = '00');
+            const units = document.querySelector('.countdown-units');
+            if (units) units.innerHTML = '<span class="countdown-expired">PROJECT DEADLINE REACHED</span>';
+            return;
+        }
+        const days  = Math.floor(diff / 86400000);
+        const hours = Math.floor((diff % 86400000) / 3600000);
+        const mins  = Math.floor((diff % 3600000)  / 60000);
+        const secs  = Math.floor((diff % 60000)    / 1000);
+        document.getElementById('cdDays').textContent  = String(days).padStart(2,'0');
+        document.getElementById('cdHours').textContent = String(hours).padStart(2,'0');
+        document.getElementById('cdMins').textContent  = String(mins).padStart(2,'0');
+        document.getElementById('cdSecs').textContent  = String(secs).padStart(2,'0');
+    }
+    tick();
+    countdownInterval = setInterval(tick, 1000);
+}
+
+// ─── WA DRAG ──────────────────────────────────────────────────────────────────
+const wa = document.getElementById('waDraggable');
+let dr=false,ox=0,oy=0;
+wa.addEventListener('mousedown', e=>{dr=true;ox=e.clientX-wa.offsetLeft;oy=e.clientY-wa.offsetTop;wa.style.transition='none';});
+document.addEventListener('mousemove', e=>{if(dr){wa.style.left=(e.clientX-ox)+'px';wa.style.top=(e.clientY-oy)+'px';wa.style.right=wa.style.bottom='auto';}});
+document.addEventListener('mouseup', ()=>{dr=false;wa.style.transition='transform 0.3s';});
+
+// ─── START ────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', initDashboard);
+</script>
+</body>
+</html>
