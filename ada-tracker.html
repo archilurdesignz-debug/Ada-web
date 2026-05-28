@@ -13,7 +13,7 @@
             --bg2:       #eceae4;
             --bg3:       #e2ddd6;
             --ink:       #1a1714;
-            --ink2:      #2e2b26;
+            --ink2:      --2e2b26;
             --ink3:      #4a4540;
             --mist:      #6b6560;
             --rule:      rgba(26,23,20,0.1);
@@ -205,6 +205,7 @@
             grid-template-columns: 1fr auto; 
             align-items: center;
             gap: 40px;
+            margin-bottom: 36px;
         }
 
         .countdown-label {
@@ -569,6 +570,7 @@
         </a>
     </div>
 </div>
+
 <div id="dashboardMain" style="display:none;">
     <div class="dashboard-wrapper">
 
@@ -585,56 +587,55 @@
 
         <main>
 
+            <div class="header-bar">
+                <div class="header-left">
+                    <h2 id="projTitle">—</h2>
+                    <p class="client-name-display" id="clientNameDisplay">—</p>
+                    <span class="ref-tag" id="projToken"></span>
+                </div>
+                <div class="completion-display">
+                    <span class="pct" id="totalPercentText">0%</span>
+                    <span class="pct-label">Overall Completion</span>
+                </div>
+            </div>
+
+            <div class="payment-band" id="paymentBand" style="display:none;">
+                <div class="pay-cell deposit">
+                    <span class="pay-label">Initial Deposit Paid</span>
+                    <span class="pay-value" id="depositDisplay">—</span>
+                    <span class="pay-sub">Confirmed payment received</span>
+                </div>
+                <div class="pay-cell">
+                    <span class="pay-label">Total Agreed Sum</span>
+                    <span class="pay-value" id="totalSumDisplay">—</span>
+                    <span class="pay-sub">Full project package fee</span>
+                </div>
+                <div class="pay-cell balance">
+                    <span class="pay-label">Outstanding Balance</span>
+                    <span class="pay-value" id="balanceDisplay">—</span>
+                    <span class="pay-sub">Payable at completion</span>
+                </div>
+            </div>
+
+            <div class="architect-info">
+                <div>
+                    <span class="arch-label">Lead Architect</span>
+                    <span class="arch-name" id="leadArch">—</span>
+                </div>
+            </div>
+
+            <div class="countdown-bar" id="countdownBar" style="display:none;">
+                <span class="countdown-label">Project Deadline</span>
+                <div class="countdown-units">
+                    <div><span id="cdDays">00</span><label>Days</label></div>
+                    <div><span id="cdHours">00</span><label>Hours</label></div>
+                    <div><span id="cdMins">00</span><label>Mins</label></div>
+                    <div><span id="cdSecs">00</span><label>Secs</label></div>
+                </div>
+            </div>
+
             <div class="panel active" id="panel-tracker">
-
-                <div class="header-bar">
-                    <div class="header-left">
-                        <h2 id="projTitle">—</h2>
-                        <p class="client-name-display" id="clientNameDisplay">—</p>
-                        <span class="ref-tag" id="projToken"></span>
-                    </div>
-                    <div class="completion-display">
-                        <span class="pct" id="totalPercentText">0%</span>
-                        <span class="pct-label">Overall Completion</span>
-                    </div>
-                </div>
-
-                <div class="payment-band" id="paymentBand" style="display:none;">
-                    <div class="pay-cell deposit">
-                        <span class="pay-label">Initial Deposit Paid</span>
-                        <span class="pay-value" id="depositDisplay">—</span>
-                        <span class="pay-sub">Confirmed payment received</span>
-                    </div>
-                    <div class="pay-cell">
-                        <span class="pay-label">Total Agreed Sum</span>
-                        <span class="pay-value" id="totalSumDisplay">—</span>
-                        <span class="pay-sub">Full project package fee</span>
-                    </div>
-                    <div class="pay-cell balance">
-                        <span class="pay-label">Outstanding Balance</span>
-                        <span class="pay-value" id="balanceDisplay">—</span>
-                        <span class="pay-sub">Payable at completion</span>
-                    </div>
-                </div>
-
-                <div class="architect-info">
-                    <div>
-                        <span class="arch-label">Lead Architect</span>
-                        <span class="arch-name" id="leadArch">—</span>
-                    </div>
-                </div>
-
-                <div class="countdown-bar" id="countdownBar" style="display:none;">
-                    <span class="countdown-label">Project Deadline</span>
-                    <div class="countdown-units">
-                        <div><span id="cdDays">00</span><label>Days</label></div>
-                        <div><span id="cdHours">00</span><label>Hours</label></div>
-                        <div><span id="cdMins">00</span><label>Mins</label></div>
-                        <div><span id="cdSecs">00</span><label>Secs</label></div>
-                    </div>
-                </div>
-
-                <p class="tracker-section-label" style="margin-top: 36px;">Service Execution Tracker</p>
+                <p class="tracker-section-label">Service Execution Tracker</p>
                 <div class="tracker-grid" id="customTracksGrid"></div>
 
                 <div class="revision-status-box" style="margin-bottom: 20px;">
@@ -666,7 +667,6 @@
                         <button class="submit-review-btn" onclick="submitReview()">Submit Verified Review</button>
                     </div>
                 </div>
-
             </div>
 
             <div class="panel" id="panel-hub">
@@ -973,9 +973,7 @@ function populateDashboard(d) {
     const cDownBar = document.getElementById('countdownBar');
 
     if (finalDeadline) {
-        if (cDownBar) {
-            cDownBar.style.display = 'grid'; 
-        }
+        if (cDownBar) cDownBar.style.display = 'grid'; 
         startCountdown(finalDeadline);
     } else {
         if (cDownBar) cDownBar.style.display = 'none';
@@ -1245,6 +1243,9 @@ function toggleRevisionNotice() {
         noticeBox.style.display = 'none';
     }
 }
+
+// ─── START ────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', initDashboard);
 </script>
 </body>
 </html>
