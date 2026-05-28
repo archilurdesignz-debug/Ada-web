@@ -1043,7 +1043,8 @@ const revCounterEl = document.getElementById('clientRevisionCounter');
 const triggerBox = document.getElementById('revisionDropdownTrigger');
 
 if (revCounterEl) {
-    if (d.overall_percent >= 100 || !d.dashboard_locked) {
+    // ONLY lock if the project is at 100% AND the client completed the required review unlock step
+    if (d.overall_percent >= 100 && !d.dashboard_locked) {
         revCounterEl.innerText = "PROTOCOL LOCKED";
         if (triggerBox) {
             triggerBox.style.opacity = '0.6';
@@ -1318,8 +1319,8 @@ function toggleRevisionNotice() {
     
     if (!noticeBox) return;
     
-    // Check if the protocol is explicitly locked (100% completion or bypassed lock screen)
-    const isProtocolLocked = projectData && (projectData.overall_percent >= 100 || !projectData.dashboard_locked);
+  // Check if the protocol is explicitly locked (Strictly at 100% completion AND review cleared)
+const isProtocolLocked = projectData && (projectData.overall_percent >= 100 && !projectData.dashboard_locked);
 
     if (noticeBox.style.display === 'none') {
         if (isProtocolLocked) {
