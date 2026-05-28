@@ -642,19 +642,21 @@ async function updateProject() {
         }
     });
 
-// FIXED — handles all browsers reliably
-const rawDeadline = document.getElementById('editProjDeadline').value;
+// Deadline — parse datetime-local safely across all browsers
 let formattedDeadline = null;
-if (rawDeadline && rawDeadline.length >= 16) {
-    // datetime-local gives "YYYY-MM-DDTHH:MM"
-    // Append :00 only if seconds not already present
-    const normalized = rawDeadline.length === 16 ? rawDeadline + ':00' : rawDeadline;
-    const parsed = new Date(normalized);
-    if (!isNaN(parsed.getTime())) {
-        formattedDeadline = parsed.toISOString();
+const rawDeadline = document.getElementById('editProjDeadline').value;
+if (rawDeadline && rawDeadline.trim().length >= 16) {
+    // datetime-local format: "YYYY-MM-DDTHH:MM"
+    // Manually split so no browser treats it as UTC or rejects it
+    const [datePart, timePart] = rawDeadline.trim().split('T');
+    const [year, month, day]   = datePart.split('-').map(Number);
+    const [hour, minute]       = (timePart || '00:00').split(':').map(Number);
+    const localDate = new Date(year, month - 1, day, hour, minute, 0, 0);
+    if (!isNaN(localDate.getTime())) {
+        formattedDeadline = localDate.toISOString();
     }
-    // If parse fails, formattedDeadline stays null — no crash
 }
+// formattedDeadline is now either a valid ISO string or null — never throws
 
     // Final payload
  const payload = {
