@@ -57,15 +57,17 @@
             <div class="form-group"><label>Client Email</label><input type="email" id="newClientEmail"></div>
             <div class="form-group"><label>Project Title</label><input type="text" id="newProjTitle"></div>
         </div>
-        <div class="form-group"><label>Lead Architect</label><input type="text" id="newLeadArch" value="Arc. Ibukunoluwa"></div>
+        <div class="grid-1">
+            <div class="form-group"><label>Lead Architect</label><input type="text" id="newLeadArch" value="Arc. Ibukunoluwa"></div>
+        </div>
         
-                  <div class="form-group">
-                <label>Currency Option</label>
-                <select id="newCurrencyMode">
-                    <option value="NGN">Naira (₦)</option>
-                    <option value="USD">US Dollar ($)</option>
-                </select>
-            </div>
+        <div class="form-group">
+            <label>Currency Option</label>
+            <select id="newCurrencyMode">
+                <option value="NGN">Naira (₦)</option>
+                <option value="USD">US Dollar ($)</option>
+            </select>
+        </div>
                
         <div class="grid-2" style="margin-top:10px;">
             <div class="form-group">
@@ -94,31 +96,75 @@
         
         <div id="editorFields" style="display:none;">
             <div class="grid-3">
-          <div class="form-group">
-    <label for="editRevisionCount">Design Revision Count</label>
-    <input type="number" id="editRevisionCount" placeholder="0" min="0" value="0">
-    <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">Current active design iteration phases.</p>
-</div>
-                <div class="form-group"><label>Project Reference</label><input type="text" id="projRef" readonly style="color:#666;"></div>
+                <div class="form-group">
+                    <label for="editRevisionCount">Design Revision Count</label>
+                    <input type="number" id="editRevisionCount" placeholder="0" min="0" value="0">
+                    <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">Current active design iteration phases.</p>
+                </div>
+                <div class="form-group">
+                    <label>Project Reference</label>
+                    <input type="text" id="projRef" readonly style="color:#666;">
+                </div>
             </div>
-<div class="form-group">
-    <label>Overall Project Progress (%)</label>
 
-    <input 
-        type="number"
-        id="overallProgress"
-        min="0"
-        max="100"
-        placeholder="0"
-    >
+            <div class="form-group">
+                <label>Overall Project Progress (%)</label>
+                <input type="number" id="overallProgress" min="0" max="100" placeholder="0">
+                <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">Master completion percentage for client dashboard.</p>
+            </div>
+<!-- ─── PROJECT DELIVERY TIMELINE COUNTDOWN ───────────────────────────── -->
+<h3 style="display:block; margin-top:25px; margin-bottom:15px;">
+    Project Delivery Timeline
+</h3>
 
-    <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">
-        Master completion percentage for client dashboard.
-    </p>
+<div class="grid-3" style="margin-bottom:25px;">
+    
+    <div class="form-group">
+        <label>Project Deadline Date</label>
+        <input type="datetime-local" id="projectDeadline">
+        <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">
+            Final expected delivery date and time.
+        </p>
+    </div>
+
+    <div class="form-group">
+        <label>Countdown Status</label>
+        <select id="countdownStatus">
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+            <option value="completed">Completed</option>
+        </select>
+
+        <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">
+            Control countdown visibility on client dashboard.
+        </p>
+    </div>
+
+    <div class="form-group">
+        <label>Live Remaining Duration</label>
+
+        <div id="countdownPreview"
+            style="
+                background:#000;
+                border:1px solid #333;
+                padding:12px;
+                min-height:42px;
+                display:flex;
+                align-items:center;
+                color:var(--gold);
+                font-size:0.8rem;
+                letter-spacing:1px;
+            ">
+            No deadline selected
+        </div>
+
+        <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">
+            Real-time admin countdown preview.
+        </p>
+    </div>
+
 </div>
-
-<div class="grid-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 15px; margin-bottom: 25px;">
-                
+            <div class="grid-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 15px; margin-bottom: 25px;">
                 <div class="form-group">
                     <label>Active Project Currency</label>
                     <select id="editCurrencyMode" onchange="updateCurrencyLabels(this.value)">
@@ -127,25 +173,20 @@
                     </select>
                     <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">Base display currency.</p>
                 </div>
-
                 <div class="form-group">
                     <label id="lblEditDepositPaid">Initial Deposit Paid (₦)</label>
                     <input type="number" id="editDepositPaid" placeholder="e.g. 150000" min="0">
                     <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">Amount client has paid so far.</p>
                 </div>
-                
                 <div class="form-group">
                     <label id="lblEditTotalSum">Total Agreed Sum (₦)</label>
                     <input type="number" id="editTotalSum" placeholder="e.g. 500000" min="0">
                     <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">Full agreed project package fee.</p>
                 </div>
-
             </div>
 
             <h3 style="display: block; margin-top: 25px; margin-bottom: 15px;">Project Evaluation Roadmap Modules</h3>
-            
-            <div id="dynamicTracksContainer" style="display: block; margin-bottom: 15px;">
-                </div>
+            <div id="dynamicTracksContainer" style="display: block; margin-bottom: 15px;"></div>
             
             <div style="display: block; margin-bottom: 35px;">
                 <button type="button" class="btn-small" onclick="addTrackRow('', 0)" style="background: var(--success); color: white;">
@@ -158,30 +199,31 @@
                 </button>
             </div>
         </div>
-        </div>
-        <div style="margin-top:20px; padding:20px; background:rgba(0,0,0,0.3); border:1px solid #1a1a1a;">
-    <h3 style="margin-top:0; margin-bottom:12px;">Client Dashboard Access</h3>
-    <p style="font-size:0.72rem; color:#666; margin-bottom:16px; letter-spacing:0.3px;">
-        Once a project reaches 100%, you can lock the dashboard to prevent access until the client submits their review. Unlock it again at any time.
-    </p>
-    <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
-        <div id="lockStatusBadge" style="font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; padding:6px 14px; background:#333; color:#888;">
-            Status: —
-        </div>
-        <button class="btn-action" style="background:#7d2e2e; max-width:220px; margin-top:0;" onclick="lockDashboard()">
-            🔒 Lock Dashboard
-        </button>
-        <button class="btn-action" style="background:#2e7d52; max-width:220px; margin-top:0;" onclick="unlockDashboard()">
-            🔓 Unlock Dashboard
-        </button>
     </div>
-</div>
-            <div class="section-card" style="border-top-color: var(--gold);">
+
+    <div style="margin-top:20px; padding:20px; background:rgba(0,0,0,0.3); border:1px solid #1a1a1a;">
+        <h3 style="margin-top:0; margin-bottom:12px;">Client Dashboard Access</h3>
+        <p style="font-size:0.72rem; color:#666; letter-spacing:0.3px; margin-bottom: 16px;">
+            Once a project reaches 100%, you can lock the dashboard to prevent access until the client submits their review. Unlock it again at any time.
+        </p>
+        <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+            <div id="lockStatusBadge" style="font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; padding:6px 14px; background:#333; color:#888;">
+                Status: —
+            </div>
+            <button class="btn-action" style="background:#7d2e2e; max-width:220px; margin-top:0;" onclick="lockDashboard()">
+                🔒 Lock Dashboard
+            </button>
+            <button class="btn-action" style="background:#2e7d52; max-width:220px; margin-top:0;" onclick="unlockDashboard()">
+                🔓 Unlock Dashboard
+            </button>
+        </div>
+    </div>
+
+    <div class="section-card" style="border-top-color: var(--gold);">
         <h2>Submission Hub Manager</h2>
         <p style="font-size: 0.75rem; color: #666; margin-bottom: 20px;">
             Select a project then add Drive links. Toggle locked/released to control client visibility.
         </p>
-
         <div class="form-group">
             <label>Select Project</label>
             <select id="fileProjectSelector" onchange="loadProjectFiles()">
@@ -235,6 +277,7 @@
             </div>
         </div>
     </div>
+
     <div class="section-card" style="border-top-color: #3498db;">
         <h2>Upload to Portfolio</h2>
         <div class="grid-3">
@@ -260,7 +303,6 @@
             <label>Portfolio Image Source</label>
             <div style="display: flex; gap: 10px; align-items: center;">
                 <input type="text" id="pUrl" placeholder="Image URL will appear here..." style="flex: 1;">
-                
                 <label class="btn-action" style="width: auto; margin: 0; padding: 10px 15px; cursor: pointer; text-align: center; background-color: #2ecc71;">
                     📁 Upload to Dropbox
                     <input type="file" id="pFileInput" accept="image/*" style="display: none;" onchange="handleDirectUpload('pFileInput', 'pUrl')">
@@ -331,8 +373,8 @@ All architectural drawings remain the intellectual property of ADA...
         <h2>Review Moderation Inbox</h2>
         <div id="reviewInbox"><p style="font-size:0.8rem; color:#444;">Loading reviews...</p></div>
     </div>
-
 </div>
+
 <script>
 // ─── SUPABASE INIT ────────────────────────────────────────────────────────────
 const SUPABASE_URL   = 'https://ofaxbduvnhscxvoakeax.supabase.co';   
@@ -346,7 +388,7 @@ try {
     console.warn('Supabase not connected — paste your credentials above');
 }
 
-// ─── HELPERS (INCLUDING DROPBOX COORD) ────────────────────────────────────────
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
 function generateToken() {
     const year = new Date().getFullYear();
     const rand = Math.floor(Math.random() * 9000) + 1000;
@@ -362,6 +404,19 @@ function getVal(id) {
     return document.getElementById(id)?.value?.trim() ?? '';
 }
 
+function getDeadlineISO() {
+    const raw = document.getElementById('projectDeadline')?.value;
+
+    if (!raw) return null;
+
+    // datetime-local safe conversion (NO NULL BUG EVER)
+    const date = new Date(raw);
+
+    if (isNaN(date.getTime())) return null;
+
+    return date.toISOString();
+}
+
 function getBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -371,6 +426,26 @@ function getBase64(file) {
     });
 }
 
+async function autoSaveTimeline() {
+    const token = getVal('projectSelector');
+    if (!token || !_db) return;
+
+    const payload = {
+        deadline: getDeadlineISO(),
+        countdown_status: document.getElementById('countdownStatus')?.value || 'active'
+    };
+
+    const { error } = await _db
+        .from('projects')
+        .update(payload)
+        .eq('token', token);
+
+    if (error) {
+        console.error("Timeline save failed:", error.message);
+    }
+}
+
+// ─── DROPBOX FILE UPLOAD WORKFLOWS ────────────────────────────────────────────
 async function handleDirectUpload(fileInputId, targetInputId) {
     const fileInput = document.getElementById(fileInputId);
     const targetInput = document.getElementById(targetInputId);
@@ -444,7 +519,6 @@ async function handleStoreGalleryUpload() {
     }
 }
 
-// Spawns a custom roadmap input block in the UI Editor Panel
 function addTrackRow(label = '', progress = 0) {
     const container = document.getElementById('dynamicTracksContainer');
     if (!container) return;
@@ -470,7 +544,7 @@ function addTrackRow(label = '', progress = 0) {
     container.insertAdjacentHTML('beforeend', rowHTML);
 }
 
-// ─── LOAD PROJECTS INTO SELECTORS ────────────────────────────────────────────
+// ─── LOAD SELECTORS (FIXED SYNTAX FROM '--' TO '//') ──────────────────────────
 async function loadProjectSelectors() {
     if (!_db) return;
     const { data, error } = await _db
@@ -493,12 +567,12 @@ async function loadProjectSelectors() {
     });
 }
 
-// ─── CREATE NEW PROJECT ──────────────────────────────────────────────────────
+// ─── INITIALIZE METHOD ────────────────────────────────────────────────────────
 async function createNewProject() {
     const token = generateToken();
     const depositPaid = parseFloat(getVal('newDepositPaid')) || 0;
     const totalSum    = parseFloat(getVal('newTotalSum'))    || 0;
-    
+        
     const dashboardUrl = `${window.location.origin}/ada-tracker.html?token=${token}`;
 
     const payload = {
@@ -510,12 +584,7 @@ async function createNewProject() {
         deposit_paid:   depositPaid,
         total_sum:      totalSum,
         currency_mode:  getVal('newCurrencyMode'),
-        custom_tracks: [
-    {
-        heading: "Architectural Plan Schemes",
-        percent: 0
-    }
-],
+        custom_tracks: [{ heading: "Architectural Plan Schemes", percent: 0 }],
         client_url:     dashboardUrl
     };
 
@@ -542,7 +611,7 @@ async function createNewProject() {
     loadProjectSelectors();
 }
 
-// ─── LOAD PROJECT DETAILS INTO EDITOR ────────────────────────────────────────
+// ─── EDITOR LOADER ───────────────────────────────────────────────────────────
 async function loadProjectDetails() {
     const token = getVal('projectSelector');
     document.getElementById('editorFields').style.display = token ? 'block' : 'none';
@@ -556,119 +625,98 @@ async function loadProjectDetails() {
 
     if (error || !data) return;
 
-    // Standard Project Parameters
     setVal('overallProgress',  data.overall_percent);
     setVal('projRef',          data.token);
     setVal('editDepositPaid',  data.deposit_paid  ?? '');
     setVal('editTotalSum',     data.total_sum     ?? '');
-    
-    // Show lock status badge
-const badge = document.getElementById('lockStatusBadge');
-if (badge) {
-    const locked = data.dashboard_locked;
-    badge.textContent  = locked ? 'Status: LOCKED' : 'Status: OPEN';
-    badge.style.background = locked ? '#7d2e2e' : '#2e7d52';
-    badge.style.color  = 'white';
+
+/* ─── DELIVERY TIMELINE ───────────────────────── */
+if (data.deadline) {
+    const formattedDate = new Date(data.deadline)
+        .toISOString()
+        .slice(0,16);
+
+    setVal('projectDeadline', formattedDate);
 }
 
-    // Revision Count Field
+setVal('countdownStatus', data.countdown_status || 'active');
+
+startAdminCountdownPreview();
+    const badge = document.getElementById('lockStatusBadge');
+    if (badge) {
+        const locked = data.dashboard_locked;
+        badge.textContent  = locked ? 'Status: LOCKED' : 'Status: OPEN';
+        badge.style.background = locked ? '#7d2e2e' : '#2e7d52';
+        badge.style.color  = 'white';
+    }
+
     document.getElementById('editRevisionCount').value = data.revision_count || 0;
 
-    // Currency Setting Application
     const activeCurrency = data.currency_mode || 'NGN';
     document.getElementById('editCurrencyMode').value = activeCurrency;
     updateCurrencyLabels(activeCurrency);
 
-    // ─── DYNAMIC PROGRESS TRACKS PIPELINE ────────────────────────────────────
     const container = document.getElementById('dynamicTracksContainer');
     if (container) {
         container.innerHTML = ''; 
-        
         const tracks = data.custom_tracks || [];
-        
         if (tracks.length === 0) {
             addTrackRow('Architectural Plan Schemes', 0);
         } else {
-            tracks.forEach(t => {
-                addTrackRow(t.heading, t.percent);
-            });
+            tracks.forEach(t => { addTrackRow(t.heading, t.percent); });
         }
     }
 }
 
-// ─── UPDATE PROJECT (INTEGRATED FOR MULTI-TRACKS ARCHITECTURE) ───────────────
+// ─── PUBLISH REVISED SCHEME CONFIGURATION ─────────────────────────────────────
 async function updateProject() {
     const token = getVal('projectSelector');
+    if (!token) { alert('Select a project first.'); return; }
 
-    if (!token) {
-        alert('Select a project first.');
-        return;
-    }
-
-    // Compile custom roadmap tracks
     const trackRows = document.querySelectorAll('#dynamicTracksContainer > div');
-
     const customTracksCompiledArray = [];
 
     trackRows.forEach(row => {
         const heading = row.querySelector('.track-label')?.value.trim();
-
-        const percent = parseInt(
-            row.querySelector('.track-percent')?.value
-        ) || 0;
-
+        const percent = parseInt(row.querySelector('.track-percent')?.value) || 0;
         if (heading) {
-            customTracksCompiledArray.push({
-                heading,
-                percent
-            });
+            customTracksCompiledArray.push({ heading, percent });
         }
     });
 
-    // Final payload
- const payload = {
+   const payload = {
     overall_percent: parseInt(getVal('overallProgress')) || 0,
-
-    revision_count: parseInt(
-        document.getElementById('editRevisionCount').value
-    ) || 0,
-
-    deposit_paid: parseFloat(
-        getVal('editDepositPaid')
-    ) || 0,
-
-    total_sum: parseFloat(
-        getVal('editTotalSum')
-    ) || 0,
-
+    revision_count: parseInt(document.getElementById('editRevisionCount').value) || 0,
+    deposit_paid: parseFloat(getVal('editDepositPaid')) || 0,
+    total_sum: parseFloat(getVal('editTotalSum')) || 0,
     currency_mode: getVal('editCurrencyMode'),
 
+    /* ─── DELIVERY TIMELINE ───────────────────── */
+    deadline: getDeadlineISO(),
+    countdown_status: getVal('countdownStatus'),
     custom_tracks: customTracksCompiledArray
 };
-    if (!_db) {
-    alert('Supabase not connected.');
-    return;
-}
 
-// DEBUG OUTPUT
-console.log("Submitting Payload:", payload);
+/* ✅ CLOSE OBJECT FIRST, THEN RUN LOGIC */
+
+if (!_db) { 
+    alert('Supabase not connected.'); 
+    return; 
+}
 
 const { data, error } = await _db
     .from('projects')
     .update(payload)
-        .eq('token', token)
-        .select();
+    .eq('token', token)
+    .select();
 
-    if (error) {
-        console.error(error);
-        alert('Error: ' + error.message);
-    } else {
-        console.log(data);
-        alert('✓ Client dashboard updated successfully.');
-    }
+if (error) {
+    alert('Error: ' + error.message);
+} else {
+    alert('✓ Client dashboard updated successfully.');
 }
-
-// ─── SUBMISSION HUB: LOAD FILES ──────────────────────────────────────────────
+}
+// ─── SUBMISSION HUB MANAGEMENT ────────────────────────────────────────────────
 async function loadProjectFiles() {
     const token = getVal('fileProjectSelector');
     document.getElementById('fileManager').style.display = token ? 'block' : 'none';
@@ -706,7 +754,6 @@ async function loadProjectFiles() {
     `).join('');
 }
 
-// ─── SUBMISSION HUB: ADD FILE ────────────────────────────────────────────────
 async function addProjectFile() {
     const token = getVal('fileProjectSelector');
     if (!token) { alert('Select a project first.'); return; }
@@ -732,12 +779,10 @@ async function addProjectFile() {
 
     setVal('newFileName', '');
     setVal('newFileUrl', '');
-
     alert('✓ File added to client hub.');
     loadProjectFiles();
 }
 
-// ─── SUBMISSION HUB: TOGGLE LOCK ─────────────────────────────────────────────
 async function toggleFileLock(fileId, currentLocked) {
     if (!_db) return;
     const { error } = await _db
@@ -749,7 +794,6 @@ async function toggleFileLock(fileId, currentLocked) {
     else loadProjectFiles();
 }
 
-// ─── SUBMISSION HUB: DELETE FILE ─────────────────────────────────────────────
 async function deleteFile(fileId) {
     if (!confirm('Remove this file from the client hub?')) return;
     if (!_db) return;
@@ -762,7 +806,7 @@ async function deleteFile(fileId) {
     else loadProjectFiles();
 }
 
-// ─── PORTFOLIO UPLOAD ─────────────────────────────────────────────────────────
+// ─── PORTFOLIO PUBLISHING MODULE ──────────────────────────────────────────────
 async function uploadPortfolio() {
     const payload = {
         title:       getVal('pTitle'),
@@ -784,12 +828,9 @@ async function uploadPortfolio() {
     }
 }
 
-// ─── STORE UPLOAD ─────────────────────────────────────────────────────────────
+// ─── CONCEPT STORE CATALOG MANAGEMENT ──────────────────────────────────────────
 async function uploadStore() {
-    const images = [1,2,3,4,5,6]
-        .map(i => getVal(`sImg${i}`))
-        .filter(u => u);
-
+    const images = [1,2,3,4,5,6].map(i => getVal(`sImg${i}`)).filter(u => u);
     if (!images.length) { alert('Add at least one image URL.'); return; }
 
     const payload = {
@@ -833,7 +874,7 @@ async function updateProjectTerms() {
     else alert('✓ Service Terms updated for client.');
 }
 
-// ─── REVIEW MODERATION ────────────────────────────────────────────────────────
+// ─── REVIEWS MODERATION INBOX ────────────────────────────────────────────────
 async function loadPendingReviews() {
     const inbox = document.getElementById('reviewInbox');
     if (!inbox) return;
@@ -872,8 +913,91 @@ async function moderateReview(id, status) {
     if (error) alert('Error: ' + error.message);
     else { alert(`Review ${status}.`); loadPendingReviews(); }
 }
+function attachTimelineAutoSave() {
+    const deadlineInput = document.getElementById('projectDeadline');
+    const statusInput = document.getElementById('countdownStatus');
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
+    if (!deadlineInput || !statusInput) return;
+
+    let debounceTimer = null;
+
+    function triggerSave() {
+        startAdminCountdownPreview();
+
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            autoSaveTimeline();
+        }, 600); // prevents Supabase spam
+    }
+
+    deadlineInput.addEventListener('input', triggerSave);
+    deadlineInput.addEventListener('change', triggerSave);
+
+    statusInput.addEventListener('change', triggerSave);
+}
+
+/* ─── ADMIN COUNTDOWN PREVIEW ENGINE ───────────────────────────────── */
+
+let adminCountdownInterval = null;
+
+function startAdminCountdownPreview() {
+
+    clearInterval(adminCountdownInterval);
+
+    const previewBox = document.getElementById('countdownPreview');
+    const deadlineInput = document.getElementById('projectDeadline');
+    const statusInput = document.getElementById('countdownStatus');
+
+    if (!previewBox || !deadlineInput) return;
+
+    function updateCountdown() {
+
+        const deadlineValue = deadlineInput.value;
+
+        if (!deadlineValue) {
+            previewBox.innerHTML = 'No deadline selected';
+            return;
+        }
+
+        const status = statusInput.value;
+
+        if (status === 'paused') {
+            previewBox.innerHTML = '⏸ Countdown Paused';
+            return;
+        }
+
+        if (status === 'completed') {
+            previewBox.innerHTML = '✓ Project Completed';
+            return;
+        }
+
+       const deadline = new Date(
+    deadlineValue.replace(' ', 'T')
+).getTime();
+        const now = new Date().getTime();
+
+        const distance = deadline - now;
+
+        if (distance <= 0) {
+            previewBox.innerHTML = '⚠ Deadline Reached';
+            return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+
+        previewBox.innerHTML = `
+            ${days}d ${hours}h ${minutes}m remaining
+        `;
+    }
+
+    updateCountdown();
+
+    adminCountdownInterval = setInterval(updateCountdown, 1000);
+}
+
+// ─── INITIALIZATION LISTENERS ────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
     loadProjectSelectors();
     loadPendingReviews();
@@ -893,7 +1017,7 @@ function updateCurrencyLabels(currencyMode) {
     document.getElementById('lblEditDepositPaid').innerText = `Initial Deposit Paid ${symbol}`;
     document.getElementById('lblEditTotalSum').innerText = `Total Agreed Sum ${symbol}`;
 }
-// ─── DASHBOARD LOCK / UNLOCK ──────────────────────────────────────────────────
+
 async function lockDashboard() {
     const token = getVal('projectSelector');
     if (!token) { alert('Select a project first.'); return; }
