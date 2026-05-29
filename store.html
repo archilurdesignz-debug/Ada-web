@@ -244,8 +244,42 @@ document.addEventListener('DOMContentLoaded',()=>{
 function clearSearch(){document.getElementById('storeSearch').value='';document.getElementById('searchClear').style.display='none';isSearchMode=false;const g=document.getElementById('storeGrid');g.innerHTML='';defaultPlans.forEach(p=>renderCard(p,g));Object.values(dynamicData).forEach(p=>renderCard(p,g));hasMore=true;}
 async function runSearch(query){isSearchMode=true;const g=document.getElementById('storeGrid'),q=query.toLowerCase().replace(/[₦,]/g,'').trim();const hits=defaultPlans.filter(p=>[p.id,p.title,p.meta,p.category,p.price?.replace(/[₦,]/g,'')].some(f=>f&&f.toLowerCase().includes(q)));g.innerHTML='';if(!hits.length){g.innerHTML=`<div class="search-no-results">No plans found for "${query.toUpperCase()}"</div>`;return;}hits.forEach(p=>renderCard(p,g));}
 
-async function fetchStoreItems(){if(isLoading||!hasMore||isSearchMode)return;isLoading=true;try{const r=await fetch(`/.netlify/functions/get-store?page=${page}`),items=await r.json();if(!items||!items.length){hasMore=false;return;}const g=document.getElementById('storeGrid');items.forEach(i=>{if(!dynamicData[i.id]){dynamicData[i.id]=i;renderCard(i,g);}});page++;}catch(_){}isLoading=false;}
-window.addEventListener('scroll',()=>{if((window.innerHeight+window.scrollY)>=document.body.offsetHeight-300)fetchStoreItems();});
+async function fetchStoreItems() {
+    if (isLoading || !hasMore || isSearchMode) return;
+
+    isLoading = true;
+
+    try {
+        const r = await fetch(`/api/get-store?page=${page}`);
+        const items = await r.json();
+
+        if (!items || !items.length) {
+            hasMore = false;
+            return;
+        }
+
+        const g = document.getElementById('storeGrid');
+
+        items.forEach(i => {
+            if (!dynamicData[i.id]) {
+                dynamicData[i.id] = i;
+                renderCard(i, g);
+            }
+        });
+
+        page++;
+    } catch (err) {
+        console.error('Fetch store error:', err);
+    }
+
+    isLoading = false;
+}
+
+window.addEventListener('scroll', () => {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 300) {
+        fetchStoreItems();
+    }
+});
 
 function renderCard(item,container){const c=document.createElement('div');c.className='plan-card';c.addEventListener('click',()=>fillModal(item.title,item.meta,item.price,item.image_urls));c.innerHTML=`<div class="plan-img-container"><div class="plan-img" style="background-image:url('${item.main_image}')"></div><div class="plan-overlay"><h3>${item.title}</h3><p>${item.category||item.meta}</p></div></div>`;container.appendChild(c);}
 
