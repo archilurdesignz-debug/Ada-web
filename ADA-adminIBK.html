@@ -463,11 +463,12 @@ async function handleDirectUpload(fileInputId, targetInputId) {
     try {
         const base64Data = await getBase64(file);
         
-        const response = await fetch('/.netlify/functions/upload-to-dropbox', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filename: file.name, filedata: base64Data })
-        });
+       // ─── NEW FIXED CODE ───
+const response = await fetch('/api/upload-to-dropbox', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ filename: file.name, filedata: base64Data })
+});
 
         const data = await response.json();
 
@@ -498,12 +499,12 @@ async function handleStoreGalleryUpload() {
 
     try {
         const base64Data = await getBase64(file);
-        
-        const response = await fetch('/.netlify/functions/upload-to-dropbox', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filename: file.name, filedata: base64Data })
-        });
+        // ─── NEW FIXED CODE ───
+const response = await fetch('/api/upload-to-dropbox', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ filename: file.name, filedata: base64Data })
+});
 
         const data = await response.json();
 
