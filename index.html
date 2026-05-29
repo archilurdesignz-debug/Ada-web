@@ -1031,7 +1031,7 @@ async function loadPlans() {
     try {
         if (_db) {
             const { data, error } = await _db.from('plans')
-                .select('id,title,meta,category,price,main_image,image_urls')
+                .select('id,title,meta,category,price,main_image,image_urls,is_featured')
                 .order('created_at',{ascending:false}).limit(20);
             if (!error && data) {
                 const ids = new Set(all.map(p => p.id));
@@ -1040,7 +1040,13 @@ async function loadPlans() {
         }
     } catch(_) {}
 
-    const selected = [...all].sort(() => Math.random()-0.5).slice(0,6);
+    const featured = all.filter(p => p.is_featured);
+const others = all.filter(p => !p.is_featured);
+
+const selected = [
+    ...featured,
+    ...others.sort(() => Math.random() - 0.5)
+].slice(0, 6);
     const carousel = document.getElementById('plansCarousel');
     carousel.innerHTML = selected.map(p => `
         <div class="plan-card s-reveal"
