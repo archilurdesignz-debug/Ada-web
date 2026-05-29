@@ -982,8 +982,20 @@ footer {
         <p class="footer-copy">info@archilurdesignz.com</p>
     </div>
 </footer>
-
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
+    // Initialize EmailJS
+    emailjs.init("BxYPs2WHunB4bKb2w");
+
+    // Your functions below
+    function handleInquirySubmit(e) {
+
+        e.preventDefault();
+
+        // your send code here...
+
+    }
+
 /* ── CURSOR ─────────────────────────────────────────────────────────── */
 const cur = document.getElementById('cursor');
 if (window.matchMedia('(pointer:fine)').matches) {
@@ -1112,10 +1124,66 @@ function toggleInquiry(show) {
 }
 function handleInquirySubmit(e) {
     e.preventDefault();
-    alert('Thank you — your design brief has been received. We will be in touch within 24 hours.');
-    toggleInquiry(false);
-}
 
+    // Collect form values
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const phone = document.getElementById("phone").value;
+
+    const projectType = document.getElementById("projectType").value;
+    const location = document.getElementById("location").value;
+    const budget = document.getElementById("budget").value;
+    const timeline = document.getElementById("timeline").value;
+
+    const message = document.getElementById("message").value;
+
+    // Optional notes
+    const additionalNotes =
+        document.getElementById("additionalNotes")?.value || "";
+
+    // Video consultation checkbox
+    const videoConsultation =
+        document.getElementById("videoConsultation")?.checked
+        ? "Yes"
+        : "No";
+
+    // Selected services checkboxes
+    const selectedServices = Array.from(
+        document.querySelectorAll('input[name="services"]:checked')
+    )
+    .map(service => service.value)
+    .join(", ");
+
+    // SEND EMAIL
+    emailjs.send(
+        "service_7dd15om",
+        "template_626hzqs",
+        {
+            from_name: name,
+            from_email: email,
+            phone: phone,
+
+            project_type: projectType,
+            location: location,
+            budget: budget,
+            timeline: timeline,
+
+            message: message,
+            additional_notes: additionalNotes,
+
+            video_consultation: videoConsultation,
+            selected_services: selectedServices
+        }
+    )
+    .then(() => {
+        alert('Thank you — your design brief has been received. We will be in touch within 24 hours.');
+        toggleInquiry(false);
+    })
+    .catch((error) => {
+        console.error(error);
+        alert("Submission failed. Please try again.");
+    });
+}
 /* ── WA DRAG ────────────────────────────────────────────────────────── */
 const wa = document.getElementById('waDraggable');
 let dragging=false, ox=0, oy=0;
