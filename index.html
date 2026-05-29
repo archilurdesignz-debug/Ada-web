@@ -1059,16 +1059,21 @@ async function loadPlans() {
         console.log("Supabase load error:", e);
     }
 
-    // ── FEATURE FILTERING (STRICT) ───────────────────────────────
     const featured = all.filter(p => p.is_featured === true);
-    const others = all.filter(p => p.is_featured !== true);
+const others = all.filter(p => p.is_featured !== true);
 
-    // ── FINAL SELECTION ───────────────────────────────────────────
-    const selected = [
-        ...featured,
-        ...others.sort(() => Math.random() - 0.5)
-    ].slice(0, 6);
+// limit featured to avoid homepage domination
+const topFeatured = featured.slice(0, 3);
 
+// shuffle non-featured
+const shuffledOthers = others.sort(() => Math.random() - 0.5);
+
+// final selection: featured first, then others
+const selected = [
+    ...topFeatured,
+    ...shuffledOthers
+].slice(0, 6);
+    
     // ── RENDER CAROUSEL ───────────────────────────────────────────
     const carousel = document.getElementById('plansCarousel');
 
