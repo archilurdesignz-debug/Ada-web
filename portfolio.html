@@ -380,16 +380,23 @@ function renderItem(item, index) {
 async function initPortfolio() {
     allItems = [...defaultItems];
     try {
-        // Updated endpoint path for Vercel Serverless Functions
         const r = await fetch('/api/get-portfolio');
-        if (r.ok) { 
-            const d = await r.json(); 
-            d.forEach(i => allItems.push(i)); 
+        if (r.ok) {
+            const d = await r.json();
+            d.forEach(i => allItems.push(i));
         }
-    } catch(_) {}
+    } catch(err) {
+    console.error('Portfolio fetch failed:', err);
+}
+
+    // Render ONCE after all data (default + Supabase) is ready
     renderAll();
-    updateCount();
-    observeReveal();
+
+    // Give the DOM a frame to paint before querying items
+    requestAnimationFrame(() => {
+        updateCount();
+        observeReveal();
+    });
 }
 
 function renderAll() {
