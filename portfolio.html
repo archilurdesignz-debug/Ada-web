@@ -380,9 +380,19 @@ function renderItem(item, index) {
 async function initPortfolio() {
     allItems = [...defaultItems];
     try {
-        const r = await fetch('/.netlify/functions/get-portfolio');
-        if (r.ok) { const d = await r.json(); d.forEach(i => allItems.push(i)); }
-    } catch(_) {}
+        // Updated endpoint route for active Vercel API
+        const r = await fetch('/api/get-portfolio');
+        
+        if (r.ok) { 
+            const d = await r.json(); 
+            // Safely verify if incoming database data payload is an iterable array
+            if (Array.isArray(d)) {
+                d.forEach(i => allItems.push(i)); 
+            }
+        }
+    } catch(err) {
+        console.error("Failed to load cloud portfolio documents:", err);
+    }
     renderAll();
     updateCount();
     observeReveal();
