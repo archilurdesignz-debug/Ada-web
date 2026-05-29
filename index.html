@@ -1126,7 +1126,9 @@ function handleInquirySubmit(e) {
         phone: document.getElementById("cWA").value,
         location: document.getElementById("cLoc").value,
         message: document.getElementById("cBrief").value,
-        currency: document.getElementById("cCurr").value,
+        currency: document.getElementById("cCurr").value === "NGN"
+            ? "₦ Naira"
+            : "$ USD",
         video_consultation: document.getElementById("cVideo").checked ? "Yes" : "No",
         selected_services: selectedServices
     };
