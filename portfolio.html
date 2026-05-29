@@ -354,10 +354,12 @@ if (window.matchMedia('(pointer:fine)').matches) {
     document.addEventListener('mouseout',  e => { if(e.target.closest('a,button,.p-item')) cur.classList.remove('expanded'); });
 }
 
-/* ── RENDER ────────────────────────────────────────────────────── */
+/* ── RENDER ──────────────────────────────────────────────────── */
 function renderItem(item, index) {
     const grid = document.getElementById('mainGrid');
-    const catClass = item.category.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+    const catClass = item.category.toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
     const div = document.createElement('div');
     div.className = `p-item s-reveal ${catClass}`;
     div.style.transitionDelay = `${(index % 9) * 0.06}s`;
@@ -365,7 +367,7 @@ function renderItem(item, index) {
     div.onclick = () => openLightbox(index);
     div.innerHTML = `
         <img src="${item.image_url}" alt="${item.title}"
-             onerror="this.src='https://via.placeholder.com/600x400/1c1a17/b09070?text=Image+Not+Found'">
+             onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22400%22%3E%3Crect width=%22600%22 height=%22400%22 fill=%22%231c1a17%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-family=%22sans-serif%22 font-size=%2214%22 fill=%22%23b09070%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22%3EImage not found%3C/text%3E%3C/svg%3E'">
         <div class="p-caption">
             <p class="p-cat">${item.category}</p>
             <p class="p-title">${item.title}</p>
@@ -375,7 +377,6 @@ function renderItem(item, index) {
         </div>`;
     grid.appendChild(div);
 }
-
 /* ── INIT ──────────────────────────────────────────────────────── */
 async function initPortfolio() {
     allItems = [...defaultItems];
@@ -405,25 +406,19 @@ function renderAll() {
     allItems.forEach((item, i) => renderItem(item, i));
 }
 
-/* ── FILTER ────────────────────────────────────────────────────── */
+/* ── FILTER ──────────────────────────────────────────────────── */
 function filterGallery(cat, btn) {
     activeFilter = cat;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     document.querySelectorAll('.p-item').forEach(el => {
         const show = cat === 'all' || el.classList.contains(cat);
-        el.style.display = show ? 'block' : 'none';
+        // Use '' instead of 'block' so the element restores its natural display
+        el.style.display = show ? '' : 'none';
     });
     updateCount();
     observeReveal();
 }
-
-function updateCount() {
-    const visible = [...document.querySelectorAll('.p-item')].filter(el => el.style.display !== 'none');
-    visibleItems = visible.map(el => parseInt(el.dataset.index));
-    document.getElementById('filterCount').textContent = `${visible.length} ${visible.length === 1 ? 'work' : 'works'}`;
-}
-
 /* ── LIGHTBOX ──────────────────────────────────────────────────── */
 function openLightbox(globalIndex) {
     lbIndex = visibleItems.indexOf(globalIndex);
