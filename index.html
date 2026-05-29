@@ -1028,26 +1028,50 @@ function buildMarquee() {
 /* ── RENDER PLANS CAROUSEL ──────────────────────────────────────────── */
 async function loadPlans() {
     let all = [...defaultPlans];
+
     try {
         if (_db) {
-            const { data, error } = await _db.from('plans')
+            const { data, error } = await _db
+                .from('plans')
                 .select('id,title,meta,category,price,main_image,image_urls,is_featured')
-                .order('created_at',{ascending:false}).limit(20);
+                .order('created_at', { ascending: false })
+                .limit(20);
+
             if (!error && data) {
+
+                // ✅ Normalize Supabase data properly
+                const normalized = data.map(p => ({
+                    ...p,
+                    is_featured: p.is_featured === true
+                }));
+
+                // ✅ Prevent duplicates when merging with defaultPlans
                 const ids = new Set(all.map(p => p.id));
-                data.forEach(p => { if (!ids.has(p.id)) all.push(p); });
+
+                normalized.forEach(p => {
+                    if (!ids.has(p.id)) {
+                        all.push(p);
+                    }
+                });
             }
         }
-    } catch(_) {}
+    } catch (e) {
+        console.log("Supabase load error:", e);
+    }
 
-    const featured = all.filter(p => p.is_featured);
-const others = all.filter(p => !p.is_featured);
+    // ── FEATURE FILTERING (STRICT) ───────────────────────────────
+    const featured = all.filter(p => p.is_featured === true);
+    const others = all.filter(p => p.is_featured !== true);
 
-const selected = [
-    ...featured,
-    ...others.sort(() => Math.random() - 0.5)
-].slice(0, 6);
+    // ── FINAL SELECTION ───────────────────────────────────────────
+    const selected = [
+        ...featured,
+        ...others.sort(() => Math.random() - 0.5)
+    ].slice(0, 6);
+
+    // ── RENDER CAROUSEL ───────────────────────────────────────────
     const carousel = document.getElementById('plansCarousel');
+
     carousel.innerHTML = selected.map(p => `
         <div class="plan-card s-reveal"
              onclick="window.location.href='store.html?plan=${p.id}'"
@@ -1061,21 +1085,37 @@ const selected = [
                 <p class="plan-cat">${p.category || ''}</p>
                 <p class="plan-meta">${p.meta}</p>
             </div>
-        </div>`).join('');
+        </div>
+    `).join('');
+
     observeReveal();
 
-    /* drag-scroll */
-    let isDown=false, sx=0, sl=0;
-    carousel.addEventListener('mousedown',  e => { isDown=true; carousel.classList.add('dragging'); sx=e.pageX-carousel.offsetLeft; sl=carousel.scrollLeft; });
-    carousel.addEventListener('mouseleave', () => { isDown=false; carousel.classList.remove('dragging'); });
-    carousel.addEventListener('mouseup',    () => { isDown=false; carousel.classList.remove('dragging'); });
-    carousel.addEventListener('mousemove',  e => { if(!isDown)return; e.preventDefault(); carousel.scrollLeft = sl-(e.pageX-carousel.offsetLeft-sx)*1.4; });
-}
+    // ── drag-scroll ───────────────────────────────────────────────
+    let isDown = false, sx = 0, sl = 0;
 
-function shiftCarousel(dir) {
-    document.getElementById('plansCarousel').scrollBy({ left: dir*320, behavior:'smooth' });
-}
+    carousel.addEventListener('mousedown', e => {
+        isDown = true;
+        carousel.classList.add('dragging');
+        sx = e.pageX - carousel.offsetLeft;
+        sl = carousel.scrollLeft;
+    });
 
+    carousel.addEventListener('mouseleave', () => {
+        isDown = false;
+        carousel.classList.remove('dragging');
+    });
+
+    carousel.addEventListener('mouseup', () => {
+        isDown = false;
+        carousel.classList.remove('dragging');
+    });
+
+    carousel.addEventListener('mousemove', e => {
+        if (!isDown) return;
+        e.preventDefault();
+        carousel.scrollLeft = sl - (e.pageX - carousel.offsetLeft - sx) * 1.4;
+    });
+}
 /* ── REVIEWS ────────────────────────────────────────────────────────── */
 async function loadReviews() {
     const container = document.getElementById('reviews-display');
