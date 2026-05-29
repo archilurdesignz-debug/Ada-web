@@ -377,16 +377,21 @@ function renderItem(item, index) {
 }
 
 /* ── INIT ──────────────────────────────────────────────────────── */
+/* Replace your old initPortfolio block with this diagnostic version */
 async function initPortfolio() {
     allItems = [...defaultItems];
     try {
-        // Updated endpoint path for Vercel Serverless Functions
         const r = await fetch('/api/get-portfolio');
         if (r.ok) { 
             const d = await r.json(); 
+            console.log("Supabase items fetched successfully:", d);
             d.forEach(i => allItems.push(i)); 
+        } else {
+            console.error("API responded with an error status:", r.status, r.statusText);
         }
-    } catch(_) {}
+    } catch(err) {
+        console.error("Failed to fetch from API endpoint:", err);
+    }
     renderAll();
     updateCount();
     observeReveal();
