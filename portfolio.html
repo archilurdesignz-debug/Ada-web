@@ -378,7 +378,9 @@ function renderItem(item, index) {
 
 /* ── INIT ──────────────────────────────────────────────────────── */
 async function initPortfolio() {
+    // Start with your default hardcoded items
     allItems = [...defaultItems];
+    
     try {
         // Updated endpoint route for active Vercel API
         const r = await fetch('/api/get-portfolio');
@@ -387,23 +389,35 @@ async function initPortfolio() {
             const d = await r.json(); 
             // Safely verify if incoming database data payload is an iterable array
             if (Array.isArray(d)) {
-                d.forEach(i => allItems.push(i)); 
+                // Ensure your database items have properly trimmed/normalized categories
+                const normalizedDbItems = d.map(item => ({
+                    ...item,
+                    // Fallback to avoid crashes if category is missing in database row
+                    category: item.category ? item.category.trim() : 'Exterior' 
+                }));
+                
+                allItems = [...allItems, ...normalizedDbItems];
             }
         }
     } catch(err) {
         console.error("Failed to load cloud portfolio documents:", err);
     }
+    
+    // Completely re-render layout, set counts, and trigger animations
     renderAll();
-    updateCount();
-    observeReveal();
 }
 
 function renderAll() {
     const grid = document.getElementById('mainGrid');
     grid.innerHTML = '';
+    
+    // Render the combined data using the updated tracking indexes
     allItems.forEach((item, i) => renderItem(item, i));
+    
+    // Crucial: Update counts and visibility structures after populating DOM
+    updateCount();
+    observeReveal();
 }
-
 /* ── FILTER ────────────────────────────────────────────────────── */
 function filterGallery(cat, btn) {
     activeFilter = cat;
