@@ -378,23 +378,37 @@ function renderItem(item, index) {
 
 /* ── INIT ──────────────────────────────────────────────────────── */
 async function initPortfolio() {
-    // Start with your default hardcoded items
     allItems = [...defaultItems];
     
     try {
-        // Updated endpoint route for active Vercel API
         const r = await fetch('/api/get-portfolio');
         
         if (r.ok) { 
             const d = await r.json(); 
-            // Safely verify if incoming database data payload is an iterable array
+            
             if (Array.isArray(d)) {
-                // Ensure your database items have properly trimmed/normalized categories
-                const normalizedDbItems = d.map(item => ({
-                    ...item,
-                    // Fallback to avoid crashes if category is missing in database row
-                    category: item.category ? item.category.trim() : 'Exterior' 
-                }));
+                const normalizedDbItems = d.map(item => {
+                    let correctedUrl = item.image_url;
+
+                    // Intercept and rewrite Dropbox links for hotlinking source output
+                    if (correctedUrl && correctedUrl.includes('dropbox.com')) {
+                        // 1. Strip out the default browser preview flag
+                        correctedUrl = correctedUrl.replace('dl=0', '');
+                        
+                        // 2. Append the forced raw binary stream parameters
+                        if (correctedUrl.includes('?')) {
+                            correctedUrl += '&raw=1';
+                        } else {
+                            correctedUrl += '?raw=1';
+                        }
+                    }
+
+                    return {
+                        ...item,
+                        image_url: correctedUrl,
+                        category: item.category ? item.category.trim() : 'Exterior'
+                    };
+                });
                 
                 allItems = [...allItems, ...normalizedDbItems];
             }
@@ -403,7 +417,6 @@ async function initPortfolio() {
         console.error("Failed to load cloud portfolio documents:", err);
     }
     
-    // Completely re-render layout, set counts, and trigger animations
     renderAll();
 }
 
