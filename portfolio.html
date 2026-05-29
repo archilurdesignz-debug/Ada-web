@@ -323,38 +323,37 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
         <p class="footer-copy">info@archilurdesignz.com</p>
     </div>
 </footer>
-
 <script>
-/* ── DATA ──────────────────────────────────────────────────────── */
+/* ── DATA ─────────────────────────────────────────────────────── */
 const defaultItems = [
-    { title:'THE VILLA',          category:'Exterior',     image_url:'images/Exterior/Mass_Housing.png', description:'A high-density luxury residential development featuring New Traditionalist architecture designed for maximum curb appeal and spatial efficiency.' },
-    { title:'THE HOLLYWOOD',      category:'Landscaping',  image_url:'images/Landscape/Hollywood.png',   description:'An ultra-luxury Hollywood estate featuring bespoke architectural landscaping and curated softscapes designed for maximum curb appeal and premier market positioning.' },
-    { title:'SIMPLISTIC LIVING',  category:'Interior',     image_url:'images/Interior/Lounge.png',       description:'Warm, sophisticated and compact living space.' },
-    { title:'LIVINGSTIC',         category:'Exterior',     image_url:'images/Exterior/Apartments.png',   description:'Luxurious apartment homes for high-end use.' },
-    { title:'THE COMMUNITY', category:'Landscaping',  image_url:'images/Landscape/Landscape.png',   description:'A resort communal living destination with outdoor games.' },
-    { title:'THE MINIMALIST',     category:'Interior',     image_url:'images/Interior/Studio.png',       description:'Simple and elegant studio space.' },
-    { title:'DELUXE',             category:'Exterior',     image_url:'images/Exterior/Duplex21.png',     description:'Tropical Contemporary architecture suitable for high-taste users.' },
-    { title:'THE POOL SIDE',      category:'Landscaping',  image_url:'images/Landscape/Outdoor.png',     description:'An opulent poolside oasis featuring a bespoke fireplace, curated tropical greenery, and a designer seating area engineered to provide an unrivaled outdoor VIP experience.' },
-    { title:'ODOGWU STYLE',       category:'Interior',     image_url:'images/Interior/Bathroom2.png',    description:'A luxury style bathroom customized for the real Odogwu\'s.' },
-    { title:'MILLENIAL POINT',     category:'Landscaping',  image_url:'images/Landscape/Mille.jpg',       description:'A premier luxury residential estate featuring bespoke architectural design and world-class amenities engineered for an unrivaled VIP lifestyle.' },
-    { title:'SITE PROGRESS',      category:'Construction', image_url:'images/Landscape/Construction.png',description:'On-site coordination and structural implementation.' },
-    { title:'PROJECT ESTIMATES',  category:'BoQ Samples',  image_url:'images/Landscape/BoQ_Sample.png',  description:'Detailed material take-offs and financial planning.' },
+    { title:'THE VILLA',         category:'Exterior',    image_url:'images/Exterior/Mass_Housing.png',  description:'A high-density luxury residential development featuring New Traditionalist architecture designed for maximum curb appeal and spatial efficiency.' },
+    { title:'THE HOLLYWOOD',     category:'Landscaping', image_url:'images/Landscape/Hollywood.png',    description:'An ultra-luxury Hollywood estate featuring bespoke architectural landscaping and curated softscapes designed for maximum curb appeal and premier market positioning.' },
+    { title:'SIMPLISTIC LIVING', category:'Interior',    image_url:'images/Interior/Lounge.png',        description:'Warm, sophisticated and compact living space.' },
+    { title:'LIVINGSTIC',        category:'Exterior',    image_url:'images/Exterior/Apartments.png',    description:'Luxurious apartment homes for high-end use.' },
+    { title:'THE COMMUNITY',     category:'Landscaping', image_url:'images/Landscape/Landscape.png',    description:'A resort communal living destination with outdoor games.' },
+    { title:'THE MINIMALIST',    category:'Interior',    image_url:'images/Interior/Studio.png',        description:'Simple and elegant studio space.' },
+    { title:'DELUXE',            category:'Exterior',    image_url:'images/Exterior/Duplex21.png',      description:'Tropical Contemporary architecture suitable for high-taste users.' },
+    { title:'THE POOL SIDE',     category:'Landscaping', image_url:'images/Landscape/Outdoor.png',      description:'An opulent poolside oasis featuring a bespoke fireplace, curated tropical greenery, and a designer seating area engineered to provide an unrivaled outdoor VIP experience.' },
+    { title:'ODOGWU STYLE',      category:'Interior',    image_url:'images/Interior/Bathroom2.png',     description:'A luxury style bathroom customized for the real Odogwu\'s.' },
+    { title:'MILLENIAL POINT',   category:'Landscaping', image_url:'images/Landscape/Mille.jpg',        description:'A premier luxury residential estate featuring bespoke architectural design and world-class amenities engineered for an unrivaled VIP lifestyle.' },
+    { title:'SITE PROGRESS',     category:'Construction',image_url:'images/Landscape/Construction.png', description:'On-site coordination and structural implementation.' },
+    { title:'PROJECT ESTIMATES', category:'BoQ Samples', image_url:'images/Landscape/BoQ_Sample.png',   description:'Detailed material take-offs and financial planning.' },
 ];
 
-let allItems = [];
+let allItems   = [];
 let activeFilter = 'all';
-let lbIndex = 0;
+let lbIndex    = 0;
 let visibleItems = [];
 
 /* ── CURSOR ────────────────────────────────────────────────────── */
 const cur = document.getElementById('cursor');
 if (window.matchMedia('(pointer:fine)').matches) {
-    document.addEventListener('mousemove', e => { cur.style.left=e.clientX+'px'; cur.style.top=e.clientY+'px'; });
-    document.addEventListener('mouseover', e => { if(e.target.closest('a,button,.p-item')) cur.classList.add('expanded'); });
-    document.addEventListener('mouseout',  e => { if(e.target.closest('a,button,.p-item')) cur.classList.remove('expanded'); });
+    document.addEventListener('mousemove', e => { cur.style.left = e.clientX+'px'; cur.style.top = e.clientY+'px'; });
+    document.addEventListener('mouseover', e => { if (e.target.closest('a,button,.p-item')) cur.classList.add('expanded'); });
+    document.addEventListener('mouseout',  e => { if (e.target.closest('a,button,.p-item')) cur.classList.remove('expanded'); });
 }
 
-/* ── RENDER ──────────────────────────────────────────────────── */
+/* ── RENDER SINGLE ITEM ────────────────────────────────────────── */
 function renderItem(item, index) {
     const grid = document.getElementById('mainGrid');
     const catClass = item.category.toLowerCase()
@@ -377,6 +376,23 @@ function renderItem(item, index) {
         </div>`;
     grid.appendChild(div);
 }
+
+/* ── RENDER ALL ────────────────────────────────────────────────── */
+function renderAll() {
+    const grid = document.getElementById('mainGrid');
+    grid.innerHTML = '';
+    allItems.forEach((item, i) => renderItem(item, i));
+}
+
+/* ── UPDATE COUNT & VISIBLE INDEX ──────────────────────────────── */
+function updateCount() {
+    const all = [...document.querySelectorAll('.p-item')];
+    const visible = all.filter(el => el.style.display !== 'none');
+    visibleItems = visible.map(el => parseInt(el.dataset.index));
+    const n = visible.length;
+    document.getElementById('filterCount').textContent = `${n} ${n === 1 ? 'work' : 'works'}`;
+}
+
 /* ── INIT ──────────────────────────────────────────────────────── */
 async function initPortfolio() {
     allItems = [...defaultItems];
@@ -386,39 +402,31 @@ async function initPortfolio() {
             const d = await r.json();
             d.forEach(i => allItems.push(i));
         }
-    } catch(err) {
-    console.error('Portfolio fetch failed:', err);
-}
+    } catch (err) {
+        console.error('Portfolio fetch failed:', err);
+    }
 
-    // Render ONCE after all data (default + Supabase) is ready
     renderAll();
 
-    // Give the DOM a frame to paint before querying items
     requestAnimationFrame(() => {
         updateCount();
         observeReveal();
     });
 }
 
-function renderAll() {
-    const grid = document.getElementById('mainGrid');
-    grid.innerHTML = '';
-    allItems.forEach((item, i) => renderItem(item, i));
-}
-
-/* ── FILTER ──────────────────────────────────────────────────── */
+/* ── FILTER ────────────────────────────────────────────────────── */
 function filterGallery(cat, btn) {
     activeFilter = cat;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     document.querySelectorAll('.p-item').forEach(el => {
         const show = cat === 'all' || el.classList.contains(cat);
-        // Use '' instead of 'block' so the element restores its natural display
         el.style.display = show ? '' : 'none';
     });
     updateCount();
     observeReveal();
 }
+
 /* ── LIGHTBOX ──────────────────────────────────────────────────── */
 function openLightbox(globalIndex) {
     lbIndex = visibleItems.indexOf(globalIndex);
@@ -436,9 +444,9 @@ function showLightboxItem() {
     img.style.animation = 'none'; img.offsetHeight; img.style.animation = '';
     img.src = item.image_url;
     img.alt = item.title;
-    document.getElementById('lbTag').textContent = item.category;
+    document.getElementById('lbTag').textContent   = item.category;
     document.getElementById('lbTitle').textContent = item.title;
-    document.getElementById('lbDesc').textContent = item.description || '';
+    document.getElementById('lbDesc').textContent  = item.description || '';
 }
 
 function shiftLightbox(dir) {
@@ -465,7 +473,7 @@ document.addEventListener('keydown', e => {
 /* ── SCROLL REVEAL ─────────────────────────────────────────────── */
 function observeReveal() {
     const io = new IntersectionObserver(entries => {
-        entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
     }, { threshold: 0.08 });
     document.querySelectorAll('.s-reveal:not(.in)').forEach(el => io.observe(el));
 }
@@ -473,14 +481,14 @@ function observeReveal() {
 /* ── NAV SCROLL ────────────────────────────────────────────────── */
 window.addEventListener('scroll', () => {
     document.getElementById('navbar').classList.toggle('solid', window.scrollY > 60);
-}, { passive:true });
+}, { passive: true });
 
 /* ── WA DRAG ───────────────────────────────────────────────────── */
 const wa = document.getElementById('waDraggable');
-let dr=false,ox=0,oy=0;
-wa.addEventListener('mousedown', e=>{dr=true;ox=e.clientX-wa.offsetLeft;oy=e.clientY-wa.offsetTop;wa.style.transition='none';});
-document.addEventListener('mousemove', e=>{if(dr){wa.style.left=(e.clientX-ox)+'px';wa.style.top=(e.clientY-oy)+'px';wa.style.right=wa.style.bottom='auto';}});
-document.addEventListener('mouseup', ()=>{dr=false;wa.style.transition='transform 0.3s,box-shadow 0.3s';});
+let dr = false, ox = 0, oy = 0;
+wa.addEventListener('mousedown', e => { dr=true; ox=e.clientX-wa.offsetLeft; oy=e.clientY-wa.offsetTop; wa.style.transition='none'; });
+document.addEventListener('mousemove', e => { if (dr) { wa.style.left=(e.clientX-ox)+'px'; wa.style.top=(e.clientY-oy)+'px'; wa.style.right=wa.style.bottom='auto'; } });
+document.addEventListener('mouseup', () => { dr=false; wa.style.transition='transform 0.3s,box-shadow 0.3s'; });
 
 /* ── START ─────────────────────────────────────────────────────── */
 window.addEventListener('DOMContentLoaded', initPortfolio);
