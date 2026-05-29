@@ -1,6 +1,17 @@
 import fetch from 'node-fetch';
 
+// Vercel Serverless Configuration Matrix
+export const config = {
+    api: {
+        bodyParser: {
+            // Expands the default request capture limit for base64 strings
+            sizeLimit: '4.5mb', 
+        },
+    },
+};
+
 export default async function handler(req, res) {
+    // Enforce CORS and correct request method
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
@@ -37,16 +48,17 @@ export default async function handler(req, res) {
         }
 
         const accessToken = tokenData.access_token;
-        const { filename, filedata } = req.body; // Vercel automatically parses JSON bodies into req.body
+        const { filename, filedata } = req.body; 
 
         if (!filename || !filedata) {
-            return res.status(400).json({ error: "Missing file payload headers parameters." });
+            return res.status(400).json({ error: "Missing file payload parameters." });
         }
 
+        // Convert base64 incoming payload cleanly to binary buffer
         const fileBuffer = Buffer.from(filedata, 'base64');
         const dropboxPath = `/portfolio/${Date.now()}_${filename}`;
         
-        // Upload transmission to Dropbox
+        // Upload transmission to Dropbox Content API
         const uploadResponse = await fetch('https://content.dropboxapi.com/2/files/upload', {
             method: 'POST',
             headers: {
@@ -62,11 +74,13 @@ export default async function handler(req, res) {
             body: fileBuffer
         });
 
-        const uploadData = await uploadResponse.json();
-
+        // Dropbox content API returns errors as text if the call fails completely, safe check here
         if (!uploadResponse.ok) {
-            throw new Error(uploadData.error_summary || "Dropbox raw upload transmission failure");
+            const errText = await uploadResponse.text();
+            throw new Error(`Dropbox upload failure: ${errText || uploadResponse.statusText}`);
         }
+
+        const uploadData = await uploadResponse.json();
 
         // Generate public shared link
         const linkResponse = await fetch('https://api.dropbox.com/2/sharing/create_shared_link_with_settings', {
@@ -80,7 +94,7 @@ export default async function handler(req, res) {
 
         let linkData = await linkResponse.json();
         
-        // Fallback if shared link already exists
+        // Fallback catch if shared link already exists for this exact path
         if (!linkResponse.ok && linkData.error_summary?.includes('shared_link_already_exists')) {
             const listResponse = await fetch('https://api.dropbox.com/2/sharing/list_shared_links', {
                 method: 'POST',
@@ -96,6 +110,7 @@ export default async function handler(req, res) {
             throw new Error(linkData.error_summary || "Sharing link generation breakdown");
         }
 
+        // Convert default preview URL link to an absolute raw render URL source
         const directUrl = linkData.url.replace('?dl=0', '?raw=1');
 
         return res.status(200).json({ url: directUrl });
