@@ -111,7 +111,7 @@ export default async function handler(req, res) {
         }
 
         // Convert default preview URL link to an absolute raw render URL source
-        const directUrl = linkData.url.replace('?dl=0', '?raw=1');
+        const directUrl = linkData.url.replace(/[?&]dl=0/, '?raw=1');
 
         return res.status(200).json({ url: directUrl });
 
