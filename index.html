@@ -1041,7 +1041,7 @@ async function loadPlans() {
     const carousel = document.getElementById('plansCarousel');
     carousel.innerHTML = selected.map(p => `
         <div class="plan-card s-reveal"
-             onclick="window.location.href='ada-store.html?plan=${p.id}'"
+             onclick="window.location.href='store.html?plan=${p.id}'"
              role="button" tabindex="0">
             <div class="plan-img-wrap">
                 <div class="plan-img" style="background-image:url('${p.main_image}')"></div>
