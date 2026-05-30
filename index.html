@@ -1120,42 +1120,67 @@ function observeReveal() {
     }, { threshold:0.1 });
     document.querySelectorAll('.s-reveal:not(.in)').forEach(el => io.observe(el));
 }
-
 /* ── MODAL ──────────────────────────────────────────────────────────── */
 function toggleInquiry(show) {
     const m = document.getElementById('inquiryModal');
     m.classList.toggle('open', show);
     document.body.style.overflow = show ? 'hidden' : '';
 }
-function handleInquirySubmit(e) {
+
+// Simple hash — converts a string to a compact fingerprint
+async function hashString(str) {
+    const msgBuffer = new TextEncoder().encode(str.trim().toLowerCase());
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
+}
+
+async function handleInquirySubmit(e) {
     e.preventDefault();
+
+    const email  = document.getElementById('cEmail').value.trim().toLowerCase();
+    const brief  = document.getElementById('cBrief').value.trim().toLowerCase();
+
+    // Generate a fingerprint from email + brief content combined
+    const fingerprint = await hashString(email + '||' + brief);
+
+    // Check if this exact combination has been submitted before
+    const submitted = JSON.parse(localStorage.getItem('ada_submissions') || '[]');
+    if (submitted.includes(fingerprint)) {
+        // Silent block — close modal, reset form, say nothing about the reason
+        toggleInquiry(false);
+        document.getElementById('designBriefForm').reset();
+        return;
+    }
 
     const selectedServices = Array.from(
         document.querySelectorAll('input[name="srv"]:checked')
-    ).map(s => s.value).join(", ");
+    ).map(s => s.value).join(', ');
 
     const templateParams = {
-        from_name: document.getElementById("cName").value,
-        from_email: document.getElementById("cEmail").value,
-        phone: document.getElementById("cWA").value,
-        location: document.getElementById("cLoc").value,
-        message: document.getElementById("cBrief").value,
-        currency: document.getElementById("cCurr").value === "NGN"
-            ? "₦ Naira"
-            : "$ USD",
-        video_consultation: document.getElementById("cVideo").checked ? "Yes" : "No",
-        selected_services: selectedServices
+        from_name:            document.getElementById('cName').value,
+        from_email:           email,
+        phone:                document.getElementById('cWA').value,
+        location:             document.getElementById('cLoc').value,
+        message:              document.getElementById('cBrief').value,
+        currency:             document.getElementById('cCurr').value === 'NGN' ? '₦ Naira' : '$ USD',
+        video_consultation:   document.getElementById('cVideo').checked ? 'Yes' : 'No',
+        selected_services:    selectedServices
     };
 
-    emailjs.send("service_7dd15om", "template_626hzqs", templateParams)
+    emailjs.send('service_7dd15om', 'template_626hzqs', templateParams)
         .then(() => {
-            alert("Thank you — your design brief has been received. We will respond within 24 hours.");
+            // Only store the fingerprint AFTER a successful send
+            submitted.push(fingerprint);
+            localStorage.setItem('ada_submissions', JSON.stringify(submitted));
+
+            alert('Thank you — your design brief has been received. We will respond within 24 hours.');
             toggleInquiry(false);
-            document.getElementById("designBriefForm").reset();
+            document.getElementById('designBriefForm').reset();
         })
-        .catch((error) => {
-            console.error(error);
-            alert("Submission failed. Please try again.");
+        .catch(err => {
+            console.error(err);
+            alert('Submission failed. Please try again.');
         });
 }
 /* ── WA DRAG ────────────────────────────────────────────────────────── */
