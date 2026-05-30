@@ -654,6 +654,26 @@ footer {
     flex-wrap:wrap; gap:12px;
 }
 .footer-copy { font-size:0.58rem; color:rgba(122,117,112,0.5); letter-spacing:1px; }
+        .footer-ig {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    font-size: 0.68rem;
+    font-weight: 300;
+    letter-spacing: 1.5px;
+    color: var(--mist);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+.footer-ig svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+.footer-ig:hover {
+    color: var(--gold2);
+}
 
 /* ── RESPONSIVE ──────────────────────────────────────────────────────── */
 @media (max-width:1024px) {
@@ -954,11 +974,21 @@ footer {
 <!-- ── FOOTER ─────────────────────────────────────────────────────────── -->
 <footer>
     <div class="footer-top">
-        <div class="footer-brand">
-            <span class="fb-name">ADA</span>
-            <span class="fb-rc">RC: 9176834</span>
-            <p>Archilurdesignz and Architecture — crafting bespoke luxury spaces across Nigeria and beyond since 2012.</p>
-        </div>
+      <div class="footer-brand">
+    <span class="fb-name">ADA</span>
+    <span class="fb-rc">RC: 9176834</span>
+    <p>Archilurdesignz and Architecture — crafting bespoke luxury spaces across Nigeria and beyond since 2012.</p>
+    <a href="https://www.instagram.com/archilurdesignz?igsh=YzEwaHVyNzY0aTZv"
+       target="_blank" rel="noopener noreferrer"
+       class="footer-ig">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+        </svg>
+        <span>@archilurdesignz</span>
+    </a>
+</div>
         <div class="footer-col">
             <h5>Company</h5>
             <a href="about.html">About Us</a>
