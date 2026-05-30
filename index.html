@@ -1034,49 +1034,31 @@ async function loadPlans() {
             const { data, error } = await _db
                 .from('plans')
                 .select('id,title,meta,category,price,main_image,image_urls,is_featured')
+                .eq('is_featured', true)   // ← only fetch plans marked for homepage
                 .order('created_at', { ascending: false })
-                .limit(20);
+                .limit(6);
 
-            if (!error && data) {
-
-                // ✅ Normalize Supabase data properly
-                const normalized = data.map(p => ({
-                    ...p,
-                    is_featured: p.is_featured === true
-                }));
-
-                // ✅ Prevent duplicates when merging with defaultPlans
+            if (!error && data && data.length) {
+                // Replace defaultPlans entirely with Supabase featured plans
+                // once we have real data — avoids showing stale defaults
                 const ids = new Set(all.map(p => p.id));
-
-                normalized.forEach(p => {
-                    if (!ids.has(p.id)) {
-                        all.push(p);
-                    }
+                data.forEach(p => {
+                    if (!ids.has(p.id)) all.push(p);
                 });
             }
         }
     } catch (e) {
-        console.log("Supabase load error:", e);
+        console.log('Supabase load error:', e);
     }
 
-    const featured = all.filter(p => p.is_featured === true);
-const others = all.filter(p => p.is_featured !== true);
+    // No more client-side featured/others split needed —
+    // everything in `all` is already cleared for homepage display.
+    // Just shuffle and cap at 6.
+    const selected = all
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 6);
 
-// limit featured to avoid homepage domination
-const topFeatured = featured.slice(0, 3);
-
-// shuffle non-featured
-const shuffledOthers = others.sort(() => Math.random() - 0.5);
-
-// final selection: featured first, then others
-const selected = [
-    ...topFeatured,
-    ...shuffledOthers
-].slice(0, 6);
-    
-    // ── RENDER CAROUSEL ───────────────────────────────────────────
     const carousel = document.getElementById('plansCarousel');
-
     carousel.innerHTML = selected.map(p => `
         <div class="plan-card s-reveal"
              onclick="window.location.href='store.html?plan=${p.id}'"
@@ -1095,31 +1077,12 @@ const selected = [
 
     observeReveal();
 
-    // ── drag-scroll ───────────────────────────────────────────────
+    // drag-scroll
     let isDown = false, sx = 0, sl = 0;
-
-    carousel.addEventListener('mousedown', e => {
-        isDown = true;
-        carousel.classList.add('dragging');
-        sx = e.pageX - carousel.offsetLeft;
-        sl = carousel.scrollLeft;
-    });
-
-    carousel.addEventListener('mouseleave', () => {
-        isDown = false;
-        carousel.classList.remove('dragging');
-    });
-
-    carousel.addEventListener('mouseup', () => {
-        isDown = false;
-        carousel.classList.remove('dragging');
-    });
-
-    carousel.addEventListener('mousemove', e => {
-        if (!isDown) return;
-        e.preventDefault();
-        carousel.scrollLeft = sl - (e.pageX - carousel.offsetLeft - sx) * 1.4;
-    });
+    carousel.addEventListener('mousedown',  e => { isDown=true; carousel.classList.add('dragging'); sx=e.pageX-carousel.offsetLeft; sl=carousel.scrollLeft; });
+    carousel.addEventListener('mouseleave', () => { isDown=false; carousel.classList.remove('dragging'); });
+    carousel.addEventListener('mouseup',    () => { isDown=false; carousel.classList.remove('dragging'); });
+    carousel.addEventListener('mousemove',  e => { if(!isDown)return; e.preventDefault(); carousel.scrollLeft=sl-(e.pageX-carousel.offsetLeft-sx)*1.4; });
 }
 /* ── REVIEWS ────────────────────────────────────────────────────────── */
 async function loadReviews() {
