@@ -330,21 +330,21 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Full Name</label>
-                            <input type="text" placeholder="Arc. Ibukun" required>
+                            <input id="cName" type="text" placeholder="Arc. Ibukun" required>
                         </div>
                         <div class="form-group">
                             <label>Email Address</label>
-                            <input type="email" placeholder="name@domain.com" required>
+                            <input id="cEmail" type="email" placeholder="name@domain.com" required>
                         </div>
                     </div>
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Phone Number</label>
-                            <input type="tel" placeholder="+234..." required>
+                            <input id="cPhone" type="tel" placeholder="+234..." required>
                         </div>
                         <div class="form-group">
                             <label>Primary Service Interested</label>
-                            <select required>
+                            <select id="cService" required>
                                 <option value="" disabled selected>Select service token...</option>
                                 <option>Residential Architecture</option>
                                 <option>Bespoke Commercial Architecture</option>
@@ -355,7 +355,7 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
                     </div>
                     <div class="form-group full-width">
                         <label>Vision Brief</label>
-                        <textarea placeholder="Describe your architectural requirements, specific site constraints, or property size parameters..." rows="6" required></textarea>
+                        <textarea id="cBrief" placeholder="Describe your architectural requirements, specific site constraints, or property size parameters..." rows="6" required></textarea>
                     </div>
                     <button type="submit" class="submit-btn">Initialize Briefing</button>
                 </form>
@@ -393,33 +393,71 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
     </div>
 </footer>
     <script>
-        // Dynamic sticky navigation backdrop line toggle script
-        const nav = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 40) {
-                nav.classList.add('scrolled');
-            } else {
-                nav.classList.remove('scrolled');
-            }
+   // Dynamic sticky navigation backdrop line toggle script
+    const nav = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 40) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    // Intersection Observer for fluid element entry animations
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) e.target.classList.add('active');
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    /* ── CURSOR ─────────────────────────────────────────────────────────── */
+    const cur = document.getElementById('cursor');
+
+    if (window.matchMedia('(pointer:fine)').matches) {
+        document.addEventListener('mousemove', e => {
+            cur.style.left = e.clientX + 'px';
+            cur.style.top  = e.clientY + 'px';
         });
 
-        // Intersection Observer for fluid element entry animations
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('active'); });
-        }, { threshold: 0.1 });
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-        /* ── CURSOR ─────────────────────────────────────────────────────────── */
-const cur = document.getElementById('cursor');
-if (window.matchMedia('(pointer:fine)').matches) {
-    document.addEventListener('mousemove', e => {
-        cur.style.left = e.clientX + 'px';
-        cur.style.top  = e.clientY + 'px';
-    });
-    document.querySelectorAll('a, button, [role=button]').forEach(el => {
-        el.addEventListener('mouseenter', () => cur.classList.add('expanded'));
-        el.addEventListener('mouseleave', () => cur.classList.remove('expanded'));
-    });
-}
-    </script>
+        document.querySelectorAll('a, button, [role=button]').forEach(el => {
+            el.addEventListener('mouseenter', () => cur.classList.add('expanded'));
+            el.addEventListener('mouseleave', () => cur.classList.remove('expanded'));
+        });
+    }
+
+    /* ── WHATSAPP FORM SUBMISSION ───────────────────────────────────── */
+
+    document.getElementById("projectBriefForm")
+    .addEventListener("submit", function(e){
+
+        e.preventDefault();
+
+        const name = document.getElementById("cName").value;
+        const email = document.getElementById("cEmail").value;
+        const phone = document.getElementById("cPhone").value;
+        const service = document.getElementById("cService").value;
+        const brief = document.getElementById("cBrief").value;
+
+        const message =
+`NEW PROJECT BRIEF
+
+Name: ${name}
+
+Email: ${email}
+
+Phone: ${phone}
+
+Service: ${service}
+
+Project Brief:
+${brief}`;
+
+        const whatsappURL =
+`https://wa.me/2348138580315?text=${encodeURIComponent(message)}`;
+
+        window.open(whatsappURL, "_blank");
+    }); </script>
 </body>
 </html>
