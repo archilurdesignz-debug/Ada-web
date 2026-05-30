@@ -44,6 +44,89 @@
         .badge-released { background: var(--success); color: white; }
         .badge-locked { background: #333; color: #888; }
         .file-actions { display: flex; gap: 8px; }
+        /* ── MOBILE RESPONSIVE ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    body { padding: 16px; }
+
+    h1 { font-size: 1.2rem; letter-spacing: 2px; margin-bottom: 24px; }
+    h2 { font-size: 1rem; letter-spacing: 2px; }
+    h3 { font-size: 0.75rem; }
+
+    .section-card { padding: 18px; margin-bottom: 24px; }
+
+    /* All multi-column grids collapse to single column */
+    .grid-3,
+    .grid-2,
+    .stage-grid { grid-template-columns: 1fr !important; }
+
+    /* File row stacks vertically */
+    .file-row {
+        grid-template-columns: 1fr !important;
+        gap: 8px;
+    }
+
+    /* Existing file items stack */
+    .existing-file-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .file-actions {
+        flex-wrap: wrap;
+        gap: 6px;
+        width: 100%;
+    }
+    .file-actions .btn-small { flex: 1; text-align: center; }
+
+    /* Moderation buttons */
+    .mod-btns { flex-direction: column; gap: 8px; }
+    .btn-mod { width: 100%; padding: 10px; }
+
+    /* Lock/unlock buttons row */
+    div[style*="display:flex"][style*="align-items:center"][style*="gap:20px"] {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 10px !important;
+    }
+    .btn-action[style*="max-width:220px"] {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    /* Countdown preview */
+    #countdownPreview { font-size: 0.75rem; }
+
+    /* Store gallery uploader row */
+    div[style*="display: flex"][style*="gap: 10px"] { flex-direction: column; }
+    #targetStoreSlot { width: 100% !important; }
+
+    /* Creation result code blocks */
+    code { font-size: 0.65rem; word-break: break-all; display: block; }
+
+    /* Input/select sizing */
+    input, select, textarea { font-size: 0.85rem; }
+
+    /* Btn action full width always on mobile */
+    .btn-action { font-size: 0.7rem; padding: 12px; }
+
+    /* Admin container max-width override */
+    .admin-container { padding: 0; }
+
+    /* Track rows inside dynamic container */
+    #dynamicTracksContainer .file-row {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Small helper text */
+    p[style*="font-size:0.6rem"] { font-size: 0.65rem !important; }
+}
+
+@media (max-width: 480px) {
+    body { padding: 10px; }
+    h1 { font-size: 1rem; }
+    .section-card { padding: 14px; }
+    .file-status-badge { display: block; margin-bottom: 4px; }
+}
     </style>
 </head>
 <body>
