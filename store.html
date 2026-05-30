@@ -209,9 +209,20 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
 
             <div id="requestForm" style="display:none;">
                 <p class="form-section-title" id="formActionTitle"></p>
-                <input type="text" id="clientName" class="input-field" placeholder="Your Full Name">
-                <input type="email" id="clientEmail" class="input-field" placeholder="Email Address">
-                <input type="text" id="clientPhone" class="input-field" placeholder="WhatsApp Number">
+                <input type="text"
+       id="clientName"
+       class="input-field"
+       placeholder="Your Full Name">
+
+<input type="email"
+       id="clientEmail"
+       class="input-field"
+       placeholder="Email Address">
+
+<input type="text"
+       id="clientPhone"
+       class="input-field"
+       placeholder="WhatsApp Number">
                 <button class="btn-modal-primary" onclick="processFinalRequest()">Send Request</button>
                 <button class="back-link" onclick="hideRequestForm()">← Back</button>
             </div>
@@ -316,7 +327,35 @@ function fillModal(title,meta,price,images){document.getElementById('modalTitle'
 function closePlan(){document.getElementById('planModal').classList.remove('open');document.body.style.overflow='';}
 function showRequestForm(a){currentAction=a;currentPlan=document.getElementById('modalTitle').innerText;document.getElementById('formActionTitle').innerText=a+' Request';document.getElementById('initialActions').style.display='none';document.getElementById('requestForm').style.display='block';}
 function hideRequestForm(){document.getElementById('initialActions').style.display='block';document.getElementById('requestForm').style.display='none';}
-function processFinalRequest(){const n=document.getElementById('clientName').value,e=document.getElementById('clientEmail').value,p=document.getElementById('clientPhone').value;if(!n||!e){alert('Please complete name and email.');return;}window.location.href=`mailto:office@archilurdesignz.com?subject=${currentAction} for ${currentPlan}&body=Name: ${n}%0D%0AEmail: ${e}%0D%0APhone: ${p}`;setTimeout(()=>{window.open(`https://wa.me/2348138580315?text=${encodeURIComponent(`Hi ADA, I'm ${n}. I want to request a ${currentAction} for ${currentPlan}.`)}`,'_blank');},1500);}
+function processFinalRequest(){
+
+    const n = document.getElementById('clientName').value.trim();
+    const e = document.getElementById('clientEmail').value.trim();
+    const p = document.getElementById('clientPhone').value.trim();
+
+    if(!n || !e || !p){
+        alert('Please complete all fields.');
+        return;
+    }
+
+    const message =
+`ADA PLAN STORE REQUEST
+
+Request Type: ${currentAction}
+
+Plan: ${currentPlan}
+
+Client Name: ${n}
+
+Email Address: ${e}
+
+WhatsApp Number: ${p}`;
+
+    window.open(
+        `https://wa.me/2348138580315?text=${encodeURIComponent(message)}`,
+        '_blank'
+    );
+}
 
 function checkUrlForPlan(){const id=new URLSearchParams(window.location.search).get('plan');if(!id)return;const l=defaultPlans.find(p=>p.id===id);if(l){fillModal(l.title,l.meta,l.price,l.image_urls);}}
 
