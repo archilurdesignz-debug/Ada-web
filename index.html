@@ -422,17 +422,27 @@ nav:hover .nav-logomark { border-color: var(--gold); }
 .plan-meta { font-size:0.75rem; color:var(--mist); font-weight:200; }
 
 .arrow-btn {
-    position:absolute; top:50%; transform:translateY(-50%);
-    width:44px; height:44px;
-    background:rgba(13,12,10,0.8); backdrop-filter:blur(8px);
-    border:1px solid rgba(201,191,176,0.15);
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer; z-index:10;
-    transition:background 0.3s, border-color 0.3s;
-    color:var(--sand);
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px;
+    background: transparent; backdrop-filter: none; /* Removed the background box entirely */
+    border: none; /* Stripped away the border lines */
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 10;
+    transition: transform 0.3s var(--ease-out), color 0.3s;
+    color: var(--ink); /* This uses your #0d0c0a black variable token */
 }
-.arrow-btn:hover { background:var(--accent); border-color:var(--accent); color:var(--ink); }
-.arrow-btn svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.8; }
+
+.arrow-btn:hover {
+    background: transparent; 
+    border-color: transparent; 
+    color: var(--gold); /* Changes to a premium accent color on hover instead of a solid block */
+    transform: translateY(-50%) scale(1.15); /* Gives a subtle interactive pop when hovered */
+}
+
+.arrow-btn svg { 
+    width: 24px; height: 24px; /* Slightly increased scale to compensate for losing the box */
+    stroke: currentColor; fill: none; stroke-width: 2; 
+}
 .arr-prev { left:12px; }
 .arr-next { right:12px; }
 
