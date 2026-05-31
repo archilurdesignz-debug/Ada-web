@@ -915,16 +915,15 @@ function populateDashboard(d) {
     if (!d) return;
     document.title = `${d.project_title || 'Project'} | ADA Tracker`;
 
-    // Header Elements Protection Layer
-    const tEl = document.getElementById('projTitle');
-    const cEl = document.getElementById('clientNameDisplay');
-    const tkEl = document.getElementById('projToken');
+    const tEl   = document.getElementById('projTitle');
+    const cEl   = document.getElementById('clientNameDisplay');
+    const tkEl  = document.getElementById('projToken');
     const pctEl = document.getElementById('totalPercentText');
     const archEl = document.getElementById('leadArch');
 
-    if (tEl) tEl.textContent = d.project_title || '—';
-    if (cEl) cEl.textContent = d.client_name || '—';
-    if (tkEl) tkEl.textContent = d.token ? `REF: ${d.token}` : '—';
+    if (tEl)   tEl.textContent  = d.project_title  || '—';
+    if (cEl)   cEl.textContent  = d.client_name    || '—';
+    if (tkEl)  tkEl.textContent = d.token ? `REF: ${d.token}` : '—';
     if (pctEl) pctEl.textContent = `${d.overall_percent || 0}%`;
     if (archEl) archEl.textContent = d.lead_architect || '—';
 
@@ -940,17 +939,16 @@ function populateDashboard(d) {
         const balDisp = document.getElementById('balanceDisplay');
         const payBand = document.getElementById('paymentBand');
 
-        if (depDisp) depDisp.textContent  = formatCurrency(deposit, currency);
+        if (depDisp) depDisp.textContent = formatCurrency(deposit, currency);
         if (totDisp) totDisp.textContent = formatCurrency(total, currency);
-        if (balDisp) balDisp.textContent  = formatCurrency(balance > 0 ? balance : 0, currency);
-        if (payBand) payBand.style.display   = 'grid';
+        if (balDisp) balDisp.textContent = formatCurrency(balance > 0 ? balance : 0, currency);
+        if (payBand) payBand.style.display = 'grid';
     }
-    
-// Render service terms (dynamic from Supabase, or static fallback)
-renderServiceTerms(d.service_terms);
-    }
-    
-    // ── CUSTOM TRACKS ────────────────────────────────────────────────────────
+
+    // Service terms
+    renderServiceTerms(d.service_terms);
+
+    // Custom tracks
     const grid = document.getElementById('customTracksGrid');
     if (grid) {
         let tracks = [];
@@ -984,7 +982,7 @@ renderServiceTerms(d.service_terms);
     setStageEl('subDev',   d.stage_dev);
     setStageEl('subWork',  d.stage_working);
 
-    // Unlock engineering
+    // Unlock engineering cards
     if (d.stage_coordination === 'started' || d.stage_coordination === 'completed') {
         document.querySelectorAll('.eng-card').forEach(card => {
             card.classList.remove('locked-dependency');
@@ -993,29 +991,25 @@ renderServiceTerms(d.service_terms);
         });
     }
 
- // Dynamic review container assignment logic
+    // Review section
     if (d.overall_percent >= 100) {
-        const revArea = document.getElementById('reviewArea');
-        const revLock = document.getElementById('reviewLockedContent');
+        const revArea   = document.getElementById('reviewArea');
+        const revLock   = document.getElementById('reviewLockedContent');
         const revUnlock = document.getElementById('reviewUnlockedContent');
-        
+
         if (revArea) revArea.classList.add('unlocked');
-        if (revLock) revLock.style.display  = 'none';
-        
+        if (revLock) revLock.style.display = 'none';
+
         if (revUnlock) {
-            // Check if they completed a submission during this session or if admin explicitly flagged it complete
-            const reviewAlreadySubmitted = sessionStorage.getItem(`submitted_review_${d.token}`) || d.review_approved; 
+            const reviewAlreadySubmitted = sessionStorage.getItem(`submitted_review_${d.token}`) || d.review_approved;
 
             if (reviewAlreadySubmitted) {
-                // RULE 2 & 3: Display static thank you and lock channels down
                 revUnlock.innerHTML = `
                     <h3 style="color:var(--gold);">Thank You</h3>
-                    <p style="margin-top:15px; font-size:0.95rem; color:var(--mist); line-height: 1.8;">
+                    <p style="margin-top:15px; font-size:0.95rem; color:var(--mist); line-height:1.8;">
                         Your experience review has been recorded. Revisions and feedback channels are locked for completed phases.
                     </p>`;
             } else {
-                // RULE 1: Fresh 100% milestone reached — present the entry form fields clearly
-                // Restores the original form HTML layout to prevent the premature "Thank You" message
                 revUnlock.innerHTML = `
                     <h3 style="font-size:1.3rem; color:var(--ink);">Share Your ADA Experience</h3>
                     <p style="font-size:0.9rem; color:var(--gold); margin-top:10px;">Congratulations on your project completion.</p>
@@ -1029,79 +1023,45 @@ renderServiceTerms(d.service_terms);
                     <textarea class="review-textarea" id="reviewComment" placeholder="Tell us about your design experience..." rows="5"></textarea><br>
                     <button class="submit-review-btn" onclick="submitReview()">Submit Verified Review</button>
                 `;
-                // Initialize star display state
                 setRating(selectedRating);
             }
             revUnlock.style.display = 'block';
         }
     }
 
-    const para = text => text
-        ? `<p>${text.replace(/\n/g, '<br>')}</p>`
-        : '';
-
-    const bullets = arr => Array.isArray(arr) && arr.length
-        ? `<ul>${arr.map(b => `<li>${b}</li>`).join('')}</ul>`
-        : '';
-
-    const sections = t.sections.map(s => `
-        <div class="terms-section">
-            <h2>${s.heading}</h2>
-            ${s.type === 'heading' || s.type === 'both' ? para(s.body) : ''}
-            ${s.type === 'bullets' || s.type === 'both' ? bullets(s.bullets) : ''}
-        </div>
-    `).join('');
-
-    const footer = t.footer
-        ? `<p class="terms-footer">${t.footer}</p>`
-        : '';
-
-    return sections + footer;
-}
-    
-// Revision Protocol Configuration
+    // Revision protocol
     const activeRevisions = d.revision_count || 0;
     const revCounterEl = document.getElementById('clientRevisionCounter');
-    const triggerBox = document.getElementById('revisionDropdownTrigger');
+    const triggerBox   = document.getElementById('revisionDropdownTrigger');
 
     if (revCounterEl) {
         const reviewAlreadySubmitted = sessionStorage.getItem(`submitted_review_${d.token}`) || d.review_approved;
 
-        // RULE 2: Only freeze the protocol tracking block IF progress is maxed out AND they have submitted their text
         if (d.overall_percent >= 100 && reviewAlreadySubmitted) {
-            revCounterEl.innerText = "PROTOCOL LOCKED";
-            if (triggerBox) {
-                triggerBox.style.opacity = '0.6';
-                triggerBox.style.cursor = 'not-allowed';
-            }
+            revCounterEl.innerText = 'PROTOCOL LOCKED';
+            if (triggerBox) { triggerBox.style.opacity = '0.6'; triggerBox.style.cursor = 'not-allowed'; }
         } else {
-            // RULE 1: Keep tracking actively open if they haven't sent the form yet
             revCounterEl.innerText = `REVISION COUNT (${activeRevisions}/3)`;
-            if (triggerBox) {
-                triggerBox.style.opacity = '1';
-                triggerBox.style.cursor = 'pointer';
-            }
+            if (triggerBox) { triggerBox.style.opacity = '1'; triggerBox.style.cursor = 'pointer'; }
         }
     }
 
-   // Countdown Execution Block Check
+    // Countdown
     const finalDeadline = d.deadline || d.proj_deadline;
     const cDownBar = document.getElementById('countdownBar');
 
     if (finalDeadline) {
-        if (cDownBar) {
-            cDownBar.style.display = 'flex'; 
-        }
+        if (cDownBar) cDownBar.style.display = 'grid';
         startCountdown(finalDeadline);
     } else {
         if (cDownBar) cDownBar.style.display = 'none';
     }
 
-    // Show dashboard
+    // ── REVEAL DASHBOARD ─────────────────────────────────────────────────────
     const loadScreen = document.getElementById('loadingScreen');
-    const dashMain = document.getElementById('dashboardMain');
+    const dashMain   = document.getElementById('dashboardMain');
     if (loadScreen) loadScreen.style.display = 'none';
-    if (dashMain) dashMain.style.display = 'block';
+    if (dashMain)   dashMain.style.display   = 'block';
 }
 // ─── HUB ─────────────────────────────────────────────────────────────────────
 async function loadHubFiles() {
