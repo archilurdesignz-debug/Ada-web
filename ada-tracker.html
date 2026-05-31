@@ -1071,11 +1071,33 @@ function populateDashboard(d) {
         }
     }
 
-    // Service terms
-    const termsDisp = document.getElementById('termsDisplay');
-    if (termsDisp && d.service_terms) {
-        termsDisp.innerHTML = d.service_terms;
+function renderServiceTerms(t) {
+    if (!t || !Array.isArray(t.sections) || !t.sections.length) {
+        return '<p style="color:#aaa;">No terms have been published yet.</p>';
     }
+
+    const para = text => text
+        ? `<p>${text.replace(/\n/g, '<br>')}</p>`
+        : '';
+
+    const bullets = arr => Array.isArray(arr) && arr.length
+        ? `<ul>${arr.map(b => `<li>${b}</li>`).join('')}</ul>`
+        : '';
+
+    const sections = t.sections.map(s => `
+        <div class="terms-section">
+            <h2>${s.heading}</h2>
+            ${s.type === 'heading' || s.type === 'both' ? para(s.body) : ''}
+            ${s.type === 'bullets' || s.type === 'both' ? bullets(s.bullets) : ''}
+        </div>
+    `).join('');
+
+    const footer = t.footer
+        ? `<p class="terms-footer">${t.footer}</p>`
+        : '';
+
+    return sections + footer;
+}
     
 // Revision Protocol Configuration
     const activeRevisions = d.revision_count || 0;
