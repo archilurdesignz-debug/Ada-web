@@ -504,50 +504,47 @@
     </div>
 
     <!-- ── SERVICE TERMS MANAGER ────────────────────────────────────── -->
-    <div class="section-card" style="border-top-color: #9b59b6;">
-        <div class="section-toggle" onclick="toggleSection(this)">
-            <h2>Service Terms Manager</h2>
-            <span class="toggle-icon">+</span>
-        </div>
-        <div class="section-body">
-            <p style="font-size:0.75rem; color:#666; margin-bottom:20px;">Review or customize the service terms assigned to the current project.</p>
-            <div class="form-group">
-                <label>Current Terms (Markdown/HTML Supported)</label>
-                <textarea id="adminTermsArea" style="height:300px; font-size:0.8rem; background:#050505;">
- <h3>Intellectual Licensure</h3>
-                    <p>All architectural drawings, specifications, and design documents prepared for this project remain the sole intellectual property of the Architect, who retains all copyright and authorship rights. The Client is granted a non-transferable, non-exclusive, limited license to utilize these documents solely for the execution of this specific project. Any unauthorized reproduction, reuse, modification, or application of these drawings for other projects or purposes is strictly prohibited without prior written consent from the Architect.</p>
-                <h3>Payment Terms and Project Commencement</h3>
-                    <p>The project timeline shall officially commence only upon receipt of an initial deposit of 70% or more of the total agreed fee, as specified in the contract agreement. The remaining balance of 30% or more shall be due and payable immediately upon the handover of the final deliverables.</p>
-                <h3>Delivery Timeline and Expedited Services</h3>
-                <p>Following the receipt of the initial deposit, the standard timeline for final delivery is estimated at four weeks for a complete approval package but may vary according to the type of project. However, the agreed timeline is subject to prompt feedback and assuming no client-requested revisions. But should the Client require an expedited delivery ahead of the standard schedule, a "fast-track" premium of an additional 10% of the total contract value shall be required.</p>
-                <h3>Design Workflow and Methodology</h3>
-                <p>Our workflow for this project shall initiate with</p>
-                <ul>
-                        <li>Site contextualization and analysis</li>
-                        <li>Preparation of conceptual sketches</li>
-                        <li>Design development and detailed drawings</li>
-                        <li>Consultant coordination</li>
-                </ul>
-                <h3>Site Visitations and Consultation Logistics (if applicable)</h3>
-                <p>All logistics, transportation costs, and associated expenses incurred during site visits to verify dimensions on the provided survey plans shall be borne exclusively by the Client. Furthermore, the agreed consultation fee must be fully remitted to the Architect prior to scheduling any site visitation.
- </p>
-                <h3>Final Deliverables and Project Submissions</h3>    
-                <p>Upon successful completion of the design phase, the final Architectural package delivered to the client and ready for approval shall consist of: 
-                    <ul>
-                        <li>Three sets of printed architectural drawings(including exterior 3D renderings, floor plans, roof plans, building sections, elevations, and construction details)</li>
-                        <li>Three sets of printed structural drawings (inclusive of the structural undertaking letter, structural calculations, foundation designs, and column details)</li>
-                        <li>Three sets of printed electrical drawings (covering lighting, power sockets, air conditioning provisions, and utilities)</li>
-                        <li>Three sets of printed mechanical drawings (detailing plumbing layouts and HVAC systems).</li>
-                    </ul>
-                <h3>Revision Policy and Scope Variances</h3>   
-                <p>The contract fee covers a maximum of three design revisions prior to the final coordination. Any subsequent revisions, structural modifications, or scope changes requested beyond this limit will be classified as additional services and billed under a separate fee structure.</p>
-                <h3>Post-Design Construction Support</h3>      
-                <p>Post-design services, including construction site inspections, project monitoring, and site visitations during the construction phase, are excluded from this standard design agreement. These support services carry an independent fee structure, which must be mutually negotiated and agreed upon under a separate contract.</p>
-                </textarea>
-            </div>
-            <button class="btn-action" style="background:#9b59b6; color:white;" onclick="updateProjectTerms()">Update Client Terms</button>
-        </div>
+<div class="section-card" style="border-top-color: #9b59b6;">
+    <div class="section-toggle" onclick="toggleSection(this)">
+        <h2>Service Terms Manager</h2>
+        <span class="toggle-icon">+</span>
     </div>
+    <div class="section-body">
+        <p style="font-size:0.75rem; color:#666; margin-bottom:20px;">
+            Build the terms structure freely. Add, edit, reorder or remove sections at any time. Changes publish instantly to the client tracker.
+        </p>
+
+        <div class="form-group">
+            <label>Select Project</label>
+            <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">
+                Terms are loaded from the project selected in the Update Active Project section above.
+            </p>
+        </div>
+
+        <div class="form-group">
+            <label>Document Footer Note</label>
+            <input type="text" id="terms_footer" placeholder="e.g. Last Updated: May 2026 | Document Ref: ADA-C23-v2">
+        </div>
+
+        <div id="termsSectionsContainer" style="margin-top:10px;"></div>
+
+        <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+            <button type="button" class="btn-small" onclick="addTermsSection('heading', '')" style="background:#9b59b6; color:white;">
+                + Add Heading + Body
+            </button>
+            <button type="button" class="btn-small" onclick="addTermsSection('bullets', '')" style="background:#6c3483; color:white;">
+                + Add Heading + Bullets
+            </button>
+            <button type="button" class="btn-small" onclick="addTermsSection('both', '')" style="background:#5b2c6f; color:white;">
+                + Add Heading + Body + Bullets
+            </button>
+        </div>
+
+        <button class="btn-action" style="background:#9b59b6; color:white; margin-top:24px;" onclick="updateProjectTerms()">
+            Publish Terms to Client
+        </button>
+    </div>
+</div>
 
     <!-- ── REVIEW MODERATION (no collapse) ──────────────────────────── -->
     <div class="section-card" style="border-top-color: var(--gold);">
@@ -1049,19 +1046,119 @@ async function uploadStore() {
     }
 }
 
+// ─── SERVICE TERMS ────────────────────────────────────────────────────────────
+
+function addTermsSection(type = 'heading', heading = '', body = '', bullets = []) {
+    const container = document.getElementById('termsSectionsContainer');
+    if (!container) return;
+
+    const id = 'terms_' + Math.random().toString(36).substr(2, 9);
+
+    const bulletsValue = Array.isArray(bullets) ? bullets.join('\n') : bullets;
+
+    const bodyField = (type === 'heading' || type === 'both') ? `
+        <div class="form-group">
+            <label>Body Text</label>
+            <textarea class="terms-body" rows="3" placeholder="Enter paragraph text...">${body}</textarea>
+        </div>` : '';
+
+    const bulletsField = (type === 'bullets' || type === 'both') ? `
+        <div class="form-group">
+            <label>Bullet Points (one per line)</label>
+            <textarea class="terms-bullets" rows="4" placeholder="First bullet point&#10;Second bullet point&#10;Third bullet point">${bulletsValue}</textarea>
+        </div>` : '';
+
+    const typeBadgeColor = type === 'heading' ? '#9b59b6' : type === 'bullets' ? '#6c3483' : '#5b2c6f';
+    const typeBadgeLabel = type === 'heading' ? 'Body' : type === 'bullets' ? 'Bullets' : 'Body + Bullets';
+
+    const html = `
+        <div id="${id}" style="background:rgba(155,89,182,0.06); border:1px solid #3d2255; padding:16px; margin-bottom:12px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                <span style="font-size:0.55rem; letter-spacing:2px; text-transform:uppercase; background:${typeBadgeColor}; color:white; padding:3px 10px;">${typeBadgeLabel}</span>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn-small" onclick="moveTermsSection('${id}', -1)" title="Move Up">↑</button>
+                    <button type="button" class="btn-small" onclick="moveTermsSection('${id}', 1)" title="Move Down">↓</button>
+                    <button type="button" class="btn-small btn-remove" onclick="document.getElementById('${id}').remove()">Remove</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Section Heading</label>
+                <input type="text" class="terms-heading" value="${heading}" placeholder="e.g. Intellectual Licensure">
+            </div>
+            ${bodyField}
+            ${bulletsField}
+            <input type="hidden" class="terms-type" value="${type}">
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', html);
+}
+
+function moveTermsSection(id, dir) {
+    const el = document.getElementById(id);
+    const container = document.getElementById('termsSectionsContainer');
+    if (!el || !container) return;
+
+    const siblings = [...container.children];
+    const idx = siblings.indexOf(el);
+    const target = siblings[idx + dir];
+    if (!target) return;
+
+    if (dir === -1) container.insertBefore(el, target);
+    else container.insertBefore(target, el);
+}
+
+function loadProjectTerms(data) {
+    const container = document.getElementById('termsSectionsContainer');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const t = data.service_terms;
+    const footer = document.getElementById('terms_footer');
+
+    if (!t || !Array.isArray(t.sections)) {
+        // No terms yet — start with one blank section
+        if (footer) footer.value = '';
+        addTermsSection('heading');
+        return;
+    }
+
+    if (footer) footer.value = t.footer || '';
+
+    t.sections.forEach(s => {
+        addTermsSection(s.type, s.heading, s.body || '', s.bullets || []);
+    });
+}
+
 async function updateProjectTerms() {
     const token = getVal('projectSelector');
-    const newTerms = document.getElementById('adminTermsArea').value;
     if (!token) { alert('Select a project first via the Update Active Project section above.'); return; }
-    if (!_db) { alert('Supabase not connected.'); return; }
+    if (!_db)   { alert('Supabase not connected.'); return; }
+
+    const rows = document.querySelectorAll('#termsSectionsContainer > div[id^="terms_"]');
+    const sections = [];
+
+    rows.forEach(row => {
+        const heading = row.querySelector('.terms-heading')?.value.trim() || '';
+        const type    = row.querySelector('.terms-type')?.value || 'heading';
+        const body    = row.querySelector('.terms-body')?.value.trim() || '';
+        const bulletsRaw = row.querySelector('.terms-bullets')?.value.trim() || '';
+        const bullets = bulletsRaw ? bulletsRaw.split('\n').filter(l => l.trim()) : [];
+
+        sections.push({ type, heading, body, bullets });
+    });
+
+    const termsData = {
+        footer:   document.getElementById('terms_footer')?.value.trim() || '',
+        sections
+    };
 
     const { error } = await _db
         .from('projects')
-        .update({ service_terms: newTerms })
+        .update({ service_terms: termsData })
         .eq('token', token);
 
     if (error) alert('Update failed: ' + error.message);
-    else alert('✓ Service Terms updated for client.');
+    else alert('✓ Service Terms published to client tracker.');
 }
 
 // ─── REVIEWS MODERATION INBOX ────────────────────────────────────────────────
