@@ -190,7 +190,18 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 #waDraggable{position:fixed;bottom:32px;right:32px;width:58px;height:58px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:9999;cursor:move;touch-action:none;box-shadow:0 8px 30px rgba(37,211,102,0.25);transition:transform 0.3s,box-shadow 0.3s;}
 #waDraggable:hover{transform:scale(1.08);}
 #waDraggable svg{width:28px;height:28px;fill:#fff;pointer-events:none;}
+    
+@media (max-width: 768px) {
+    nav { padding:0 5%; height:62px; }
+    
+    /* ── ADD THIS LINE TO HIDE THE LOGO MARK ── */
+    .nav-center { display: none; } 
+    
+    .nav-right .nav-rc { display:none; }
 
+    .hero-content { padding:0 5% 60px; width: 100%; }
+    /* ... keeping the rest of your mobile rules below ... */
+}
 /* ── FOOTER ────────────────────────────────── */
 footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201,191,176,0.06);}
 .footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding-bottom:50px;border-bottom:1px solid rgba(201,191,176,0.06);margin-bottom:28px;}
