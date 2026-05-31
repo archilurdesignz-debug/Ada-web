@@ -1137,6 +1137,46 @@ async function loadPlans() {
     // Pause on hover
     carousel.addEventListener('mouseenter', () => clearInterval(autoScrollInterval));
 }
+    /* ── AUTOMATIC SCROLL TIMELINE SUITE ────────────────────────────────── */
+function initAutoScroll() {
+    const carousel = document.getElementById('plansCarousel');
+    if (!carousel) return;
+
+    // Clear any loose active intervals to avoid duplicate loops
+    clearInterval(autoScrollInterval);
+
+    autoScrollInterval = setInterval(() => {
+        const cardWidth = 320; // Accounts for .plan-card width + right margin
+        const maxScrollLeft = carousel.scrollWidth - carousel.clientWidth;
+
+        // If at end of track (with a 5px safety boundary), loop smoothly back to start
+        if (carousel.scrollLeft >= maxScrollLeft - 5) {
+            carousel.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+            carousel.scrollBy({ left: cardWidth, behavior: 'smooth' });
+        }
+    }, 4000); // 4-second scroll pacing
+}
+
+/* ── REFINED NAVIGATION ARROWS ENGINE ───────────────────────────────── */
+function shiftCarousel(direction) {
+    const carousel = document.getElementById('plansCarousel');
+    if (!carousel) return;
+
+    // Interrupt auto-scroll so the screen doesn't fight the user's manual click
+    clearInterval(autoScrollInterval);
+
+    const cardWidth = 320; 
+    carousel.scrollBy({ left: cardWidth * direction, behavior: 'smooth' });
+
+    // Safely re-engage automation after a small delay
+    setTimeout(() => {
+        // Only restart if the user isn't hovering on the carousel
+        if (!carousel.matches(':hover')) {
+            initAutoScroll();
+        }
+    }, 2000);
+}
 /* ── REVIEWS ────────────────────────────────────────────────────────── */
 async function loadReviews() {
     const container = document.getElementById('reviews-display');
