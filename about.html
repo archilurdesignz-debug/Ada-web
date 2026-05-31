@@ -123,13 +123,19 @@
         }
 
         /* ── HERO ────────────────────────────────────────────────────────────── */
-        .about-hero {
-            height: 60vh; display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(rgba(13,12,10,0.55), rgba(13,12,10,0.85)), 
-                        url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80');
-            background-size: cover; background-position: center; text-align: center; padding: 0 4%;
-            position: relative;
-        }
+      .about-hero {
+    height: 60vh;
+    display: flex;
+    align-items: flex-end;   /* changed from center */
+    justify-content: flex-start;  /* changed from center */
+    background: linear-gradient(rgba(13,12,10,0.55), rgba(13,12,10,0.85)), 
+                url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+}
         .about-hero h1 {
             font-family: var(--f-display);
             font-weight: 400;
@@ -368,6 +374,41 @@
     .hero-content { padding:0 5% 60px; width: 100%; }
     /* ... keeping the rest of your mobile rules below ... */
 }
+        .about-hero .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.58rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+}
+.about-hero .eyebrow::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--gold);
+}
+.about-hero h1 {
+    font-family: var(--f-display);
+    font-size: clamp(2.4rem, 5vw, 4.8rem);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.5px;
+    color: var(--white);
+}
+.about-hero h1 em {
+    font-style: italic;
+    color: var(--gold2);
+    display: block;
+}
+.portfolio-hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 0 5% 6%;
+    align-self: flex-end;
+}
 /* ── FOOTER ────────────────────────────────── */
 footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201,191,176,0.06);}
 .footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding-bottom:50px;border-bottom:1px solid rgba(201,191,176,0.06);margin-bottom:28px;}
@@ -439,12 +480,12 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
         </div>
     </nav>
 
-    <section class="about-hero">
-        <div class="reveal">
-            <h1 style="font-style: italic; text-transform: none; font-size: clamp(1.8rem, 3.5vw, 2.5rem); margin-bottom: 10px;">The Art of Vision. The Discipline of Execution</h1>
-            <h1 style="letter-spacing: 4px; font-size: clamp(2rem, 4.5vw, 3.5rem);">ADA Archilurdesignz</h1>
-        </div>
-    </section>
+  <section class="about-hero">
+    <div class="portfolio-hero-content reveal">
+        <span class="eyebrow">Studio</span>
+        <h1>The Art of Vision.<br><em>The Discipline<br>of Execution.</em></h1>
+    </div>
+</section>
 
     <section class="section-padding essence-section split-grid reveal">
         <div class="split-text">
