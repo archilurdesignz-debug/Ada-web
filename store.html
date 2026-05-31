@@ -143,6 +143,17 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
     #modalTitle{font-size:2rem;}
     .footer-top{grid-template-columns:1fr;}
 }
+    @media (max-width: 768px) {
+    nav { padding:0 5%; height:62px; }
+    
+    /* ── ADD THIS LINE TO HIDE THE LOGO MARK ── */
+    .nav-center { display: none; } 
+    
+    .nav-right .nav-rc { display:none; }
+
+    .hero-content { padding:0 5% 60px; width: 100%; }
+    /* ... keeping the rest of your mobile rules below ... */
+}
 </style>
 </head>
 <body>
@@ -152,8 +163,8 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
 <nav id="navbar">
     <div class="nav-left">
         <a href="index.html">Home</a>
-        <a href="about.html">About</a>
         <a href="portfolio.html">Portfolio</a>
+        <a href="about.html">About</a>
     </div>
     <div class="nav-center">
         <div class="nav-logomark">A</div>
