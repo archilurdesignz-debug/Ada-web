@@ -60,7 +60,8 @@
 }
 #cursor.expanded { width: 40px; height: 40px; background: var(--gold2); opacity: 0.6; }
 
-        h1, h2, h3 { font-family: var(--f-display); font-weight: 400; text-transform: uppercase; letter-spacing: 1px; }
+       h1, h2, h3 { font-family: var(--f-display); font-weight: 400; letter-spacing: 1px; }
+h2, h3 { text-transform: uppercase; }
         
         /* ── NAV ─────────────────────────────────────────────────────────────── */
         nav {
@@ -137,8 +138,20 @@
     overflow: hidden;
 }
 .about-hero h1 {
-    font-size: clamp(1.6rem, 3vw, 3rem);
-    line-height: 1.12; lowercase;
+    font-family: var(--f-display);
+    font-size: clamp(1.4rem, 2.5vw, 2.4rem);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: 0px;
+    color: var(--white);
+    text-transform: none;
+}
+
+.about-hero h1 em {
+    font-style: italic;
+    color: var(--gold2);
+    display: block;
+    text-transform: none;
 }
 
 .about-hero .eyebrow {
