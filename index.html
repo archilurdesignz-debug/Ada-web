@@ -172,47 +172,87 @@ nav:hover .nav-logomark { border-color: var(--gold); }
     height:1px;
     background:linear-gradient(to right, transparent 0%, rgba(201,191,176,0.2) 38%, transparent 100%);
 }
-
-.hero-content {
-    position:relative; z-index:2;
-    padding: 0 5% 7%;
-    max-width:760px;
-    animation: heroUp 1.2s var(--ease-out) 0.3s both;
-}
 @keyframes heroUp {
     from { opacity:0; transform:translateY(40px); }
     to   { opacity:1; transform:translateY(0); }
-}
-
-.hero-tag {
-    display:inline-flex; align-items:center; gap:10px;
-    margin-bottom:24px;
 }
 .hero-tag-line { width:32px; height:1px; background:var(--accent); }
 .hero-tag span {
     font-family:var(--f-body); font-size:0.58rem; font-weight:400;
     letter-spacing:4px; text-transform:uppercase; color:var(--gold2);
 }
+.hero-content {
+    position: relative; z-index: 2;
+    padding: 0 5% 7%;
+    max-width: 1000px; /* Expanded span to let the sub-text stretch elegantly under the title */
+    margin: 0 auto;    /* Centers the entire content block on the screen */
+    text-align: center; /* Centers all text elements inside */
+    animation: heroUp 1.2s var(--ease-out) 0.3s both;
+}
+
+.hero-tag {
+    display: inline-flex; align-items: center; gap: 10px;
+    margin: 0 auto 24px; /* Added auto margins to center the tag block */
+}
 
 .hero-title {
     font-family: var(--f-display);
     font-size: clamp(2.6rem, 5.5vw, 5.2rem);
-    font-weight:400; line-height:1.08;
-    letter-spacing:-0.5px; color:var(--white);
-    margin-bottom:28px;
+    font-weight: 400; line-height: 1.1;
+    letter-spacing: -0.5px; color: var(--white);
+    margin-bottom: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
+
+.hero-title span {
+    display: block;
+    white-space: nowrap;
+}
+
 .hero-title em {
-    font-style:italic; color:var(--gold2);
-    display:block;
+    font-style: italic; color: var(--gold2);
+    display: block;
+    margin-top: 5px; /* Comfortable gap on desktop screens */
 }
 
 .hero-sub {
-    font-size:0.8rem; font-weight:200; color:var(--sand);
-    max-width:420px; line-height:1.8; margin-bottom:40px;
-    letter-spacing:0.3px;
+    font-size: 0.85rem; font-weight: 200; color: var(--sand);
+    max-width: 700px; /* Increased from 420px to spread under the entire span of the text above */
+    line-height: 1.8; margin: 0 auto 40px; /* Centers the text box itself */
+    letter-spacing: 0.3px;
 }
 
-.hero-btns { display:flex; gap:14px; flex-wrap:wrap; }
+.hero-btns { 
+    display: flex; gap: 14px; flex-wrap: wrap; 
+    justify-content: center; /* Centers the action buttons underneath */
+}
+        @media (max-width: 768px) {
+    /* ... keeping your existing mobile styles intact ... */
+    
+    .hero-content { 
+        padding: 0 5% 60px; 
+        width: 100%;
+    }
+    
+    .hero-title {
+        line-height: 1.05;
+    }
+    
+    .hero-title span {
+        white-space: normal; /* Allows beautiful wrapping on very small screens */
+        word-spacing: normal; /* Maintains default proportional spacing between Bespoke and Luxury */
+    }
+    
+    .hero-title em {
+        margin-top: -4px; /* Pulls "Architecture" closer up vertically on mobile screens */
+    }
+    
+    .hero-sub {
+        max-width: 100%; /* Spans fully across the mobile layout safely inside padding boundaries */
+    }
+}
 
 .btn-fill {
     padding:14px 36px;
@@ -803,12 +843,11 @@ footer {
             <span class="hero-tag-line"></span>
             <span>Archilurdesignz and Architecture</span>
         </div>
-        <h1 class="hero-title">
-            Bespoke<br>
-            <em>Luxury</em><br>
-            Architecture.
-        </h1>
-        <p class="hero-sub">End-to-end design, engineering, and construction coordination — from concept to site without disconnect.</p>
+       <h1 class="hero-title">
+    <span>Bespoke Luxury</span>
+    <em>Architecture</em>
+</h1>
+<p class="hero-sub">End-to-end design, engineering, and construction coordination — from concept to site without disconnect.</p>
         <div class="hero-btns">
             <a href="store.html" class="btn-fill">Shop Plans</a>
             <button class="btn-ghost" onclick="toggleInquiry(true)">Request Custom Design</button>
