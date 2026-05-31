@@ -1057,6 +1057,8 @@ function buildMarquee() {
 }
 
 /* ── RENDER PLANS CAROUSEL ──────────────────────────────────────────── */
+let autoScrollInterval = null; // Holds the active auto-scroll interval loop
+
 async function loadPlans() {
     let all = [...defaultPlans];
 
@@ -1065,14 +1067,12 @@ async function loadPlans() {
             const { data, error } = await _db
                 .from('plans')
                 .select('id,title,meta,category,price,main_image,image_urls,is_featured')
-                .eq('is_featured', true)   // ← only fetch plans marked for homepage
+                .eq('is_featured', true)   
                 .order('created_at', { ascending: false })
                 .limit(6);
 
             if (!error && data && data.length) {
-                // Replace defaultPlans entirely with Supabase featured plans
-                // once we have real data — avoids showing stale defaults
-                const ids = new Set(all.map(p => p.id));
+                const ids = new Set(defaultPlans.map(p => p.id));
                 data.forEach(p => {
                     if (!ids.has(p.id)) all.push(p);
                 });
@@ -1082,9 +1082,7 @@ async function loadPlans() {
         console.log('Supabase load error:', e);
     }
 
-    // No more client-side featured/others split needed —
-    // everything in `all` is already cleared for homepage display.
-    // Just shuffle and cap at 6.
+    // Refresh configurations, shuffle seamlessly, and slice exactly 6 slots
     const selected = all
         .sort(() => Math.random() - 0.5)
         .slice(0, 6);
@@ -1108,12 +1106,36 @@ async function loadPlans() {
 
     observeReveal();
 
-    // drag-scroll
+    // Reset and initiate auto-scroll after elements render
+    initAutoScroll();
+
+    // Drag scroll listeners
     let isDown = false, sx = 0, sl = 0;
-    carousel.addEventListener('mousedown',  e => { isDown=true; carousel.classList.add('dragging'); sx=e.pageX-carousel.offsetLeft; sl=carousel.scrollLeft; });
-    carousel.addEventListener('mouseleave', () => { isDown=false; carousel.classList.remove('dragging'); });
-    carousel.addEventListener('mouseup',    () => { isDown=false; carousel.classList.remove('dragging'); });
-    carousel.addEventListener('mousemove',  e => { if(!isDown)return; e.preventDefault(); carousel.scrollLeft=sl-(e.pageX-carousel.offsetLeft-sx)*1.4; });
+    carousel.addEventListener('mousedown',  e => { 
+        isDown = true; 
+        carousel.classList.add('dragging'); 
+        sx = e.pageX - carousel.offsetLeft; 
+        sl = carousel.scrollLeft; 
+        clearInterval(autoScrollInterval); // Clear automation while dragging
+    });
+    carousel.addEventListener('mouseleave', () => { 
+        isDown = false; 
+        carousel.classList.remove('dragging'); 
+        initAutoScroll(); // Re-engage on exit
+    });
+    carousel.addEventListener('mouseup',    () => { 
+        isDown = false; 
+        carousel.classList.remove('dragging'); 
+        initAutoScroll(); // Re-engage on finish
+    });
+    carousel.addEventListener('mousemove',  e => { 
+        if(!isDown) return; 
+        e.preventDefault(); 
+        carousel.scrollLeft = sl - (e.pageX - carousel.offsetLeft - sx) * 1.4; 
+    });
+
+    // Pause on hover
+    carousel.addEventListener('mouseenter', () => clearInterval(autoScrollInterval));
 }
 /* ── REVIEWS ────────────────────────────────────────────────────────── */
 async function loadReviews() {
