@@ -786,9 +786,9 @@ footer {
 <!-- ── NAV ────────────────────────────────────────────────────────────── -->
 <nav id="navbar">
     <div class="nav-left">
-        <a href="portfolio.html">Portfolio</a>
-        <a href="store.html">Store</a>
-        <a href="about.html">About</a>
+        <a href="portfolio">Portfolio</a>
+        <a href="store">Store</a>
+        <a href="about">About</a>
     </div>
     <div class="nav-center">
         <div class="nav-logomark">A</div>
@@ -870,7 +870,7 @@ footer {
 </h1>
 <p class="hero-sub">End-to-end design, engineering, and construction coordination — from concept to site without disconnect.</p>
         <div class="hero-btns">
-            <a href="store.html" class="btn-fill">Shop Plans</a>
+            <a href="store" class="btn-fill">Shop Plans</a>
             <button class="btn-ghost" onclick="toggleInquiry(true)">Request Custom Design</button>
         </div>
     </div>
@@ -894,7 +894,7 @@ footer {
             <span class="eyebrow">Ready to Build</span>
             <h2 class="section-h">Top Selling Designs</h2>
         </div>
-        <a href="store.html" class="plans-link s-reveal delay-2">View Full Collection →</a>
+        <a href="store" class="plans-link s-reveal delay-2">View Full Collection →</a>
     </div>
     <div class="carousel-outer">
         <button class="arrow-btn arr-prev" onclick="shiftCarousel(-1)">
@@ -1051,9 +1051,9 @@ footer {
 </div>
         <div class="footer-col">
             <h5>Company</h5>
-            <a href="about.html">About Us</a>
-            <a href="portfolio.html">Portfolio</a>
-            <a href="connect.html">Contact</a>
+            <a href="about">About Us</a>
+            <a href="portfolio">Portfolio</a>
+            <a href="connect">Contact</a>
         </div>
         <div class="footer-col">
             <h5>Services</h5>
@@ -1064,8 +1064,8 @@ footer {
         </div>
         <div class="footer-col">
             <h5>Plans Store</h5>
-            <a href="store.html">Browse Plans</a>
-            <a href="policy.html">Privacy Policy</a>
+            <a href="store">Browse Plans</a>
+            <a href="policy">Privacy Policy</a>
         </div>
     </div>
     <div class="footer-bottom">
@@ -1150,7 +1150,7 @@ async function loadPlans() {
     const carousel = document.getElementById('plansCarousel');
     carousel.innerHTML = selected.map(p => `
         <div class="plan-card s-reveal"
-             onclick="window.location.href='store.html?plan=${p.id}'"
+             onclick="window.location.href='store?plan=${p.id}'"
              role="button" tabindex="0">
             <div class="plan-img-wrap">
                 <div class="plan-img" style="background-image:url('${p.main_image}')"></div>
