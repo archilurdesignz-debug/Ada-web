@@ -664,7 +664,18 @@ nav:hover .nav-logomark { border-color: var(--gold); }
 }
 #waDraggable:hover { transform:scale(1.08); box-shadow:0 12px 40px rgba(37,211,102,0.35); }
 #waDraggable svg { width:28px; height:28px; fill:#fff; pointer-events:none; }
+        
+@media (max-width: 768px) {
+    nav { padding:0 5%; height:62px; }
+    
+    /* ── ADD THIS LINE TO HIDE THE LOGO MARK ── */
+    .nav-center { display: none; } 
+    
+    .nav-right .nav-rc { display:none; }
 
+    .hero-content { padding:0 5% 60px; width: 100%; }
+    /* ... keeping the rest of your mobile rules below ... */
+}
 /* ── FOOTER ──────────────────────────────────────────────────────────── */
 footer {
     background:var(--ink2); padding:64px 5% 28px;
