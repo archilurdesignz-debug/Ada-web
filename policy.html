@@ -130,78 +130,90 @@
         }
     
           /* ── HERO ────────────────────────────────────────────────────────────── */
-     .legal-hero {
-     height: 45vh; display: flex; align-items: center; justify-content: center;
-            
+     /* ── HERO ────────────────────────────────────────────────────────────── */
+.legal-hero {
+    position: relative;
+    height: 45vh;
     min-height: 420px;
 
     display: flex;
-    align-items: flex-end;      /* pushes content to bottom */
-    justify-content: flex-start; /* pushes content to left */
+    align-items: flex-end;      /* bottom alignment */
+    justify-content: flex-start; /* left alignment */
 
-   background: linear-gradient(rgba(13,12,10,0.65), rgba(13,12,10,0.85)), 
-       url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1920&q=80');
-
-    background-size: cover; background-position: center; text-align: center; padding: 0 4%;
-            position: relative;
     padding: 0 5% 6%;
-    position: relative;
-    text-align: left;
+    overflow: hidden;
+
+    background: linear-gradient(
+        rgba(13,12,10,0.65),
+        rgba(13,12,10,0.85)
+    ),
+    url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1920&q=80');
+
+    background-size: cover;
+    background-position: center;
 }
-        
-     /* Hero Content Container */
-.legal-hero-content{
+
+/* ── HERO CONTENT ───────────────────────────────────────────────────── */
+.legal-hero-content {
     position: relative;
     z-index: 2;
+    text-align: left;
+
     animation: heroUp 1.1s cubic-bezier(0.16,1,0.3,1) 0.2s both;
 }
 
-/* Fade-Up Animation */
-@keyframes heroUp{
-    from{
+/* Fade animation */
+@keyframes heroUp {
+    from {
         opacity: 0;
         transform: translateY(36px);
     }
-    to{
+    to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-/* Eyebrow Label */
-.eyebrow{
-    display:inline-flex;
-    align-items:center;
-    gap:10px;
-    font-size:0.58rem;
-    letter-spacing:4px;
-    text-transform:none;
-    color:#b09070;
-    margin-bottom:14px;
-    font-family:'Outfit', sans-serif;
+/* ── EYEBROW ─────────────────────────────────────────────────────────── */
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    font-size: 0.58rem;
+    letter-spacing: 4px;
+    text-transform: none;
+
+    color: #b09070;
+    margin-bottom: 14px;
+
+    font-family: 'Outfit', sans-serif;
 }
-.eyebrow::before{
+
+.eyebrow::before {
     content: '';
     width: 24px;
     height: 1px;
     background: #b09070;
 }
 
-/* Main Hero Title */
-.legal-hero-content h1{
+/* ── HERO TITLE ─────────────────────────────────────────────────────── */
+.legal-hero-content h1 {
     font-family: 'Playfair Display', Georgia, serif;
     font-size: clamp(2.4rem, 5vw, 4.8rem);
     font-weight: 400;
     line-height: 1.08;
+
     letter-spacing: -0.5px;
-    text-transform:none;
-    text-align:left;
+    text-transform: none;
+    text-align: left;
+
     color: #faf8f4;
     margin: 0;
 }
 
-/* Highlighted Word */
-.legal-hero-content h1 em{
+/* Highlight word */
+.legal-hero-content h1 em {
     font-style: italic;
     color: #d4b896;
 }
@@ -385,6 +397,16 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
     
     /* ── FOOTER RESPONSIVE GRID ── */
     .footer-top { grid-template-columns: 1fr; }
+}
+        @media (max-width: 768px) {
+    .legal-hero {
+        padding: 0 6% 10%;
+        min-height: 380px;
+    }
+
+    .legal-hero-content h1 {
+        font-size: clamp(2rem, 6vw, 3rem);
+    }
 }
     </style>
 </head>
