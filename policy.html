@@ -63,6 +63,8 @@
         h1, h2, h3 { font-family: var(--f-display); font-weight: 400; text-transform: uppercase; letter-spacing: 1px; }
         a { text-decoration: none; color: inherit; transition: 0.3s; }
 
+
+        
         /* ── NAV ─────────────────────────────────────────────────────────────── */
         nav {
             position: fixed; top:0; left:0; right:0; z-index:1000;
@@ -126,22 +128,83 @@
             line-height: 1;
             text-transform: uppercase;
         }
+    
+          /* ── HERO ────────────────────────────────────────────────────────────── */
+     .legal-hero {
+     height: 45vh; display: flex; align-items: center; justify-content: center;
+            
+    min-height: 420px;
 
-        /* ── LEGAL HEADER ────────────────────────────────────────────────────── */
-        .legal-header {
-            height: 45vh; display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(rgba(13,12,10,0.65), rgba(13,12,10,0.85)), 
-                        url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1920&q=80');
-            background-size: cover; background-position: center; text-align: center; padding: 0 4%;
+    display: flex;
+    align-items: flex-end;      /* pushes content to bottom */
+    justify-content: flex-start; /* pushes content to left */
+
+   background: linear-gradient(rgba(13,12,10,0.65), rgba(13,12,10,0.85)), 
+       url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1920&q=80');
+
+    background-size: cover; background-position: center; text-align: center; padding: 0 4%;
             position: relative;
-        }
-        .legal-header h1 {
-            font-family: var(--f-display);
-            font-weight: 400;
-            color: var(--white);
-            line-height: 1.2;
-        }
+    padding: 0 5% 6%;
+    position: relative;
+    text-align: left;
+}
+        
+     /* Hero Content Container */
+.legal-hero-content{
+    position: relative;
+    z-index: 2;
+    animation: heroUp 1.1s cubic-bezier(0.16,1,0.3,1) 0.2s both;
+}
 
+/* Fade-Up Animation */
+@keyframes heroUp{
+    from{
+        opacity: 0;
+        transform: translateY(36px);
+    }
+    to{
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Eyebrow Label */
+.eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    font-size:0.58rem;
+    letter-spacing:4px;
+    text-transform:none;
+    color:#b09070;
+    margin-bottom:14px;
+    font-family:'Outfit', sans-serif;
+}
+.eyebrow::before{
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: #b09070;
+}
+
+/* Main Hero Title */
+.legal-hero-content h1{
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(2.4rem, 5vw, 4.8rem);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.5px;
+    text-transform:none;
+    text-align:left;
+    color: #faf8f4;
+    margin: 0;
+}
+
+/* Highlighted Word */
+.legal-hero-content h1 em{
+    font-style: italic;
+    color: #d4b896;
+}
         /* ── LAYOUT GRID ─────────────────────────────────────────────────────── */
         .legal-container {
             display: grid; grid-template-columns: 260px 1fr;
@@ -271,9 +334,6 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
     nav { padding: 0 6%; height: 62px; }
     .nav-center { display: none; } 
     .nav-right .nav-rc { display: none; }
-    
-    /* ── HEADER SCALE ── */
-    .legal-header { height: 35vh; }
 
     /* ── CONTAINER RE-GRID ── */
     .legal-container {
@@ -354,11 +414,13 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
         </div>
     </nav>
 
-    <header class="legal-header">
-        <div>
-            <h1 style="font-style: italic; font-family: var(--f-display); text-transform: none; font-size: clamp(1.8rem, 3.5vw, 2.5rem); margin-bottom: 10px;">Studio</h1>
-            <h1 style="letter-spacing: 4px; font-size: clamp(2rem, 4.5vw, 3.5rem);">Compliance & Policies</h1>
-        </div>
+    <header class="legal-hero-content">
+    <span class="eyebrow">Studio</span>
+    <h1>
+        Compliances &<br>
+        <em>Policies</em>
+    </h1>
+</div>
     </header>
 
     <div class="legal-container">
