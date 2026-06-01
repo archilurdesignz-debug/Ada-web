@@ -276,6 +276,124 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
 .footer-ig:hover {
     color: var(--gold2);
 }
+        /* ── MOBILE RESPONSIVE ───────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .connect-grid {
+        grid-template-columns: 1fr;
+        gap: 48px;
+    }
+
+    .section-padding {
+        padding: 60px 6%;
+    }
+
+    .form-container {
+        padding: 32px 24px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .form-group.full-width {
+        grid-column: span 1;
+    }
+
+    .footer-top {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+    }
+
+    .info-col h2 {
+        font-size: 1.8rem;
+        margin-bottom: 28px;
+    }
+
+    .fiverr-banner {
+        padding: 28px;
+        margin-top: 36px;
+    }
+}
+
+@media (max-width: 600px) {
+    nav { padding: 0 5%; height: 62px; }
+    .nav-center { display: none; }
+    .nav-right .nav-rc { display: none; }
+
+    .connect-hero {
+        height: 40vh;
+        padding: 0 5%;
+        align-items: flex-end;
+    }
+
+    .connect-hero h1[style] {
+        font-size: clamp(1.2rem, 5vw, 1.6rem) !important;
+    }
+
+    .section-padding {
+        padding: 48px 5%;
+    }
+
+    .connect-grid {
+        gap: 36px;
+    }
+
+    .form-container {
+        padding: 24px 18px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 16px; /* prevents iOS zoom on focus */
+        padding: 12px 14px;
+    }
+
+    .form-group textarea {
+        rows: 5;
+        min-height: 120px;
+    }
+
+    .submit-btn {
+        padding: 15px;
+        font-size: 0.62rem;
+    }
+
+    .contact-method p {
+        font-size: 0.95rem;
+    }
+
+    .fiverr-banner {
+        padding: 24px;
+        margin-top: 28px;
+    }
+
+    .fiverr-banner h3 {
+        font-size: 1rem;
+    }
+
+    .fiverr-banner p {
+        font-size: 0.8rem;
+    }
+
+    .fiverr-btn {
+        display: block;
+        text-align: center;
+        padding: 13px 20px;
+    }
+
+    .footer-top {
+        grid-template-columns: 1fr;
+        gap: 28px;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
 /* ── RESPONSIVE ────────────────────────────── */
 @media(max-width:1024px){.portfolio-grid{columns:2;}}
 @media(max-width:768px){
