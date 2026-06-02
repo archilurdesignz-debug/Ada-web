@@ -502,7 +502,11 @@ function updateCount() {
 
 /* ── INIT ──────────────────────────────────────────────────────── */
 async function initPortfolio() {
-    allItems = [...defaultItems];
+    allItems = defaultItems.map(item => ({
+    ...item,
+    layout: ['landscape','portrait','square']
+        [Math.floor(Math.random() * 3)]
+}));
     try {
         const r = await fetch('/api/get-portfolio');
         if (r.ok) {
