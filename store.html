@@ -154,6 +154,22 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
     .hero-content { padding:0 5% 60px; width: 100%; }
     /* ... keeping the rest of your mobile rules below ... */
 }
+    /* Prevent image interaction */
+img {
+    -webkit-user-drag: none;
+    user-drag: none;
+    -webkit-user-select: none;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* Re-enable pointer events on cards so hover/click still works,
+   but the img inside remains protected */
+.p-item,
+.plan-card,
+.plan-img-wrap {
+    pointer-events: auto;
+}
 </style>
 </head>
 <body>
