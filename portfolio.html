@@ -275,6 +275,40 @@ img {
     z-index: 2;
     font-family: var(--f-body);
 }
+    /* ── LAYOUT VARIANTS ───────────────────────────────────────────────── */
+.p-item.layout-portrait {
+    break-inside: avoid;
+}
+.p-item.layout-portrait img {
+    height: 520px;
+    object-fit: cover;
+    width: 100%;
+}
+
+.p-item.layout-landscape {
+    break-inside: avoid;
+}
+.p-item.layout-landscape img {
+    height: 280px;
+    object-fit: cover;
+    width: 100%;
+}
+
+.p-item.layout-square {
+    break-inside: avoid;
+}
+.p-item.layout-square img {
+    height: 380px;
+    object-fit: cover;
+    width: 100%;
+}
+
+/* Mobile — flatten height differences on small screens */
+@media (max-width: 768px) {
+    .p-item.layout-portrait img  { height: 380px; }
+    .p-item.layout-landscape img { height: 220px; }
+    .p-item.layout-square img    { height: 300px; }
+}
 </style>
 </head>
 <body>
@@ -429,8 +463,12 @@ function renderItem(item, index) {
     const catClass = item.category.toLowerCase()
         .replace(/\s+/g, '-')
         .replace(/[^a-z0-9-]/g, '');
+
+    // Read the layout field saved from the admin
+    const layout = (item.layout || 'landscape').toLowerCase();
+
     const div = document.createElement('div');
-    div.className = `p-item s-reveal ${catClass}`;
+    div.className = `p-item s-reveal ${catClass} layout-${layout}`;
     div.style.transitionDelay = `${(index % 9) * 0.06}s`;
     div.dataset.index = index;
     div.onclick = () => openLightbox(index);
@@ -446,7 +484,6 @@ function renderItem(item, index) {
         </div>`;
     grid.appendChild(div);
 }
-
 /* ── RENDER ALL ────────────────────────────────────────────────── */
 function renderAll() {
     const grid = document.getElementById('mainGrid');
