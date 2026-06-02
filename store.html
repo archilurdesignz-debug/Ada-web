@@ -170,6 +170,20 @@ img {
 .plan-img-wrap {
     pointer-events: auto;
 }
+    .p-item::after,
+.plan-img-wrap::after {
+    content: 'ADA Archilurdesignz';
+    position: absolute;
+    bottom: 8px;
+    right: 10px;
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+    pointer-events: none;
+    z-index: 2;
+    font-family: var(--f-body);
+}
 </style>
 </head>
 <body>
@@ -400,6 +414,41 @@ document.addEventListener('mousemove',e=>{if(dr){wa.style.left=(e.clientX-ox)+'p
 document.addEventListener('mouseup',()=>{dr=false;wa.style.transition='transform 0.3s';});
 
 window.addEventListener('DOMContentLoaded',()=>{const g=document.getElementById('storeGrid');defaultPlans.forEach(p=>renderCard(p,g));fetchStoreItems();checkUrlForPlan();});
+/* ── IMAGE PROTECTION ──────────────────────────────────────────────── */
+// Block right-click on images
+document.addEventListener('contextmenu', e => {
+    if (e.target.tagName === 'IMG' ||
+        e.target.closest('.p-item') ||
+        e.target.closest('.plan-card') ||
+        e.target.closest('.plan-img-wrap')) {
+        e.preventDefault();
+    }
+});
+
+// Block Ctrl+S (save page) and Ctrl+U (view source) and PrintScreen attempts
+document.addEventListener('keydown', e => {
+    // Ctrl+S / Cmd+S
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+    }
+    // Ctrl+U / Cmd+U
+    if ((e.ctrlKey || e.metaKey) && e.key === 'u') {
+        e.preventDefault();
+    }
+    // Ctrl+Shift+I (devtools)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'i') {
+        e.preventDefault();
+    }
+    // F12 devtools
+    if (e.key === 'F12') {
+        e.preventDefault();
+    }
+});
+
+// Block drag of images
+document.addEventListener('dragstart', e => {
+    if (e.target.tagName === 'IMG') e.preventDefault();
+});
 </script>
 </body>
 </html>
