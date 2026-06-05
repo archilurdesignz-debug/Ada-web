@@ -1045,7 +1045,90 @@ async function uploadStore() {
         if (sStatus) sStatus.innerText = ""; 
     }
 }
+<!-- ── DEFAULT PLANS VISIBILITY ─────────────────────────────────────── -->
+<div class="section-card" style="border-top-color: var(--wa);">
+    <div class="section-toggle" onclick="toggleSection(this)">
+        <h2>Homepage Default Plans</h2>
+        <span class="toggle-icon">+</span>
+    </div>
+    <div class="section-body">
+        <p style="font-size:0.75rem; color:#666; margin-bottom:20px;">
+            Toggle which hardcoded default plans appear on the homepage carousel when no featured Supabase plans are available.
+        </p>
+        <div id="defaultsToggleList" style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+            <p style="font-size:0.75rem; color:#444;">Loading...</p>
+        </div>
+        <button class="btn-action" onclick="saveDefaultsVisibility()" style="background:var(--wa); color:white;">
+            Save Visibility Settings
+        </button>
+    </div>
+</div>
 
+    // ─── DEFAULT PLANS VISIBILITY ─────────────────────────────────────────────────
+
+const DEFAULT_PLAN_LABELS = {
+    'obsidian-2bed': 'The Obsidian — 2 Beds · 210 SQM',
+    'modeer-2bed':   'The Modeer — 2 Beds · 165 SQM'
+};
+
+async function loadDefaultsVisibility() {
+    const container = document.getElementById('defaultsToggleList');
+    if (!container || !_db) return;
+
+    const { data, error } = await _db
+        .from('homepage_defaults')
+        .select('id, enabled');
+
+    if (error || !data) {
+        container.innerHTML = '<p style="font-size:0.75rem; color:#444;">Could not load defaults.</p>';
+        return;
+    }
+
+    container.innerHTML = data.map(row => `
+        <div style="display:flex; align-items:center; justify-content:space-between;
+                    padding:14px 16px; background:rgba(0,0,0,0.3); border:1px solid #1a1a1a;">
+            <span style="font-size:0.78rem; color:var(--white); letter-spacing:0.5px;">
+                ${DEFAULT_PLAN_LABELS[row.id] || row.id}
+            </span>
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;
+                          font-size:0.65rem; letter-spacing:1px; text-transform:uppercase; color:var(--gold);">
+                <input type="checkbox"
+                       id="default_toggle_${row.id}"
+                       ${row.enabled ? 'checked' : ''}
+                       style="width:16px; height:16px; accent-color:var(--gold); cursor:pointer;">
+                ${row.enabled ? 'Visible' : 'Hidden'}
+            </label>
+        </div>
+    `).join('');
+
+    // Update label text dynamically when toggled
+    data.forEach(row => {
+        const cb = document.getElementById(`default_toggle_${row.id}`);
+        if (cb) {
+            cb.addEventListener('change', () => {
+                const lbl = cb.parentElement;
+                lbl.lastChild.textContent = cb.checked ? ' Visible' : ' Hidden';
+            });
+        }
+    });
+}
+
+async function saveDefaultsVisibility() {
+    if (!_db) { alert('Supabase not connected.'); return; }
+
+    const ids = Object.keys(DEFAULT_PLAN_LABELS);
+    const updates = ids.map(id => ({
+        id,
+        enabled: document.getElementById(`default_toggle_${id}`)?.checked ?? true
+    }));
+
+    const { error } = await _db
+        .from('homepage_defaults')
+        .upsert(updates, { onConflict: 'id' });
+
+    if (error) alert('Save failed: ' + error.message);
+    else alert('✓ Default plan visibility updated.');
+}
 // ─── SERVICE TERMS ────────────────────────────────────────────────────────────
 
 function addTermsSection(type = 'heading', heading = '', body = '', bullets = []) {
@@ -1288,6 +1371,7 @@ function startAdminCountdownPreview() {
 window.addEventListener('DOMContentLoaded', () => {
     loadProjectSelectors();
     loadPendingReviews();
+    loadDefaultsVisibility()
 
     const newCurrencyDropdown = document.getElementById('newCurrencyMode');
     if (newCurrencyDropdown) {
