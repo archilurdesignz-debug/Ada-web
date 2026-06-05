@@ -432,7 +432,20 @@ async function checkUrlForPlan() {
             const plan = Array.isArray(data) ? data[0] : data;
             if (plan) {
                 dynamicData[plan.id] = plan;
-                fillModal(plan.title, plan.meta, plan.price, plan.image_urls);
+                const galleryImages = plan.image_urls.length > 1
+    ? [
+        plan.image_urls[1], // floor plan first
+        plan.image_urls[0], // cover second
+        ...plan.image_urls.slice(2)
+      ]
+    : plan.image_urls;
+
+fillModal(
+    plan.title,
+    plan.meta,
+    plan.price,
+    galleryImages
+);
                 return;
             }
         }
