@@ -503,6 +503,25 @@
         </div>
     </div>
 
+    <!-- ── DEFAULT PLANS VISIBILITY ─────────────────────────────────────── -->
+<div class="section-card" style="border-top-color: var(--wa);">
+    <div class="section-toggle" onclick="toggleSection(this)">
+        <h2>Homepage Default Plans</h2>
+        <span class="toggle-icon">+</span>
+    </div>
+    <div class="section-body">
+        <p style="font-size:0.75rem; color:#666; margin-bottom:20px;">
+            Toggle which hardcoded default plans appear on the homepage carousel when no featured Supabase plans are available.
+        </p>
+        <div id="defaultsToggleList" style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+            <p style="font-size:0.75rem; color:#444;">Loading...</p>
+        </div>
+        <button class="btn-action" onclick="saveDefaultsVisibility()" style="background:var(--wa); color:white;">
+            Save Visibility Settings
+        </button>
+    </div>
+</div>
+
     <!-- ── SERVICE TERMS MANAGER ────────────────────────────────────── -->
 <div class="section-card" style="border-top-color: #9b59b6;">
     <div class="section-toggle" onclick="toggleSection(this)">
@@ -853,6 +872,7 @@ startAdminCountdownPreview();
             tracks.forEach(t => { addTrackRow(t.heading, t.percent); });
         }
     }
+        loadProjectTerms(data);
 }
 
 // ─── PUBLISH REVISED SCHEME CONFIGURATION ─────────────────────────────────────
@@ -1045,25 +1065,6 @@ async function uploadStore() {
         if (sStatus) sStatus.innerText = ""; 
     }
 }
-<!-- ── DEFAULT PLANS VISIBILITY ─────────────────────────────────────── -->
-<div class="section-card" style="border-top-color: var(--wa);">
-    <div class="section-toggle" onclick="toggleSection(this)">
-        <h2>Homepage Default Plans</h2>
-        <span class="toggle-icon">+</span>
-    </div>
-    <div class="section-body">
-        <p style="font-size:0.75rem; color:#666; margin-bottom:20px;">
-            Toggle which hardcoded default plans appear on the homepage carousel when no featured Supabase plans are available.
-        </p>
-        <div id="defaultsToggleList" style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
-            <p style="font-size:0.75rem; color:#444;">Loading...</p>
-        </div>
-        <button class="btn-action" onclick="saveDefaultsVisibility()" style="background:var(--wa); color:white;">
-            Save Visibility Settings
-        </button>
-    </div>
-</div>
-
     // ─── DEFAULT PLANS VISIBILITY ─────────────────────────────────────────────────
 
 const DEFAULT_PLAN_LABELS = {
@@ -1371,7 +1372,7 @@ function startAdminCountdownPreview() {
 window.addEventListener('DOMContentLoaded', () => {
     loadProjectSelectors();
     loadPendingReviews();
-    loadDefaultsVisibility()
+    loadDefaultsVisibility();
 
     const newCurrencyDropdown = document.getElementById('newCurrencyMode');
     if (newCurrencyDropdown) {
