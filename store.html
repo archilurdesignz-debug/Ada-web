@@ -377,6 +377,9 @@ function getGalleryImages(images) {
           ]
         : images || [];
 }   
+    function shuffleArray(array) {
+    return [...array].sort(() => Math.random() - 0.5);
+}
 function renderCard(item,container){const c=document.createElement('div');c.className='plan-card';c.addEventListener('click',()=>fillModal(
     item.title,
     item.meta,
@@ -478,9 +481,13 @@ document.addEventListener('mouseup',()=>{dr=false;wa.style.transition='transform
 
 window.addEventListener('DOMContentLoaded', async () => {
     const g = document.getElementById('storeGrid');
-    defaultPlans.forEach(p => renderCard(p, g));
+
+    shuffleArray(defaultPlans)
+        .forEach(p => renderCard(p, g));
+
     fetchStoreItems();
-    await checkUrlForPlan(); // await so Supabase fetch completes before giving up
+
+    await checkUrlForPlan();
 });
 /* ── IMAGE PROTECTION ──────────────────────────────────────────────── */
 // Block right-click on images
