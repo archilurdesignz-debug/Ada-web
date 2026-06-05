@@ -1124,32 +1124,56 @@ function buildMarquee() {
 let autoScrollInterval = null; // Holds the active auto-scroll interval loop
 
 async function loadPlans() {
-    let all = [...defaultPlans];
+    let all = [];
 
+    // Fetch which defaults are enabled
+    try {
+        if (_db) {
+            const { data: defaults } = await _db
+                .from('homepage_defaults')
+                .select('id, enabled');
+
+            if (defaults && defaults.length) {
+                const enabledIds = new Set(
+                    defaults.filter(d => d.enabled).map(d => d.id)
+                );
+                // Only include defaultPlans whose id is enabled
+                defaultPlans.forEach(p => {
+                    if (enabledIds.has(p.id)) all.push(p);
+                });
+            } else {
+                // Table empty or fetch failed — show all defaults as fallback
+                all = [...defaultPlans];
+            }
+        } else {
+            all = [...defaultPlans];
+        }
+    } catch(e) {
+        all = [...defaultPlans];
+    }
+
+    // Then fetch featured Supabase plans as before
     try {
         if (_db) {
             const { data, error } = await _db
                 .from('plans')
                 .select('id,title,meta,category,price,main_image,image_urls,is_featured')
-                .eq('is_featured', true)   
+                .eq('is_featured', true)
                 .order('created_at', { ascending: false })
                 .limit(6);
 
             if (!error && data && data.length) {
-                const ids = new Set(defaultPlans.map(p => p.id));
+                const ids = new Set(all.map(p => p.id));
                 data.forEach(p => {
                     if (!ids.has(p.id)) all.push(p);
                 });
             }
         }
-    } catch (e) {
+    } catch(e) {
         console.log('Supabase load error:', e);
     }
 
-    // Refresh configurations, shuffle seamlessly, and slice exactly 6 slots
-    const selected = all
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 6);
+    const selected = all.sort(() => Math.random() - 0.5).slice(0, 6);
 
     const carousel = document.getElementById('plansCarousel');
     carousel.innerHTML = selected.map(p => `
