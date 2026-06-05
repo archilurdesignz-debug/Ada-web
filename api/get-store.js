@@ -6,9 +6,27 @@ export default async function handler(req, res) {
     }
 
     try {
-        const page = parseInt(req.query.page || '1');
+        const { id, page } = req.query;
+
+        // ── Single plan lookup by id (for URL deep-linking from homepage) ──
+        if (id) {
+            const { data, error } = await supabase
+                .from('plans')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error || !data) {
+                return res.status(404).json({ error: 'Plan not found' });
+            }
+
+            return res.status(200).json(data);
+        }
+
+        // ── Paginated listing (existing behaviour) ────────────────────────
+        const pageNum = parseInt(page || '1');
         const limit = 6;
-        const from = (page - 1) * limit;
+        const from = (pageNum - 1) * limit;
         const to = from + limit - 1;
 
         const { data, error } = await supabase
@@ -18,8 +36,8 @@ export default async function handler(req, res) {
             .range(from, to);
 
         if (error) throw error;
-
         return res.status(200).json(data || []);
+
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
