@@ -405,7 +405,43 @@ WhatsApp Number: ${p}`;
     );
 }
 
-function checkUrlForPlan(){const id=new URLSearchParams(window.location.search).get('plan');if(!id)return;const l=defaultPlans.find(p=>p.id===id);if(l){fillModal(l.title,l.meta,l.price,l.image_urls);}}
+async function checkUrlForPlan() {
+    const id = new URLSearchParams(window.location.search).get('plan');
+    if (!id) return;
+
+    // Check defaults first — instant, no network needed
+    const local = defaultPlans.find(p => p.id === id);
+    if (local) {
+        fillModal(local.title, local.meta, local.price, local.image_urls);
+        return;
+    }
+
+    // Check already-loaded Supabase plans
+    if (dynamicData[id]) {
+        const p = dynamicData[id];
+        fillModal(p.title, p.meta, p.price, p.image_urls);
+        return;
+    }
+
+    // Not loaded yet — fetch directly from the API by id
+    try {
+        const r = await fetch(`/api/get-store?id=${encodeURIComponent(id)}`);
+        if (r.ok) {
+            const data = await r.json();
+            // API may return array or single object
+            const plan = Array.isArray(data) ? data[0] : data;
+            if (plan) {
+                dynamicData[plan.id] = plan;
+                fillModal(plan.title, plan.meta, plan.price, plan.image_urls);
+                return;
+            }
+        }
+    } catch(e) {
+        console.error('Plan fetch by id failed:', e);
+    }
+
+    console.warn('Plan not found for id:', id);
+}
 
 window.addEventListener('scroll',()=>{document.getElementById('navbar').classList.toggle('solid',window.scrollY>60);},{passive:true});
 
@@ -414,7 +450,12 @@ wa.addEventListener('mousedown',e=>{dr=true;ox=e.clientX-wa.offsetLeft;oy=e.clie
 document.addEventListener('mousemove',e=>{if(dr){wa.style.left=(e.clientX-ox)+'px';wa.style.top=(e.clientY-oy)+'px';wa.style.right=wa.style.bottom='auto';}});
 document.addEventListener('mouseup',()=>{dr=false;wa.style.transition='transform 0.3s';});
 
-window.addEventListener('DOMContentLoaded',()=>{const g=document.getElementById('storeGrid');defaultPlans.forEach(p=>renderCard(p,g));fetchStoreItems();checkUrlForPlan();});
+window.addEventListener('DOMContentLoaded', async () => {
+    const g = document.getElementById('storeGrid');
+    defaultPlans.forEach(p => renderCard(p, g));
+    fetchStoreItems();
+    await checkUrlForPlan(); // await so Supabase fetch completes before giving up
+});
 /* ── IMAGE PROTECTION ──────────────────────────────────────────────── */
 // Block right-click on images
 document.addEventListener('contextmenu', e => {
