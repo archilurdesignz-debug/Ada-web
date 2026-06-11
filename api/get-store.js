@@ -6,9 +6,9 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { id, page } = req.query;
+        const { id, page, search } = req.query;
 
-        // ── Single plan lookup by id (for URL deep-linking from homepage) ──
+        // Single plan by id
         if (id) {
             const { data, error } = await supabase
                 .from('plans')
@@ -16,14 +16,25 @@ export default async function handler(req, res) {
                 .eq('id', id)
                 .single();
 
-            if (error || !data) {
-                return res.status(404).json({ error: 'Plan not found' });
-            }
-
+            if (error || !data) return res.status(404).json({ error: 'Plan not found' });
             return res.status(200).json(data);
         }
 
-        // ── Paginated listing (existing behaviour) ────────────────────────
+        // Full-text search across title, meta, category
+        if (search) {
+            const q = search.toLowerCase();
+            const { data, error } = await supabase
+                .from('plans')
+                .select('*')
+                .or(`title.ilike.%${q}%,meta.ilike.%${q}%,category.ilike.%${q}%,price.ilike.%${q}%`)
+                .order('created_at', { ascending: false })
+                .limit(50);
+
+            if (error) throw error;
+            return res.status(200).json(data || []);
+        }
+
+        // Paginated listing
         const pageNum = parseInt(page || '1');
         const limit = 6;
         const from = (pageNum - 1) * limit;
