@@ -330,7 +330,60 @@ document.addEventListener('DOMContentLoaded',()=>{
     inp.addEventListener('input',()=>{const q=inp.value.trim();clr.style.display=q?'block':'none';clearTimeout(searchTimeout);if(!q){clearSearch();return;}searchTimeout=setTimeout(()=>runSearch(q),400);});
 });
 function clearSearch(){document.getElementById('storeSearch').value='';document.getElementById('searchClear').style.display='none';isSearchMode=false;const g=document.getElementById('storeGrid');g.innerHTML='';defaultPlans.forEach(p=>renderCard(p,g));Object.values(dynamicData).forEach(p=>renderCard(p,g));hasMore=true;}
-async function runSearch(query){isSearchMode=true;const g=document.getElementById('storeGrid'),q=query.toLowerCase().replace(/[₦,]/g,'').trim();const hits=defaultPlans.filter(p=>[p.id,p.title,p.meta,p.category,p.price?.replace(/[₦,]/g,'')].some(f=>f&&f.toLowerCase().includes(q)));g.innerHTML='';if(!hits.length){g.innerHTML=`<div class="search-no-results">No plans found for "${query.toUpperCase()}"</div>`;return;}hits.forEach(p=>renderCard(p,g));}
+async function runSearch(query) {
+    isSearchMode = true;
+    const g = document.getElementById('storeGrid');
+    const q = query.toLowerCase().replace(/[₦,]/g, '').trim();
+
+    g.innerHTML = `<div class="search-no-results" style="color:var(--gold);">Searching...</div>`;
+
+    // Search defaults first — instant
+    const defaultHits = defaultPlans.filter(p =>
+        [p.id, p.title, p.meta, p.category, p.price?.replace(/[₦,]/g, '')]
+            .some(f => f && f.toLowerCase().includes(q))
+    );
+
+    // Search all already-loaded Supabase plans
+    const dynamicHits = Object.values(dynamicData).filter(p =>
+        [p.id, p.title, p.meta, p.category, p.price?.replace(/[₦,]/g, '')]
+            .some(f => f && f.toLowerCase().includes(q))
+    );
+
+    // Also query the API for Supabase plans not yet loaded (paginated data)
+    let apiHits = [];
+    try {
+        const r = await fetch(`/api/get-store?search=${encodeURIComponent(q)}`);
+        if (r.ok) {
+            const data = await r.json();
+            if (Array.isArray(data) && data.length) {
+                // Merge into dynamicData cache
+                data.forEach(p => { dynamicData[p.id] = p; });
+                // Only include results not already in dynamicHits
+                const dynamicIds = new Set(dynamicHits.map(p => p.id));
+                apiHits = data.filter(p => !dynamicIds.has(p.id));
+            }
+        }
+    } catch(e) {
+        console.error('Search API error:', e);
+    }
+
+    // Merge all hits, deduplicate by id
+    const seen = new Set();
+    const allHits = [...defaultHits, ...dynamicHits, ...apiHits].filter(p => {
+        if (seen.has(p.id)) return false;
+        seen.add(p.id);
+        return true;
+    });
+
+    g.innerHTML = '';
+
+    if (!allHits.length) {
+        g.innerHTML = `<div class="search-no-results">No plans found for "${query.toUpperCase()}"</div>`;
+        return;
+    }
+
+    allHits.forEach(p => renderCard(p, g));
+}
 
 async function fetchStoreItems() {
     if (isLoading || !hasMore || isSearchMode) return;
