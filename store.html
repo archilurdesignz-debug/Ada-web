@@ -333,21 +333,22 @@ function clearSearch(){document.getElementById('storeSearch').value='';document.
 async function runSearch(query) {
     isSearchMode = true;
     const g = document.getElementById('storeGrid');
+    if (!g) return;
+    
     const q = query.toLowerCase().replace(/[₦,]/g, '').trim();
 
-    // 1. Instantly filter defaults so the search feels immediate
+    // 1. Instant local filter across defaults and cached data
     const defaultHits = defaultPlans.filter(p =>
         [p.id, p.title, p.meta, p.category, p.price?.replace(/[₦,]/g, '')]
             .some(f => f && f.toLowerCase().includes(q))
     );
 
-    // 2. Filter whatever has already been loaded into the local cache from Supabase
     const dynamicHits = Object.values(dynamicData).filter(p =>
         [p.id, p.title, p.meta, p.category, p.price?.replace(/[₦,]/g, '')]
             .some(f => f && f.toLowerCase().includes(q))
     );
 
-    // Render initial local/cached results right away while waiting for the network
+    // Clear grid and immediately show local hits
     g.innerHTML = '';
     const seen = new Set();
     
@@ -358,32 +359,30 @@ async function runSearch(query) {
         }
     });
 
-    // If we found nothing locally yet, show a temporary subtle loading state
+    // Show temporary loader if no local hits are found yet
     if (seen.size === 0) {
-        g.innerHTML = `<div id="searchLoadingStatus" class="search-no-results" style="color:var(--gold);">Searching...</div>`;
+        g.innerHTML = `<div id="searchIndicator" class="search-no-results" style="color:var(--gold);">Searching...</div>`;
     }
 
-    // 3. Query the API for items that haven't been lazy-loaded yet
+    // 2. Fetch new matching records from the server API
     let apiHits = [];
     try {
         const r = await fetch(`/api/get-store?search=${encodeURIComponent(q)}`);
         if (r.ok) {
             const data = await r.json();
             if (Array.isArray(data) && data.length) {
-                // Cache them in your dynamicData object
                 data.forEach(p => { dynamicData[p.id] = p; });
-                // Filter out items we've already displayed on screen
                 apiHits = data.filter(p => !seen.has(p.id));
             }
         }
     } catch(e) {
-        console.error('Search API error:', e);
+        console.error('Search API execution error:', e);
     } finally {
-        // Clear out the "Searching..." loader if it's still rendering
-        const loader = document.getElementById('searchLoadingStatus');
-        if (loader) loader.remove();
+        // Safely remove the "Searching..." text block
+        const indicator = document.getElementById('searchIndicator');
+        if (indicator) indicator.remove();
 
-        // Render any newly discovered items from the server
+        // Render any items found from the database
         if (apiHits.length > 0) {
             apiHits.forEach(p => {
                 if (!seen.has(p.id)) {
@@ -393,7 +392,7 @@ async function runSearch(query) {
             });
         }
 
-        // If absolute total results across all sources is zero, display the final fallback message
+        // Final fallback if absolutely nothing matched across all targets
         if (seen.size === 0) {
             g.innerHTML = `<div class="search-no-results">No plans found for "${query.toUpperCase()}"</div>`;
         }
@@ -447,13 +446,21 @@ function getGalleryImages(images) {
     function shuffleArray(array) {
     return [...array].sort(() => Math.random() - 0.5);
 }
-function renderCard(item,container){const c=document.createElement('div');c.className='plan-card';c.addEventListener('click',()=>fillModal(
-    item.title,
-    item.meta,
-    item.price,
-    getGalleryImages(item.image_urls)
-));c.innerHTML=`<div class="plan-img-container"><div class="plan-img" style="background-image:url('${item.main_image}')"></div><div class="plan-overlay"><h3>${item.title}</h3><p>${item.category||item.meta}</p></div></div>`;container.appendChild(c);}
-
+function renderCard(item, container){
+    if (!item || !container) return;
+    const c = document.createElement('div');
+    c.className = 'plan-card';
+    c.addEventListener('click', () => {
+        fillModal(
+            item.title || 'Untitled Plan',
+            item.meta || '',
+            item.price || 'Contact for Price',
+            getGalleryImages(item.image_urls || item.images)
+        );
+    });
+    c.innerHTML = `<div class="plan-img-container"><div class="plan-img" style="background-image:url('${item.main_image || ''}')"></div><div class="plan-overlay"><h3>${item.title || 'Untitled'}</h3><p>${item.category || item.meta || ''}</p></div></div>`;
+    container.appendChild(c);
+}
 function fillModal(title,meta,price,images){document.getElementById('modalTitle').innerText=title;document.getElementById('modalMeta').innerText=meta;document.getElementById('modalPrice').innerText=price;document.getElementById('modalGallery').innerHTML=(images||[]).map(img=>`<img src="${img}">`).join('');document.getElementById('planModal').classList.add('open');document.body.style.overflow='hidden';hideRequestForm();}
 function closePlan(){document.getElementById('planModal').classList.remove('open');document.body.style.overflow='';}
 function showRequestForm(a){currentAction=a;currentPlan=document.getElementById('modalTitle').innerText;document.getElementById('formActionTitle').innerText=a+' Request';document.getElementById('initialActions').style.display='none';document.getElementById('requestForm').style.display='block';}
