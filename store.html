@@ -335,56 +335,70 @@ async function runSearch(query) {
     const g = document.getElementById('storeGrid');
     const q = query.toLowerCase().replace(/[₦,]/g, '').trim();
 
-    g.innerHTML = `<div class="search-no-results" style="color:var(--gold);">Searching...</div>`;
-
-    // Search defaults first — instant
+    // 1. Instantly filter defaults so the search feels immediate
     const defaultHits = defaultPlans.filter(p =>
         [p.id, p.title, p.meta, p.category, p.price?.replace(/[₦,]/g, '')]
             .some(f => f && f.toLowerCase().includes(q))
     );
 
-    // Search all already-loaded Supabase plans
+    // 2. Filter whatever has already been loaded into the local cache from Supabase
     const dynamicHits = Object.values(dynamicData).filter(p =>
         [p.id, p.title, p.meta, p.category, p.price?.replace(/[₦,]/g, '')]
             .some(f => f && f.toLowerCase().includes(q))
     );
 
-    // Also query the API for Supabase plans not yet loaded (paginated data)
+    // Render initial local/cached results right away while waiting for the network
+    g.innerHTML = '';
+    const seen = new Set();
+    
+    [...defaultHits, ...dynamicHits].forEach(p => {
+        if (!seen.has(p.id)) {
+            seen.add(p.id);
+            renderCard(p, g);
+        }
+    });
+
+    // If we found nothing locally yet, show a temporary subtle loading state
+    if (seen.size === 0) {
+        g.innerHTML = `<div id="searchLoadingStatus" class="search-no-results" style="color:var(--gold);">Searching...</div>`;
+    }
+
+    // 3. Query the API for items that haven't been lazy-loaded yet
     let apiHits = [];
     try {
         const r = await fetch(`/api/get-store?search=${encodeURIComponent(q)}`);
         if (r.ok) {
             const data = await r.json();
             if (Array.isArray(data) && data.length) {
-                // Merge into dynamicData cache
+                // Cache them in your dynamicData object
                 data.forEach(p => { dynamicData[p.id] = p; });
-                // Only include results not already in dynamicHits
-                const dynamicIds = new Set(dynamicHits.map(p => p.id));
-                apiHits = data.filter(p => !dynamicIds.has(p.id));
+                // Filter out items we've already displayed on screen
+                apiHits = data.filter(p => !seen.has(p.id));
             }
         }
     } catch(e) {
         console.error('Search API error:', e);
+    } finally {
+        // Clear out the "Searching..." loader if it's still rendering
+        const loader = document.getElementById('searchLoadingStatus');
+        if (loader) loader.remove();
+
+        // Render any newly discovered items from the server
+        if (apiHits.length > 0) {
+            apiHits.forEach(p => {
+                if (!seen.has(p.id)) {
+                    seen.add(p.id);
+                    renderCard(p, g);
+                }
+            });
+        }
+
+        // If absolute total results across all sources is zero, display the final fallback message
+        if (seen.size === 0) {
+            g.innerHTML = `<div class="search-no-results">No plans found for "${query.toUpperCase()}"</div>`;
+        }
     }
-
-    // Merge all hits, deduplicate by id
-    const seen = new Set();
-    const allHits = [...defaultHits, ...dynamicHits, ...apiHits].filter(p => {
-        if (seen.has(p.id)) return false;
-        seen.add(p.id);
-        return true;
-    });
-
-    g.innerHTML = '';
-
-    if (!allHits.length) {
-        g.innerHTML = `<div class="search-no-results">No plans found for "${query.toUpperCase()}"</div>`;
-        return;
-    }
-
-    allHits.forEach(p => renderCard(p, g));
 }
-
 async function fetchStoreItems() {
     if (isLoading || !hasMore || isSearchMode) return;
 
