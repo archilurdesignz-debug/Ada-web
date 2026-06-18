@@ -184,6 +184,112 @@ img {
     z-index: 2;
     font-family: var(--f-body);
 }
+    /* ==========================================================================
+   ENHANCED SINGLE-BOX TABBED SELECTOR SYSTEM 
+   ========================================================================== */
+.tabbed-package-box {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(201, 191, 176, 0.12);
+    padding: 32px 28px;
+    margin-bottom: 28px;
+    border-radius: 4px;
+}
+
+.package-tabs {
+    display: flex;
+    border-bottom: 1px solid rgba(201, 191, 176, 0.15);
+    margin-bottom: 24px;
+    gap: 8px;
+}
+
+.package-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--mist);
+    font-family: var(--f-display), 'Playfair Display', serif;
+    font-size: 1.05rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 14px 8px;
+    cursor: pointer;
+    text-align: center;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.package-tab:hover {
+    color: var(--sand);
+}
+
+.package-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.tab-content-pane {
+    display: none;
+    animation: fadeInTab 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tab-content-pane.active {
+    display: block;
+}
+
+.tier-title-desc {
+    font-size: 1.1rem;
+    color: var(--white);
+    font-weight: 500;
+    margin-bottom: 10px;
+    letter-spacing: 0.3px;
+}
+
+.tier-body-desc {
+    font-size: 0.9rem;
+    color: var(--sand);
+    line-height: 1.65;
+    margin-bottom: 20px;
+}
+
+.tier-specs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 16px;
+    border-top: 1px solid rgba(201, 191, 176, 0.08);
+    padding-top: 18px;
+    font-size: 0.85rem;
+    color: var(--sand);
+}
+
+.tier-spec-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tier-spec-item .icon-check { 
+    color: #25D366; /* var(--wa) */
+    font-weight: bold; 
+}
+
+.tier-spec-item .icon-cross { 
+    color: #ff4d4d; 
+    font-weight: bold; 
+}
+
+@keyframes fadeInTab {
+    from { opacity: 0; transform: translateY(2px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive adjustment for narrower screens */
+@media(max-width:768px){
+    .tabbed-package-box { padding: 22px 18px; }
+    .package-tab { font-size: 0.85rem; padding: 12px 2px; letter-spacing: 0.5px; }
+    .tier-title-desc { font-size: 1rem; }
+    .tier-body-desc { font-size: 0.85rem; }
+    .tier-specs { grid-template-columns: 1fr; gap: 8px; }
+}
 </style>
 </head>
 <body>
@@ -230,25 +336,78 @@ img {
         <div class="modal-details" id="modalDetails">
             <h2 id="modalTitle"></h2>
             <span id="modalMeta"></span>
-            <div id="modalPrice"></div>
 
             <div id="initialActions">
-                <button class="btn-modal-primary" onclick="showRequestForm('Purchase')">Purchase Plan</button>
-                <button class="btn-modal-ghost" onclick="showRequestForm('Modification')">Request Modification</button>
+                <p class="form-section-title" style="font-size: 1.15rem; margin-bottom: 14px;">Select Plan Package</p>
+                
+                <div class="tabbed-package-box">
+                    <div class="package-tabs">
+                        <button class="package-tab active" onclick="switchPackageTab(this, 'Basic Package', 'basic-pane')">Basic</button>
+                        <button class="package-tab" onclick="switchPackageTab(this, 'Standard Package', 'standard-pane')">Standard</button>
+                        <button class="package-tab" onclick="switchPackageTab(this, 'Premium Package', 'premium-pane')">Premium</button>
+                        <button class="package-tab" onclick="switchPackageTab(this, 'Customize Package', 'customize-pane')">Customize</button>
+                    </div>
 
-                <div class="pkg-box">
-                    <span class="pkg-label">Included in Package (No Watermark)</span>
-                    <div class="pkg-item"><span class="pkg-dot">✦</span>Presentation Floor Plan(s) with dimensions</div>
-                    <div class="pkg-item"><span class="pkg-dot">✦</span>Exterior 3D Renders </div>
-                    <div class="pkg-item"><span class="pkg-dot">✦</span>Scaled Floor Plan Sketch</div>
-                    <div class="pkg-item"><span class="pkg-dot">✦</span>Raw Sketchup File (Source 3D Model) </div>
+                    <div id="basic-pane" class="tab-content-pane active">
+                        <p class="tier-title-desc">Floor Plan Only</p>
+                        <p class="tier-body-desc">Obtain a fully dimensioned floor plan(s).</p>
+                        <div class="tier-specs">
+                            <div class="tier-spec-item">Revisions: 0</div>
+                            <div class="tier-spec-item">Delivery: 1 Day</div>
+                            <div class="tier-spec-item">2D Drawings: 1</div>
+                            <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
+                            <div class="tier-spec-item"><span class="icon-cross">✕</span> Ext 3D Renders</div>
+                            <div class="tier-spec-item"><span class="icon-cross">✕</span> Printables</div>
+                        </div>
+                    </div>
+
+                    <div id="standard-pane" class="tab-content-pane">
+                        <p class="tier-title-desc">Full Architectural Drawings Only</p>
+                        <p class="tier-body-desc">Obtain the full architectural working drawings. Site Plan Revision Only.</p>
+                        <div class="tier-specs">
+                            <div class="tier-spec-item">Revisions: 1</div>
+                            <div class="tier-spec-item">Delivery: 7 Days</div>
+                            <div class="tier-spec-item">2D Drawings: 1</div>
+                            <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
+                            <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
+                            <div class="tier-spec-item"><span class="icon-cross">✕</span> Printables</div>
+                        </div>
+                    </div>
+
+                    <div id="premium-pane" class="tab-content-pane">
+                        <p class="tier-title-desc">Approval Ready Drawings</p>
+                        <p class="tier-body-desc">Obtain the full Architectural, Structural, Mechanical and Electricals ready for approval. Site Plan Revision Only.</p>
+                        <div class="tier-specs">
+                            <div class="tier-spec-item">Revisions: 1</div>
+                            <div class="tier-spec-item">Delivery: 14 Days</div>
+                            <div class="tier-spec-item">2D Drawings: 1</div>
+                            <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
+                            <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
+                            <div class="tier-spec-item"><span class="icon-check">✓</span> Printables</div>
+                        </div>
+                    </div>
+
+                    <div id="customize-pane" class="tab-content-pane">
+                        <p class="tier-title-desc">Custom Your Design</p>
+                        <p class="tier-body-desc">Customize your design to suite your land. Obtain Full Architectural, Structural, Mechanical and Electrical drawings for your custom design.</p>
+                        <div class="tier-specs">
+                            <div class="tier-spec-item">Revisions: 3</div>
+                            <div class="tier-spec-item">Delivery: 30 Days</div>
+                            <div class="tier-spec-item">2D Drawings: 1</div>
+                            <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
+                            <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
+                            <div class="tier-spec-item"><span class="icon-check">✓</span> Printables</div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="Why-Buy" style="margin-bottom:40px">
-                    <p><strong style="color:var(--gold2);">Why Buy this Plan?</strong></p> 
-                    <p style="text-align: justify; margin-bottom:20px">Love the design, floor layout, or 3D appearance? If the plan already suits your needs without major modifications, purchasing it is a smart and cost-effective first step.</p>
-                    <p style="text-align: justify;">You'll be significantly closer to receiving the complete construction and approval drawing package, including Architectural, Structural, Electrical, and Mechanical drawings where applicable—saving you valuable time and design costs.</p>
-              </div>
+                <button class="btn-modal-primary" style="background: var(--accent); color: var(--white);" onclick="goToForm()">Contact For Price</button>
+
+                <div class="Why-Buy" style="margin-top: 35px; margin-bottom:40px">
+                    <p style="margin-bottom: 8px;"><strong style="color:var(--gold2); font-size: 1.05rem;">Why Buy this Plan?</strong></p> 
+                    <p style="text-align: justify; margin-bottom:20px; font-size: 0.9rem; color: var(--sand);">Love the design, floor layout, or 3D appearance? If the plan already suits your needs without major modifications, purchasing it is a smart and cost-effective first step.</p>
+                    <p style="text-align: justify; font-size: 0.9rem; color: var(--sand);">You'll be significantly closer to receiving the complete construction and approval drawing package, including Architectural, Structural, Electrical, and Mechanical drawings where applicable—saving you valuable time and design costs.</p>
+                </div>
                 <div class="notice-box">
                     <p><strong style="color:var(--gold2);">Notice:</strong></p>
                     <p>These are conceptual models. For safe implementation, consult our architectural team to adjust plans to your site's requirements.</p>
@@ -257,20 +416,9 @@ img {
 
             <div id="requestForm" style="display:none;">
                 <p class="form-section-title" id="formActionTitle"></p>
-                <input type="text"
-       id="clientName"
-       class="input-field"
-       placeholder="Your Full Name">
-
-<input type="email"
-       id="clientEmail"
-       class="input-field"
-       placeholder="Email Address">
-
-<input type="text"
-       id="clientPhone"
-       class="input-field"
-       placeholder="WhatsApp Number">
+                <input type="text" id="clientName" class="input-field" placeholder="Your Full Name">
+                <input type="email" id="clientEmail" class="input-field" placeholder="Email Address">
+                <input type="text" id="clientPhone" class="input-field" placeholder="WhatsApp Number">
                 <button class="btn-modal-primary" onclick="processFinalRequest()">Send Request</button>
                 <button class="back-link" onclick="hideRequestForm()">← Back</button>
             </div>
@@ -494,7 +642,74 @@ WhatsApp Number: ${p}`;
         '_blank'
     );
 }
+/* ==========================================================================
+   DYNAMIC TABBED ENGINE & LEAD CONVERSION HANDLING
+   ========================================================================== */
 
+// Switches tab styling states and updates visible specifications viewports
+function switchPackageTab(tabElement, tierName, paneId) {
+    // Clear active status styling across tabs
+    document.querySelectorAll('.package-tab').forEach(tab => tab.classList.remove('active'));
+    // Hide all tab text segments
+    document.querySelectorAll('.tab-content-pane').forEach(pane => pane.classList.remove('active'));
+    
+    // Bind active states to chosen package elements
+    tabElement.classList.add('active');
+    document.getElementById(paneId).classList.add('active');
+    
+    // Store selected package variable for the final WhatsApp string composition
+    currentAction = tierName;
+}
+
+// Redirects customer seamlessly to the inline request contact fields
+function goToForm() {
+    showRequestForm(currentAction);
+}
+
+// Modifies existing fillModal handler to reset variables back to "Basic" whenever a design card is opened
+function fillModal(title, meta, price, images) {
+    document.getElementById('modalTitle').innerText = title;
+    document.getElementById('modalMeta').innerText = meta;
+    document.getElementById('modalGallery').innerHTML = (images || []).map(img => `<img src="${img}">`).join('');
+    document.getElementById('planModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    
+    // Safety Reset: Instantly reset tabs back to the Basic configuration layout panel view
+    const defaultTab = document.querySelector('.package-tab');
+    if (defaultTab) {
+        switchPackageTab(defaultTab, 'Basic Package', 'basic-pane');
+    }
+    
+    hideRequestForm();
+}
+
+// Processes captured customer information and appends chosen tier selection text directly onto WhatsApp url
+function processFinalRequest() {
+    const n = document.getElementById('clientName').value.trim();
+    const e = document.getElementById('clientEmail').value.trim();
+    const p = document.getElementById('clientPhone').value.trim();
+
+    if(!n || !e || !p) {
+        alert('Please complete all fields.');
+        return;
+    }
+
+    // Preformatted dynamic output message structure
+    const message = 
+`ADA PLAN STORE REQUEST
+
+Plan: ${currentPlan}
+Selected Tier: ${currentAction}
+
+Client Name: ${n}
+Email Address: ${e}
+WhatsApp Number: ${p}`;
+
+    window.open(
+        `https://wa.me/2348138580315?text=${encodeURIComponent(message)}`,
+        '_blank'
+    );
+}
 async function checkUrlForPlan() {
     const id = new URLSearchParams(window.location.search).get('plan');
     if (!id) return;
