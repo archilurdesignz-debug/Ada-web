@@ -722,10 +722,19 @@ const globalFaqDataMock = [
     { category: "Custom Design", question: "Can we start a project completely from scratch for an asymmetrical site?", answer: "Yes, absolutely. By using our 'Customize Package' layer, our studio designs a completely tailored concept space tracking your geometric site parameters and programming needs from the ground up." },
     { category: "Custom Design", question: "How are site inspections handled for locations outside Lagos or Abuja?", answer: "We deploy geospatial surveying coordinates or partner with verified local engineering personnel to scan contours and orientation layout boundaries flawlessly before framing designs." }
 ];
-
-/* SUB-MODAL OVERLAY CONTROL OPERATIONS */
+/* SUB-MODAL OVERLAY CONTROL OPERATIONS — STRICT SYNCED ENGINE */
 async function openFaqSubModal(targetCategory) {
-    document.getElementById('subModalCategoryTitle').innerText = targetCategory + " FAQ";
+    // 1. Strict alignment validation check to guarantee category queries match backend definitions exactly
+    let backendSearchCategory = targetCategory;
+    
+    if (targetCategory === "Ready Made Design" || targetCategory === "Ready Made Plans") {
+        backendSearchCategory = "Ready Made Plans FAQs";
+    } else if (targetCategory === "Custom Design") {
+        backendSearchCategory = "Custom Design FAQs";
+    }
+
+    // Set header interface text string cleanly to maintain structural elegance
+    document.getElementById('subModalCategoryTitle').innerText = backendSearchCategory;
     const container = document.getElementById('subModalFaqAccordionTarget');
     container.innerHTML = "";
     
@@ -737,16 +746,21 @@ async function openFaqSubModal(targetCategory) {
         sourceData = globalFaqDataMock;
     }
 
-    const filtered = sourceData.filter(faq => faq.category === targetCategory || (targetCategory === "Ready Made Design" && faq.category === "Ready Made Plans"));
+    // 2. Map and match specifically against database category tokens explicitly
+    const filtered = sourceData.filter(faq => {
+        const itemCat = String(faq.category).trim().toLowerCase();
+        const targetCat = String(backendSearchCategory).trim().toLowerCase();
+        return itemCat === targetCat;
+    });
 
     if (filtered.length === 0) {
-        container.innerHTML = `<p style="font-size:0.85rem; color:var(--mist); font-style:italic; padding: 10px 0;">No answers registered under this cluster section.</p>`;
+        container.innerHTML = `<p style="font-size:0.85rem; color:var(--mist); font-style:italic; padding: 15px 0; text-align:center;">No answers registered under the "${backendSearchCategory}" cluster section.</p>`;
     } else {
         container.innerHTML = filtered.map(faq => `
             <div class="accordion-item">
                 <button type="button" class="accordion-trigger-header" onclick="toggleSubModalFaqAccordion(this)">
                     <span class="accordion-question-text">${faq.question}</span>
-                    <span class="faq-accordion-plus-sign" style="color:var(--sand); font-size:1.1rem; transition:0.3s;">+</span>
+                    <span class="faq-accordion-plus-sign" style="color:var(--sand); font-size:1.1rem; transition:0.3s; pointer-events:none;">+</span>
                 </button>
                 <div class="accordion-body-pane">
                     <p>${faq.answer}</p>
