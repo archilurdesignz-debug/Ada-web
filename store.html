@@ -290,6 +290,104 @@ img {
     .tier-body-desc { font-size: 0.85rem; }
     .tier-specs { grid-template-columns: 1fr; gap: 8px; }
 }
+    /* FAQ TRIGGERS GRID */
+.faq-triggers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 24px;
+    margin-bottom: 28px;
+}
+.faq-trigger-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(201, 191, 176, 0.12);
+    padding: 20px 18px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.3s var(--ease-out);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.faq-trigger-card:hover {
+    border-color: var(--accent);
+    background: rgba(200, 168, 122, 0.04);
+}
+.faq-trigger-title {
+    font-family: var(--f-display);
+    font-size: 1.1rem;
+    color: var(--gold2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+.faq-trigger-desc {
+    font-size: 0.78rem;
+    color: var(--mist);
+    line-height: 1.4;
+}
+
+/* REFINED OPTIMIZED NARROW SUB-MODAL LAYER */
+.sub-modal-layer {
+    position: absolute;
+    top: 15px;
+    bottom: 15px;
+    right: 15px;
+    width: calc(100% - 30px);
+    max-width: 460px;
+    background: rgba(13, 12, 10, 0.85);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(201, 191, 176, 0.16);
+    z-index: 2200;
+    display: none;
+    padding: 28px 24px;
+    overflow-y: auto;
+    border-radius: 4px;
+    box-shadow: -10px 20px 60px rgba(0, 0, 0, 0.7);
+    animation: subModalSlide 0.4s var(--ease-out);
+}
+.sub-modal-layer.open { display: block; }
+.sub-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(201, 191, 176, 0.12);
+    padding-bottom: 14px;
+    margin-bottom: 22px;
+}
+.sub-modal-title {
+    font-family: var(--f-display);
+    font-size: 1.25rem;
+    color: var(--gold2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.sub-modal-back-btn {
+    background: none;
+    border: none;
+    color: var(--sand);
+    font-family: var(--f-body);
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+.sub-modal-back-btn:hover { color: var(--white); }
+
+/* ACCORDIONS WITHIN SUB MODAL */
+.accordion-wrapper { display: flex; flex-direction: column; gap: 12px; }
+.accordion-item { background: rgba(255,255,255,0.02); border: 1px solid rgba(201,191,176,0.08); overflow: hidden; transition: 0.3s; }
+.accordion-trigger-header { width: 100%; background: none; border: none; display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; cursor: pointer; text-align: left; gap: 12px; }
+.accordion-question-text { font-family: var(--f-display); font-size: 1rem; color: var(--white); line-height: 1.4; }
+.accordion-body-pane { max-height: 0px; overflow: hidden; transition: max-height 0.35s var(--ease-out); }
+.accordion-body-pane p { padding: 0 18px 16px; font-size: 0.85rem; color: var(--sand); line-height: 1.6; text-align: justify; }
+
+@keyframes subModalSlide {
+    from { opacity: 0; transform: translateX(15px); }
+    to { opacity: 1; transform: translateX(0); }
+}
 </style>
 </head>
 <body>
@@ -354,7 +452,7 @@ img {
                         <div class="tier-specs">
                             <div class="tier-spec-item">Revisions: 0</div>
                             <div class="tier-spec-item">Delivery: 1 Day</div>
-                            <div class="tier-spec-item">2D Drawings: 1</div>
+                            <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
                             <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
                             <div class="tier-spec-item"><span class="icon-cross">✕</span> Ext 3D Renders</div>
                             <div class="tier-spec-item"><span class="icon-cross">✕</span> Printables</div>
@@ -367,7 +465,7 @@ img {
                         <div class="tier-specs">
                             <div class="tier-spec-item">Revisions: 1</div>
                             <div class="tier-spec-item">Delivery: 7 Days</div>
-                            <div class="tier-spec-item">2D Drawings: 1</div>
+                            <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
                             <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
                             <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
                             <div class="tier-spec-item"><span class="icon-cross">✕</span> Printables</div>
@@ -380,7 +478,7 @@ img {
                         <div class="tier-specs">
                             <div class="tier-spec-item">Revisions: 1</div>
                             <div class="tier-spec-item">Delivery: 14 Days</div>
-                            <div class="tier-spec-item">2D Drawings: 1</div>
+                            <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
                             <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
                             <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
                             <div class="tier-spec-item"><span class="icon-check">✓</span> Printables</div>
@@ -403,10 +501,24 @@ img {
 
                 <button class="btn-modal-primary" style="background: var(--accent); color: var(--white);" onclick="goToForm()">Contact For Price</button>
 
-                <div class="store-integrated-faq" style="margin-top: 40px; border-top: 1px solid rgba(201,191,176,0.1); padding-top:30px;">
-    <p class="form-section-title" style="font-size: 1.1rem; margin-bottom: 16px; color: var(--gold2);"> Our Frequently Asked Questions (FAQs)</p>
-    <div class="accordion-wrapper" id="storeFaqTargetNode" style="display:flex; flex-direction:column; gap:12px;">
-        </div>
+<div class="faq-triggers-grid">
+    <div class="faq-trigger-card" onclick="openFaqSubModal('Ready Made Design')">
+        <p class="faq-trigger-title">Ready Made Plans FAQ</p>
+        <p class="faq-trigger-desc">Questions about delivery modifications, formats, and reuse rights.</p>
+    </div>
+    <div class="faq-trigger-card" onclick="openFaqSubModal('Custom Design')">
+        <p class="faq-trigger-title">Custom Design FAQ</p>
+        <p class="faq-trigger-desc">Questions about custom layouts, specifications, and layout revisions.</p>
+    </div>
+</div>
+
+<div id="faqSubModalLayer" class="sub-modal-layer">
+    <div class="sub-modal-header">
+        <h3 id="subModalCategoryTitle" class="sub-modal-title">FAQ</h3>
+        <button class="sub-modal-back-btn" onclick="closeFaqSubModal()">Close ✕</button>
+    </div>
+    <div class="accordion-wrapper" id="subModalFaqAccordionTarget">
+    </div>
 </div>
                 <div class="notice-box">
                     <p><strong style="color:var(--gold2);">Notice:</strong></p>
@@ -710,55 +822,68 @@ WhatsApp Number: ${p}`;
         '_blank'
     );
 }
-    // Fetch and populate store specific localized FAQ accordion panels
-async function loadStoreSpecificFaqs() {
-    const targetNode = document.getElementById('storeFaqTargetNode');
-    if (!targetNode) return;
+// Structural internal backup dataset parameters array
+const globalFaqDataMock = [
+    { category: "Ready Made Design", question: "How fast do I receive the files after payment verification?", answer: "Basic structural layouts deliver inside 24 hours. Complete architectural working sets and premium approval drawings take 7 to 14 days to assemble site context modifications correctly." },
+    { category: "Ready Made Design", question: "What file formats are provided inside the packages?", answer: "We supply scaled, high-resolution vector PDF drawing packages along with original AutoCAD DWG blueprints for smooth localization by site team professionals." },
+    { category: "Custom Design", question: "Can we start a project completely from scratch for an asymmetrical site?", answer: "Yes, absolutely. By using our 'Customize Package' layer, our studio designs a completely tailored concept space tracking your geometric site parameters and programming needs from the ground up." },
+    { category: "Custom Design", question: "How are site inspections handled for locations outside Lagos or Abuja?", answer: "We deploy geospatial surveying coordinates or partner with verified local engineering personnel to scan contours and orientation layout boundaries flawlessly before framing designs." }
+];
 
+/* SUB-MODAL OVERLAY CONTROL OPERATIONS */
+async function openFaqSubModal(targetCategory) {
+    document.getElementById('subModalCategoryTitle').innerText = targetCategory + " FAQ";
+    const container = document.getElementById('subModalFaqAccordionTarget');
+    container.innerHTML = "";
+    
+    let sourceData = [];
     try {
         const response = await fetch('/api/get-faqs');
-        if (response.ok) {
-            const allFaqs = await response.json();
-            // Filter out only Ready Made and Custom categories for checkout workflow view
-            const storeFaqs = allFaqs.filter(f => f.category === "Ready Made Design" || f.category === "Custom Design");
-            
-            if(storeFaqs.length > 0) {
-                targetNode.innerHTML = storeFaqs.map(faq => `
-                    <div class="accordion-item" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(201,191,176,0.08); overflow:hidden; transition: 0.3s;">
-                        <button type="button" class="accordion-trigger-header" onclick="toggleStoreFaq(this)" style="width:100%; background:none; border:none; display:flex; justify-content:space-between; align-items:center; padding:16px 20px; cursor:pointer; text-align:left; gap:15px;">
-                            <span class="accordion-question-text" style="font-family:var(--f-display); font-size:1rem; color:var(--white);">${faq.question}</span>
-                            <span class="faq-status-toggle-plus" style="color:var(--sand); font-size:1.1rem;">+</span>
-                        </button>
-                        <div class="accordion-body-pane" style="max-height:0px; overflow:hidden; transition: max-height 0.3s var(--ease-out);">
-                            <p style="padding: 0 20px 16px; font-size:0.82rem; color:var(--sand); line-height:1.6; text-align:justify;">${faq.answer}</p>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-    } catch(err) {
-        console.error("Store inline FAQ failed to initialize data channels:", err);
+        sourceData = response.ok ? await response.json() : globalFaqDataMock;
+    } catch (e) {
+        sourceData = globalFaqDataMock;
     }
+
+    const filtered = sourceData.filter(faq => faq.category === targetCategory || (targetCategory === "Ready Made Design" && faq.category === "Ready Made Plans"));
+
+    if (filtered.length === 0) {
+        container.innerHTML = `<p style="font-size:0.85rem; color:var(--mist); font-style:italic; padding: 10px 0;">No answers registered under this cluster section.</p>`;
+    } else {
+        container.innerHTML = filtered.map(faq => `
+            <div class="accordion-item">
+                <button type="button" class="accordion-trigger-header" onclick="toggleSubModalFaqAccordion(this)">
+                    <span class="accordion-question-text">${faq.question}</span>
+                    <span class="faq-accordion-plus-sign" style="color:var(--sand); font-size:1.1rem; transition:0.3s;">+</span>
+                </button>
+                <div class="accordion-body-pane">
+                    <p>${faq.answer}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    document.getElementById('faqSubModalLayer').classList.add('open');
 }
 
-function toggleStoreFaq(btn) {
-    const item = btn.parentElement;
+function closeFaqSubModal() {
+    document.getElementById('faqSubModalLayer').classList.remove('open');
+}
+
+function toggleSubModalFaqAccordion(buttonElement) {
+    const item = buttonElement.parentElement;
     const pane = item.querySelector('.accordion-body-pane');
-    const indicator = btn.querySelector('.faq-status-toggle-plus');
+    const sign = buttonElement.querySelector('.faq-accordion-plus-sign');
     
     if (pane.style.maxHeight === '0px' || !pane.style.maxHeight) {
         pane.style.maxHeight = pane.scrollHeight + 'px';
-        indicator.innerText = '−';
-        indicator.style.color = 'var(--accent)';
+        sign.innerText = '−';
+        sign.style.color = 'var(--accent)';
     } else {
         pane.style.maxHeight = '0px';
-        indicator.innerText = '+';
-        indicator.style.color = 'var(--sand)';
+        sign.innerText = '+';
+        sign.style.color = 'var(--sand)';
     }
 }
-
-// Append this initialization inside your existing window DOMContentLoaded thread listeners
-window.addEventListener('DOMContentLoaded', loadStoreSpecificFaqs);
 async function checkUrlForPlan() {
     const id = new URLSearchParams(window.location.search).get('plan');
     if (!id) return;
