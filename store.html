@@ -280,7 +280,41 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
     .sub-modal-layer { top: 50%; bottom: auto; right: auto; left: 50%; width: calc(100% - 20px); max-height: calc(100vh - 30px); padding: 20px 14px; }
     .footer-top{grid-template-columns:1fr;}
 }
-</style>
+    /* SELECTABLE FAQ REDIRECT LINK BLOCK */
+.store-faq-link-block {
+    margin-top: 15px;
+    margin-bottom: 24px;
+    font-size: 0.88rem;
+    color: var(--sand);
+    line-height: 1.6;
+}
+.store-faq-hyperlink {
+    color: var(--gold2);
+    font-weight: 400;
+    position: relative;
+    white-space: nowrap;
+    display: inline-block;
+    transition: color 0.35s var(--ease-out);
+}
+.store-faq-hyperlink::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.35s var(--ease-out);
+}
+.store-faq-hyperlink:hover {
+    color: var(--white);
+}
+.store-faq-hyperlink:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
 </style>
 </head>
 <body>
@@ -413,6 +447,9 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
     <div class="accordion-wrapper" id="subModalFaqAccordionTarget">
     </div>
 </div>
+                <div class="store-faq-link-block">
+    <p>Want to explore more? Visit our dedicated <a href="faq" class="store-faq-hyperlink">Frequently Asked Questions (FAQ)</a> page for a full operational overview.</p>
+</div>
                 <div class="notice-box">
                     <p><strong style="color:var(--gold2);">Notice:</strong></p>
                     <p>For safe construction and implementation, please consult our architectural team to adjust plans to your site's requirements.</p>
@@ -471,11 +508,32 @@ const defaultPlans=[
 ];
 let dynamicData={},currentAction='',currentPlan='',page=1,isLoading=false,hasMore=true,searchTimeout=null,isSearchMode=false;
 
-/* cursor */
-if(window.matchMedia('(pointer:fine)').matches){
-    const cur=document.getElementById('cursor');cur.style.display='block';
-    document.addEventListener('mousemove',e=>{cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
+/* ── PREMIUM MICRO-BLENDING CURSOR MOTOR ──────────────────────────── */
+if (window.matchMedia('(pointer:fine)').matches) {
+    const cur = document.getElementById('cursor');
+    if (cur) {
+        cur.style.display = 'block';
+        
+        document.addEventListener('mousemove', e => {
+            cur.style.left = e.clientX + 'px';
+            cur.style.top = e.clientY + 'px';
+        });
+
+        const bindCursorHoverEffects = () => {
+            document.querySelectorAll('a, button, .accordion-trigger-header, .store-faq-hyperlink, .package-tab, .faq-trigger-card').forEach(el => {
+                el.addEventListener('mouseenter', () => cur.classList.add('expanded'));
+                el.addEventListener('mouseleave', () => cur.classList.remove('expanded'));
+            });
+        };
+
+        document.addEventListener('DOMContentLoaded', bindCursorHoverEffects);
+    }
 }
+
+/* search */
+document.addEventListener('DOMContentLoaded',()=>{
+    const inp=document.getElementById('storeSearch'),clr=document.getElementById('searchClear');
+...
 
 /* search */
 document.addEventListener('DOMContentLoaded',()=>{
