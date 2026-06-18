@@ -403,14 +403,14 @@ img {
 
                 <button class="btn-modal-primary" style="background: var(--accent); color: var(--white);" onclick="goToForm()">Contact For Price</button>
 
-                <div class="Why-Buy" style="margin-top: 35px; margin-bottom:40px">
-                    <p style="margin-bottom: 8px;"><strong style="color:var(--gold2); font-size: 1.05rem;">Why Buy this Plan?</strong></p> 
-                    <p style="text-align: justify; margin-bottom:20px; font-size: 0.9rem; color: var(--sand);">Love the design, floor layout, or 3D appearance? If the plan already suits your needs without major modifications, purchasing it is a smart and cost-effective first step.</p>
-                    <p style="text-align: justify; font-size: 0.9rem; color: var(--sand);">You'll be significantly closer to receiving the complete construction and approval drawing package, including Architectural, Structural, Electrical, and Mechanical drawings where applicable—saving you valuable time and design costs.</p>
-                </div>
+                <div class="store-integrated-faq" style="margin-top: 40px; border-top: 1px solid rgba(201,191,176,0.1); padding-top:30px;">
+    <p class="form-section-title" style="font-size: 1.1rem; margin-bottom: 16px; color: var(--gold2);">Store Plan Guidelines FAQ</p>
+    <div class="accordion-wrapper" id="storeFaqTargetNode" style="display:flex; flex-direction:column; gap:12px;">
+        </div>
+</div>
                 <div class="notice-box">
                     <p><strong style="color:var(--gold2);">Notice:</strong></p>
-                    <p>These are conceptual models. For safe implementation, consult our architectural team to adjust plans to your site's requirements.</p>
+                    <p>For safe construction and implementation, please consult our architectural team to adjust plans to your site's requirements.</p>
                 </div>
             </div>
 
@@ -710,6 +710,55 @@ WhatsApp Number: ${p}`;
         '_blank'
     );
 }
+    // Fetch and populate store specific localized FAQ accordion panels
+async function loadStoreSpecificFaqs() {
+    const targetNode = document.getElementById('storeFaqTargetNode');
+    if (!targetNode) return;
+
+    try {
+        const response = await fetch('/api/get-faqs');
+        if (response.ok) {
+            const allFaqs = await response.json();
+            // Filter out only Ready Made and Custom categories for checkout workflow view
+            const storeFaqs = allFaqs.filter(f => f.category === "Ready Made Design" || f.category === "Custom Design");
+            
+            if(storeFaqs.length > 0) {
+                targetNode.innerHTML = storeFaqs.map(faq => `
+                    <div class="accordion-item" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(201,191,176,0.08); overflow:hidden; transition: 0.3s;">
+                        <button type="button" class="accordion-trigger-header" onclick="toggleStoreFaq(this)" style="width:100%; background:none; border:none; display:flex; justify-content:space-between; align-items:center; padding:16px 20px; cursor:pointer; text-align:left; gap:15px;">
+                            <span class="accordion-question-text" style="font-family:var(--f-display); font-size:1rem; color:var(--white);">${faq.question}</span>
+                            <span class="faq-status-toggle-plus" style="color:var(--sand); font-size:1.1rem;">+</span>
+                        </button>
+                        <div class="accordion-body-pane" style="max-height:0px; overflow:hidden; transition: max-height 0.3s var(--ease-out);">
+                            <p style="padding: 0 20px 16px; font-size:0.82rem; color:var(--sand); line-height:1.6; text-align:justify;">${faq.answer}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+    } catch(err) {
+        console.error("Store inline FAQ failed to initialize data channels:", err);
+    }
+}
+
+function toggleStoreFaq(btn) {
+    const item = btn.parentElement;
+    const pane = item.querySelector('.accordion-body-pane');
+    const indicator = btn.querySelector('.faq-status-toggle-plus');
+    
+    if (pane.style.maxHeight === '0px' || !pane.style.maxHeight) {
+        pane.style.maxHeight = pane.scrollHeight + 'px';
+        indicator.innerText = '−';
+        indicator.style.color = 'var(--accent)';
+    } else {
+        pane.style.maxHeight = '0px';
+        indicator.innerText = '+';
+        indicator.style.color = 'var(--sand)';
+    }
+}
+
+// Append this initialization inside your existing window DOMContentLoaded thread listeners
+window.addEventListener('DOMContentLoaded', loadStoreSpecificFaqs);
 async function checkUrlForPlan() {
     const id = new URLSearchParams(window.location.search).get('plan');
     if (!id) return;
