@@ -564,6 +564,41 @@
         </button>
     </div>
 </div>
+<!-- ── FAQs ────────────────────────────────────── -->
+    <div class="admin-dashboard-panel" style="background:#13110e; border:1px solid #c9bfb020; padding:40px; max-width:950px; margin:40px auto; color:#f3ede4; font-family:'Outfit', sans-serif;">
+    <h2 style="font-family:'Playfair Display', serif; color:#d4b896; margin-bottom:24px; text-transform:uppercase; letter-spacing:1px;">FAQ Content Master Control Panel</h2>
+    
+    <div style="margin-bottom: 34px; padding-bottom: 24px; border-bottom: 1px solid #ffffff10;">
+        <h4 style="color:#b09070; text-transform:uppercase; font-size:0.8rem; letter-spacing:2px; margin-bottom:14px;">Manage Categories</h4>
+        <div style="display:flex; gap:10px; margin-bottom:16px;">
+            <input type="text" id="newCategoryInput" placeholder="e.g., Construction FAQs" style="flex:1; padding:12px; background:#ffffff05; border:1px solid #ffffff15; color:#fff; outline:none; font-family:inherit;">
+            <button onclick="addAdminCategory()" style="padding:12px 24px; background:#c8a87a; border:none; color:#0d0c0a; font-weight:500; cursor:pointer; text-transform:uppercase; font-size:0.75rem; letter-spacing:1px;">Add Category</button>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;" id="adminCategoryPills">
+            </div>
+    </div>
+
+    <div style="margin-bottom: 34px; padding-bottom: 24px; border-bottom: 1px solid #ffffff10;">
+        <h4 id="formTitleText" style="color:#b09070; text-transform:uppercase; font-size:0.8rem; letter-spacing:2px; margin-bottom:14px;">Add New FAQ Entry</h4>
+        <input type="hidden" id="editingFaqId" value="">
+        
+        <select id="faqCategorySelect" style="width:100%; padding:12px; background:#1c1a17; border:1px solid #ffffff15; color:#fff; outline:none; margin-bottom:12px; font-family:inherit;">
+            </select>
+        <input type="text" id="faqQuestionInput" placeholder="Enter Question String" style="width:100%; padding:12px; background:#ffffff05; border:1px solid #ffffff15; color:#fff; outline:none; margin-bottom:12px; font-family:inherit;">
+        <textarea id="faqAnswerInput" rows="4" placeholder="Enter Answer Paragraph text content" style="width:100%; padding:12px; background:#ffffff05; border:1px solid #ffffff15; color:#fff; outline:none; margin-bottom:16px; font-family:inherit; resize:vertical;"></textarea>
+        
+        <div style="display:flex; gap:10px;">
+            <button id="submitFaqBtn" onclick="saveFaqItem()" style="flex:1; padding:15px; background:#faf8f4; border:none; color:#0d0c0a; font-weight:500; cursor:pointer; text-transform:uppercase; font-size:0.75rem; letter-spacing:2px;">Publish Entry to Live Registers</button>
+            <button id="cancelEditBtn" onclick="clearFaqForm()" style="display:none; padding:15px 24px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-weight:500; cursor:pointer; text-transform:uppercase; font-size:0.75rem;">Cancel</button>
+        </div>
+    </div>
+
+    <div>
+        <h4 style="color:#b09070; text-transform:uppercase; font-size:0.8rem; letter-spacing:2px; margin-bottom:14px;">Active Live Items Dashboard</h4>
+        <div id="adminFaqRowsContainer" style="display:flex; flex-direction:column; gap:12px;">
+            </div>
+    </div>
+</div>
 
     <!-- ── REVIEW MODERATION (no collapse) ──────────────────────────── -->
     <div class="section-card" style="border-top-color: var(--gold);">
@@ -1244,7 +1279,152 @@ async function updateProjectTerms() {
     if (error) alert('Update failed: ' + error.message);
     else alert('✓ Service Terms published to client tracker.');
 }
+    
+// FAQS Local defaults state registers tracking exactly your platform base configurations
+let systemCategories = ["General FAQs", "Construction FAQs", "Ready Made Plans FAQs", "Custom Design FAQs"];
+let liveFaqItems = [];
 
+async function initAdminDashboard() {
+    // Attempt dynamic retrieval from API routes, gracefully fall back on baseline array structures
+    try {
+        const catRes = await fetch('/api/categories');
+        if(catRes.ok) systemCategories = await catRes.json();
+    } catch(e) {}
+    
+    renderCategoryControls();
+    await fetchAndRenderFaqRows();
+}
+
+function renderCategoryControls() {
+    const select = document.getElementById('faqCategorySelect');
+    const pills = document.getElementById('adminCategoryPills');
+    if(!select || !pills) return;
+
+    select.innerHTML = systemCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+    pills.innerHTML = systemCategories.map(cat => `
+        <span style="background:#1c1a17; border:1px solid #ffffff10; padding:6px 14px; font-size:0.8rem; display:inline-flex; align-items:center; gap:8px; border-radius:2px;">
+            ${cat} <button onclick="deleteCategoryRecord('${cat}')" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-weight:bold; padding:0 2px;">✕</button>
+        </span>
+    `).join('');
+}
+
+async function fetchAndRenderFaqRows() {
+    const container = document.getElementById('adminFaqRowsContainer');
+    if(!container) return;
+
+    try {
+        const response = await fetch('/api/get-faqs');
+        liveFaqItems = response.ok ? await response.json() : [];
+    } catch(e) { liveFaqItems = []; }
+
+    if(liveFaqItems.length === 0) {
+        container.innerHTML = `<p style="font-size:0.85rem; color:#7a7570; font-style:italic;">No live items registered in your application registers.</p>`;
+        return;
+    }
+
+    container.innerHTML = liveFaqItems.map(item => `
+        <div style="background:#1c1a17; border:1px solid #ffffff08; padding:20px; display:flex; justify-content:space-between; align-items:center; gap:24px; border-radius:2px;">
+            <div style="flex:1;">
+                <span style="font-size:0.65rem; background:rgba(200, 168, 122, 0.15); color:#c8a87a; padding:4px 8px; text-transform:uppercase; letter-spacing:1px; font-weight:500; border-radius:2px;">${item.category}</span>
+                <p style="font-size:1rem; font-weight:500; margin:10px 0 4px; color:#fff; font-family:'Playfair Display', serif;">${item.question}</p>
+                <p style="font-size:0.85rem; color:#7a7570; line-height:1.5; text-align:justify;">${item.answer}</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px; flex-shrink:0;">
+                <button onclick="startFaqEdit('${item.id}')" style="padding:8px 16px; background:none; border:1px solid rgba(255,255,255,0.15); color:#c9bfb0; font-size:0.7rem; text-transform:uppercase; cursor:pointer; letter-spacing:1px; transition:0.3s;" onmouseover="this.style.borderColor='#c8a87a';this.style.color='#fff';">Edit</button>
+                <button onclick="deleteFaqRecord('${item.id}')" style="padding:8px 16px; background:none; border:1px solid rgba(255,77,77,0.3); color:#ff4d4d; font-size:0.7rem; text-transform:uppercase; cursor:pointer; letter-spacing:1px; transition:0.3s;" onmouseover="this.style.background='rgba(255,77,77,0.08)'" onmouseout="this.style.background='none'">Delete</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function addAdminCategory() {
+    const input = document.getElementById('newCategoryInput');
+    const val = input.value.trim();
+    if(!val) return;
+
+    if(!systemCategories.includes(val)) {
+        systemCategories.push(val);
+        await fetch('/api/categories/save', { 
+            method:'POST', 
+            headers:{'Content-Type':'application/json'}, 
+            body:JSON.stringify({ category: val }) 
+        });
+        input.value = '';
+        renderCategoryControls();
+    }
+}
+
+async function deleteCategoryRecord(cat) {
+    if(confirm(`Are you sure you want to delete the category "${cat}"? This will not remove the individual items, but will clear out this navigation grouping node option.`)) {
+        systemCategories = systemCategories.filter(c => c !== cat);
+        await fetch('/api/categories/delete', { 
+            method:'DELETE', 
+            headers:{'Content-Type':'application/json'}, 
+            body:JSON.stringify({ category: cat }) 
+        });
+        renderCategoryControls();
+    }
+}
+
+function startFaqEdit(id) {
+    const targetItem = liveFaqItems.find(item => String(item.id) === String(id));
+    if(!targetItem) return;
+
+    document.getElementById('editingFaqId').value = targetItem.id;
+    document.getElementById('faqCategorySelect').value = targetItem.category;
+    document.getElementById('faqQuestionInput').value = targetItem.question;
+    document.getElementById('faqAnswerInput').value = targetItem.answer;
+
+    document.getElementById('formTitleText').innerText = "Modify Existing FAQ Entry";
+    document.getElementById('submitFaqBtn').innerText = "Update & Save Changes";
+    document.getElementById('cancelEditBtn').style.display = "inline-block";
+}
+
+function clearFaqForm() {
+    document.getElementById('editingFaqId').value = "";
+    document.getElementById('faqQuestionInput').value = "";
+    document.getElementById('faqAnswerInput').value = "";
+    
+    document.getElementById('formTitleText').innerText = "Add New FAQ Entry";
+    document.getElementById('submitFaqBtn').innerText = "Publish Entry to Live Registers";
+    document.getElementById('cancelEditBtn').style.display = "none";
+}
+
+async function saveFaqItem() {
+    const editId = document.getElementById('editingFaqId').value;
+    const cat = document.getElementById('faqCategorySelect').value;
+    const q = document.getElementById('faqQuestionInput').value.trim();
+    const a = document.getElementById('faqAnswerInput').value.trim();
+
+    if(!q || !a) { alert("Please write a valid question and answer."); return; }
+
+    const payload = { category: cat, question: q, answer: a };
+    let targetUrl = '/api/faqs/save';
+    
+    // If we have an ID set, change the endpoint routing to target the modification record updates
+    if(editId) {
+        payload.id = editId;
+        targetUrl = '/api/faqs/update';
+    }
+
+    await fetch(targetUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    clearFaqForm();
+    await fetchAndRenderFaqRows();
+}
+
+async function deleteFaqRecord(id) {
+    if(confirm("Confirm deletion of this live FAQ entity record? This action cannot be reversed.")) {
+        await fetch(`/api/faqs/delete?id=${id}`, { method: 'DELETE' });
+        await fetchAndRenderFaqRows();
+    }
+}
+
+window.addEventListener('DOMContentLoaded', initAdminDashboard);
 // ─── REVIEWS MODERATION INBOX ────────────────────────────────────────────────
 async function loadPendingReviews() {
     const inbox = document.getElementById('reviewInbox');
