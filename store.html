@@ -533,11 +533,6 @@ if (window.matchMedia('(pointer:fine)').matches) {
 /* search */
 document.addEventListener('DOMContentLoaded',()=>{
     const inp=document.getElementById('storeSearch'),clr=document.getElementById('searchClear');
-...
-
-/* search */
-document.addEventListener('DOMContentLoaded',()=>{
-    const inp=document.getElementById('storeSearch'),clr=document.getElementById('searchClear');
     inp.addEventListener('input',()=>{const q=inp.value.trim();clr.style.display=q?'block':'none';clearTimeout(searchTimeout);if(!q){clearSearch();return;}searchTimeout=setTimeout(()=>runSearch(q),400);});
 });
 function clearSearch(){document.getElementById('storeSearch').value='';document.getElementById('searchClear').style.display='none';isSearchMode=false;const g=document.getElementById('storeGrid');g.innerHTML='';defaultPlans.forEach(p=>renderCard(p,g));Object.values(dynamicData).forEach(p=>renderCard(p,g));hasMore=true;}
