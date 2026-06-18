@@ -567,45 +567,44 @@
     
 <!-- ── FAQs ────────────────────────────────────── -->
     <div class="section-card" style="border-top-color: #3498db;">
-        <div class="section-toggle" onclick="toggleSection(this)">
-            <h2>Edit FAQs</h2>
-            <span class="toggle-icon">+</span>
-        </div>
-    <div class="admin-dashboard-panel" style="background:#13110e; border:1px solid #c9bfb020; padding:40px; max-width:950px; margin:40px auto; color:#f3ede4; font-family:'Outfit', sans-serif;">
-    <h2 style="font-family:'Playfair Display', serif; color:#d4b896; margin-bottom:24px; text-transform:uppercase; letter-spacing:1px;">FAQ Content Master Control Panel</h2>
+    <div class="section-toggle" onclick="toggleSection(this)">
+        <h2>Edit FAQs</h2>
+        <span class="toggle-icon">+</span>
+    </div>
     
-    <div style="margin-bottom: 34px; padding-bottom: 24px; border-bottom: 1px solid #ffffff10;">
-        <h4 style="color:#b09070; text-transform:uppercase; font-size:0.8rem; letter-spacing:2px; margin-bottom:14px;">Manage Categories</h4>
-        <div style="display:flex; gap:10px; margin-bottom:16px;">
-            <input type="text" id="newCategoryInput" placeholder="e.g., Construction FAQs" style="flex:1; padding:12px; background:#ffffff05; border:1px solid #ffffff15; color:#fff; outline:none; font-family:inherit;">
-            <button onclick="addAdminCategory()" style="padding:12px 24px; background:#c8a87a; border:none; color:#0d0c0a; font-weight:500; cursor:pointer; text-transform:uppercase; font-size:0.75rem; letter-spacing:1px;">Add Category</button>
-        </div>
-        <div style="display:flex; flex-wrap:wrap; gap:8px;" id="adminCategoryPills">
+    <div class="section-body">
+        <div class="admin-dashboard-panel" style="background:#13110e; border:1px solid #c9bfb020; padding:40px; max-width:950px; margin:40px auto; color:#f3ede4; font-family:'Outfit', sans-serif;">
+            <h2 style="font-family:'Playfair Display', serif; color:#d4b896; margin-bottom:24px; text-transform:uppercase; letter-spacing:1px;">FAQ Content Master Control Panel</h2>
+            
+            <div style="margin-bottom: 34px; padding-bottom: 24px; border-bottom: 1px solid #ffffff10;">
+                <h4 style="color:#b09070; text-transform:uppercase; font-size:0.8rem; letter-spacing:2px; margin-bottom:14px;">Manage Categories</h4>
+                <div style="display:flex; gap:10px; margin-bottom:16px;">
+                    <input type="text" id="newCategoryInput" placeholder="e.g., Construction FAQs" style="flex:1; padding:12px; background:#ffffff05; border:1px solid #ffffff15; color:#fff; outline:none; font-family:inherit;">
+                    <button onclick="addAdminCategory()" style="padding:12px 24px; background:#c8a87a; border:none; color:#0d0c0a; font-weight:500; cursor:pointer; text-transform:uppercase; font-size:0.75rem; letter-spacing:1px;">Add Category</button>
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:8px;" id="adminCategoryPills"></div>
             </div>
-    </div>
 
-    <div style="margin-bottom: 34px; padding-bottom: 24px; border-bottom: 1px solid #ffffff10;">
-        <h4 id="formTitleText" style="color:#b09070; text-transform:uppercase; font-size:0.8rem; letter-spacing:2px; margin-bottom:14px;">Add New FAQ Entry</h4>
-        <input type="hidden" id="editingFaqId" value="">
-        
-        <select id="faqCategorySelect" style="width:100%; padding:12px; background:#1c1a17; border:1px solid #ffffff15; color:#fff; outline:none; margin-bottom:12px; font-family:inherit;">
-            </select>
-        <input type="text" id="faqQuestionInput" placeholder="Enter Question String" style="width:100%; padding:12px; background:#ffffff05; border:1px solid #ffffff15; color:#fff; outline:none; margin-bottom:12px; font-family:inherit;">
-        <textarea id="faqAnswerInput" rows="4" placeholder="Enter Answer Paragraph text content" style="width:100%; padding:12px; background:#ffffff05; border:1px solid #ffffff15; color:#fff; outline:none; margin-bottom:16px; font-family:inherit; resize:vertical;"></textarea>
-        
-        <div style="display:flex; gap:10px;">
-            <button id="submitFaqBtn" onclick="saveFaqItem()" style="flex:1; padding:15px; background:#faf8f4; border:none; color:#0d0c0a; font-weight:500; cursor:pointer; text-transform:uppercase; font-size:0.75rem; letter-spacing:2px;">Publish Entry to Live Registers</button>
-            <button id="cancelEditBtn" onclick="clearFaqForm()" style="display:none; padding:15px 24px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-weight:500; cursor:pointer; text-transform:uppercase; font-size:0.75rem;">Cancel</button>
-        </div>
-    </div>
-
-    <div>
-        <h4 style="color:#b09070; text-transform:uppercase; font-size:0.8rem; letter-spacing:2px; margin-bottom:14px;">Active Live Items Dashboard</h4>
-        <div id="adminFaqRowsContainer" style="display:flex; flex-direction:column; gap:12px;">
+            <div style="margin-bottom: 34px; padding-bottom: 24px; border-bottom: 1px solid #ffffff10;">
+                <h4 id="formTitleText" style="color:#b09070; text-transform:uppercase; font-size:0.8rem; letter-spacing:2px; margin-bottom:14px;">Add New FAQ Entry</h4>
+                <input type="hidden" id="editingFaqId" value="">
+                
+                <select id="faqCategorySelect" style="width:100%; padding:12px; background:#1c1a17; border:1px solid #ffffff15; color:#fff; outline:none; margin-bottom:12px; font-family:inherit;"></select>
+                <input type="text" id="faqQuestionInput" placeholder="Enter Question String" style="width:100%; padding:12px; background:#ffffff05; border:1px solid #ffffff15; color:#fff; outline:none; margin-bottom:12px; font-family:inherit;">
+                <textarea id="faqAnswerInput" rows="4" placeholder="Enter Answer Paragraph text content" style="width:100%; padding:12px; background:#ffffff05; border:1px solid #ffffff15; color:#fff; outline:none; margin-bottom:16px; font-family:inherit; resize:vertical;"></textarea>
+                
+                <div style="display:flex; gap:10px;">
+                    <button id="submitFaqBtn" onclick="saveFaqItem()" style="flex:1; padding:15px; background:#faf8f4; border:none; color:#0d0c0a; font-weight:500; cursor:pointer; text-transform:uppercase; font-size:0.75rem; letter-spacing:2px;">Publish Entry to Live Registers</button>
+                    <button id="cancelEditBtn" onclick="clearFaqForm()" style="display:none; padding:15px 24px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; font-weight:500; cursor:pointer; text-transform:uppercase; font-size:0.75rem;">Cancel</button>
+                </div>
             </div>
-    </div>
-</div>
-    </div>
+
+            <div>
+                <h4 style="color:#b09070; text-transform:uppercase; font-size:0.8rem; letter-spacing:2px; margin-bottom:14px;">Active Live Items Dashboard</h4>
+                <div id="adminFaqRowsContainer" style="display:flex; flex-direction:column; gap:12px;"></div>
+            </div>
+        </div>
+    </div> </div>
     
     <!-- ── REVIEW MODERATION (no collapse) ──────────────────────────── -->
     <div class="section-card" style="border-top-color: var(--gold);">
