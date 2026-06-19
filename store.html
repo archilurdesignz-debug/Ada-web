@@ -362,6 +362,24 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
             <h2 id="modalTitle"></h2>
             <span id="modalMeta"></span>
 
+        <div id="modalArchitecturalFeaturesPanel" style="margin-bottom: 32px; border-bottom: 1px solid rgba(201,191,176,0.12); padding-bottom: 24px; display:none;">
+    
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; background: rgba(255,255,255,0.02); border:1px solid rgba(201,191,176,0.06); padding: 16px 20px;">
+        <div>
+            <p style="font-size: 0.62rem; color: var(--mist); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Building Dimensions</p>
+            <p id="featDimensionsTarget" style="font-size: 1rem; color: var(--white); font-weight: 400; font-family: var(--f-display);"></p>
+        </div>
+        <div>
+            <p style="font-size: 0.62rem; color: var(--mist); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Plot Size Suitability</p>
+            <p id="featPlotTarget" style="font-size: 0.9rem; color: var(--gold2); font-weight: 300;"></p>
+        </div>
+    </div>
+
+    <div id="featLevelsListWrapper">
+        <p class="form-section-title" style="font-size: 1.15rem; margin-bottom: 16px;">Building Features &amp; Layout</p>
+        <div id="featLevelsTargetContainer" style="display: flex; flex-direction: column; gap: 24px;"></div>
+    </div>
+</div>
             <div id="initialActions">
                 <p class="form-section-title" style="font-size: 1.15rem; margin-bottom: 14px;">Select Plan Package</p>
                 
@@ -657,17 +675,89 @@ function renderCard(item, container){
     const c = document.createElement('div');
     c.className = 'plan-card';
     c.addEventListener('click', () => {
+        // FIXED: Now accurately passing item.features as the 5th parameter down to fillModal
         fillModal(
             item.title || 'Untitled Plan',
             item.meta || '',
             item.price || 'Contact for Price',
-            getGalleryImages(item.image_urls || item.images)
+            getGalleryImages(item.image_urls || item.images),
+            item.features 
         );
     });
     c.innerHTML = `<div class="plan-img-container"><div class="plan-img" style="background-image:url('${item.main_image || ''}')"></div><div class="plan-overlay"><h3>${item.title || 'Untitled'}</h3><p>${item.category || item.meta || ''}</p></div></div>`;
     container.appendChild(c);
 }
-function fillModal(title,meta,price,images){document.getElementById('modalTitle').innerText=title;document.getElementById('modalMeta').innerText=meta;document.getElementById('modalPrice').innerText=price;document.getElementById('modalGallery').innerHTML=(images||[]).map(img=>`<img src="${img}">`).join('');document.getElementById('planModal').classList.add('open');document.body.style.overflow='hidden';hideRequestForm();}
+
+function fillModal(title, meta, price, images, features) {
+    document.getElementById('modalTitle').innerText = title;
+    document.getElementById('modalMeta').innerText = meta;
+    
+    // Safety check: Re-bind modal price string if the element container target template relies on it
+    const priceNode = document.getElementById('modalPrice');
+    if (priceNode) priceNode.innerText = price;
+    
+    document.getElementById('modalGallery').innerHTML = (images || []).map(img => `<img src="${img}">`).join('');
+    
+    // Core Elements Target Setup Selection
+    const featPanel = document.getElementById('modalArchitecturalFeaturesPanel');
+    const dimTarget = document.getElementById('featDimensionsTarget');
+    const plotTarget = document.getElementById('featPlotTarget');
+    const levelsContainer = document.getElementById('featLevelsTargetContainer');
+
+    // Reset layout view defaults completely
+    if (featPanel) featPanel.style.display = 'none';
+    if (levelsContainer) levelsContainer.innerHTML = '';
+
+    // If metadata row contains information profiles, render layout structures gracefully
+    if (features && (features.length || features.width || features.plotSuitability || (features.levels && features.levels.length))) {
+        if (featPanel) featPanel.style.display = 'block';
+        
+        // Formulate Dimensions Output String Data
+        const lengthStr = features.length || '—';
+        const widthStr = features.width || '—';
+        if (dimTarget) dimTarget.innerText = `${lengthStr} Length × ${widthStr} Width`;
+        if (plotTarget) plotTarget.innerText = features.plotSuitability || 'Review Site Conditions';
+
+        // Render Multi-Column Bullet Points for Structural Levels
+        if (features.levels && features.levels.length > 0) {
+            const listWrapper = document.getElementById('featLevelsListWrapper');
+            if (listWrapper) listWrapper.style.display = 'block';
+            
+            if (levelsContainer) {
+                levelsContainer.innerHTML = features.levels.map(lvl => {
+                    // Loop spaces block elements directly inside 2-3 Column grids dynamically
+                    const spacesHtml = (lvl.spaces || []).map(space => `
+                        <li style="position: relative; padding-left: 14px; font-size: 0.88rem; color: var(--sand); line-height: 1.6; list-style:none; margin-bottom:4px;">
+                            <span style="position: absolute; left: 0; color: var(--accent);">•</span> ${space}
+                        </li>
+                    `).join('');
+
+                    return `
+                        <div style="border-left: 1px solid rgba(200, 168, 122, 0.2); padding-left: 18px;">
+                            <h4 style="font-family: var(--f-display); font-size: 1.05rem; color: var(--gold2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">${lvl.name}</h4>
+                            <ul style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px 16px; margin: 0; padding: 0;">
+                                ${spacesHtml || '<li style="color:var(--mist); font-size:0.8rem; list-style:none;">Open Layout Mapping</li>'}
+                            </ul>
+                        </div>
+                    `;
+                }).join('');
+            }
+        } else {
+            const listWrapper = document.getElementById('featLevelsListWrapper');
+            if (listWrapper) listWrapper.style.display = 'none';
+        }
+    }
+
+    document.getElementById('planModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    
+    const defaultTab = document.querySelector('.package-tab');
+    if (defaultTab) {
+        switchPackageTab(defaultTab, 'Basic Package', 'basic-pane');
+    }
+    closeFaqSubModal();
+    hideRequestForm();
+}
 function closePlan(){document.getElementById('planModal').classList.remove('open');document.body.style.overflow='';}
 function showRequestForm(a){currentAction=a;currentPlan=document.getElementById('modalTitle').innerText;document.getElementById('formActionTitle').innerText=a+' Request';document.getElementById('initialActions').style.display='none';document.getElementById('requestForm').style.display='block';}
 function hideRequestForm(){document.getElementById('initialActions').style.display='block';document.getElementById('requestForm').style.display='none';}
