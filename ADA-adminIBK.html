@@ -644,7 +644,7 @@
 </div>
 
 <script>
-// ─── SUPABASE INIT ────────────────────────────────────────────────────────────
+// ─── SUPABASE CLIENT INITIALIZATION ───────────────────────────────────────────
 const SUPABASE_URL   = 'https://ofaxbduvnhscxvoakeax.supabase.co';   
 const SUPABASE_KEY   = 'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK'; 
 
@@ -655,7 +655,13 @@ try {
 } catch(e) {
     console.warn('Supabase not connected — paste your credentials above');
 }
-// ─── COLLAPSIBLE SECTIONS ─────────────────────────────────────────────────────
+
+// ─── MASTER PLATFORM GLOBAL STATE COUNTERS ────────────────────────────────────
+let compiledFloorLevelsMatrix = [];
+let currentEditingPlanId = null; 
+let adminCountdownInterval = null;
+
+// ─── COLLAPSIBLE WORKSPACE PANELS MOTOR ───────────────────────────────────────
 function toggleSection(header) {
     const body = header.nextElementSibling;
     const icon = header.querySelector('.toggle-icon');
@@ -663,7 +669,8 @@ function toggleSection(header) {
     body.classList.toggle('expanded', !isOpen);
     icon.classList.toggle('open', !isOpen);
 }
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
+
+// ─── FORM VALUE UTILITY HELPERS ───────────────────────────────────────────────
 function generateToken() {
     const year = new Date().getFullYear();
     const rand = Math.floor(Math.random() * 9000) + 1000;
@@ -681,18 +688,13 @@ function getVal(id) {
 
 function getDeadlineISO() {
     const raw = document.getElementById('projectDeadline')?.value;
-
     if (!raw) return null;
-
-    // datetime-local safe conversion (NO NULL BUG EVER)
     const date = new Date(raw);
-
     if (isNaN(date.getTime())) return null;
-
     return date.toISOString();
 }
 
-function getBase64(file) {
+async function getBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -720,7 +722,7 @@ async function autoSaveTimeline() {
     }
 }
 
-// ─── DROPBOX FILE UPLOAD WORKFLOWS ────────────────────────────────────────────
+// ─── DROPBOX CONTENT DISPATCH STORAGE ENGINES ─────────────────────────────────
 async function handleDirectUpload(fileInputId, targetInputId) {
     const fileInput = document.getElementById(fileInputId);
     const targetInput = document.getElementById(targetInputId);
@@ -734,13 +736,11 @@ async function handleDirectUpload(fileInputId, targetInputId) {
 
     try {
         const base64Data = await getBase64(file);
-        
-       // ─── NEW FIXED CODE ───
-const response = await fetch('/api/upload-to-dropbox', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ filename: file.name, filedata: base64Data })
-});
+        const response = await fetch('/api/upload-to-dropbox', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: file.name, filedata: base64Data })
+        });
 
         const data = await response.json();
 
@@ -771,12 +771,11 @@ async function handleStoreGalleryUpload() {
 
     try {
         const base64Data = await getBase64(file);
-        // ─── NEW FIXED CODE ───
-const response = await fetch('/api/upload-to-dropbox', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ filename: file.name, filedata: base64Data })
-});
+        const response = await fetch('/api/upload-to-dropbox', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: file.name, filedata: base64Data })
+        });
 
         const data = await response.json();
 
@@ -795,6 +794,7 @@ const response = await fetch('/api/upload-to-dropbox', {
     }
 }
 
+// ─── TRACK MODULE PARAMETERS GENERATION ───────────────────────────────────────
 function addTrackRow(label = '', progress = 0) {
     const container = document.getElementById('dynamicTracksContainer');
     if (!container) return;
@@ -820,7 +820,7 @@ function addTrackRow(label = '', progress = 0) {
     container.insertAdjacentHTML('beforeend', rowHTML);
 }
 
-// ─── LOAD SELECTORS (FIXED SYNTAX FROM '--' TO '//') ──────────────────────────
+// ─── PROJECTS MANAGEMENT CORE INTERFACES ───────────────────────────────────────
 async function loadProjectSelectors() {
     if (!_db) return;
     const { data, error } = await _db
@@ -843,12 +843,10 @@ async function loadProjectSelectors() {
     });
 }
 
-// ─── INITIALIZE METHOD ────────────────────────────────────────────────────────
 async function createNewProject() {
     const token = generateToken();
     const depositPaid = parseFloat(getVal('newDepositPaid')) || 0;
     const totalSum    = parseFloat(getVal('newTotalSum'))    || 0;
-        
     const dashboardUrl = `${window.location.origin}/ada-tracker.html?token=${token}`;
 
     const payload = {
@@ -887,7 +885,6 @@ async function createNewProject() {
     loadProjectSelectors();
 }
 
-// ─── EDITOR LOADER ───────────────────────────────────────────────────────────
 async function loadProjectDetails() {
     const token = getVal('projectSelector');
     document.getElementById('editorFields').style.display = token ? 'block' : 'none';
@@ -906,18 +903,14 @@ async function loadProjectDetails() {
     setVal('editDepositPaid',  data.deposit_paid  ?? '');
     setVal('editTotalSum',     data.total_sum     ?? '');
 
-/* ─── DELIVERY TIMELINE ───────────────────────── */
-if (data.deadline) {
-    const formattedDate = new Date(data.deadline)
-        .toISOString()
-        .slice(0,16);
+    if (data.deadline) {
+        const formattedDate = new Date(data.deadline).toISOString().slice(0,16);
+        setVal('projectDeadline', formattedDate);
+    }
 
-    setVal('projectDeadline', formattedDate);
-}
+    setVal('countdownStatus', data.countdown_status || 'active');
+    startAdminCountdownPreview();
 
-setVal('countdownStatus', data.countdown_status || 'active');
-
-startAdminCountdownPreview();
     const badge = document.getElementById('lockStatusBadge');
     if (badge) {
         const locked = data.dashboard_locked;
@@ -942,10 +935,9 @@ startAdminCountdownPreview();
             tracks.forEach(t => { addTrackRow(t.heading, t.percent); });
         }
     }
-        loadProjectTerms(data);
+    loadProjectTerms(data);
 }
 
-// ─── PUBLISH REVISED SCHEME CONFIGURATION ─────────────────────────────────────
 async function updateProject() {
     const token = getVal('projectSelector');
     if (!token) { alert('Select a project first.'); return; }
@@ -961,39 +953,32 @@ async function updateProject() {
         }
     });
 
-   const payload = {
-    overall_percent: parseInt(getVal('overallProgress')) || 0,
-    revision_count: parseInt(document.getElementById('editRevisionCount').value) || 0,
-    deposit_paid: parseFloat(getVal('editDepositPaid')) || 0,
-    total_sum: parseFloat(getVal('editTotalSum')) || 0,
-    currency_mode: getVal('editCurrencyMode'),
+    const payload = {
+        overall_percent: parseInt(getVal('overallProgress')) || 0,
+        revision_count: parseInt(document.getElementById('editRevisionCount').value) || 0,
+        deposit_paid: parseFloat(getVal('editDepositPaid')) || 0,
+        total_sum: parseFloat(getVal('editTotalSum')) || 0,
+        currency_mode: getVal('editCurrencyMode'),
+        deadline: getDeadlineISO(),
+        countdown_status: getVal('countdownStatus'),
+        custom_tracks: customTracksCompiledArray
+    };
 
-    /* ─── DELIVERY TIMELINE ───────────────────── */
-    deadline: getDeadlineISO(),
-    countdown_status: getVal('countdownStatus'),
-    custom_tracks: customTracksCompiledArray
-};
+    if (!_db) { alert('Supabase not connected.'); return; }
 
-/* ✅ CLOSE OBJECT FIRST, THEN RUN LOGIC */
+    const { error } = await _db
+        .from('projects')
+        .update(payload)
+        .eq('token', token);
 
-if (!_db) { 
-    alert('Supabase not connected.'); 
-    return; 
+    if (error) {
+        alert('Error: ' + error.message);
+    } else {
+        alert('✓ Client dashboard updated successfully.');
+    }
 }
 
-const { data, error } = await _db
-    .from('projects')
-    .update(payload)
-    .eq('token', token)
-    .select();
-
-if (error) {
-    alert('Error: ' + error.message);
-} else {
-    alert('✓ Client dashboard updated successfully.');
-}
-}
-// ─── SUBMISSION HUB MANAGEMENT ────────────────────────────────────────────────
+// ─── SUBMISSION HUB FILE MANAGEMENT ───────────────────────────────────────────
 async function loadProjectFiles() {
     const token = getVal('fileProjectSelector');
     document.getElementById('fileManager').style.display = token ? 'block' : 'none';
@@ -1083,7 +1068,7 @@ async function deleteFile(fileId) {
     else loadProjectFiles();
 }
 
-// ─── PORTFOLIO PUBLISHING MODULE ──────────────────────────────────────────────
+// ─── STUDIO PORTFOLIO PUBLISHING MODULE ───────────────────────────────────────
 async function uploadPortfolio() {
     const payload = {
         title:       getVal('pTitle'),
@@ -1104,85 +1089,8 @@ async function uploadPortfolio() {
         if (pStatus) pStatus.innerText = ""; 
     }
 }
-let compiledFloorLevelsMatrix = [];
 
-function addAdminFloorLevelNode() {
-    const nameInput = document.getElementById('levelNameInput');
-    const levelName = nameInput.value.trim();
-    if(!levelName) { alert('Please enter a valid Level Name first (e.g., Ground Floor Plan).'); return; }
-
-    // Creates an isolated blueprint token structure
-    const newLevel = { id: Date.now(), name: levelName, spaces: [] };
-    compiledFloorLevelsMatrix.push(newLevel);
-    nameInput.value = '';
-    renderAdminFloorLevelsUI();
-}
-
-function renderAdminFloorLevelsUI() {
-    const container = document.getElementById('adminFloorLevelsContainer');
-    if (!container) return;
-    
-    container.innerHTML = compiledFloorLevelsMatrix.map(lvl => {
-        // Formulate a temporary visible badge strip for added spaces
-        const spacesListItems = lvl.spaces.map((space, index) => `
-            <span style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 8px; border-radius: 2px; color: #fff;">
-                • ${space} 
-                <button type="button" onclick="removeSpaceFromLevel(${lvl.id}, ${index})" style="background:none; border:none; color:var(--danger); cursor:pointer; font-weight:bold; padding:0; font-size: 0.75rem;">✕</button>
-            </span>
-        `).join('');
-
-        return `
-            <div style="background:rgba(255,255,255,0.02); border:1px solid var(--glass); padding:20px; position:relative; border-radius: 4px;">
-                <button type="button" onclick="removeAdminLevelNode(${lvl.id})" style="position:absolute; right:20px; top:20px; background:none; border:none; color:var(--danger); cursor:pointer; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Remove Level ✕</button>
-                
-                <h4 style="color:var(--gold); margin-bottom:12px; text-transform:uppercase; font-size:0.9rem; letter-spacing: 1px; font-family: 'Cormorant Garamond', serif;">${lvl.name}</h4>
-                
-                <div style="display:flex; gap:8px; margin-bottom:14px; max-width: 500px;">
-                    <input type="text" id="spaceInput_${lvl.id}" placeholder="Add space entry (e.g., Living room)" style="flex:1; padding:10px; background:rgba(0,0,0,0.4); border:1px solid var(--glass); color:#fff; font-size:0.85rem; outline: none;" onkeydown="if(event.key==='Enter'){event.preventDefault(); addSpaceToLevel(${lvl.id});}">
-                    <button type="button" onclick="addSpaceToLevel(${lvl.id})" style="padding:10px 18px; background: #fff; border:none; color:#0c0b09; font-size:0.8rem; font-weight:600; cursor:pointer; text-transform: uppercase;">+ Add Space</button>
-                </div>
-                
-                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-height: 24px;">
-                    ${lvl.spaces.length > 0 ? spacesListItems : '<em style="color:#777; font-size:0.8rem;">No spaces listed under this level yet.</em>'}
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-function addSpaceToLevel(levelId) {
-    const input = document.getElementById(`spaceInput_${levelId}`);
-    const val = input.value.trim();
-    if(!val) return;
-
-    const target = compiledFloorLevelsMatrix.find(l => l.id === levelId);
-    if(target) {
-        target.spaces.push(val);
-        input.value = '';
-        renderAdminFloorLevelsUI();
-        // Return focus to field to make sequential rapid-entry typing fast
-        document.getElementById(`spaceInput_${levelId}`).focus();
-    }
-}
-
-function removeSpaceFromLevel(levelId, spaceIndex) {
-    const target = compiledFloorLevelsMatrix.find(l => l.id === levelId);
-    if(target) {
-        target.spaces.splice(spaceIndex, 1);
-        renderAdminFloorLevelsUI();
-    }
-}
-
-function removeAdminLevelNode(levelId) {
-    compiledFloorLevelsMatrix = compiledFloorLevelsMatrix.filter(l => l.id !== levelId);
-    renderAdminFloorLevelsUI();
-}
-// ─── CONCEPT STORE CATALOG MANAGEMENT ──────────────────────────────────────────
-// ─── MASTER ARRAYS & STATE TRACKING VARIABLES ───────────────────────────────
-let compiledFloorLevelsMatrix = [];
-let currentEditingPlanId = null; // Holds the active plan ID during an update sequence
-
-// ─── 1. UPLOAD / PUBLISH NEW FRESH STORE ENTRIES ─────────────────────────────
+// ─── BRAND ARCHITECTURAL CONCEPT STORE MODULES ─────────────────────────────────
 async function uploadStore() {
     const images = [1,2,3,4,5,6].map(i => getVal(`sImg${i}`)).filter(u => u);
     if (!images.length) { alert('Add at least one image URL.'); return; }
@@ -1195,8 +1103,6 @@ async function uploadStore() {
         image_urls:  images,
         main_image:  images[0],
         is_featured: document.getElementById('sFeatured').checked,
-        
-        // Pack all dimensions and multi-column levels into the features column
         features: {
             length: document.getElementById('planLength').value.trim(),
             width: document.getElementById('planWidth').value.trim(),
@@ -1217,14 +1123,12 @@ async function uploadStore() {
     }
 }
 
-// ─── 2. EDIT SELECTION: PULL FROM SUPABASE AND HYDRATE CARDS ──────────────────
 async function editPlan(id) {
     if (!_db) { alert('Supabase not connected.'); return; }
     
     const { data, error } = await _db.from('plans').select('*').eq('id', id).single();
     if (error || !data) { alert('Could not retrieve plan details.'); return; }
 
-    // Hydrate standard input fields
     setVal('sTitle', data.title || '');
     setVal('sPrice', data.price || '');
     setVal('sMeta', data.meta || '');
@@ -1237,24 +1141,19 @@ async function editPlan(id) {
         }
     }
 
-    // Hydrate your new dimensions and plot settings
     const feat = data.features || {};
     setVal('planLength', feat.length || '');
     setVal('planWidth', feat.width || '');
     setVal('planPlotSuitability', feat.plotSuitability || '');
 
-    // Map your structural level vectors from Supabase back onto your active dashboard view
     compiledFloorLevelsMatrix = feat.levels || [];
     renderAdminFloorLevelsUI();
 
-    // Lock the editing ID so the update system knows which row to save over
     currentEditingPlanId = data.id; 
-    
     const statusTextNode = document.getElementById('sUploadStatus');
     if (statusTextNode) statusTextNode.innerText = `Currently Editing Plan ID: ${data.id}`;
 }
 
-// ─── 3. SAVE MODIFICATIONS BACK TO EXISTING RECORD ROW ────────────────────────
 async function updateStore() {
     if (!currentEditingPlanId) { alert('No plan actively loaded for modification changes.'); return; }
     if (!_db) { alert('Supabase not connected.'); return; }
@@ -1270,8 +1169,6 @@ async function updateStore() {
         image_urls:  images,
         main_image:  images[0],
         is_featured: document.getElementById('sFeatured').checked,
-        
-        // Preserve dimensions and custom layout structural items during changes
         features: {
             length: document.getElementById('planLength').value.trim(),
             width: document.getElementById('planWidth').value.trim(),
@@ -1290,7 +1187,6 @@ async function updateStore() {
     }
 }
 
-// ─── 4. REUSABLE RESET UTILITY: WIPES VIEW SCRIPTS CLEAN ──────────────────────
 function clearAdminPlanFormView() {
     ['sTitle','sPrice','sMeta','sCategory','sImg1','sImg2','sImg3','sImg4','sImg5','sImg6', 'planLength', 'planWidth', 'planPlotSuitability', 'levelNameInput']
         .forEach(id => {
@@ -1301,7 +1197,6 @@ function clearAdminPlanFormView() {
     const featuredCheck = document.getElementById('sFeatured');
     if (featuredCheck) featuredCheck.checked = false;
     
-    // Wipe layout configuration matrices clean for the next record actions
     compiledFloorLevelsMatrix = [];
     renderAdminFloorLevelsUI();
     currentEditingPlanId = null;
@@ -1312,7 +1207,7 @@ function clearAdminPlanFormView() {
     if (typeof fetchAdminStoreItems === "function") fetchAdminStoreItems();
 }
 
-// ─── 5. INTERACTIVE FLOOR LEVEL & SPACE MAKER CONTROLS ─────────────────────────
+// ─── DYNAMIC INTERACTIVE FLOORS AND SPACES ENGINE ────────────────────────────
 function addAdminFloorLevelNode() {
     const nameInput = document.getElementById('levelNameInput');
     const levelName = nameInput.value.trim();
@@ -1381,8 +1276,8 @@ function removeAdminLevelNode(levelId) {
     compiledFloorLevelsMatrix = compiledFloorLevelsMatrix.filter(l => l.id !== levelId);
     renderAdminFloorLevelsUI();
 }
-    // ─── DEFAULT PLANS VISIBILITY ─────────────────────────────────────────────────
 
+// ─── HOMEPAGE CAROUSEL HARDCODED CARDS VISIBILITY CONTROLS ─────────────────────
 const DEFAULT_PLAN_LABELS = {
     'obsidian-2bed': 'The Obsidian — 2 Beds · 210 SQM',
     'modeer-2bed':   'The Modeer — 2 Beds · 165 SQM'
@@ -1402,23 +1297,17 @@ async function loadDefaultsVisibility() {
     }
 
     container.innerHTML = data.map(row => `
-        <div style="display:flex; align-items:center; justify-content:space-between;
-                    padding:14px 16px; background:rgba(0,0,0,0.3); border:1px solid #1a1a1a;">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:rgba(0,0,0,0.3); border:1px solid #1a1a1a;">
             <span style="font-size:0.78rem; color:var(--white); letter-spacing:0.5px;">
                 ${DEFAULT_PLAN_LABELS[row.id] || row.id}
             </span>
-            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;
-                          font-size:0.65rem; letter-spacing:1px; text-transform:uppercase; color:var(--gold);">
-                <input type="checkbox"
-                       id="default_toggle_${row.id}"
-                       ${row.enabled ? 'checked' : ''}
-                       style="width:16px; height:16px; accent-color:var(--gold); cursor:pointer;">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.65rem; letter-spacing:1px; text-transform:uppercase; color:var(--gold);">
+                <input type="checkbox" id="default_toggle_${row.id}" ${row.enabled ? 'checked' : ''} style="width:16px; height:16px; accent-color:var(--gold); cursor:pointer;">
                 ${row.enabled ? 'Visible' : 'Hidden'}
             </label>
         </div>
     `).join('');
 
-    // Update label text dynamically when toggled
     data.forEach(row => {
         const cb = document.getElementById(`default_toggle_${row.id}`);
         if (cb) {
@@ -1446,14 +1335,13 @@ async function saveDefaultsVisibility() {
     if (error) alert('Save failed: ' + error.message);
     else alert('✓ Default plan visibility updated.');
 }
-// ─── SERVICE TERMS ────────────────────────────────────────────────────────────
 
+// ─── CUSTOM CLIENT SERVICE TERMS SCHEDULER MANAGEMENT ─────────────────────────
 function addTermsSection(type = 'heading', heading = '', body = '', bullets = []) {
     const container = document.getElementById('termsSectionsContainer');
     if (!container) return;
 
     const id = 'terms_' + Math.random().toString(36).substr(2, 9);
-
     const bulletsValue = Array.isArray(bullets) ? bullets.join('\n') : bullets;
 
     const bodyField = (type === 'heading' || type === 'both') ? `
@@ -1516,14 +1404,12 @@ function loadProjectTerms(data) {
     const footer = document.getElementById('terms_footer');
 
     if (!t || !Array.isArray(t.sections)) {
-        // No terms yet — start with one blank section
         if (footer) footer.value = '';
         addTermsSection('heading');
         return;
     }
 
     if (footer) footer.value = t.footer || '';
-
     t.sections.forEach(s => {
         addTermsSection(s.type, s.heading, s.body || '', s.bullets || []);
     });
@@ -1560,8 +1446,8 @@ async function updateProjectTerms() {
     if (error) alert('Update failed: ' + error.message);
     else alert('✓ Service Terms published to client tracker.');
 }
-    
-// ─── FAQ MANAGEMENT — DIRECT SUPABASE ────────────────────────────────────────
+
+// ─── DYNAMIC FAQS SYSTEM MANAGER DIRECT ACCESS ROUTES ──────────────────────────
 let systemCategories = ["General FAQs", "Construction FAQs", "Ready Made Plans FAQs", "Custom Design FAQs"];
 let liveFaqItems = [];
 
@@ -1594,11 +1480,9 @@ function renderCategoryControls() {
     ).join('');
 
     pills.innerHTML = systemCategories.map(cat => `
-        <span style="background:#1c1a17; border:1px solid #ffffff10; padding:6px 14px;
-                     font-size:0.8rem; display:inline-flex; align-items:center; gap:8px;">
+        <span style="background:#1c1a17; border:1px solid #ffffff10; padding:6px 14px; font-size:0.8rem; display:inline-flex; align-items:center; gap:8px;">
             ${cat}
-            <button onclick="deleteCategoryRecord('${cat}')"
-                    style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-weight:bold;">✕</button>
+            <button onclick="deleteCategoryRecord('${cat}')" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-weight:bold;">✕</button>
         </span>
     `).join('');
 }
@@ -1650,22 +1534,15 @@ async function fetchAndRenderFaqRows() {
     }
 
     container.innerHTML = liveFaqItems.map(item => `
-        <div style="background:#1c1a17; border:1px solid #ffffff08; padding:20px;
-                    display:flex; justify-content:space-between; align-items:center; gap:24px;">
+        <div style="background:#1c1a17; border:1px solid #ffffff08; padding:20px; display:flex; justify-content:space-between; align-items:center; gap:24px;">
             <div style="flex:1;">
-                <span style="font-size:0.65rem; background:rgba(200,168,122,0.15); color:#c8a87a;
-                             padding:4px 8px; text-transform:uppercase; letter-spacing:1px;">${item.category}</span>
-                <p style="font-size:1rem; font-weight:500; margin:10px 0 4px; color:#fff;
-                           font-family:'Playfair Display', serif;">${item.question}</p>
+                <span style="font-size:0.65rem; background:rgba(200,168,122,0.15); color:#c8a87a; padding:4px 8px; text-transform:uppercase; letter-spacing:1px;">${item.category}</span>
+                <p style="font-size:1rem; font-weight:500; margin:10px 0 4px; color:#fff; font-family:'Playfair Display', serif;">${item.question}</p>
                 <p style="font-size:0.85rem; color:#7a7570; line-height:1.5;">${item.answer}</p>
             </div>
             <div style="display:flex; flex-direction:column; gap:8px; flex-shrink:0;">
-                <button onclick="startFaqEdit('${item.id}')"
-                        style="padding:8px 16px; background:none; border:1px solid rgba(255,255,255,0.15);
-                               color:#c9bfb0; font-size:0.7rem; text-transform:uppercase; cursor:pointer;">Edit</button>
-                <button onclick="deleteFaqRecord('${item.id}')"
-                        style="padding:8px 16px; background:none; border:1px solid rgba(255,77,77,0.3);
-                               color:#ff4d4d; font-size:0.7rem; text-transform:uppercase; cursor:pointer;">Delete</button>
+                <button onclick="startFaqEdit('${item.id}')" style="padding:8px 16px; background:none; border:1px solid rgba(255,255,255,0.15); color:#c9bfb0; font-size:0.7rem; text-transform:uppercase; cursor:pointer;">Edit</button>
+                <button onclick="deleteFaqRecord('${item.id}')" style="padding:8px 16px; background:none; border:1px solid rgba(255,77,77,0.3); color:#ff4d4d; font-size:0.7rem; text-transform:uppercase; cursor:pointer;">Delete</button>
             </div>
         </div>
     `).join('');
@@ -1703,10 +1580,8 @@ async function saveFaqItem() {
 
     let error;
     if (editId) {
-        // Update existing
         ({ error } = await _db.from('faqs').update({ category: cat, question: q, answer: a }).eq('id', editId));
     } else {
-        // Insert new
         ({ error } = await _db.from('faqs').insert([{ category: cat, question: q, answer: a }]));
     }
 
@@ -1723,13 +1598,7 @@ async function deleteFaqRecord(id) {
     await fetchAndRenderFaqRows();
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    initAdminDashboard();
-    loadProjectSelectors();
-    loadPendingReviews();
-    loadDefaultsVisibility();
-});
-// ─── REVIEWS MODERATION INBOX ────────────────────────────────────────────────
+// ─── TESTIMONIAL REVIEWS INBOX SECTIONS ────────────────────────────────────────
 async function loadPendingReviews() {
     const inbox = document.getElementById('reviewInbox');
     if (!inbox) return;
@@ -1768,35 +1637,29 @@ async function moderateReview(id, status) {
     if (error) alert('Error: ' + error.message);
     else { alert(`Review ${status}.`); loadPendingReviews(); }
 }
+
 function attachTimelineAutoSave() {
     const deadlineInput = document.getElementById('projectDeadline');
     const statusInput = document.getElementById('countdownStatus');
 
     if (!deadlineInput || !statusInput) return;
-
     let debounceTimer = null;
 
     function triggerSave() {
         startAdminCountdownPreview();
-
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
             autoSaveTimeline();
-        }, 600); // prevents Supabase spam
+        }, 600); 
     }
 
     deadlineInput.addEventListener('input', triggerSave);
     deadlineInput.addEventListener('change', triggerSave);
-
     statusInput.addEventListener('change', triggerSave);
 }
 
-/* ─── ADMIN COUNTDOWN PREVIEW ENGINE ───────────────────────────────── */
-
-let adminCountdownInterval = null;
-
+// ─── ADMIN TIMELINE PREVIEW COUNTDOWN MOTOR ──────────────────────────────────
 function startAdminCountdownPreview() {
-
     clearInterval(adminCountdownInterval);
 
     const previewBox = document.getElementById('countdownPreview');
@@ -1806,16 +1669,13 @@ function startAdminCountdownPreview() {
     if (!previewBox || !deadlineInput) return;
 
     function updateCountdown() {
-
         const deadlineValue = deadlineInput.value;
-
         if (!deadlineValue) {
             previewBox.innerHTML = 'No deadline selected';
             return;
         }
 
         const status = statusInput.value;
-
         if (status === 'paused') {
             previewBox.innerHTML = '⏸ Countdown Paused';
             return;
@@ -1826,11 +1686,8 @@ function startAdminCountdownPreview() {
             return;
         }
 
-       const deadline = new Date(
-    deadlineValue.replace(' ', 'T')
-).getTime();
+        const deadline = new Date(deadlineValue.replace(' ', 'T')).getTime();
         const now = new Date().getTime();
-
         const distance = deadline - now;
 
         if (distance <= 0) {
@@ -1842,38 +1699,14 @@ function startAdminCountdownPreview() {
         const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
 
-        previewBox.innerHTML = `
-            ${days}d ${hours}h ${minutes}m remaining
-        `;
+        previewBox.innerHTML = `${days}d ${hours}h ${minutes}m remaining`;
     }
 
     updateCountdown();
-
     adminCountdownInterval = setInterval(updateCountdown, 1000);
 }
 
-// ─── INITIALIZATION LISTENERS ────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-    loadProjectSelectors();
-    loadPendingReviews();
-    loadDefaultsVisibility();
-
-    const newCurrencyDropdown = document.getElementById('newCurrencyMode');
-    if (newCurrencyDropdown) {
-        newCurrencyDropdown.addEventListener('change', function() {
-            const symbol = this.value === 'USD' ? '($)' : '(₦)';
-            document.querySelector("label[for='newDepositPaid']").innerText = `Initial Deposit Paid ${symbol}`;
-            document.querySelector("label[for='newTotalSum']").innerText = `Total Agreed Sum ${symbol}`;
-        });
-    }
-});
-
-function updateCurrencyLabels(currencyMode) {
-    const symbol = currencyMode === 'USD' ? '($)' : '(₦)';
-    document.getElementById('lblEditDepositPaid').innerText = `Initial Deposit Paid ${symbol}`;
-    document.getElementById('lblEditTotalSum').innerText = `Total Agreed Sum ${symbol}`;
-}
-
+// ─── DASHBOARD PORTAL ENTRY LOCK OPERATORS ────────────────────────────────────
 async function lockDashboard() {
     const token = getVal('projectSelector');
     if (!token) { alert('Select a project first.'); return; }
@@ -1913,6 +1746,30 @@ async function unlockDashboard() {
     badge.style.color = 'white';
     alert('✓ Dashboard unlocked. Client can now access their tracker.');
 }
+
+function updateCurrencyLabels(currencyMode) {
+    const symbol = currencyMode === 'USD' ? '($)' : '(₦)';
+    document.getElementById('lblEditDepositPaid').innerText = `Initial Deposit Paid ${symbol}`;
+    document.getElementById('lblEditTotalSum').innerText = `Total Agreed Sum ${symbol}`;
+}
+
+// ─── MASTER WINDOW LIFECYCLE TARGET DOM LOADER ────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+    initAdminDashboard();
+    loadProjectSelectors();
+    loadPendingReviews();
+    loadDefaultsVisibility();
+    attachTimelineAutoSave();
+
+    const newCurrencyDropdown = document.getElementById('newCurrencyMode');
+    if (newCurrencyDropdown) {
+        newCurrencyDropdown.addEventListener('change', function() {
+            const symbol = this.value === 'USD' ? '($)' : '(₦)';
+            document.querySelector("label[for='newDepositPaid']").innerText = `Initial Deposit Paid ${symbol}`;
+            document.querySelector("label[for='newTotalSum']").innerText = `Total Agreed Sum ${symbol}`;
+        });
+    }
+});
 </script>
 </body>
 </html>
