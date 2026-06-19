@@ -521,8 +521,48 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
 
 <script>
 const defaultPlans=[
-    {id:'obsidian-2bed',title:'Obsidian',meta:'2 BEDS • 210 SQM',category:'Tropical Contemporary',price:'',main_image:'images/2BEDS4.webp',image_urls:['','images/2BED2.webp','images/2BED3.webp','images/2BEDS4.webp']},
-    {id:'modeer-2bed',title:'Modeer',meta:'2 BEDS • 165 SQM',category:'Tropical Contemporary',price:'',main_image:'images/2BEDSTY2B.webp',image_urls:['','images/2BEDSTY2C.webp','images/2BEDSTY2D.webp','images/2BEDSTY2B.webp']}
+    {
+        id:'obsidian-2bed',
+        title:'Obsidian',
+        meta:'2 BEDS • 210 SQM',
+        category:'Tropical Contemporary',
+        price:'',
+        main_image:'images/2BEDS4.webp',
+        image_urls:['','images/2BED2.webp','images/2BED3.webp','images/2BEDS4.webp'],
+        features: {
+            width: "14.6m",
+            length: "18.8m",
+            plotSuitability: "Fits on a 100ft x 100ft minimum plot ",
+            levels: [
+                {
+                    id: 1711122334455,
+                    name: "Ground Floor Plan",
+                    spaces: ["Entrance","Ante room","Visitor's Toilet", "Living room", "Dining room","2 Nos Bedrooms Ensuite", "Kitchen","Laundry","Store","Sit-Outs"]
+                } // <-- Fixed: Closed the object here properly
+            ]
+        }
+    },
+    {
+        id:'modeer-2bed',
+        title:'Modeer',
+        meta:'2 BEDS • 165 SQM',
+        category:'Tropical Contemporary',
+        price:'',
+        main_image:'images/2BEDSTY2B.webp',
+        image_urls:['','images/2BEDSTY2C.webp','images/2BEDSTY2D.webp','images/2BEDSTY2B.webp'],
+        features: {
+            width: "12.7m",
+            length: "16.0m",
+            plotSuitability: "Fits on a 50ft x 100ft plot minimum",
+            levels: [
+                {
+                    id: 1711122388999,
+                    name: "Ground Floor Plan",
+                    spaces: ["Entrance", "Ante Room", "Visitor's Toilet", "Living Room", "Dining Room", "2 Nos Bedrooms Ensuite", "Kitchen", "Store", "Sit-Out"]
+                }
+            ]
+        }
+    }
 ];
 let dynamicData={},currentAction='',currentPlan='',page=1,isLoading=false,hasMore=true,searchTimeout=null,isSearchMode=false;
 
