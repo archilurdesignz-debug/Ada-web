@@ -412,51 +412,77 @@
 
         // Hydrates structural accordions into sections mapped out gracefully
         function renderFaqContent(activeCategory) {
-            const target = document.getElementById('faqContentTarget');
-            if(!target) return;
-            target.innerHTML = '';
+    const target = document.getElementById('faqContentTarget');
+    if (!target) return;
+    target.innerHTML = '';
 
-            const grouped = {};
-            faqRecords.forEach(item => {
-                if(activeCategory === 'all' || item.category === activeCategory) {
-                    if(!grouped[item.category]) grouped[item.category] = [];
-                    grouped[item.category].push(item);
-                }
-            });
-
-            for (const [sectionCategory, elements] of Object.entries(grouped)) {
-                const block = document.createElement('section');
-                block.className = 'faq-group-block';
-                
-                let title = sectionCategory.toLowerCase().includes('faqs') ? sectionCategory : sectionCategory + ' FAQs';
-                
-                let accordionsHtml = '';
-                elements.forEach(faq => {
-                    accordionsHtml += `
-                        <div class="accordion-item">
-                            <button class="accordion-trigger-header" onclick="toggleAccordionPane(this)">
-                                <span class="accordion-question-text">${faq.question}</span>
-                                <div class="accordion-icon-marker"></div>
-                            </button>
-                            <div class="accordion-body-pane">
-                                <div class="accordion-inner-text">
-                                    <p>${faq.answer}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                block.innerHTML = `
-                    <span>ADA Studio Index</span>
-                    <h2>${title}</h2>
-                    <div class="policy-box">
-                        <div class="accordion-wrapper">${accordionsHtml}</div>
-                    </div>
-                `;
-                target.appendChild(block);
-            }
+    // Build grouped object
+    const grouped = {};
+    faqRecords.forEach(item => {
+        if (activeCategory === 'all' || item.category === activeCategory) {
+            if (!grouped[item.category]) grouped[item.category] = [];
+            grouped[item.category].push(item);
         }
+    });
+
+    // ── ENFORCE DISPLAY ORDER ─────────────────────────────────────────
+    // Use the same sorting order as the sidebar so sections always appear
+    // General → Construction → Ready Made Plans → Custom Design
+    const sortingOrder = [
+        "General FAQs",
+        "Construction FAQs",
+        "Ready Made Plans FAQs",
+        "Custom Design FAQs"
+    ];
+
+    // Sort the grouped keys: known categories follow sortingOrder,
+    // any unknown/admin-added categories appear after in alphabetical order
+    const orderedKeys = Object.keys(grouped).sort((a, b) => {
+        let idxA = sortingOrder.indexOf(a);
+        let idxB = sortingOrder.indexOf(b);
+        if (idxA === -1) idxA = 999;
+        if (idxB === -1) idxB = 999;
+        if (idxA !== idxB) return idxA - idxB;
+        return a.localeCompare(b); // alphabetical tiebreak for unknowns
+    });
+
+    // Render sections in the enforced order
+    orderedKeys.forEach(sectionCategory => {
+        const elements = grouped[sectionCategory];
+        const block = document.createElement('section');
+        block.className = 'faq-group-block';
+
+        let title = sectionCategory.toLowerCase().includes('faqs')
+            ? sectionCategory
+            : sectionCategory + ' FAQs';
+
+        let accordionsHtml = '';
+        elements.forEach(faq => {
+            accordionsHtml += `
+                <div class="accordion-item">
+                    <button class="accordion-trigger-header" onclick="toggleAccordionPane(this)">
+                        <span class="accordion-question-text">${faq.question}</span>
+                        <div class="accordion-icon-marker"></div>
+                    </button>
+                    <div class="accordion-body-pane">
+                        <div class="accordion-inner-text">
+                            <p>${faq.answer}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        block.innerHTML = `
+            <span>ADA Studio Index</span>
+            <h2>${title}</h2>
+            <div class="policy-box">
+                <div class="accordion-wrapper">${accordionsHtml}</div>
+            </div>
+        `;
+        target.appendChild(block);
+    });
+}
 
         function filterFaqGrid(category, element) {
             document.querySelectorAll('.sidebar-filter-btn').forEach(btn => btn.classList.remove('active'));
