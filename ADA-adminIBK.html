@@ -208,73 +208,67 @@
             <p style="font-size:0.75rem; color:#666; margin-bottom:20px;">
                 Compile line-item parameters dynamically to update rows inside your Supabase collections and map structural vector tokens to secure URLs.
             </p>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-            <div>
-                <label style="display:block; font-size:0.75rem; color:var(--gold); margin-bottom:4px; text-transform:uppercase;">Invoice Number Reference</label>
-                <input type="text" id="invNum" placeholder="e.g. ADA-2026-001" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white;">
+            
+            <div class="grid-2" style="margin-bottom: 20px;">
+                <div>
+                    <label>Invoice Number Reference</label>
+                    <input type="text" id="invNum" placeholder="e.g. ADA-2026-001">
+                </div>
+                <div>
+                    <label>Billing Currency</label>
+                    <select id="invCurrency">
+                        <option value="NGN">Nigerian Naira (₦)</option>
+                        <option value="USD">US Dollar ($)</option>
+                    </select>
+                </div>
             </div>
-            <div>
-                <label style="display:block; font-size:0.75rem; color:var(--gold); margin-bottom:4px; text-transform:uppercase;">Billing Currency</label>
-                <select id="invCurrency" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white;">
-                    <option value="NGN">Nigerian Naira (₦)</option>
-                    <option value="USD">US Dollar ($)</option>
-                </select>
-            </div>
-        </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-            <div>
-                <h4 style="font-size:0.85rem; margin-bottom:10px;">Client Profile Metrics</h4>
-                <input type="text" id="invClientName" placeholder="Client Full Name" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white; margin-bottom:8px;">
-                <input type="text" id="invClientPhone" placeholder="Client Contact Number" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white; margin-bottom:8px;">
-                <input type="email" id="invClientEmail" placeholder="Client Email Address (Optional)" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white; margin-bottom:8px;">
-                <input type="text" id="invClientAddr" placeholder="Client Billing/Site Coordinates" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white; margin-bottom:8px;">
-                <input type="text" id="invPlotSize" placeholder="Project Site Plot Size Scale (Optional)" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white;">
-            </div>
-          <div>
+            <div class="grid-2" style="margin-bottom: 20px;">
+                <div>
+                    <h3 style="margin-top:0; margin-bottom:15px; border-left-color: #b09070;">Client Profile Metrics</h3>
+                    <input type="text" id="invClientName" placeholder="Client Full Name" style="margin-bottom:8px;">
+                    <input type="text" id="invClientPhone" placeholder="Client Contact Number" style="margin-bottom:8px;">
+                    <input type="email" id="invClientEmail" placeholder="Client Email Address (Optional)" style="margin-bottom:8px;">
+                    <input type="text" id="invClientAddr" placeholder="Client Billing/Site Coordinates" style="margin-bottom:8px;">
+                    <input type="text" id="invPlotSize" placeholder="Project Site Plot Size Scale (Optional)">
+                </div>
+                <div>
                     <h3 style="margin-top:0; margin-bottom:15px; border-left-color: #b09070;">Studio Defaults Configuration</h3>
                     <div class="form-group"><label>Business Address Override</label><input type="text" id="invFirmAddr" placeholder="Defaults to main office if blank"></div>
                     <div class="form-group"><label>Business Phone Number Override</label><input type="text" id="invFirmPhone" placeholder="Defaults to studio line if blank"></div>
                     <div class="form-group"><label>Upfront Remittance %</label><input type="number" id="invUpfrontPct" value="50" min="0" max="100"></div>
-                </div>
-        <div>
-    <h3 style="margin-top:0; margin-bottom:15px; border-left-color: #b09070;">Studio Defaults Configuration</h3>
-    <div class="form-group"><label>Business Address Override</label><input type="text" id="invFirmAddr" placeholder="Defaults to main office if blank"></div>
-    <div class="form-group"><label>Business Phone Number Override</label><input type="text" id="invFirmPhone" placeholder="Defaults to studio line if blank"></div>
-    <div class="form-group"><label>Upfront Remittance %</label><input type="number" id="invUpfrontPct" value="50" min="0" max="100"></div>
-    
-    <div class="form-group">
-        <label>Naira Account Routing Note (Override)</label>
-        <textarea id="invNairaAccount" rows="2" placeholder="Bank Name, Account Number, Account Name..."></textarea>
-    </div>
-    <div class="form-group">
-        <label>Dollar Account Routing Note (Override)</label>
-        <textarea id="invDollarAccount" rows="2" placeholder="Bank Name, Domiciliary Account, Swift Code..."></textarea>
-    </div>
-</div>
-        </div>
-
-        <div style="border: 1px solid var(--glass); padding: 16px; margin-bottom: 20px; background:rgba(255,255,255,0.01);">
-            <h4 style="font-size:0.85rem; margin-bottom:12px; color:var(--gold);">Transactional Service Line Items</h4>
-            <div id="invItemsFormContainer">
-                <div class="invoice-item-entry-row" style="display:flex; gap:10px; margin-bottom:8px;">
-                    <input type="text" class="item-name-input" placeholder="Service Name (e.g. Architectural Drawing Pack)" style="flex:2; padding:8px; background:var(--bg); border:1px solid var(--glass); color:white;">
-                    <input type="number" class="item-qty-input" value="1" placeholder="Qty" style="width:70px; padding:8px; background:var(--bg); border:1px solid var(--glass); color:white; text-align:center;">
-                    <input type="number" class="item-price-input" placeholder="Unit Price" style="flex:1; padding:8px; background:var(--bg); border:1px solid var(--glass); color:white;">
-                    <button type="button" onclick="this.parentElement.remove()" style="background:var(--danger); color:white; border:none; padding:0 12px; cursor:pointer;">✕</button>
+                    <div class="form-group">
+                        <label>Naira Account Routing Note (Override)</label>
+                        <textarea id="invNairaAccount" rows="2" placeholder="Bank Name, Account Number, Account Name..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Dollar Account Routing Note (Override)</label>
+                        <textarea id="invDollarAccount" rows="2" placeholder="Bank Name, Domiciliary Account, Swift Code..."></textarea>
+                    </div>
                 </div>
             </div>
-            <button type="button" onclick="addNewInvoiceLineItemInputRow()" style="background:none; border:1px dashed var(--gold); color:var(--gold); padding:6px 12px; font-size:0.75rem; cursor:pointer; margin-top:8px;">+ Add Line Item Field</button>
-        </div>
 
-        <button type="button" onclick="submitInvoiceToSupabaseEngine()" style="width:100%; padding:14px; background:var(--success); color:white; border:none; font-weight:600; text-transform:uppercase; letter-spacing:2px; cursor:pointer;">Compile and Generate Share Link</button>
-        
-        <div id="invoiceOutputUrlWrapper" style="margin-top:20px; display:none; background:rgba(46,125,82,0.1); border:1px solid var(--success); padding:16px;">
-            <p style="font-size:0.8rem; color:var(--gold); margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;">✓ Secure Access URL Link Generated Successfully:</p>
-            <input type="text" id="lblGeneratedInvoiceUrl" readonly style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:#2e7d52; font-family:monospace; font-size:0.85rem;" onclick="this.select()">
+            <div style="border: 1px solid var(--glass); padding: 16px; margin-bottom: 20px; background:rgba(255,255,255,0.01);">
+                <h4 style="font-size:0.85rem; margin-bottom:12px; color:var(--gold);">Transactional Service Line Items</h4>
+                <div id="invItemsFormContainer">
+                    <div class="invoice-item-entry-row" style="display:flex; gap:10px; margin-bottom:8px;">
+                        <input type="text" class="item-name-input" placeholder="Service Name (e.g. Architectural Drawing Pack)" style="flex:2;">
+                        <input type="number" class="item-qty-input" value="1" placeholder="Qty" style="width:70px; text-align:center;">
+                        <input type="number" class="item-price-input" placeholder="Unit Price" style="flex:1;">
+                        <button type="button" onclick="this.parentElement.remove()" style="background:var(--danger); color:white; border:none; padding:0 12px; cursor:pointer;">✕</button>
+                    </div>
+                </div>
+                <button type="button" class="btn-small" onclick="addNewInvoiceLineItemInputRow()" style="background:none; border:1px dashed var(--gold); color:var(--gold);">+ Add Line Item Field</button>
+            </div>
+
+            <button type="button" class="btn-action" style="background:var(--success); color:white;" onclick="submitInvoiceToSupabaseEngine()">Compile and Generate Share Link</button>
+            
+            <div id="invoiceOutputUrlWrapper" style="margin-top:20px; display:none; background:rgba(46,125,82,0.1); border:1px solid var(--success); padding:16px;">
+                <p style="font-size:0.8rem; color:var(--gold); margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;">✓ Secure Access URL Link Generated Successfully:</p>
+                <input type="text" id="lblGeneratedInvoiceUrl" readonly style="color:#2e7d52; font-family:monospace; font-size:0.85rem; background: #000; border: 1px solid #333;" onclick="this.select()">
+            </div>
         </div>
     </div>
-</div>
     <!-- ── INITIALIZE CLIENT DASHBOARD ─────────────────────────────── -->
     <div class="section-card" style="border-top-color: var(--success);">
         <div class="section-toggle" onclick="toggleSection(this)">
@@ -1907,7 +1901,7 @@ async function submitInvoiceToSupabaseEngine() {
 
     const formatDateString = (d) => d.toISOString().split('T')[0];
 
-    const payload = {
+   const payload = {
         invoice_number: num,
         currency: document.getElementById('invCurrency').value,
         client_name: cName,
@@ -1920,7 +1914,7 @@ async function submitInvoiceToSupabaseEngine() {
         upfront_percentage: parseFloat(document.getElementById('invUpfrontPct').value) || 50,
         issue_date: formatDateString(today),
         due_date: formatDateString(dueDate),
-        items: compiledItems
+        items: compiledItems,
         naira_account_info: document.getElementById('invNairaAccount').value.trim() || undefined,
         dollar_account_info: document.getElementById('invDollarAccount').value.trim() || undefined
     };
@@ -1936,7 +1930,6 @@ async function submitInvoiceToSupabaseEngine() {
         return;
     }
 
-    // Output url block linking straight out to your public invoice file routing patterns
     const targetUrl = window.location.origin + '/invoice.html?id=' + data.id;
     document.getElementById('lblGeneratedInvoiceUrl').value = targetUrl;
     document.getElementById('invoiceOutputUrlWrapper').style.display = 'block';
