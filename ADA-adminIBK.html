@@ -199,13 +199,15 @@
     <h1>ADA Universal Control Panel</h1>
 
      <!-- ── GENERATE INVOICE ─────────────────────────────── -->
-    <div class="card" style="margin-bottom: 24px;">
-    <div class="card-header" onclick="toggleSection('invoiceGeneratorAdminBlock')" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
-        <h3>Dynamic Invoice Generation Hub</h3>
-        <span style="color:var(--gold);">[ Click to Expand / Collapse ]</span>
-    </div>
-    
-    <div id="invoiceGeneratorAdminBlock" style="display: none; padding: 24px 20px; border-top: 1px solid var(--glass);">
+<div class="section-card" style="border-top-color: #b09070;">
+        <div class="section-toggle" onclick="toggleSection(this)">
+            <h2>Generate Client Invoice</h2>
+            <span class="toggle-icon">+</span>
+        </div>
+        <div class="section-body">
+            <p style="font-size:0.75rem; color:#666; margin-bottom:20px;">
+                Compile line-item parameters dynamically to update rows inside your Supabase collections and map structural vector tokens to secure URLs.
+            </p>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
             <div>
                 <label style="display:block; font-size:0.75rem; color:var(--gold); margin-bottom:4px; text-transform:uppercase;">Invoice Number Reference</label>
@@ -229,12 +231,12 @@
                 <input type="text" id="invClientAddr" placeholder="Client Billing/Site Coordinates" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white; margin-bottom:8px;">
                 <input type="text" id="invPlotSize" placeholder="Project Site Plot Size Scale (Optional)" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white;">
             </div>
-            <div>
-                <h4 style="font-size:0.85rem; margin-bottom:10px;">Studio Defaults Configuration (Editable)</h4>
-                <input type="text" id="invFirmAddr" placeholder="Business Address override" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white; margin-bottom:8px;">
-                <input type="text" id="invFirmPhone" placeholder="Business Phone Number override" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white; margin-bottom:8px;">
-                <input type="number" id="invUpfrontPct" value="50" placeholder="Upfront Remittance % (e.g. 50)" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white;">
-            </div>
+          <div>
+                    <h3 style="margin-top:0; margin-bottom:15px; border-left-color: #b09070;">Studio Defaults Configuration</h3>
+                    <div class="form-group"><label>Business Address Override</label><input type="text" id="invFirmAddr" placeholder="Defaults to main office if blank"></div>
+                    <div class="form-group"><label>Business Phone Number Override</label><input type="text" id="invFirmPhone" placeholder="Defaults to studio line if blank"></div>
+                    <div class="form-group"><label>Upfront Remittance %</label><input type="number" id="invUpfrontPct" value="50" min="0" max="100"></div>
+                </div>
         </div>
 
         <div style="border: 1px solid var(--glass); padding: 16px; margin-bottom: 20px; background:rgba(255,255,255,0.01);">
@@ -722,9 +724,21 @@ let currentEditingPlanId = null;
 let adminCountdownInterval = null;
 
 // ─── COLLAPSIBLE WORKSPACE PANELS MOTOR ───────────────────────────────────────
-function toggleSection(header) {
-    const body = header.nextElementSibling;
-    const icon = header.querySelector('.toggle-icon');
+function toggleSection(element) {
+    // If passed the header element directly, get the body element next to it
+    const body = element.classList.contains('section-toggle') ? element.nextElementSibling : document.getElementById(element);
+    const icon = element.classList.contains('section-toggle') ? element.querySelector('.toggle-icon') : null;
+    
+    // Support simple ID toggles too
+    if(!icon) {
+        const header = body.previousElementSibling;
+        const fallbackIcon = header ? header.querySelector('.toggle-icon') : null;
+        const isOpen = body.classList.contains('expanded');
+        body.classList.toggle('expanded', !isOpen);
+        if(fallbackIcon) fallbackIcon.classList.toggle('open', !isOpen);
+        return;
+    }
+    
     const isOpen = body.classList.contains('expanded');
     body.classList.toggle('expanded', !isOpen);
     icon.classList.toggle('open', !isOpen);
@@ -1886,7 +1900,7 @@ async function submitInvoiceToSupabaseEngine() {
         client_email: document.getElementById('invClientEmail').value.trim(),
         client_address: document.getElementById('invClientAddr').value.trim(),
         plot_size: document.getElementById('invPlotSize').value.trim(),
-        business_address: document.getElementById('invFirmAddress').value.trim() || undefined, // fallback to null if empty so schema defaults work
+        business_address: document.getElementById('invFirmAddr').value.trim() || undefined, 
         business_phone: document.getElementById('invFirmPhone').value.trim() || undefined,
         upfront_percentage: parseFloat(document.getElementById('invUpfrontPct').value) || 50,
         issue_date: formatDateString(today),
