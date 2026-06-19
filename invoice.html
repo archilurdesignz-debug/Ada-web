@@ -142,6 +142,10 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
             <span>Subtotal</span>
             <span id="lblSubtotal"></span>
         </div>
+        <div class="total-row" id="vatRowWrapper" style="display: none; margin-top: 4px;">
+            <span>VAT (7.5%)</span>
+            <span id="lblVatAmount"></span>
+        </div>
         <div class="total-row grand-final">
             <span>Total Amount Due</span>
             <span id="lblGrandTotal"></span>
@@ -242,9 +246,28 @@ async function assembleInvoiceInvoiceEngine() {
             targetContainer.appendChild(row);
         });
 
+        let grandTotalFinal = calculatedSubtotal;
+        
+        // Render Base Subtotal
         document.getElementById('lblSubtotal').innerText = formatCurrency(calculatedSubtotal, curr);
-        document.getElementById('lblGrandTotal').innerText = formatCurrency(calculatedSubtotal, curr);
+        
+        // Handle conditional 7.5% VAT computations safely
+        if (invoice.apply_vat === true) {
+            const vatAmountCalculated = calculatedSubtotal * 0.075;
+            grandTotalFinal = calculatedSubtotal + vatAmountCalculated;
+            
+            document.getElementById('lblVatAmount').innerText = formatCurrency(vatAmountCalculated, curr);
+            document.getElementById('vatRowWrapper').style.display = 'flex';
+        } else {
+            document.getElementById('vatRowWrapper').style.display = 'none';
+        }
 
+        // Render Grand Final Total Sum
+        document.getElementById('lblGrandTotal').innerText = formatCurrency(grandTotalFinal, curr);
+
+        // Map relative upfront retainer message benchmarks strings instructions based on the absolute total
+        const upfrontPercentageValue = Number(invoice.upfront_percentage) || 50;
+        const upfrontCalculatedRawAmount = (upfrontPercentageValue / 100) * grandTotalFinal; // <-- change from calculatedSubtotal to grandTotalFinal
         const upfrontPercentageValue = Number(invoice.upfront_percentage) || 50;
         const upfrontCalculatedRawAmount = (upfrontPercentageValue / 100) * calculatedSubtotal;
         
