@@ -1178,6 +1178,11 @@ function removeAdminLevelNode(levelId) {
     renderAdminFloorLevelsUI();
 }
 // ─── CONCEPT STORE CATALOG MANAGEMENT ──────────────────────────────────────────
+// ─── MASTER ARRAYS & STATE TRACKING VARIABLES ───────────────────────────────
+let compiledFloorLevelsMatrix = [];
+let currentEditingPlanId = null; // Holds the active plan ID during an update sequence
+
+// ─── 1. UPLOAD / PUBLISH NEW FRESH STORE ENTRIES ─────────────────────────────
 async function uploadStore() {
     const images = [1,2,3,4,5,6].map(i => getVal(`sImg${i}`)).filter(u => u);
     if (!images.length) { alert('Add at least one image URL.'); return; }
@@ -1189,14 +1194,129 @@ async function uploadStore() {
         category:    getVal('sCategory'),
         image_urls:  images,
         main_image:  images[0],
-        is_featured: document.getElementById('sFeatured').checked
+        is_featured: document.getElementById('sFeatured').checked,
+        
+        // Pack all dimensions and multi-column levels into the features column
+        features: {
+            length: document.getElementById('planLength').value.trim(),
+            width: document.getElementById('planWidth').value.trim(),
+            plotSuitability: document.getElementById('planPlotSuitability').value.trim(),
+            levels: compiledFloorLevelsMatrix
+        }
     };
-    let compiledFloorLevelsMatrix = [];
+    
+    if (!payload.title) { alert('Plan name required.'); return; }
+    if (!_db) { alert('Supabase not connected.'); return; }
 
+    const { error } = await _db.from('plans').insert([payload]);
+    if (error) {
+        alert('Upload Error: ' + error.message);
+    } else {
+        alert('✓ Fresh design plan published to store.');
+        clearAdminPlanFormView();
+    }
+}
+
+// ─── 2. EDIT SELECTION: PULL FROM SUPABASE AND HYDRATE CARDS ──────────────────
+async function editPlan(id) {
+    if (!_db) { alert('Supabase not connected.'); return; }
+    
+    const { data, error } = await _db.from('plans').select('*').eq('id', id).single();
+    if (error || !data) { alert('Could not retrieve plan details.'); return; }
+
+    // Hydrate standard input fields
+    setVal('sTitle', data.title || '');
+    setVal('sPrice', data.price || '');
+    setVal('sMeta', data.meta || '');
+    setVal('sCategory', data.category || '');
+    document.getElementById('sFeatured').checked = !!data.is_featured;
+    
+    if (data.image_urls) {
+        for (let i = 1; i <= 6; i++) {
+            setVal(`sImg${i}`, data.image_urls[i-1] || '');
+        }
+    }
+
+    // Hydrate your new dimensions and plot settings
+    const feat = data.features || {};
+    setVal('planLength', feat.length || '');
+    setVal('planWidth', feat.width || '');
+    setVal('planPlotSuitability', feat.plotSuitability || '');
+
+    // Map your structural level vectors from Supabase back onto your active dashboard view
+    compiledFloorLevelsMatrix = feat.levels || [];
+    renderAdminFloorLevelsUI();
+
+    // Lock the editing ID so the update system knows which row to save over
+    currentEditingPlanId = data.id; 
+    
+    const statusTextNode = document.getElementById('sUploadStatus');
+    if (statusTextNode) statusTextNode.innerText = `Currently Editing Plan ID: ${data.id}`;
+}
+
+// ─── 3. SAVE MODIFICATIONS BACK TO EXISTING RECORD ROW ────────────────────────
+async function updateStore() {
+    if (!currentEditingPlanId) { alert('No plan actively loaded for modification changes.'); return; }
+    if (!_db) { alert('Supabase not connected.'); return; }
+
+    const images = [1,2,3,4,5,6].map(i => getVal(`sImg${i}`)).filter(u => u);
+    if (!images.length) { alert('Add at least one image URL.'); return; }
+
+    const payload = {
+        title:       getVal('sTitle'),
+        price:       getVal('sPrice'),
+        meta:        getVal('sMeta'),
+        category:    getVal('sCategory'),
+        image_urls:  images,
+        main_image:  images[0],
+        is_featured: document.getElementById('sFeatured').checked,
+        
+        // Preserve dimensions and custom layout structural items during changes
+        features: {
+            length: document.getElementById('planLength').value.trim(),
+            width: document.getElementById('planWidth').value.trim(),
+            plotSuitability: document.getElementById('planPlotSuitability').value.trim(),
+            levels: compiledFloorLevelsMatrix
+        }
+    };
+
+    const { error } = await _db.from('plans').update(payload).eq('id', currentEditingPlanId);
+    
+    if (error) {
+        alert('Update Error: ' + error.message);
+    } else {
+        alert('✓ Plan record row updated successfully.');
+        clearAdminPlanFormView();
+    }
+}
+
+// ─── 4. REUSABLE RESET UTILITY: WIPES VIEW SCRIPTS CLEAN ──────────────────────
+function clearAdminPlanFormView() {
+    ['sTitle','sPrice','sMeta','sCategory','sImg1','sImg2','sImg3','sImg4','sImg5','sImg6', 'planLength', 'planWidth', 'planPlotSuitability', 'levelNameInput']
+        .forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+    
+    const featuredCheck = document.getElementById('sFeatured');
+    if (featuredCheck) featuredCheck.checked = false;
+    
+    // Wipe layout configuration matrices clean for the next record actions
+    compiledFloorLevelsMatrix = [];
+    renderAdminFloorLevelsUI();
+    currentEditingPlanId = null;
+    
+    const sStatus = document.getElementById('sUploadStatus');
+    if (sStatus) sStatus.innerText = ""; 
+    
+    if (typeof fetchAdminStoreItems === "function") fetchAdminStoreItems();
+}
+
+// ─── 5. INTERACTIVE FLOOR LEVEL & SPACE MAKER CONTROLS ─────────────────────────
 function addAdminFloorLevelNode() {
     const nameInput = document.getElementById('levelNameInput');
     const levelName = nameInput.value.trim();
-    if(!levelName) { alert('Enter a valid Level Name first.'); return; }
+    if (!levelName) { alert('Please enter a valid Level Name first (e.g., Ground Floor Plan).'); return; }
 
     const newLevel = { id: Date.now(), name: levelName, spaces: [] };
     compiledFloorLevelsMatrix.push(newLevel);
@@ -1206,31 +1326,53 @@ function addAdminFloorLevelNode() {
 
 function renderAdminFloorLevelsUI() {
     const container = document.getElementById('adminFloorLevelsContainer');
-    container.innerHTML = compiledFloorLevelsMatrix.map(lvl => `
-        <div style="background:rgba(255,255,255,0.02); border:1px solid var(--glass); padding:15px; position:relative;">
-            <button type="button" onclick="removeAdminLevelNode(${lvl.id})" style="position:absolute; right:15px; top:15px; background:none; border:none; color:var(--danger); cursor:pointer;">Remove Level ✕</button>
-            <h4 style="color:var(--gold); margin-bottom:8px; text-transform:uppercase; font-size:0.85rem;">${lvl.name}</h4>
-            
-            <div style="display:flex; gap:8px; margin-bottom:8px;">
-                <input type="text" id="spaceInput_${lvl.id}" placeholder="Add Space (e.g., Anteroom)" style="flex:1; padding:8px; background:rgba(0,0,0,0.3); border:1px solid var(--glass); color:#fff; font-size:0.85rem;">
-                <button type="button" onclick="addSpaceToLevel(${lvl.id})" style="padding:8px 14px; background:#fff; border:none; color:#000; font-size:0.85rem; cursor:pointer;">+ Add</button>
+    if (!container) return;
+    
+    container.innerHTML = compiledFloorLevelsMatrix.map(lvl => {
+        const spacesListItems = lvl.spaces.map((space, index) => `
+            <span style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 8px; border-radius: 2px; color: #fff;">
+                • ${space} 
+                <button type="button" onclick="removeSpaceFromLevel(${lvl.id}, ${index})" style="background:none; border:none; color:var(--danger); cursor:pointer; font-weight:bold; padding:0; font-size: 0.75rem;">✕</button>
+            </span>
+        `).join('');
+
+        return `
+            <div style="background:rgba(255,255,255,0.02); border:1px solid var(--glass); padding:20px; position:relative; border-radius: 4px; margin-bottom:12px;">
+                <button type="button" onclick="removeAdminLevelNode(${lvl.id})" style="position:absolute; right:20px; top:20px; background:none; border:none; color:var(--danger); cursor:pointer; font-size: 0.8rem; text-transform: uppercase;">Remove Level ✕</button>
+                
+                <h4 style="color:var(--gold); margin-bottom:12px; text-transform:uppercase; font-size:0.9rem; letter-spacing: 1px;">${lvl.name}</h4>
+                
+                <div style="display:flex; gap:8px; margin-bottom:14px; max-width: 500px;">
+                    <input type="text" id="spaceInput_${lvl.id}" placeholder="Add space entry (e.g., Living room)" style="flex:1; padding:10px; background:rgba(0,0,0,0.4); border:1px solid var(--glass); color:#fff; font-size:0.85rem; outline: none;" onkeydown="if(event.key==='Enter'){event.preventDefault(); addSpaceToLevel(${lvl.id});}">
+                    <button type="button" onclick="addSpaceToLevel(${lvl.id})" style="padding:10px 18px; background: #fff; border:none; color:#0c0b09; font-size:0.8rem; font-weight:600; cursor:pointer; text-transform: uppercase;">+ Add</button>
+                </div>
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-height: 24px;">
+                    ${lvl.spaces.length > 0 ? spacesListItems : '<em style="color:#777; font-size:0.8rem;">No spaces listed under this level yet.</em>'}
+                </div>
             </div>
-            <div style="font-size:0.8rem; color:#aaa;">
-                <strong>Spaces listed:</strong> ${lvl.spaces.length > 0 ? lvl.spaces.join(', ') : 'None added yet.'}
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function addSpaceToLevel(levelId) {
     const input = document.getElementById(`spaceInput_${levelId}`);
     const val = input.value.trim();
-    if(!val) return;
+    if (!val) return;
 
     const target = compiledFloorLevelsMatrix.find(l => l.id === levelId);
-    if(target) {
+    if (target) {
         target.spaces.push(val);
         input.value = '';
+        renderAdminFloorLevelsUI();
+        document.getElementById(`spaceInput_${levelId}`).focus();
+    }
+}
+
+function removeSpaceFromLevel(levelId, spaceIndex) {
+    const target = compiledFloorLevelsMatrix.find(l => l.id === levelId);
+    if (target) {
+        target.spaces.splice(spaceIndex, 1);
         renderAdminFloorLevelsUI();
     }
 }
@@ -1238,21 +1380,6 @@ function addSpaceToLevel(levelId) {
 function removeAdminLevelNode(levelId) {
     compiledFloorLevelsMatrix = compiledFloorLevelsMatrix.filter(l => l.id !== levelId);
     renderAdminFloorLevelsUI();
-}
-    if (!payload.title) { alert('Plan name required.'); return; }
-    if (!_db) { alert('Supabase not connected.'); return; }
-
-    const { error } = await _db.from('plans').insert([payload]);
-    if (error) {
-        alert('Error: ' + error.message);
-    } else {
-        alert('✓ Plan published to store.');
-        ['sTitle','sPrice','sMeta','sCategory','sImg1','sImg2','sImg3','sImg4','sImg5','sImg6']
-            .forEach(id => setVal(id, ''));
-        document.getElementById('sFeatured').checked = false;
-        const sStatus = document.getElementById('sUploadStatus');
-        if (sStatus) sStatus.innerText = ""; 
-    }
 }
     // ─── DEFAULT PLANS VISIBILITY ─────────────────────────────────────────────────
 
