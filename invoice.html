@@ -13,10 +13,10 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
 
 /* HEADER BRAND ROW */
 .invoice-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #b09070; padding-bottom: 30px; margin-bottom: 40px; }
-.logo-block { display: flex; align-items: center; gap: 14px; }
-.logo-mark-svg { width: 44px; height: 44px; object-fit: contain; }
-.wordmark .w1 { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 600; letter-spacing: 4px; text-transform: uppercase; display: block; }
-.wordmark .w2 { font-size: 0.6rem; letter-spacing: 2px; color: #7a7570; text-transform: uppercase; margin-top: 2px; display: block; }
+.logo-block { display: flex; align-items: center; gap: 16px; }
+.logo-mark-img { height: 85px; width: auto; object-fit: contain; display: block; }
+.wordmark .w1 { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; letter-spacing: 4px; text-transform: uppercase; display: block; color: #1c1a17; }
+.wordmark .w2 { font-size: 0.65rem; letter-spacing: 2px; color: #7a7570; text-transform: uppercase; margin-top: 2px; display: block; }
 .studio-meta { font-size: 0.8rem; color: #7a7570; text-align: right; line-height: 1.6; }
 
 /* DATA PROFILE PIECES */
@@ -47,9 +47,18 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
 .invoice-footer-notes { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; margin-top: 40px; border-top: 1px solid rgba(201,191,176,0.2); padding-top: 30px; }
 .notice-upfront-box { padding: 18px; border-left: 2px solid #b09070; background: #faf6f0; margin-bottom: 16px; }
 .notice-upfront-box p { font-size: 0.84rem; color: #2e2b26; font-style: italic; line-height: 1.6; }
-.banking-profile-card { background: #faf8f4; border: 1px solid rgba(201,191,176,0.2); padding: 20px; border-radius: 4px; }
+.banking-profile-card { background: #faf8f4; border: 1px solid rgba(201,191,176,0.2); padding: 20px; border-radius: 4px; margin-bottom: 16px; }
 .banking-profile-card h5 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: #b09070; margin-bottom: 12px; }
 .banking-profile-card p { font-size: 0.84rem; color: #7a7570; line-height: 1.7; white-space: pre-line; }
+
+/* SCOPE OF SERVICES LEDGER MATRIX */
+.services-ledger-box { background: #ffffff; border: 1px solid rgba(201,191,176,0.25); padding: 20px; border-radius: 4px; }
+.services-ledger-box h5 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: #1c1a17; margin-bottom: 12px; border-bottom: 1px solid rgba(201,191,176,0.15); padding-bottom: 6px; }
+.ledger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ledger-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; color: #555; padding: 4px 0; }
+.ledger-status { font-weight: 600; font-size: 0.85rem; }
+.ledger-status.active { color: #2e7d52; }
+.ledger-status.inactive { color: #af3a3a; }
 
 /* UTILITY BUTTON CONTROLS BLOCK FOR ADMIN CONTEXTS */
 .actions-utility-bar { max-width: 900px; margin: 0 auto 20px; display: flex; justify-content: flex-end; gap: 14px; }
@@ -87,10 +96,7 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
     
     <header class="invoice-header">
         <div class="logo-block">
-            <svg class="logo-mark-svg" viewBox="0 0 1000 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M500 120 L200 680 L390 680 L445 570 L345 570 L500 270 L655 570 L500 570 L470 510 L415 510 L500 680 L800 680 Z" fill="#b09070"/>
-                <path d="M150 750 C150 750 350 750 650 750 C780 750 850 700 850 630 C850 560 780 510 650 510 L580 510 L610 570 L650 570 C720 570 760 600 760 630 C760 660 720 690 650 690 L150 690 Z" fill="#b09070"/>
-            </svg>
+            <img class="logo-mark-img" src="Ada-web/ada-logo-gold.svg" alt="ADA Corporate Signature Branding Mark">
             <div class="wordmark">
                 <span class="w1">ADA</span>
                 <span class="w2">Archilurdesignz</span>
@@ -157,9 +163,23 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
             <div class="notice-upfront-box" id="upfrontNoticePanel">
                 <p><strong>Upfront Remittance Structure Note:</strong><br>
                 Pursuant to ADA Client Service Terms, a mandatory <span id="lblUpfrontPercent"></span>% upfront deposit representing <strong id="lblUpfrontValueAmount" style="color:#b09070;"></strong> is required to formally schedule project milestones and allocate engineering resources.</p>
-        <div class="banking-profile-card">
-            <h5>Remittance Instructions</h5>
-            <p id="lblAccountInfoDetails"></p>
+            </div>
+            
+            <div class="services-ledger-box">
+                <h5>Studio Service Coverage Log</h5>
+                <div class="ledger-grid" id="invoiceServicesLedgerTarget">
+                    </div>
+            </div>
+        </div>
+        
+        <div>
+            <div class="banking-profile-card">
+                <h5>Remittance Instructions</h5>
+                <p id="lblAccountInfoDetails"></p>
+            </div>
+            <p style="font-size: 0.75rem; color: #7a7570; line-height: 1.6; margin-top: 12px; font-style: italic;">
+                For safe implementation, ensure all programmatic project briefs align completely with local drawing guidelines and zoning boundaries.
+            </p>
         </div>
     </footer>
 </div>
@@ -168,6 +188,18 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
 const supabaseUrl = 'https://ofaxbduvnhscxvoakeax.supabase.co'; 
 const supabaseKey = 'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK';
 const _db = supabase.createClient(supabaseUrl, supabaseKey);
+
+// Comprehensive list of available catalogued studio capabilities
+const MASTER_STUDIO_SERVICES_LIST = [
+    "Architectural Drawing Pack",
+    "Structural Engineering Design",
+    "MEP Engineering Drawings",
+    "High-End 3D Photorealistic Rendering",
+    "Construction/Project Supervision",
+    "Bill of Quantities (BoQ) Estimates",
+    "Architectural Graphic Services",
+    "Municipal Drawing Approval Processing"
+];
 
 function formatCurrency(value, currencyToken) {
     const numericValue = Number(value) || 0;
@@ -244,11 +276,8 @@ async function assembleInvoiceInvoiceEngine() {
         });
 
         let grandTotalFinal = calculatedSubtotal;
-        
-        // Render Base Subtotal
         document.getElementById('lblSubtotal').innerText = formatCurrency(calculatedSubtotal, curr);
         
-        // Handle conditional 7.5% VAT computations safely
         if (invoice.apply_vat === true) {
             const vatAmountCalculated = calculatedSubtotal * 0.075;
             grandTotalFinal = calculatedSubtotal + vatAmountCalculated;
@@ -259,14 +288,10 @@ async function assembleInvoiceInvoiceEngine() {
             document.getElementById('vatRowWrapper').style.display = 'none';
         }
 
-        // Render Grand Final Total Sum
         document.getElementById('lblGrandTotal').innerText = formatCurrency(grandTotalFinal, curr);
 
-        // Map relative upfront retainer message benchmarks strings instructions based on the absolute total
         const upfrontPercentageValue = Number(invoice.upfront_percentage) || 50;
-        const upfrontCalculatedRawAmount = (upfrontPercentageValue / 100) * grandTotalFinal; // <-- change from calculatedSubtotal to grandTotalFinal
-        const upfrontPercentageValue = Number(invoice.upfront_percentage) || 50;
-        const upfrontCalculatedRawAmount = (upfrontPercentageValue / 100) * calculatedSubtotal;
+        const upfrontCalculatedRawAmount = (upfrontPercentageValue / 100) * grandTotalFinal;
         
         document.getElementById('lblUpfrontPercent').innerText = upfrontPercentageValue;
         document.getElementById('lblUpfrontValueAmount').innerText = formatCurrency(upfrontCalculatedRawAmount, curr);
@@ -277,6 +302,22 @@ async function assembleInvoiceInvoiceEngine() {
         document.getElementById('lblAccountInfoDetails').innerText = curr === 'USD' 
             ? (invoice.dollar_account_info || fallbackDollar)
             : (invoice.naira_account_info || fallbackNaira);
+
+        // POPULATE COVERED SCOPE MATRICES DYNAMICALLY
+        const serviceLedgerContainer = document.getElementById('invoiceServicesLedgerTarget');
+        const scopeArray = Array.isArray(invoice.scope_of_services) ? invoice.scope_of_services : [];
+        
+        serviceLedgerContainer.innerHTML = MASTER_STUDIO_SERVICES_LIST.map(service => {
+            const isCovered = scopeArray.includes(service);
+            return `
+                <div class="ledger-item">
+                    <span>${service}</span>
+                    <span class="ledger-status ${isCovered ? 'active' : 'inactive'}">
+                        ${isCovered ? '✓' : '✕'}
+                    </span>
+                </div>
+            `;
+        }).join('');
 
         document.getElementById('invoiceLoadingScreen').style.display = 'none';
         document.getElementById('invoiceControlPanel').style.display = 'flex';
