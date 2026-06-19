@@ -1882,7 +1882,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-    // 1. Appends an empty structured input row into your item block array viewports
+    // ─── INVOICE DYNAMIC SUB-ENGINE WORKERS ───────────────────────────────────────
 function addNewInvoiceLineItemInputRow() {
     const container = document.getElementById('invItemsFormContainer');
     const d = document.createElement('div');
@@ -1899,34 +1899,9 @@ function addNewInvoiceLineItemInputRow() {
     container.appendChild(d);
 }
 
-// 2. Compiles parameters and posts cleanly straight to Supabase 'invoices' table
 async function submitInvoiceToSupabaseEngine() {
     if (!_db) { alert('Supabase client connection not initialized.'); return; }
 
-    const num = document.getElementById('invNum').value.trim();
-    const cName = document.getElementById('invClientName').value.trim();
-    
-    if (!num || !cName) { 
-        alert('Please provide an Invoice Number and Client Name minimum to build data payloads.'); 
-        return; 
-    }
-
-    // Map through interactive rows to build line-item JSONB array strings
-    const compiledItems = [];
-    document.querySelectorAll('.invoice-item-entry-row').forEach(row => {
-        const name = row.querySelector('.item-name-input').value.trim();
-        const qty = parseInt(row.querySelector('.item-qty-input').value) || 1;
-        const price = parseFloat(row.querySelector('.item-price-input').value) || 0;
-        
-        if (name) {
-            compiledItems.push({ name: name, qty: qty, unit_price: price });
-        }
-    });
-
-    async function submitInvoiceToSupabaseEngine() {
-    if (!_db) { alert('Supabase client connection not initialized.'); return; }
-
-    // ─── ADD THESE TWO DEFINITIONS BACK TO PREVENT CRASHES ───
     const num = document.getElementById('invNum').value.trim();
     const cName = document.getElementById('invClientName').value.trim();
     
@@ -1935,7 +1910,6 @@ async function submitInvoiceToSupabaseEngine() {
         return; 
     }
 
-    // Map through line-items (Ensure compiledItems is built right here if using lines)
     const compiledItems = [];
     document.querySelectorAll('.invoice-item-entry-row').forEach(row => {
         const name = row.querySelector('.item-name-input').value.trim();
@@ -1944,7 +1918,6 @@ async function submitInvoiceToSupabaseEngine() {
         if (name) compiledItems.push({ name, qty, unit_price: price });
     });
 
-    // Compute Issue Date and add 7 days automatically for Due Date calculation rules
     const today = new Date();
     const dueDate = new Date();
     dueDate.setDate(today.getDate() + 7);
