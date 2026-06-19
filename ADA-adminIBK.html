@@ -237,6 +237,21 @@
                     <div class="form-group"><label>Business Phone Number Override</label><input type="text" id="invFirmPhone" placeholder="Defaults to studio line if blank"></div>
                     <div class="form-group"><label>Upfront Remittance %</label><input type="number" id="invUpfrontPct" value="50" min="0" max="100"></div>
                 </div>
+        <div>
+    <h3 style="margin-top:0; margin-bottom:15px; border-left-color: #b09070;">Studio Defaults Configuration</h3>
+    <div class="form-group"><label>Business Address Override</label><input type="text" id="invFirmAddr" placeholder="Defaults to main office if blank"></div>
+    <div class="form-group"><label>Business Phone Number Override</label><input type="text" id="invFirmPhone" placeholder="Defaults to studio line if blank"></div>
+    <div class="form-group"><label>Upfront Remittance %</label><input type="number" id="invUpfrontPct" value="50" min="0" max="100"></div>
+    
+    <div class="form-group">
+        <label>Naira Account Routing Note (Override)</label>
+        <textarea id="invNairaAccount" rows="2" placeholder="Bank Name, Account Number, Account Name..."></textarea>
+    </div>
+    <div class="form-group">
+        <label>Dollar Account Routing Note (Override)</label>
+        <textarea id="invDollarAccount" rows="2" placeholder="Bank Name, Domiciliary Account, Swift Code..."></textarea>
+    </div>
+</div>
         </div>
 
         <div style="border: 1px solid var(--glass); padding: 16px; margin-bottom: 20px; background:rgba(255,255,255,0.01);">
@@ -1906,6 +1921,8 @@ async function submitInvoiceToSupabaseEngine() {
         issue_date: formatDateString(today),
         due_date: formatDateString(dueDate),
         items: compiledItems
+        naira_account_info: document.getElementById('invNairaAccount').value.trim() || undefined,
+        dollar_account_info: document.getElementById('invDollarAccount').value.trim() || undefined
     };
 
     const { data, error } = await _db
