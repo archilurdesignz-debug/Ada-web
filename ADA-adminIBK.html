@@ -230,7 +230,36 @@
                     <input type="text" id="invClientPhone" placeholder="Client Contact Number" style="margin-bottom:8px;">
                     <input type="email" id="invClientEmail" placeholder="Client Email Address (Optional)" style="margin-bottom:8px;">
                     <input type="text" id="invClientAddr" placeholder="Client Billing/Site Coordinates" style="margin-bottom:8px;">
-                    <input type="text" id="invPlotSize" placeholder="Project Site Plot Size Scale (Optional)">
+                    <div class="form-group" style="margin-top: 15px;">
+                        
+    <label>Scope of Services Covered</label>
+    <div id="servicesCatalogueContainer" style="background:#000; border:1px solid #333; padding:12px; max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
+        <label style="display:flex; align-items:center; gap:8px; color:#fff; font-size:0.75rem; cursor:pointer; text-transform:none; letter-spacing:0;">
+            <input type="checkbox" name="studioService" value="Architectural Drawing Pack" style="width:auto; accent-color:var(--gold);"> Architectural Drawing Pack
+        </label>
+        <label style="display:flex; align-items:center; gap:8px; color:#fff; font-size:0.75rem; cursor:pointer; text-transform:none; letter-spacing:0;">
+            <input type="checkbox" name="studioService" value="Structural Engineering Design" style="width:auto; accent-color:var(--gold);"> Structural Engineering Pack
+        </label>
+        <label style="display:flex; align-items:center; gap:8px; color:#fff; font-size:0.75rem; cursor:pointer; text-transform:none; letter-spacing:0;">
+            <input type="checkbox" name="studioService" value="MEP Engineering Drawings" style="width:auto; accent-color:var(--gold);"> MEP Engineering Pack
+        </label>
+        <label style="display:flex; align-items:center; gap:8px; color:#fff; font-size:0.75rem; cursor:pointer; text-transform:none; letter-spacing:0;">
+            <input type="checkbox" name="studioService" value="High-End 3D Photorealistic Rendering" style="width:auto; accent-color:var(--gold);"> Photorealistic 3D Renders (4K)
+        </label>
+        <label style="display:flex; align-items:center; gap:8px; color:#fff; font-size:0.75rem; cursor:pointer; text-transform:none; letter-spacing:0;">
+            <input type="checkbox" name="studioService" value="Construction/Project Supervision" style="width:auto; accent-color:var(--gold);"> BIM Coordination & Management
+        </label>
+        <label style="display:flex; align-items:center; gap:8px; color:#fff; font-size:0.75rem; cursor:pointer; text-transform:none; letter-spacing:0;">
+            <input type="checkbox" name="studioService" value="Bill of Quantities (BoQ) Estimates" style="width:auto; accent-color:var(--gold);"> BIM Coordination & Management
+        </label>
+         <label style="display:flex; align-items:center; gap:8px; color:#fff; font-size:0.75rem; cursor:pointer; text-transform:none; letter-spacing:0;">
+            <input type="checkbox" name="studioService" value="Architectural Graphic Services" style="width:auto; accent-color:var(--gold);"> BIM Coordination & Management
+        </label>
+        <label style="display:flex; align-items:center; gap:8px; color:#fff; font-size:0.75rem; cursor:pointer; text-transform:none; letter-spacing:0;">
+            <input type="checkbox" name="studioService" value="Municipal Drawing Approval Processing" style="width:auto; accent-color:var(--gold);"> Local Authority Approval Processing
+        </label>
+    </div>
+</div>
                 </div>
                 <div>
                     <h3 style="margin-top:0; margin-bottom:15px; border-left-color: #b09070;">Studio Defaults Configuration</h3>
@@ -1894,14 +1923,40 @@ async function submitInvoiceToSupabaseEngine() {
         }
     });
 
+    async function submitInvoiceToSupabaseEngine() {
+    if (!_db) { alert('Supabase client connection not initialized.'); return; }
+
+    // ─── ADD THESE TWO DEFINITIONS BACK TO PREVENT CRASHES ───
+    const num = document.getElementById('invNum').value.trim();
+    const cName = document.getElementById('invClientName').value.trim();
+    
+    if (!num || !cName) { 
+        alert('Please provide an Invoice Number and Client Name minimum.'); 
+        return; 
+    }
+
+    // Map through line-items (Ensure compiledItems is built right here if using lines)
+    const compiledItems = [];
+    document.querySelectorAll('.invoice-item-entry-row').forEach(row => {
+        const name = row.querySelector('.item-name-input').value.trim();
+        const qty = parseInt(row.querySelector('.item-qty-input').value) || 1;
+        const price = parseFloat(row.querySelector('.item-price-input').value) || 0;
+        if (name) compiledItems.push({ name, qty, unit_price: price });
+    });
+
     // Compute Issue Date and add 7 days automatically for Due Date calculation rules
     const today = new Date();
     const dueDate = new Date();
     dueDate.setDate(today.getDate() + 7);
 
     const formatDateString = (d) => d.toISOString().split('T')[0];
+    
+    const selectedServicesArray = [];
+    document.querySelectorAll('input[name="studioService"]:checked').forEach(checkbox => {
+        selectedServicesArray.push(checkbox.value);
+    });
 
-   const payload = {
+    const payload = {
         invoice_number: num,
         token: num,
         currency: document.getElementById('invCurrency').value,
@@ -1909,7 +1964,7 @@ async function submitInvoiceToSupabaseEngine() {
         client_phone: document.getElementById('invClientPhone').value.trim(),
         client_email: document.getElementById('invClientEmail').value.trim(),
         client_address: document.getElementById('invClientAddr').value.trim(),
-        plot_size: document.getElementById('invPlotSize').value.trim(),
+        scope_of_services: selectedServicesArray,
         business_address: document.getElementById('invFirmAddr').value.trim() || undefined, 
         business_phone: document.getElementById('invFirmPhone').value.trim() || undefined,
         upfront_percentage: parseFloat(document.getElementById('invUpfrontPct').value) || 50,
