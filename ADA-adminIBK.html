@@ -467,33 +467,33 @@
                 <div class="form-group"><label>Price</label><input type="text" id="sPrice"></div>
                 <div class="form-group"><label>Meta (e.g. 4 Beds • 350 SQM)</label><input type="text" id="sMeta"></div>
             </div>
-            <div class="form-group" style="margin-top: 24px; border-top: 1px solid var(--glass); padding-top: 20px;">
-    <h3>Architectural Spatial Parameters</h3>
+ <div class="form-group" style="margin-top: 30px; border-top: 1px solid var(--glass); padding-top: 25px; background: rgba(255,255,255,0.01); padding: 20px; border-radius: 4px;">
+    <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--gold);">Architectural Spatial Parameters</h3>
     
-    <div style="display: flex; gap: 15px; margin-bottom: 12px;">
+    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
         <div style="flex: 1;">
-            <label>Building Length (m / ft)</label>
-            <input type="text" id="planLength" placeholder="e.g., 18.5m" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass); color:#fff;">
+            <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; color: #aaa;">Building Length</label>
+            <input type="text" id="planLength" placeholder="e.g., 18.5m" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--glass); color:#fff; outline: none;">
         </div>
         <div style="flex: 1;">
-            <label>Building Width (m / ft)</label>
-            <input type="text" id="planWidth" placeholder="e.g., 12.0m" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass); color:#fff;">
+            <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; color: #aaa;">Building Width</label>
+            <input type="text" id="planWidth" placeholder="e.g., 12.0m" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--glass); color:#fff; outline: none;">
         </div>
     </div>
 
-    <div style="margin-bottom: 15px;">
-        <label>Plot Size Suitability Description</label>
-        <input type="text" id="planPlotSuitability" placeholder="e.g., Fits on a 50ft x 100ft plot minimum" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass); color:#fff;">
+    <div style="margin-bottom: 20px;">
+        <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; color: #aaa;">Plot Size Suitability Description</label>
+        <input type="text" id="planPlotSuitability" placeholder="e.g., Fits on a 50ft x 100ft plot minimum" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--glass); color:#fff; outline: none;">
     </div>
 
     <div style="margin-bottom: 15px;">
-        <label style="display:block; margin-bottom:6px;">Building Levels Setup</label>
-        <div style="display:flex; gap:10px; margin-bottom:12px;">
-            <input type="text" id="levelNameInput" placeholder="Level Name (e.g., Ground Floor)" style="flex:1; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass); color:#fff;">
-            <button type="button" onclick="addAdminFloorLevelNode()" style="padding:10px 20px; background:var(--gold); border:none; color:#000; font-weight:600; cursor:pointer;">Add Level</button>
+        <label style="display:block; font-size: 0.8rem; margin-bottom: 6px; color: #aaa; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Building Levels Setup</label>
+        <div style="display:flex; gap:10px; margin-bottom:16px;">
+            <input type="text" id="levelNameInput" placeholder="Level Name (e.g., Ground Floor Plan)" style="flex:1; padding:12px; background:rgba(0,0,0,0.5); border:1px solid var(--glass); color:#fff; outline: none; font-family: inherit;">
+            <button type="button" onclick="addAdminFloorLevelNode()" style="padding:12px 24px; background:var(--gold); border:none; color:#0c0b09; font-weight:600; cursor:pointer; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Create Level</button>
         </div>
         
-        <div id="adminFloorLevelsContainer" style="display:flex; flex-direction:column; gap:12px;"></div>
+        <div id="adminFloorLevelsContainer" style="display:flex; flex-direction:column; gap:16px; margin-top: 15px;"></div>
     </div>
 </div>
             <div class="form-group"><label>Category</label><input type="text" id="sCategory" placeholder="e.g. Tropical Contemporary"></div>
@@ -1104,7 +1104,79 @@ async function uploadPortfolio() {
         if (pStatus) pStatus.innerText = ""; 
     }
 }
+let compiledFloorLevelsMatrix = [];
 
+function addAdminFloorLevelNode() {
+    const nameInput = document.getElementById('levelNameInput');
+    const levelName = nameInput.value.trim();
+    if(!levelName) { alert('Please enter a valid Level Name first (e.g., Ground Floor Plan).'); return; }
+
+    // Creates an isolated blueprint token structure
+    const newLevel = { id: Date.now(), name: levelName, spaces: [] };
+    compiledFloorLevelsMatrix.push(newLevel);
+    nameInput.value = '';
+    renderAdminFloorLevelsUI();
+}
+
+function renderAdminFloorLevelsUI() {
+    const container = document.getElementById('adminFloorLevelsContainer');
+    if (!container) return;
+    
+    container.innerHTML = compiledFloorLevelsMatrix.map(lvl => {
+        // Formulate a temporary visible badge strip for added spaces
+        const spacesListItems = lvl.spaces.map((space, index) => `
+            <span style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 8px; border-radius: 2px; color: #fff;">
+                • ${space} 
+                <button type="button" onclick="removeSpaceFromLevel(${lvl.id}, ${index})" style="background:none; border:none; color:var(--danger); cursor:pointer; font-weight:bold; padding:0; font-size: 0.75rem;">✕</button>
+            </span>
+        `).join('');
+
+        return `
+            <div style="background:rgba(255,255,255,0.02); border:1px solid var(--glass); padding:20px; position:relative; border-radius: 4px;">
+                <button type="button" onclick="removeAdminLevelNode(${lvl.id})" style="position:absolute; right:20px; top:20px; background:none; border:none; color:var(--danger); cursor:pointer; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Remove Level ✕</button>
+                
+                <h4 style="color:var(--gold); margin-bottom:12px; text-transform:uppercase; font-size:0.9rem; letter-spacing: 1px; font-family: 'Cormorant Garamond', serif;">${lvl.name}</h4>
+                
+                <div style="display:flex; gap:8px; margin-bottom:14px; max-width: 500px;">
+                    <input type="text" id="spaceInput_${lvl.id}" placeholder="Add space entry (e.g., Living room)" style="flex:1; padding:10px; background:rgba(0,0,0,0.4); border:1px solid var(--glass); color:#fff; font-size:0.85rem; outline: none;" onkeydown="if(event.key==='Enter'){event.preventDefault(); addSpaceToLevel(${lvl.id});}">
+                    <button type="button" onclick="addSpaceToLevel(${lvl.id})" style="padding:10px 18px; background: #fff; border:none; color:#0c0b09; font-size:0.8rem; font-weight:600; cursor:pointer; text-transform: uppercase;">+ Add Space</button>
+                </div>
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-height: 24px;">
+                    ${lvl.spaces.length > 0 ? spacesListItems : '<em style="color:#777; font-size:0.8rem;">No spaces listed under this level yet.</em>'}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function addSpaceToLevel(levelId) {
+    const input = document.getElementById(`spaceInput_${levelId}`);
+    const val = input.value.trim();
+    if(!val) return;
+
+    const target = compiledFloorLevelsMatrix.find(l => l.id === levelId);
+    if(target) {
+        target.spaces.push(val);
+        input.value = '';
+        renderAdminFloorLevelsUI();
+        // Return focus to field to make sequential rapid-entry typing fast
+        document.getElementById(`spaceInput_${levelId}`).focus();
+    }
+}
+
+function removeSpaceFromLevel(levelId, spaceIndex) {
+    const target = compiledFloorLevelsMatrix.find(l => l.id === levelId);
+    if(target) {
+        target.spaces.splice(spaceIndex, 1);
+        renderAdminFloorLevelsUI();
+    }
+}
+
+function removeAdminLevelNode(levelId) {
+    compiledFloorLevelsMatrix = compiledFloorLevelsMatrix.filter(l => l.id !== levelId);
+    renderAdminFloorLevelsUI();
+}
 // ─── CONCEPT STORE CATALOG MANAGEMENT ──────────────────────────────────────────
 async function uploadStore() {
     const images = [1,2,3,4,5,6].map(i => getVal(`sImg${i}`)).filter(u => u);
