@@ -182,305 +182,155 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
 
 <script>
 const supabaseUrl = 'https://ofaxbduvnhscxvoakeax.supabase.co'; 
-
 const supabaseKey = 'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK';
-
 const _db = supabase.createClient(supabaseUrl, supabaseKey);
 
-
-
-// Comprehensive list of available catalogued studio capabilities
-
+// FIXED: Synchronized exactly with admin dashboard checklist names
 const MASTER_STUDIO_SERVICES_LIST = [
-
     "Architectural Drawing Pack",
-
     "Structural Engineering Design",
-
     "MEP Engineering Drawings",
-
     "High-End 3D Photorealistic Rendering",
-
     "Construction/Project Supervision",
-
     "Bill of Quantities (BoQ) Estimates",
-
-    "Architecture & Graphic Services",
-
+    "Architectural Graphic Services",
     "Municipal Drawing Approval Processing"
-
 ];
 
-
-
 function formatCurrency(value, currencyToken) {
-
     const numericValue = Number(value) || 0;
-
     if (currencyToken === 'USD') {
-
         return '$' + numericValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
     }
-
     return '₦' + numericValue.toLocaleString('en-NG');
-
 }
 
-
-
 async function assembleInvoiceInvoiceEngine() {
-
     try {
-
         const urlParams = new URLSearchParams(window.location.search);
-
         const invoiceId = urlParams.get('id');
 
-
-
         if (!invoiceId) {
-
             document.getElementById('invoiceLoadingScreen').innerHTML = "<h2>Engine Failure</h2><p>Missing absolute invoice sequence ID reference token query.</p>";
-
             return;
-
         }
-
-
 
         const { data: invoice, error } = await _db
-
             .from('invoices')
-
             .select('*')
-
             .eq('id', invoiceId)
-
             .single();
 
-
-
         if (error || !invoice) {
-
             console.error('Fetch operation error payload:', error);
-
             document.getElementById('invoiceLoadingScreen').innerHTML = "<h2>Document Not Found</h2><p>The requested financial document asset mapping row query failed matching records.</p>";
-
             return;
-
         }
-
-
 
         const curr = invoice.currency || 'NGN';
 
-
-
         document.getElementById('lblFirmAddress').innerText = invoice.business_address || "No 18, Omerelu Street, GRA, Port Harcourt, Nigeria";
-
         document.getElementById('lblFirmPhone').innerText = invoice.business_phone || "+234 813 858 0315";
-
         
-
         document.getElementById('lblClientName').innerText = invoice.client_name || "Bespoke Client Profile";
-
         document.getElementById('lblClientAddress').innerText = invoice.client_address || "—";
-
         document.getElementById('lblClientPhone').innerText = invoice.client_phone || "—";
-
         document.getElementById('lblClientEmail').innerText = invoice.client_email || "";
-
         
-
         if (invoice.plot_size) {
-
             document.getElementById('lblPlotSize').innerText = invoice.plot_size;
-
             document.getElementById('lblPlotSizeWrapper').style.display = 'block';
-
         }
-
-
 
         document.getElementById('lblInvoiceNumber').innerText = invoice.invoice_number || '—';
-
         document.getElementById('lblIssueDate').innerText = invoice.issue_date || '—';
-
         document.getElementById('lblDueDate').innerText = invoice.due_date || '—';
 
-
-
         const targetContainer = document.getElementById('invoiceItemsTargetRowContainer');
-
         targetContainer.innerHTML = "";
-
         
-
         let calculatedSubtotal = 0;
-
         const lineItemsArray = Array.isArray(invoice.items) ? invoice.items : [];
 
-
-
         lineItemsArray.forEach(item => {
-
             const qty = Number(item.qty) || 1;
-
             const price = Number(item.unit_price) || 0;
-
             const lineTotal = qty * price;
-
             calculatedSubtotal += lineTotal;
 
-
-
             const row = document.createElement('tr');
-
             row.innerHTML = `
-
                 <td class="col-desc">
-
                     <strong>${item.name || 'Bespoke Architecture Service'}</strong>
-
                     ${item.description ? `<p style="font-size:0.78rem; color:#7a7570; margin-top:4px;">${item.description}</p>` : ''}
-
                 </td>
-
                 <td class="col-qty">${qty}</td>
-
                 <td class="col-price">${formatCurrency(price, curr)}</td>
-
                 <td class="col-total">${formatCurrency(lineTotal, curr)}</td>
-
             `;
-
             targetContainer.appendChild(row);
-
         });
 
-
-
         let grandTotalFinal = calculatedSubtotal;
-
         document.getElementById('lblSubtotal').innerText = formatCurrency(calculatedSubtotal, curr);
-
         
-
         if (invoice.apply_vat === true) {
-
             const vatAmountCalculated = calculatedSubtotal * 0.075;
-
             grandTotalFinal = calculatedSubtotal + vatAmountCalculated;
-
             
-
             document.getElementById('lblVatAmount').innerText = formatCurrency(vatAmountCalculated, curr);
-
             document.getElementById('vatRowWrapper').style.display = 'flex';
-
         } else {
-
             document.getElementById('vatRowWrapper').style.display = 'none';
-
         }
-
-
 
         document.getElementById('lblGrandTotal').innerText = formatCurrency(grandTotalFinal, curr);
 
-
-
         const upfrontPercentageValue = Number(invoice.upfront_percentage) || 50;
-
         const upfrontCalculatedRawAmount = (upfrontPercentageValue / 100) * grandTotalFinal;
-
         
-
         document.getElementById('lblUpfrontPercent').innerText = upfrontPercentageValue;
-
         document.getElementById('lblUpfrontValueAmount').innerText = formatCurrency(upfrontCalculatedRawAmount, curr);
 
-
-
         const fallbackNaira = "Access Bank\nAccount Number: 0076849302\nName: Archilurdesignz and Architecture";
-
         const fallbackDollar = "Zenith Bank Plc (Domiciliary)\nAccount Number: 5071192834\nSort Code/Swift: ZEBINGLA";
-
         
-
         document.getElementById('lblAccountInfoDetails').innerText = curr === 'USD' 
-
             ? (invoice.dollar_account_info || fallbackDollar)
-
             : (invoice.naira_account_info || fallbackNaira);
 
-
-
-        // POPULATE COVERED SCOPE MATRICES DYNAMICALLY
-
+        // POPULATE COVERED SCOPE MATRICES DYNAMICALLY WITH EXACT TEXT MATCHES
         const serviceLedgerContainer = document.getElementById('invoiceServicesLedgerTarget');
-
         const scopeArray = Array.isArray(invoice.scope_of_services) ? invoice.scope_of_services : [];
-
         
-
         serviceLedgerContainer.innerHTML = MASTER_STUDIO_SERVICES_LIST.map(service => {
-
             const isCovered = scopeArray.includes(service);
-
             return `
-
                 <div class="ledger-item">
-
                     <span>${service}</span>
-
                     <span class="ledger-status ${isCovered ? 'active' : 'inactive'}">
-
                         ${isCovered ? '✓' : '✕'}
-
                     </span>
-
                 </div>
-
             `;
-
         }).join('');
 
-
-
         document.getElementById('invoiceLoadingScreen').style.display = 'none';
-
         document.getElementById('invoiceControlPanel').style.display = 'flex';
-
         document.getElementById('invoiceFrame').style.opacity = '1';
 
-
-
     } catch (engineFault) {
-
         console.error('Invoice system engine compilation failure:', engineFault);
-
         document.getElementById('invoiceLoadingScreen').innerHTML = "<h2>Compilation Fault</h2><p>A runtime exception blocked page assembly processes.</p>";
-
     }
-
 }
 
-
-
 function triggerDeviceDownloadPDF() {
-
     const invoiceNum = document.getElementById('lblInvoiceNumber').innerText || 'Document';
-
     const oldTitle = document.title;
-
     document.title = "Invoice_" + invoiceNum.replace(/[^a-zA-Z0-9-_]/g, '_');
-
     window.print();
-
     document.title = oldTitle;
-
 }
 
 document.addEventListener('DOMContentLoaded', assembleInvoiceInvoiceEngine);
