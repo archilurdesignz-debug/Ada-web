@@ -1286,151 +1286,174 @@ async function updateProjectTerms() {
     else alert('✓ Service Terms published to client tracker.');
 }
     
-// FAQS Local defaults state registers tracking exactly your platform base configurations
+// ─── FAQ MANAGEMENT — DIRECT SUPABASE ────────────────────────────────────────
 let systemCategories = ["General FAQs", "Construction FAQs", "Ready Made Plans FAQs", "Custom Design FAQs"];
 let liveFaqItems = [];
 
 async function initAdminDashboard() {
-    // Attempt dynamic retrieval from API routes, gracefully fall back on baseline array structures
-    try {
-        const catRes = await fetch('/api/categories');
-        if(catRes.ok) systemCategories = await catRes.json();
-    } catch(e) {}
-    
-    renderCategoryControls();
+    await loadFaqCategories();
     await fetchAndRenderFaqRows();
+}
+
+async function loadFaqCategories() {
+    if (!_db) return;
+    try {
+        const { data, error } = await _db
+            .from('faq_categories')
+            .select('name')
+            .order('sort_order', { ascending: true });
+        if (!error && data && data.length) {
+            systemCategories = data.map(r => r.name);
+        }
+    } catch(e) {}
+    renderCategoryControls();
 }
 
 function renderCategoryControls() {
     const select = document.getElementById('faqCategorySelect');
-    const pills = document.getElementById('adminCategoryPills');
-    if(!select || !pills) return;
+    const pills  = document.getElementById('adminCategoryPills');
+    if (!select || !pills) return;
 
-    select.innerHTML = systemCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+    select.innerHTML = systemCategories.map(cat =>
+        `<option value="${cat}">${cat}</option>`
+    ).join('');
+
     pills.innerHTML = systemCategories.map(cat => `
-        <span style="background:#1c1a17; border:1px solid #ffffff10; padding:6px 14px; font-size:0.8rem; display:inline-flex; align-items:center; gap:8px; border-radius:2px;">
-            ${cat} <button onclick="deleteCategoryRecord('${cat}')" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-weight:bold; padding:0 2px;">✕</button>
+        <span style="background:#1c1a17; border:1px solid #ffffff10; padding:6px 14px;
+                     font-size:0.8rem; display:inline-flex; align-items:center; gap:8px;">
+            ${cat}
+            <button onclick="deleteCategoryRecord('${cat}')"
+                    style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-weight:bold;">✕</button>
         </span>
     `).join('');
 }
 
+async function addAdminCategory() {
+    if (!_db) { alert('Supabase not connected.'); return; }
+    const input = document.getElementById('newCategoryInput');
+    const val = input.value.trim();
+    if (!val) return;
+    if (systemCategories.includes(val)) { alert('Category already exists.'); return; }
+
+    const { error } = await _db
+        .from('faq_categories')
+        .insert([{ name: val, sort_order: systemCategories.length + 1 }]);
+
+    if (error) { alert('Error: ' + error.message); return; }
+    input.value = '';
+    await loadFaqCategories();
+}
+
+async function deleteCategoryRecord(cat) {
+    if (!_db) return;
+    if (!confirm(`Delete category "${cat}"? FAQs in this category will remain but become uncategorised.`)) return;
+
+    const { error } = await _db
+        .from('faq_categories')
+        .delete()
+        .eq('name', cat);
+
+    if (error) { alert('Error: ' + error.message); return; }
+    await loadFaqCategories();
+}
+
 async function fetchAndRenderFaqRows() {
     const container = document.getElementById('adminFaqRowsContainer');
-    if(!container) return;
+    if (!container || !_db) return;
 
-    try {
-        const response = await fetch('/api/get-faqs');
-        liveFaqItems = response.ok ? await response.json() : [];
-    } catch(e) { liveFaqItems = []; }
+    const { data, error } = await _db
+        .from('faqs')
+        .select('*')
+        .order('category', { ascending: true })
+        .order('sort_order', { ascending: true });
 
-    if(liveFaqItems.length === 0) {
-        container.innerHTML = `<p style="font-size:0.85rem; color:#7a7570; font-style:italic;">No live items registered in your application registers.</p>`;
+    liveFaqItems = (!error && data) ? data : [];
+
+    if (liveFaqItems.length === 0) {
+        container.innerHTML = `<p style="font-size:0.85rem; color:#7a7570; font-style:italic;">No FAQ entries yet. Add one above.</p>`;
         return;
     }
 
     container.innerHTML = liveFaqItems.map(item => `
-        <div style="background:#1c1a17; border:1px solid #ffffff08; padding:20px; display:flex; justify-content:space-between; align-items:center; gap:24px; border-radius:2px;">
+        <div style="background:#1c1a17; border:1px solid #ffffff08; padding:20px;
+                    display:flex; justify-content:space-between; align-items:center; gap:24px;">
             <div style="flex:1;">
-                <span style="font-size:0.65rem; background:rgba(200, 168, 122, 0.15); color:#c8a87a; padding:4px 8px; text-transform:uppercase; letter-spacing:1px; font-weight:500; border-radius:2px;">${item.category}</span>
-                <p style="font-size:1rem; font-weight:500; margin:10px 0 4px; color:#fff; font-family:'Playfair Display', serif;">${item.question}</p>
-                <p style="font-size:0.85rem; color:#7a7570; line-height:1.5; text-align:justify;">${item.answer}</p>
+                <span style="font-size:0.65rem; background:rgba(200,168,122,0.15); color:#c8a87a;
+                             padding:4px 8px; text-transform:uppercase; letter-spacing:1px;">${item.category}</span>
+                <p style="font-size:1rem; font-weight:500; margin:10px 0 4px; color:#fff;
+                           font-family:'Playfair Display', serif;">${item.question}</p>
+                <p style="font-size:0.85rem; color:#7a7570; line-height:1.5;">${item.answer}</p>
             </div>
             <div style="display:flex; flex-direction:column; gap:8px; flex-shrink:0;">
-                <button onclick="startFaqEdit('${item.id}')" style="padding:8px 16px; background:none; border:1px solid rgba(255,255,255,0.15); color:#c9bfb0; font-size:0.7rem; text-transform:uppercase; cursor:pointer; letter-spacing:1px; transition:0.3s;" onmouseover="this.style.borderColor='#c8a87a';this.style.color='#fff';">Edit</button>
-                <button onclick="deleteFaqRecord('${item.id}')" style="padding:8px 16px; background:none; border:1px solid rgba(255,77,77,0.3); color:#ff4d4d; font-size:0.7rem; text-transform:uppercase; cursor:pointer; letter-spacing:1px; transition:0.3s;" onmouseover="this.style.background='rgba(255,77,77,0.08)'" onmouseout="this.style.background='none'">Delete</button>
+                <button onclick="startFaqEdit('${item.id}')"
+                        style="padding:8px 16px; background:none; border:1px solid rgba(255,255,255,0.15);
+                               color:#c9bfb0; font-size:0.7rem; text-transform:uppercase; cursor:pointer;">Edit</button>
+                <button onclick="deleteFaqRecord('${item.id}')"
+                        style="padding:8px 16px; background:none; border:1px solid rgba(255,77,77,0.3);
+                               color:#ff4d4d; font-size:0.7rem; text-transform:uppercase; cursor:pointer;">Delete</button>
             </div>
         </div>
     `).join('');
 }
 
-async function addAdminCategory() {
-    const input = document.getElementById('newCategoryInput');
-    const val = input.value.trim();
-    if(!val) return;
-
-    if(!systemCategories.includes(val)) {
-        systemCategories.push(val);
-        await fetch('/api/categories/save', { 
-            method:'POST', 
-            headers:{'Content-Type':'application/json'}, 
-            body:JSON.stringify({ category: val }) 
-        });
-        input.value = '';
-        renderCategoryControls();
-    }
-}
-
-async function deleteCategoryRecord(cat) {
-    if(confirm(`Are you sure you want to delete the category "${cat}"? This will not remove the individual items, but will clear out this navigation grouping node option.`)) {
-        systemCategories = systemCategories.filter(c => c !== cat);
-        await fetch('/api/categories/delete', { 
-            method:'DELETE', 
-            headers:{'Content-Type':'application/json'}, 
-            body:JSON.stringify({ category: cat }) 
-        });
-        renderCategoryControls();
-    }
-}
-
 function startFaqEdit(id) {
-    const targetItem = liveFaqItems.find(item => String(item.id) === String(id));
-    if(!targetItem) return;
-
-    document.getElementById('editingFaqId').value = targetItem.id;
-    document.getElementById('faqCategorySelect').value = targetItem.category;
-    document.getElementById('faqQuestionInput').value = targetItem.question;
-    document.getElementById('faqAnswerInput').value = targetItem.answer;
-
-    document.getElementById('formTitleText').innerText = "Modify Existing FAQ Entry";
-    document.getElementById('submitFaqBtn').innerText = "Update & Save Changes";
-    document.getElementById('cancelEditBtn').style.display = "inline-block";
+    const item = liveFaqItems.find(f => String(f.id) === String(id));
+    if (!item) return;
+    document.getElementById('editingFaqId').value = item.id;
+    document.getElementById('faqCategorySelect').value = item.category;
+    document.getElementById('faqQuestionInput').value = item.question;
+    document.getElementById('faqAnswerInput').value = item.answer;
+    document.getElementById('formTitleText').innerText = 'Modify Existing FAQ Entry';
+    document.getElementById('submitFaqBtn').innerText = 'Update & Save Changes';
+    document.getElementById('cancelEditBtn').style.display = 'inline-block';
 }
 
 function clearFaqForm() {
-    document.getElementById('editingFaqId').value = "";
-    document.getElementById('faqQuestionInput').value = "";
-    document.getElementById('faqAnswerInput').value = "";
-    
-    document.getElementById('formTitleText').innerText = "Add New FAQ Entry";
-    document.getElementById('submitFaqBtn').innerText = "Publish Entry to Live Registers";
-    document.getElementById('cancelEditBtn').style.display = "none";
+    document.getElementById('editingFaqId').value = '';
+    document.getElementById('faqQuestionInput').value = '';
+    document.getElementById('faqAnswerInput').value = '';
+    document.getElementById('faqCategorySelect').selectedIndex = 0;
+    document.getElementById('formTitleText').innerText = 'Add New FAQ Entry';
+    document.getElementById('submitFaqBtn').innerText = 'Publish Entry to Live Registers';
+    document.getElementById('cancelEditBtn').style.display = 'none';
 }
 
 async function saveFaqItem() {
+    if (!_db) { alert('Supabase not connected.'); return; }
     const editId = document.getElementById('editingFaqId').value;
     const cat = document.getElementById('faqCategorySelect').value;
-    const q = document.getElementById('faqQuestionInput').value.trim();
-    const a = document.getElementById('faqAnswerInput').value.trim();
+    const q   = document.getElementById('faqQuestionInput').value.trim();
+    const a   = document.getElementById('faqAnswerInput').value.trim();
+    if (!q || !a) { alert('Please enter both a question and an answer.'); return; }
 
-    if(!q || !a) { alert("Please write a valid question and answer."); return; }
-
-    const payload = { category: cat, question: q, answer: a };
-    let targetUrl = '/api/faqs/save';
-    
-    // If we have an ID set, change the endpoint routing to target the modification record updates
-    if(editId) {
-        payload.id = editId;
-        targetUrl = '/api/faqs/update';
+    let error;
+    if (editId) {
+        // Update existing
+        ({ error } = await _db.from('faqs').update({ category: cat, question: q, answer: a }).eq('id', editId));
+    } else {
+        // Insert new
+        ({ error } = await _db.from('faqs').insert([{ category: cat, question: q, answer: a }]));
     }
 
-    await fetch(targetUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    });
-
+    if (error) { alert('Save failed: ' + error.message); return; }
     clearFaqForm();
     await fetchAndRenderFaqRows();
 }
 
 async function deleteFaqRecord(id) {
-    if(confirm("Confirm deletion of this live FAQ entity record? This action cannot be reversed.")) {
-        await fetch(`/api/faqs/delete?id=${id}`, { method: 'DELETE' });
-        await fetchAndRenderFaqRows();
-    }
+    if (!_db) return;
+    if (!confirm('Delete this FAQ entry permanently?')) return;
+    const { error } = await _db.from('faqs').delete().eq('id', id);
+    if (error) { alert('Error: ' + error.message); return; }
+    await fetchAndRenderFaqRows();
 }
 
-window.addEventListener('DOMContentLoaded', initAdminDashboard);
+window.addEventListener('DOMContentLoaded', () => {
+    initAdminDashboard();
+    loadProjectSelectors();
+    loadPendingReviews();
+    loadDefaultsVisibility();
+});
 // ─── REVIEWS MODERATION INBOX ────────────────────────────────────────────────
 async function loadPendingReviews() {
     const inbox = document.getElementById('reviewInbox');
