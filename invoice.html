@@ -36,24 +36,24 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
 .item-table .col-total { width: 20%; text-align: right; font-weight: 500; }
 
 /* TOTAL CONVERSIONS BOX PANEL */
-.invoice-totals-wrapper { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; border-bottom: 1px solid rgba(201,191,176,0.3); padding-bottom: 24px; margin-bottom: 30px; }
+.invoice-totals-wrapper { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; border-bottom: 1px solid rgba(201, 191, 176, 0.3); padding-bottom: 24px; margin-bottom: 30px; }
 .total-row { display: flex; justify-content: flex-end; width: 100%; max-width: 380px; font-size: 0.95rem; color: #7a7570; }
 .total-row span:first-child { flex: 1; text-align: left; }
 .total-row span:last-child { text-align: right; color: #1c1a17; }
-.total-row.grand-final { font-size: 1.35rem; color: #1c1a17; font-weight: 500; font-family: 'Playfair Display', serif; margin-top: 6px; border-top: 1px dashed rgba(201,191,176,0.4); padding-top: 12px; }
+.total-row.grand-final { font-size: 1.35rem; color: #1c1a17; font-weight: 500; font-family: 'Playfair Display', serif; margin-top: 6px; border-top: 1px dashed rgba(201, 191, 176, 0.4); padding-top: 12px; }
 .total-row.grand-final span:last-child { color: #b09070; font-weight: 600; }
 
 /* RECURRING REMARK & BANK PROFILE INFRASTRUCTURE LAYERS */
-.invoice-footer-notes { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; margin-top: 40px; border-top: 1px solid rgba(201,191,176,0.2); padding-top: 30px; }
+.invoice-footer-notes { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; margin-top: 40px; border-top: 1px solid rgba(201, 191, 176, 0.2); padding-top: 30px; }
 .notice-upfront-box { padding: 18px; border-left: 2px solid #b09070; background: #faf6f0; margin-bottom: 16px; }
 .notice-upfront-box p { font-size: 0.84rem; color: #2e2b26; font-style: italic; line-height: 1.6; }
-.banking-profile-card { background: #faf8f4; border: 1px solid rgba(201,191,176,0.2); padding: 20px; border-radius: 4px; margin-bottom: 16px; }
+.banking-profile-card { background: #faf8f4; border: 1px solid rgba(201, 191, 176, 0.2); padding: 20px; border-radius: 4px; margin-bottom: 16px; }
 .banking-profile-card h5 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: #b09070; margin-bottom: 12px; }
 .banking-profile-card p { font-size: 0.84rem; color: #7a7570; line-height: 1.7; white-space: pre-line; }
 
 /* SCOPE OF SERVICES LEDGER MATRIX */
-.services-ledger-box { background: #ffffff; border: 1px solid rgba(201,191,176,0.25); padding: 20px; border-radius: 4px; }
-.services-ledger-box h5 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: #1c1a17; margin-bottom: 12px; border-bottom: 1px solid rgba(201,191,176,0.15); padding-bottom: 6px; }
+.services-ledger-box { background: #ffffff; border: 1px solid rgba(201, 191, 176, 0.25); padding: 20px; border-radius: 4px; }
+.services-ledger-box h5 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: #1c1a17; margin-bottom: 12px; border-bottom: 1px solid rgba(201, 191, 176, 0.15); padding-bottom: 6px; }
 .ledger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .ledger-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; color: #555; padding: 4px 0; }
 .ledger-status { font-weight: 600; font-size: 0.85rem; }
@@ -62,7 +62,7 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
 
 /* UTILITY BUTTON CONTROLS BLOCK FOR ADMIN CONTEXTS */
 .actions-utility-bar { max-width: 900px; margin: 0 auto 20px; display: flex; justify-content: flex-end; gap: 14px; }
-.btn-utility { padding: 10px 20px; font-family: 'Outfit', sans-serif; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; cursor: pointer; border: 1px solid rgba(13,12,10,0.15); background: #ffffff; color: #1c1a17; transition: 0.3s; }
+.btn-utility { padding: 10px 20px; font-family: 'Outfit', sans-serif; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; cursor: pointer; border: 1px solid rgba(13, 12, 10, 0.15); background: #ffffff; color: #1c1a17; transition: 0.3s; }
 .btn-utility:hover { background: #1c1a17; color: #faf8f4; border-color: #1c1a17; }
 .btn-utility.primary { background: #b09070; color: #ffffff; border-color: #b09070; }
 .btn-utility.primary:hover { background: #1c1a17; border-color: #1c1a17; }
@@ -94,7 +94,8 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
 
 <div class="invoice-container" id="invoiceFrame" style="opacity: 0; transition: opacity 0.5s ease;">
     
-   <div class="logo-block">
+    <header class="invoice-header">
+        <div class="logo-block">
             <img class="logo-mark-img" src="./Ada-web/ada-logo-gold.svg" alt="ADA Corporate Signature Branding Mark" onerror="this.src='ada-logo-gold.svg'">
             <div class="wordmark">
                 <span class="w1">ADA</span>
@@ -166,8 +167,7 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
             
             <div class="services-ledger-box">
                 <h5>Studio Service Coverage Log</h5>
-                <div class="ledger-grid" id="invoiceServicesLedgerTarget">
-                    </div>
+                <div class="ledger-grid" id="invoiceServicesLedgerTarget"></div>
             </div>
         </div>
         
@@ -196,7 +196,7 @@ const MASTER_STUDIO_SERVICES_LIST = [
     "High-End 3D Photorealistic Rendering",
     "Construction/Project Supervision",
     "Bill of Quantities (BoQ) Estimates",
-    "Architecture & Graphic Services",
+    "Architectural Graphic Services",
     "Municipal Drawing Approval Processing"
 ];
 
