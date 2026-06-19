@@ -198,6 +198,66 @@
 <div class="admin-container">
     <h1>ADA Universal Control Panel</h1>
 
+     <!-- ── GENERATE INVOICE ─────────────────────────────── -->
+    <div class="card" style="margin-bottom: 24px;">
+    <div class="card-header" onclick="toggleSection('invoiceGeneratorAdminBlock')" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+        <h3>Dynamic Invoice Generation Hub</h3>
+        <span style="color:var(--gold);">[ Click to Expand / Collapse ]</span>
+    </div>
+    
+    <div id="invoiceGeneratorAdminBlock" style="display: none; padding: 24px 20px; border-top: 1px solid var(--glass);">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+            <div>
+                <label style="display:block; font-size:0.75rem; color:var(--gold); margin-bottom:4px; text-transform:uppercase;">Invoice Number Reference</label>
+                <input type="text" id="invNum" placeholder="e.g. ADA-2026-001" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white;">
+            </div>
+            <div>
+                <label style="display:block; font-size:0.75rem; color:var(--gold); margin-bottom:4px; text-transform:uppercase;">Billing Currency</label>
+                <select id="invCurrency" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white;">
+                    <option value="NGN">Nigerian Naira (₦)</option>
+                    <option value="USD">US Dollar ($)</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+            <div>
+                <h4 style="font-size:0.85rem; margin-bottom:10px;">Client Profile Metrics</h4>
+                <input type="text" id="invClientName" placeholder="Client Full Name" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white; margin-bottom:8px;">
+                <input type="text" id="invClientPhone" placeholder="Client Contact Number" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white; margin-bottom:8px;">
+                <input type="email" id="invClientEmail" placeholder="Client Email Address (Optional)" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white; margin-bottom:8px;">
+                <input type="text" id="invClientAddr" placeholder="Client Billing/Site Coordinates" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white; margin-bottom:8px;">
+                <input type="text" id="invPlotSize" placeholder="Project Site Plot Size Scale (Optional)" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white;">
+            </div>
+            <div>
+                <h4 style="font-size:0.85rem; margin-bottom:10px;">Studio Defaults Configuration (Editable)</h4>
+                <input type="text" id="invFirmAddr" placeholder="Business Address override" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white; margin-bottom:8px;">
+                <input type="text" id="invFirmPhone" placeholder="Business Phone Number override" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white; margin-bottom:8px;">
+                <input type="number" id="invUpfrontPct" value="50" placeholder="Upfront Remittance % (e.g. 50)" style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:white;">
+            </div>
+        </div>
+
+        <div style="border: 1px solid var(--glass); padding: 16px; margin-bottom: 20px; background:rgba(255,255,255,0.01);">
+            <h4 style="font-size:0.85rem; margin-bottom:12px; color:var(--gold);">Transactional Service Line Items</h4>
+            <div id="invItemsFormContainer">
+                <div class="invoice-item-entry-row" style="display:flex; gap:10px; margin-bottom:8px;">
+                    <input type="text" class="item-name-input" placeholder="Service Name (e.g. Architectural Drawing Pack)" style="flex:2; padding:8px; background:var(--bg); border:1px solid var(--glass); color:white;">
+                    <input type="number" class="item-qty-input" value="1" placeholder="Qty" style="width:70px; padding:8px; background:var(--bg); border:1px solid var(--glass); color:white; text-align:center;">
+                    <input type="number" class="item-price-input" placeholder="Unit Price" style="flex:1; padding:8px; background:var(--bg); border:1px solid var(--glass); color:white;">
+                    <button type="button" onclick="this.parentElement.remove()" style="background:var(--danger); color:white; border:none; padding:0 12px; cursor:pointer;">✕</button>
+                </div>
+            </div>
+            <button type="button" onclick="addNewInvoiceLineItemInputRow()" style="background:none; border:1px dashed var(--gold); color:var(--gold); padding:6px 12px; font-size:0.75rem; cursor:pointer; margin-top:8px;">+ Add Line Item Field</button>
+        </div>
+
+        <button type="button" onclick="submitInvoiceToSupabaseEngine()" style="width:100%; padding:14px; background:var(--success); color:white; border:none; font-weight:600; text-transform:uppercase; letter-spacing:2px; cursor:pointer;">Compile and Generate Share Link</button>
+        
+        <div id="invoiceOutputUrlWrapper" style="margin-top:20px; display:none; background:rgba(46,125,82,0.1); border:1px solid var(--success); padding:16px;">
+            <p style="font-size:0.8rem; color:var(--gold); margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;">✓ Secure Access URL Link Generated Successfully:</p>
+            <input type="text" id="lblGeneratedInvoiceUrl" readonly style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--glass); color:#2e7d52; font-family:monospace; font-size:0.85rem;" onclick="this.select()">
+        </div>
+    </div>
+</div>
     <!-- ── INITIALIZE CLIENT DASHBOARD ─────────────────────────────── -->
     <div class="section-card" style="border-top-color: var(--success);">
         <div class="section-toggle" onclick="toggleSection(this)">
@@ -1770,6 +1830,87 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+    // 1. Appends an empty structured input row into your item block array viewports
+function addNewInvoiceLineItemInputRow() {
+    const container = document.getElementById('invItemsFormContainer');
+    const d = document.createElement('div');
+    d.className = 'invoice-item-entry-row';
+    d.style.display = 'flex';
+    d.style.gap = '10px';
+    d.style.marginBottom = '8px';
+    d.innerHTML = `
+        <input type="text" class="item-name-input" placeholder="Service Name Description" style="flex:2; padding:8px; background:var(--bg); border:1px solid var(--glass); color:white;">
+        <input type="number" class="item-qty-input" value="1" style="width:70px; padding:8px; background:var(--bg); border:1px solid var(--glass); color:white; text-align:center;">
+        <input type="number" class="item-price-input" placeholder="Unit Price" style="flex:1; padding:8px; background:var(--bg); border:1px solid var(--glass); color:white;">
+        <button type="button" onclick="this.parentElement.remove()" style="background:var(--danger); color:white; border:none; padding:0 12px; cursor:pointer;">✕</button>
+    `;
+    container.appendChild(d);
+}
+
+// 2. Compiles parameters and posts cleanly straight to Supabase 'invoices' table
+async function submitInvoiceToSupabaseEngine() {
+    if (!_db) { alert('Supabase client connection not initialized.'); return; }
+
+    const num = document.getElementById('invNum').value.trim();
+    const cName = document.getElementById('invClientName').value.trim();
+    
+    if (!num || !cName) { 
+        alert('Please provide an Invoice Number and Client Name minimum to build data payloads.'); 
+        return; 
+    }
+
+    // Map through interactive rows to build line-item JSONB array strings
+    const compiledItems = [];
+    document.querySelectorAll('.invoice-item-entry-row').forEach(row => {
+        const name = row.querySelector('.item-name-input').value.trim();
+        const qty = parseInt(row.querySelector('.item-qty-input').value) || 1;
+        const price = parseFloat(row.querySelector('.item-price-input').value) || 0;
+        
+        if (name) {
+            compiledItems.push({ name: name, qty: qty, unit_price: price });
+        }
+    });
+
+    // Compute Issue Date and add 7 days automatically for Due Date calculation rules
+    const today = new Date();
+    const dueDate = new Date();
+    dueDate.setDate(today.getDate() + 7);
+
+    const formatDateString = (d) => d.toISOString().split('T')[0];
+
+    const payload = {
+        invoice_number: num,
+        currency: document.getElementById('invCurrency').value,
+        client_name: cName,
+        client_phone: document.getElementById('invClientPhone').value.trim(),
+        client_email: document.getElementById('invClientEmail').value.trim(),
+        client_address: document.getElementById('invClientAddr').value.trim(),
+        plot_size: document.getElementById('invPlotSize').value.trim(),
+        business_address: document.getElementById('invFirmAddress').value.trim() || undefined, // fallback to null if empty so schema defaults work
+        business_phone: document.getElementById('invFirmPhone').value.trim() || undefined,
+        upfront_percentage: parseFloat(document.getElementById('invUpfrontPct').value) || 50,
+        issue_date: formatDateString(today),
+        due_date: formatDateString(dueDate),
+        items: compiledItems
+    };
+
+    const { data, error } = await _db
+        .from('invoices')
+        .insert([payload])
+        .select('id')
+        .single();
+
+    if (error) {
+        alert('Supabase Error writing transaction asset: ' + error.message);
+        return;
+    }
+
+    // Output url block linking straight out to your public invoice file routing patterns
+    const targetUrl = window.location.origin + '/invoice.html?id=' + data.id;
+    document.getElementById('lblGeneratedInvoiceUrl').value = targetUrl;
+    document.getElementById('invoiceOutputUrlWrapper').style.display = 'block';
+    alert('✓ Invoice created successfully in database!');
+}
 </script>
 </body>
 </html>
