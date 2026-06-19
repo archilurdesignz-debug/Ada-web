@@ -561,7 +561,6 @@ async function runSearch(query) {
     
     const q = query.toLowerCase().replace(/[₦,]/g, '').trim();
 
-    // 1. Instant local filter across defaults and cached data
     const defaultHits = defaultPlans.filter(p =>
         [p.id, p.title, p.meta, p.category, p.price?.replace(/[₦,]/g, '')]
             .some(f => f && f.toLowerCase().includes(q))
@@ -572,7 +571,6 @@ async function runSearch(query) {
             .some(f => f && f.toLowerCase().includes(q))
     );
 
-    // Clear grid and immediately show local hits
     g.innerHTML = '';
     const seen = new Set();
     
@@ -583,12 +581,10 @@ async function runSearch(query) {
         }
     });
 
-    // Show temporary loader if no local hits are found yet
     if (seen.size === 0) {
         g.innerHTML = `<div id="searchIndicator" class="search-no-results" style="color:var(--gold);">Searching...</div>`;
     }
 
-    // 2. Fetch new matching records from the server API
     let apiHits = [];
     try {
         const r = await fetch(`/api/get-store?search=${encodeURIComponent(q)}`);
@@ -602,11 +598,9 @@ async function runSearch(query) {
     } catch(e) {
         console.error('Search API execution error:', e);
     } finally {
-        // Safely remove the "Searching..." text block
         const indicator = document.getElementById('searchIndicator');
         if (indicator) indicator.remove();
 
-        // Render any items found from the database
         if (apiHits.length > 0) {
             apiHits.forEach(p => {
                 if (!seen.has(p.id)) {
@@ -616,7 +610,6 @@ async function runSearch(query) {
             });
         }
 
-        // Final fallback if absolutely nothing matched across all targets
         if (seen.size === 0) {
             g.innerHTML = `<div class="search-no-results">No plans found for "${query.toUpperCase()}"</div>`;
         }
@@ -624,7 +617,6 @@ async function runSearch(query) {
 }
 async function fetchStoreItems() {
     if (isLoading || !hasMore || isSearchMode) return;
-
     isLoading = true;
 
     try {
@@ -637,7 +629,6 @@ async function fetchStoreItems() {
         }
 
         const g = document.getElementById('storeGrid');
-
         items.forEach(i => {
             if (!dynamicData[i.id]) {
                 dynamicData[i.id] = i;
@@ -649,7 +640,6 @@ async function fetchStoreItems() {
     } catch (err) {
         console.error('Fetch store error:', err);
     }
-
     isLoading = false;
 }
 
@@ -667,15 +657,15 @@ function getGalleryImages(images) {
           ]
         : images || [];
 }   
-    function shuffleArray(array) {
+function shuffleArray(array) {
     return [...array].sort(() => Math.random() - 0.5);
 }
+
 function renderCard(item, container){
     if (!item || !container) return;
     const c = document.createElement('div');
     c.className = 'plan-card';
     c.addEventListener('click', () => {
-        // FIXED: Now accurately passing item.features as the 5th parameter down to fillModal
         fillModal(
             item.title || 'Untitled Plan',
             item.meta || '',
@@ -688,44 +678,40 @@ function renderCard(item, container){
     container.appendChild(c);
 }
 
+// ─── MASTER DETAILED MODAL RENDERING MOTOR ─────────────────────────────────────
 function fillModal(title, meta, price, images, features) {
+    currentPlan = title; 
+    
     document.getElementById('modalTitle').innerText = title;
     document.getElementById('modalMeta').innerText = meta;
     
-    // Safety check: Re-bind modal price string if the element container target template relies on it
     const priceNode = document.getElementById('modalPrice');
     if (priceNode) priceNode.innerText = price;
     
     document.getElementById('modalGallery').innerHTML = (images || []).map(img => `<img src="${img}">`).join('');
     
-    // Core Elements Target Setup Selection
     const featPanel = document.getElementById('modalArchitecturalFeaturesPanel');
     const dimTarget = document.getElementById('featDimensionsTarget');
     const plotTarget = document.getElementById('featPlotTarget');
     const levelsContainer = document.getElementById('featLevelsTargetContainer');
 
-    // Reset layout view defaults completely
     if (featPanel) featPanel.style.display = 'none';
     if (levelsContainer) levelsContainer.innerHTML = '';
 
-    // If metadata row contains information profiles, render layout structures gracefully
     if (features && (features.length || features.width || features.plotSuitability || (features.levels && features.levels.length))) {
         if (featPanel) featPanel.style.display = 'block';
         
-        // Formulate Dimensions Output String Data
         const lengthStr = features.length || '—';
         const widthStr = features.width || '—';
         if (dimTarget) dimTarget.innerText = `${lengthStr} Length × ${widthStr} Width`;
         if (plotTarget) plotTarget.innerText = features.plotSuitability || 'Review Site Conditions';
 
-        // Render Multi-Column Bullet Points for Structural Levels
         if (features.levels && features.levels.length > 0) {
             const listWrapper = document.getElementById('featLevelsListWrapper');
             if (listWrapper) listWrapper.style.display = 'block';
             
             if (levelsContainer) {
                 levelsContainer.innerHTML = features.levels.map(lvl => {
-                    // Loop spaces block elements directly inside 2-3 Column grids dynamically
                     const spacesHtml = (lvl.spaces || []).map(space => `
                         <li style="position: relative; padding-left: 14px; font-size: 0.88rem; color: var(--sand); line-height: 1.6; list-style:none; margin-bottom:4px;">
                             <span style="position: absolute; left: 0; color: var(--accent);">•</span> ${space}
@@ -733,7 +719,7 @@ function fillModal(title, meta, price, images, features) {
                     `).join('');
 
                     return `
-                        <div style="border-left: 1px solid rgba(200, 168, 122, 0.2); padding-left: 18px;">
+                        <div style="border-left: 1px solid rgba(200, 168, 122, 0.2); padding-left: 18px; margin-bottom: 16px;">
                             <h4 style="font-family: var(--f-display); font-size: 1.05rem; color: var(--gold2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">${lvl.name}</h4>
                             <ul style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px 16px; margin: 0; padding: 0;">
                                 ${spacesHtml || '<li style="color:var(--mist); font-size:0.8rem; list-style:none;">Open Layout Mapping</li>'}
@@ -758,116 +744,39 @@ function fillModal(title, meta, price, images, features) {
     closeFaqSubModal();
     hideRequestForm();
 }
+
 function closePlan(){document.getElementById('planModal').classList.remove('open');document.body.style.overflow='';}
 function showRequestForm(a){currentAction=a;currentPlan=document.getElementById('modalTitle').innerText;document.getElementById('formActionTitle').innerText=a+' Request';document.getElementById('initialActions').style.display='none';document.getElementById('requestForm').style.display='block';}
 function hideRequestForm(){document.getElementById('initialActions').style.display='block';document.getElementById('requestForm').style.display='none';}
-function processFinalRequest(){
 
-    const n = document.getElementById('clientName').value.trim();
-    const e = document.getElementById('clientEmail').value.trim();
-    const p = document.getElementById('clientPhone').value.trim();
-
-    if(!n || !e || !p){
-        alert('Please complete all fields.');
-        return;
-    }
-
-    const message =
-`ADA PLAN STORE REQUEST
-
-Request Type: ${currentAction}
-
-Plan: ${currentPlan}
-
-Client Name: ${n}
-
-Email Address: ${e}
-
-WhatsApp Number: ${p}`;
-
-    window.open(
-        `https://wa.me/2348138580315?text=${encodeURIComponent(message)}`,
-        '_blank'
-    );
-}
 /* ==========================================================================
-   DYNAMIC TABBED ENGINE & LEAD CONVERSION HANDLING
+    DYNAMIC TABBED ENGINE & LEAD CONVERSION HANDLING
    ========================================================================== */
-
-// Switches tab styling states and updates visible specifications viewports
 function switchPackageTab(tabElement, tierName, paneId) {
-    // Clear active status styling across tabs
     document.querySelectorAll('.package-tab').forEach(tab => tab.classList.remove('active'));
-    // Hide all tab text segments
     document.querySelectorAll('.tab-content-pane').forEach(pane => pane.classList.remove('active'));
     
-    // Bind active states to chosen package elements
     tabElement.classList.add('active');
     document.getElementById(paneId).classList.add('active');
-    
-    // Store selected package variable for the final WhatsApp string composition
     currentAction = tierName;
 }
 
-// Redirects customer seamlessly to the inline request contact fields
 function goToForm() {
     showRequestForm(currentAction);
 }
 
-// Modifies existing fillModal handler to reset variables back to "Basic" whenever a design card is opened
-function fillModal(title, meta, price, images) {
-    document.getElementById('modalTitle').innerText = title;
-    document.getElementById('modalMeta').innerText = meta;
-    document.getElementById('modalGallery').innerHTML = (images || []).map(img => `<img src="${img}">`).join('');
-    document.getElementById('planModal').classList.add('open');
-    document.body.style.overflow = 'hidden';
-    
-    // Safety Reset: Instantly reset tabs back to the Basic configuration layout panel view
-    const defaultTab = document.querySelector('.package-tab');
-    if (defaultTab) {
-        switchPackageTab(defaultTab, 'Basic Package', 'basic-pane');
-    }
-    
-    hideRequestForm();
-}
-
-// Processes captured customer information and appends chosen tier selection text directly onto WhatsApp url
-function processFinalRequest() {
-    const n = document.getElementById('clientName').value.trim();
-    const e = document.getElementById('clientEmail').value.trim();
-    const p = document.getElementById('clientPhone').value.trim();
-
-    if(!n || !e || !p) {
-        alert('Please complete all fields.');
-        return;
-    }
-
-    // Preformatted dynamic output message structure
-    const message = 
-`ADA PLAN STORE REQUEST
-
-Plan: ${currentPlan}
-Selected Tier: ${currentAction}
-
-Client Name: ${n}
-Email Address: ${e}
-WhatsApp Number: ${p}`;
-
-    window.open(
-        `https://wa.me/2348138580315?text=${encodeURIComponent(message)}`,
-        '_blank'
-    );
-}
 // Change "Ready Made Design" -> "Ready Made Plans FAQs" and "Custom Design" -> "Custom Design FAQs"
 const globalFaqDataMock = [
-    { category: "Ready Made Plans FAQs", question: "How fast do I receive the files after payment verification?", answer: "Basic structural layouts deliver inside 24 hours. Complete architectural working sets and premium approval drawings take 7 to 14 days to assemble site context modifications correctly." },
-    { category: "Ready Made Plans FAQs", question: "What file formats are provided inside the packages?", answer: "We supply scaled, high-resolution vector PDF drawing packages along with original AutoCAD DWG blueprints for smooth localization by site team professionals." },
-    { category: "Custom Design FAQs", question: "Can we start a project completely from scratch for an asymmetrical site?", answer: "Yes, absolutely. By using our 'Customize Package' layer, our studio designs a completely tailored concept space tracking your geometric site parameters and programming needs from the ground up." },
-    { category: "Custom Design FAQs", question: "How are site inspections handled for locations outside Lagos or Abuja?", answer: "We deploy geospatial surveying coordinates or partner with verified local engineering personnel to scan contours and orientation layout boundaries flawlessly before framing designs." }
+    { category: "Ready Made Plans FAQs", question: "Are the plans in your store ready for direct construction?", answer: "No. Plans and 3D models sold directly on our store platform are presentation and conceptual-based models. They are not fully dimensioned architectural working drawings and are not intended for direct construction use without a comprehensive professional review." },
+    { category: "Ready Made Plans FAQs", question: "What is required before I can build using a plan from the store?", answer: "It is mandatory that all purchased catalog plans are formally reviewed, adapted, and approved by a registered professional before construction operations begin on site to ensure compliance with your land parameters and local building codes." },
+    { category: "Ready Made Plans FAQs", question: "How many times can I construct a house using a single purchased plan?", answer: "Purchased designs are licensed under a strict limitation of use. They are granted a single-use construction license for one approved project site only. Any reuse, resale, duplication, redistribution, or modification without written authorization from ADA is prohibited." },
+    { category: "Custom Design FAQs", question: "What services are covered under custom commission frameworks?", answer: "ADA provides a comprehensive suite of professional architectural and engineering support lines, including Bespoke Architectural Design & 3D Visualization, Structural/Mechanical/Electrical coordination, Quantity Surveying & Bill of Quantities (BoQ), and Construction Support frameworks." },
+    { category: "Custom Design FAQs", question: "What are my obligations as a client during a custom design phase?", answer: "Clients are required to provide accurate project details and site data, cooperate actively throughout the design cycle, approve milestone design steps promptly, and enter into separate, formalized individual service contracts where requested." },
+    { category: "Custom Design FAQs", question: "How are timelines handled for customized projects?", answer: "All development schedules are technical estimates. Final delivery timelines are inherently dependent on project scope, design complexity, engineering consultant coordination, and client feedback speed. Timelines may fluctuate dynamically to prioritize strict technical accuracy and quality control." }
 ];
+
 /* SUB-MODAL OVERLAY CONTROL OPERATIONS — STRICT SYNCED ENGINE */
 async function openFaqSubModal(targetCategory) {
-    // 1. Strict alignment validation check to guarantee category queries match backend definitions exactly
     let backendSearchCategory = targetCategory;
     
     if (targetCategory === "Ready Made Design" || targetCategory === "Ready Made Plans") {
@@ -876,7 +785,6 @@ async function openFaqSubModal(targetCategory) {
         backendSearchCategory = "Custom Design FAQs";
     }
 
-    // Set header interface text string cleanly to maintain structural elegance
     document.getElementById('subModalCategoryTitle').innerText = backendSearchCategory;
     const container = document.getElementById('subModalFaqAccordionTarget');
     container.innerHTML = "";
@@ -889,7 +797,6 @@ async function openFaqSubModal(targetCategory) {
         sourceData = globalFaqDataMock;
     }
 
-    // 2. Map and match specifically against database category tokens explicitly
     const filtered = sourceData.filter(faq => {
         const itemCat = String(faq.category).trim().toLowerCase();
         const targetCat = String(backendSearchCategory).trim().toLowerCase();
@@ -934,55 +841,35 @@ function toggleSubModalFaqAccordion(buttonElement) {
         sign.style.color = 'var(--sand)';
     }
 }
+
 async function checkUrlForPlan() {
     const id = new URLSearchParams(window.location.search).get('plan');
     if (!id) return;
 
-    // Check defaults first — instant, no network needed
     const local = defaultPlans.find(p => p.id === id);
-  if (local) {
-    fillModal(
-        local.title,
-        local.meta,
-        local.price,
-        getGalleryImages(local.image_urls)
-    );
-    return;
-}
-    // Check already-loaded Supabase plans
+    if (local) {
+        fillModal(local.title, local.meta, local.price, getGalleryImages(local.image_urls), local.features);
+        return;
+    }
     if (dynamicData[id]) {
-    const p = dynamicData[id];
-    fillModal(
-        p.title,
-        p.meta,
-        p.price,
-        getGalleryImages(p.image_urls)
-    );
-    return;
-}
-    // Not loaded yet — fetch directly from the API by id
+        const p = dynamicData[id];
+        fillModal(p.title, p.meta, p.price, getGalleryImages(p.image_urls), p.features);
+        return;
+    }
     try {
         const r = await fetch(`/api/get-store?id=${encodeURIComponent(id)}`);
         if (r.ok) {
             const data = await r.json();
-            // API may return array or single object
             const plan = Array.isArray(data) ? data[0] : data;
             if (plan) {
                 dynamicData[plan.id] = plan;
-        fillModal(
-    plan.title,
-    plan.meta,
-    plan.price,
-    getGalleryImages(plan.image_urls)
-);
+                fillModal(plan.title, plan.meta, plan.price, getGalleryImages(plan.image_urls), plan.features);
                 return;
             }
         }
     } catch(e) {
         console.error('Plan fetch by id failed:', e);
     }
-
-    console.warn('Plan not found for id:', id);
 }
 
 window.addEventListener('scroll',()=>{document.getElementById('navbar').classList.toggle('solid',window.scrollY>60);},{passive:true});
@@ -999,41 +886,23 @@ window.addEventListener('DOMContentLoaded', async () => {
         .forEach(p => renderCard(p, g));
 
     fetchStoreItems();
-
     await checkUrlForPlan();
 });
+
 /* ── IMAGE PROTECTION ──────────────────────────────────────────────── */
-// Block right-click on images
 document.addEventListener('contextmenu', e => {
-    if (e.target.tagName === 'IMG' ||
-        e.target.closest('.p-item') ||
-        e.target.closest('.plan-card') ||
-        e.target.closest('.plan-img-wrap')) {
+    if (e.target.tagName === 'IMG' || e.target.closest('.p-item') || e.target.closest('.plan-card') || e.target.closest('.plan-img-wrap')) {
         e.preventDefault();
     }
 });
 
-// Block Ctrl+S (save page) and Ctrl+U (view source) and PrintScreen attempts
 document.addEventListener('keydown', e => {
-    // Ctrl+S / Cmd+S
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-    }
-    // Ctrl+U / Cmd+U
-    if ((e.ctrlKey || e.metaKey) && e.key === 'u') {
-        e.preventDefault();
-    }
-    // Ctrl+Shift+I (devtools)
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'i') {
-        e.preventDefault();
-    }
-    // F12 devtools
-    if (e.key === 'F12') {
-        e.preventDefault();
-    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') e.preventDefault();
+    if ((e.ctrlKey || e.metaKey) && e.key === 'u') e.preventDefault();
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'i') e.preventDefault();
+    if (e.key === 'F12') e.preventDefault();
 });
 
-// Block drag of images
 document.addEventListener('dragstart', e => {
     if (e.target.tagName === 'IMG') e.preventDefault();
 });
