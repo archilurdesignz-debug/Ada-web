@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice | ADA Archilurdesignz</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; line-height: 1.5; padding: 60px 4%; }
+.invoice-container { max-width: 900px; margin: 0 auto; background: #ffffff; border: 1px solid rgba(201, 191, 176, 0.4); padding: 50px; position: relative; box-shadow: 0 10px 40px rgba(13,12,10,0.03); }
+
+/* HEADER BRAND ROW */
+.invoice-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #b09070; padding-bottom: 30px; margin-bottom: 40px; }
+.logo-block { display: flex; align-items: center; gap: 14px; }
+.logo-mark { width: 44px; height: 44px; border: 1px solid #c9bfb0; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #b09070; font-weight: 500; }
+.wordmark .w1 { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 600; letter-spacing: 4px; text-transform: uppercase; display: block; }
+.wordmark .w2 { font-size: 0.6rem; letter-spacing: 2px; color: #7a7570; text-transform: uppercase; margin-top: 2px; display: block; }
+.studio-meta { font-size: 0.8rem; color: #7a7570; text-align: right; line-height: 1.6; }
+
+/* DATA PROFILE PIECES */
+.invoice-meta-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; margin-bottom: 40px; }
+.meta-column h4 { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 2px; color: #7a7570; margin-bottom: 10px; font-weight: 500; }
+.meta-column p { font-size: 0.92rem; color: #1c1a17; line-height: 1.6; }
+.invoice-title-block { text-align: right; }
+.invoice-title-block h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; letter-spacing: 2px; text-transform: uppercase; color: #1c1a17; margin-bottom: 6px; }
+
+/* LINE ITEM SPECIFICATION DATA GRID GRID */
+.item-table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 35px; }
+.item-table th { background: #1c1a17; color: #faf8f4; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px; padding: 14px 16px; text-align: left; font-weight: 400; }
+.item-table td { padding: 18px 16px; border-bottom: 1px solid rgba(201,191,176,0.25); font-size: 0.9rem; color: #2e2b26; vertical-align: top; }
+.item-table .col-desc { width: 55%; }
+.item-table .col-qty { width: 10%; text-align: center; }
+.item-table .col-price { width: 15%; text-align: right; }
+.item-table .col-total { width: 20%; text-align: right; font-weight: 500; }
+
+/* TOTAL CONVERSIONS BOX PANEL */
+.invoice-totals-wrapper { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; border-bottom: 1px solid rgba(201,191,176,0.3); padding-bottom: 24px; margin-bottom: 30px; }
+.total-row { display: flex; justify-content: flex-end; width: 100%; max-width: 380px; font-size: 0.95rem; color: #7a7570; }
+.total-row span:first-child { flex: 1; text-align: left; }
+.total-row span:last-child { text-align: right; color: #1c1a17; }
+.total-row.grand-final { font-size: 1.35rem; color: #1c1a17; font-weight: 500; font-family: 'Playfair Display', serif; margin-top: 6px; border-top: 1px dashed rgba(201,191,176,0.4); padding-top: 12px; }
+.total-row.grand-final span:last-child { color: #b09070; font-weight: 600; }
+
+/* RECURRING REMARK & BANK PROFILE INFRASTRUCTURE LAYERS */
+.invoice-footer-notes { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; margin-top: 40px; border-top: 1px solid rgba(201,191,176,0.2); padding-top: 30px; }
+.notice-upfront-box { padding: 18px; border-left: 2px solid #b09070; background: #faf6f0; margin-bottom: 16px; }
+.notice-upfront-box p { font-size: 0.84rem; color: #2e2b26; font-style: italic; line-height: 1.6; }
+.banking-profile-card { background: #faf8f4; border: 1px solid rgba(201,191,176,0.2); padding: 20px; border-radius: 4px; }
+.banking-profile-card h5 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: #b09070; margin-bottom: 12px; }
+.banking-profile-card p { font-size: 0.84rem; color: #7a7570; line-height: 1.7; white-space: pre-line; }
+
+/* UTILITY BUTTON CONTROLS BLOCK FOR ADMIN CONTEXTS */
+.actions-utility-bar { max-width: 900px; margin: 0 auto 20px; display: flex; justify-content: flex-end; gap: 14px; }
+.btn-utility { padding: 10px 20px; font-family: 'Outfit', sans-serif; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; cursor: pointer; border: 1px solid rgba(13,12,10,0.15); background: #ffffff; color: #1c1a17; transition: 0.3s var(--ease-out); }
+.btn-utility:hover { background: #1c1a17; color: #faf8f4; border-color: #1c1a17; }
+.btn-utility.primary { background: #b09070; color: #ffffff; border-color: #b09070; }
+.btn-utility.primary:hover { background: #1c1a17; border-color: #1c1a17; }
+
+/* SCREEN LOADING INDICATORS */
+.engine-loader { position: fixed; inset: 0; background: #0d0c0a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; color: #faf8f4; }
+.engine-loader h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; letter-spacing: 3px; text-transform: uppercase; color: #b09070; margin-bottom: 8px; }
+.engine-loader p { font-size: 0.8rem; color: #7a7570; letter-spacing: 1px; }
+
+@media print {
+    body { padding: 0; background: #ffffff; }
+    .invoice-container { border: none; padding: 0; box-shadow: none; }
+    .actions-utility-bar { display: none !important; }
+}
+@media print {
+    @page {
+        size: A4 vertical;
+        margin: 15mm 15mm 15mm 15mm; /* Professional white-space boundaries */
+    }
+    body {
+        background: #ffffff !important;
+        padding: 0 !important;
+    }
+    .invoice-container {
+        border: none !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .actions-utility-bar, #cursor {
+        display: none !important; /* Hide UI controls completely on file export */
+    }
+}
+</style>
+</head>
+<body>
+
+<div id="invoiceLoadingScreen" class="engine-loader">
+    <h2>ADA Architecture</h2>
+    <p>Compiling Financial Document Vector Assets...</p>
+</div>
+
+<div class="actions-utility-bar" id="invoiceControlPanel" style="display: none;">
+    <button class="btn-utility" onclick="window.close()">Close</button>
+    <button class="btn-utility primary" onclick="triggerDeviceDownloadPDF()">Download PDF</button>
+</div>
+
+<div class="invoice-container" id="invoiceFrame" style="opacity: 0; transition: opacity 0.5s ease;">
+    
+    <header class="invoice-header">
+        <div class="logo-block">
+            <div class="logo-mark">A</div>
+            <div class="wordmark">
+                <span class="w1">ADA</span>
+                <span class="w2">Archilurdesignz</span>
+            </div>
+        </div>
+        <div class="studio-meta">
+            <p style="font-weight: 500; color: #1c1a17;">Archilurdesignz and Architecture</p>
+            <p id="lblFirmAddress"></p>
+            <p id="lblFirmPhone"></p>
+            <p>RC Number: 9176834</p>
+            <p>www.archilurdesignz.com</p>
+        </div>
+    </header>
+
+    <section class="invoice-meta-grid">
+        <div class="meta-column">
+            <h4>Billed To</h4>
+            <p><strong id="lblClientName" style="font-size:1.1rem; color:#1c1a17;"></strong></p>
+            <p id="lblClientAddress"></p>
+            <p id="lblClientPhone"></p>
+            <p id="lblClientEmail" style="color:#7a7570;"></p>
+            <p id="lblPlotSizeWrapper" style="margin-top: 10px; display: none;">
+                <span style="font-size:0.75rem; text-transform:uppercase; color:#7a7570; letter-spacing:1px; display:block;">Project Site Plot Scale:</span>
+                <strong id="lblPlotSize" style="color:#b09070;"></strong>
+            </p>
+        </div>
+        <div class="meta-column invoice-title-block">
+            <h1>Invoice</h1>
+            <p><strong>Invoice Number:</strong> <span id="lblInvoiceNumber">—</span></p>
+            <p><strong>Date Issued:</strong> <span id="lblIssueDate">—</span></p>
+            <p><strong>Due Date:</strong> <span id="lblDueDate">—</span></p>
+        </div>
+    </section>
+
+    <table class="item-table">
+        <thead>
+            <tr>
+                <th class="col-desc">Service Description</th>
+                <th class="col-qty">Qty</th>
+                <th class="col-price">Unit Cost</th>
+                <th class="col-total">Total</th>
+            </tr>
+        </thead>
+        <tbody id="invoiceItemsTargetRowContainer">
+            </tbody>
+    </table>
+
+    <div class="invoice-totals-wrapper">
+        <div class="total-row">
+            <span>Subtotal</span>
+            <span id="lblSubtotal"></span>
+        </div>
+        <div class="total-row grand-final">
+            <span>Total Amount Due</span>
+            <span id="lblGrandTotal"></span>
+        </div>
+    </div>
+
+    <footer class="invoice-footer-notes">
+        <div>
+            <div class="notice-upfront-box" id="upfrontNoticePanel">
+                <p><strong>Upfront Remittance Structure Note:</strong><br>
+                Pursuant to ADA Client Service Terms, a mandatory <span id="lblUpfrontPercent"></span>% upfront deposit representing <strong id="lblUpfrontValueAmount" style="color:#b09070;"></strong> is required to formally schedule project milestones and allocate engineering resources.</p>
+            </div>
+            <p style="font-size: 0.78rem; color: #7a7570; line-height: 1.6;">For safe implementation, ensure all programmatic project briefs align completely with local drawing guidelines and zoning boundaries.</p>
+        </div>
+        <div class="banking-profile-card">
+            <h5>Remittance Instructions</h5>
+            <p id="lblAccountInfoDetails"></p>
+        </div>
+    </footer>
+</div>
+
+<script>
+// Initialize connection to Supabase instance
+const supabaseUrl = 'https://ofaxbduvnhscxvoakeax.supabase.co'; 
+const supabaseKey = 'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK';
+const _db = supabase.createClient(supabaseUrl, supabaseKey);
+
+// Parse currency layout targets smoothly
+function formatCurrency(value, currencyToken) {
+    const numericValue = Number(value) || 0;
+    if (currencyToken === 'USD') {
+        return '$' + numericValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    return '₦' + numericValue.toLocaleString('en-NG');
+}
+
+async function assembleInvoiceInvoiceEngine() {
+    try {
+        // Extract row uuid straight out of page url parsing paths
+        const urlParams = new URLSearchParams(window.location.search);
+        const invoiceId = urlParams.get('id');
+
+        if (!invoiceId) {
+            document.getElementById('invoiceLoadingScreen').innerHTML = "<h2>Engine Failure</h2><p>Missing absolute invoice sequence ID reference token query.</p>";
+            return;
+        }
+
+        // Pull row datasets directly from active database connection mapping rows
+        const { data: invoice, error } = await _db
+            .from('invoices')
+            .select('*')
+            .eq('id', invoiceId)
+            .single();
+
+        if (error || !invoice) {
+            console.error('Fetch operation error payload:', error);
+            document.getElementById('invoiceLoadingScreen').innerHTML = "<h2>Document Not Found</h2><p>The requested financial document asset mapping row query failed matching records.</p>";
+            return;
+        }
+
+        const curr = invoice.currency || 'NGN';
+
+        // Bind Static and Variable Core Elements
+        document.getElementById('lblFirmAddress').innerText = invoice.business_address || "Plot 14, Luxury Estate Layout, Lekki, Lagos";
+        document.getElementById('lblFirmPhone').innerText = invoice.business_phone || "+234 813 858 0315";
+        
+        // Bind Client Parameters Strings
+        document.getElementById('lblClientName').innerText = invoice.client_name || "Bespoke Client Profile";
+        document.getElementById('lblClientAddress').innerText = invoice.client_address || "—";
+        document.getElementById('lblClientPhone').innerText = invoice.client_phone || "—";
+        document.getElementById('lblClientEmail').innerText = invoice.client_email || "";
+        
+        if (invoice.plot_size) {
+            document.getElementById('lblPlotSize').innerText = invoice.plot_size;
+            document.getElementById('lblPlotSizeWrapper').style.display = 'block';
+        }
+
+        // Bind Invoice Timeline Profiles
+        document.getElementById('lblInvoiceNumber').innerText = invoice.invoice_number || '—';
+        document.getElementById('lblIssueDate').innerText = invoice.issue_date || '—';
+        document.getElementById('lblDueDate').innerText = invoice.due_date || '—';
+
+        // Loop array items maps gracefully into raw tables grids rows HTML blocks
+        const targetContainer = document.getElementById('invoiceItemsTargetRowContainer');
+        targetContainer.innerHTML = "";
+        
+        let calculatedSubtotal = 0;
+        const lineItemsArray = Array.isArray(invoice.items) ? invoice.items : [];
+
+        lineItemsArray.forEach(item => {
+            const qty = Number(item.qty) || 1;
+            const price = Number(item.unit_price) || 0;
+            const lineTotal = qty * price;
+            calculatedSubtotal += lineTotal;
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="col-desc">
+                    <strong>${item.name || 'Bespoke Architecture Service'}</strong>
+                    ${item.description ? `<p style="font-size:0.78rem; color:#7a7570; margin-top:4px;">${item.description}</p>` : ''}
+                </td>
+                <td class="col-qty">${qty}</td>
+                <td class="col-price">${formatCurrency(price, curr)}</td>
+                <td class="col-total">${formatCurrency(lineTotal, curr)}</td>
+            `;
+            targetContainer.appendChild(row);
+        });
+
+        // Compute balances metrics data allocations
+        document.getElementById('lblSubtotal').innerText = formatCurrency(calculatedSubtotal, curr);
+        document.getElementById('lblGrandTotal').innerText = formatCurrency(calculatedSubtotal, curr);
+
+        // Map relative upfront retainer message benchmarks strings instructions
+        const upfrontPercentageValue = Number(invoice.upfront_percentage) || 50;
+        const upfrontCalculatedRawAmount = (upfrontPercentageValue / 100) * calculatedSubtotal;
+        
+        document.getElementById('lblUpfrontPercent').innerText = upfrontPercentageValue;
+        document.getElementById('lblUpfrontValueAmount').innerText = formatCurrency(upfrontCalculatedRawAmount, curr);
+
+        // Bind Target Remittance Accounts Details Blocks Routing
+        const fallbackNaira = "Access Bank\nAccount Number: 0076849302\nName: Archilurdesignz and Architecture";
+        const fallbackDollar = "Zenith Bank Plc (Domiciliary)\nAccount Number: 5071192834\nSort Code/Swift: ZEBINGLA";
+        
+        document.getElementById('lblAccountInfoDetails').innerText = curr === 'USD' 
+            ? (invoice.dollar_account_info || fallbackDollar)
+            : (invoice.naira_account_info || fallbackNaira);
+
+        // Reveal Invoice Frame Containers and kill Loader transitions elements
+        document.getElementById('invoiceLoadingScreen').style.display = 'none';
+        document.getElementById('invoiceControlPanel').style.display = 'flex';
+        document.getElementById('invoiceFrame').style.opacity = '1';
+
+    } catch (engineFault) {
+        console.error('Invoice system engine compilation failure:', engineFault);
+        document.getElementById('invoiceLoadingScreen').innerHTML = "<h2>Compilation Fault</h2><p>A runtime exception blocked page assembly processes.</p>";
+    }
+}
+// Add this precise handler to your invoice.html script block
+function triggerDeviceDownloadPDF() {
+    // Dynamically set document title so the device saves the file with a professional filename
+    const invoiceNum = document.getElementById('lblInvoiceNumber').innerText || 'Document';
+    const oldTitle = document.title;
+    document.title = "Invoice_" + invoiceNum.replace(/[^a-zA-Z0-9-_]/g, '_');
+    
+    // Fire native device rendering layer
+    window.print();
+    
+    // Restore tab title state
+    document.title = oldTitle;
+}
+
+document.addEventListener('DOMContentLoaded', assembleInvoiceInvoiceEngine);
+</script>
+</body>
+</html>
