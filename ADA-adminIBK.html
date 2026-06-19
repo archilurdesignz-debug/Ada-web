@@ -266,6 +266,10 @@
                     <div class="form-group"><label>Business Address Override</label><input type="text" id="invFirmAddr" placeholder="Defaults to main office if blank"></div>
                     <div class="form-group"><label>Business Phone Number Override</label><input type="text" id="invFirmPhone" placeholder="Defaults to studio line if blank"></div>
                     <div class="form-group"><label>Upfront Remittance %</label><input type="number" id="invUpfrontPct" value="50" min="0" max="100"></div>
+                    <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-top:15px; margin-bottom:15px;">
+                    <input type="checkbox" id="invApplyVat" style="width:16px; height:16px; accent-color:var(--gold); cursor:pointer;">
+                    <label for="invApplyVat" style="margin-bottom:0; cursor:pointer;">Apply 7.5% VAT to this Invoice</label>
+                    </div>
                     <div class="form-group">
                         <label>Naira Account Routing Note (Override)</label>
                         <textarea id="invNairaAccount" rows="2" placeholder="Bank Name, Account Number, Account Name..."></textarea>
@@ -1941,6 +1945,7 @@ async function submitInvoiceToSupabaseEngine() {
         business_address: document.getElementById('invFirmAddr').value.trim() || undefined, 
         business_phone: document.getElementById('invFirmPhone').value.trim() || undefined,
         upfront_percentage: parseFloat(document.getElementById('invUpfrontPct').value) || 50,
+        apply_vat: document.getElementById('invApplyVat').checked,
         issue_date: formatDateString(today),
         due_date: formatDateString(dueDate),
         items: compiledItems,
