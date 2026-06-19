@@ -14,7 +14,7 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
 /* HEADER BRAND ROW */
 .invoice-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #b09070; padding-bottom: 30px; margin-bottom: 40px; }
 .logo-block { display: flex; align-items: center; gap: 14px; }
-.logo-mark { width: 44px; height: 44px; border: 1px solid #c9bfb0; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #b09070; font-weight: 500; }
+.logo-mark-svg { width: 44px; height: 44px; object-fit: contain; }
 .wordmark .w1 { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 600; letter-spacing: 4px; text-transform: uppercase; display: block; }
 .wordmark .w2 { font-size: 0.6rem; letter-spacing: 2px; color: #7a7570; text-transform: uppercase; margin-top: 2px; display: block; }
 .studio-meta { font-size: 0.8rem; color: #7a7570; text-align: right; line-height: 1.6; }
@@ -53,7 +53,7 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
 
 /* UTILITY BUTTON CONTROLS BLOCK FOR ADMIN CONTEXTS */
 .actions-utility-bar { max-width: 900px; margin: 0 auto 20px; display: flex; justify-content: flex-end; gap: 14px; }
-.btn-utility { padding: 10px 20px; font-family: 'Outfit', sans-serif; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; cursor: pointer; border: 1px solid rgba(13,12,10,0.15); background: #ffffff; color: #1c1a17; transition: 0.3s var(--ease-out); }
+.btn-utility { padding: 10px 20px; font-family: 'Outfit', sans-serif; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; cursor: pointer; border: 1px solid rgba(13,12,10,0.15); background: #ffffff; color: #1c1a17; transition: 0.3s; }
 .btn-utility:hover { background: #1c1a17; color: #faf8f4; border-color: #1c1a17; }
 .btn-utility.primary { background: #b09070; color: #ffffff; border-color: #b09070; }
 .btn-utility.primary:hover { background: #1c1a17; border-color: #1c1a17; }
@@ -64,29 +64,10 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
 .engine-loader p { font-size: 0.8rem; color: #7a7570; letter-spacing: 1px; }
 
 @media print {
-    body { padding: 0; background: #ffffff; }
-    .invoice-container { border: none; padding: 0; box-shadow: none; }
+    body { padding: 0; background: #ffffff !important; }
+    .invoice-container { border: none !important; padding: 0 !important; box-shadow: none !important; width: 100% !important; max-width: 100% !important; }
     .actions-utility-bar { display: none !important; }
-}
-@media print {
-    @page {
-        size: A4 vertical;
-        margin: 15mm 15mm 15mm 15mm; /* Professional white-space boundaries */
-    }
-    body {
-        background: #ffffff !important;
-        padding: 0 !important;
-    }
-    .invoice-container {
-        border: none !important;
-        padding: 0 !important;
-        box-shadow: none !important;
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-    .actions-utility-bar, #cursor {
-        display: none !important; /* Hide UI controls completely on file export */
-    }
+    @page { size: A4 vertical; margin: 15mm; }
 }
 </style>
 </head>
@@ -106,7 +87,10 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
     
     <header class="invoice-header">
         <div class="logo-block">
-            <div class="logo-mark">A</div>
+            <svg class="logo-mark-svg" viewBox="0 0 1000 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M500 120 L200 680 L390 680 L445 570 L345 570 L500 270 L655 570 L500 570 L470 510 L415 510 L500 680 L800 680 Z" fill="#b09070"/>
+                <path d="M150 750 C150 750 350 750 650 750 C780 750 850 700 850 630 C850 560 780 510 650 510 L580 510 L610 570 L650 570 C720 570 760 600 760 630 C760 660 720 690 650 690 L150 690 Z" fill="#b09070"/>
+            </svg>
             <div class="wordmark">
                 <span class="w1">ADA</span>
                 <span class="w2">Archilurdesignz</span>
@@ -150,8 +134,7 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
                 <th class="col-total">Total</th>
             </tr>
         </thead>
-        <tbody id="invoiceItemsTargetRowContainer">
-            </tbody>
+        <tbody id="invoiceItemsTargetRowContainer"></tbody>
     </table>
 
     <div class="invoice-totals-wrapper">
@@ -181,12 +164,10 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
 </div>
 
 <script>
-// Initialize connection to Supabase instance
 const supabaseUrl = 'https://ofaxbduvnhscxvoakeax.supabase.co'; 
 const supabaseKey = 'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK';
 const _db = supabase.createClient(supabaseUrl, supabaseKey);
 
-// Parse currency layout targets smoothly
 function formatCurrency(value, currencyToken) {
     const numericValue = Number(value) || 0;
     if (currencyToken === 'USD') {
@@ -197,7 +178,6 @@ function formatCurrency(value, currencyToken) {
 
 async function assembleInvoiceInvoiceEngine() {
     try {
-        // Extract row uuid straight out of page url parsing paths
         const urlParams = new URLSearchParams(window.location.search);
         const invoiceId = urlParams.get('id');
 
@@ -206,7 +186,6 @@ async function assembleInvoiceInvoiceEngine() {
             return;
         }
 
-        // Pull row datasets directly from active database connection mapping rows
         const { data: invoice, error } = await _db
             .from('invoices')
             .select('*')
@@ -221,11 +200,9 @@ async function assembleInvoiceInvoiceEngine() {
 
         const curr = invoice.currency || 'NGN';
 
-        // Bind Static and Variable Core Elements
-        document.getElementById('lblFirmAddress').innerText = invoice.business_address || "Plot 14, Luxury Estate Layout, Lekki, Lagos";
+        document.getElementById('lblFirmAddress').innerText = invoice.business_address || "No 18, Omerelu Street, GRA, Port Harcourt, Nigeria";
         document.getElementById('lblFirmPhone').innerText = invoice.business_phone || "+234 813 858 0315";
         
-        // Bind Client Parameters Strings
         document.getElementById('lblClientName').innerText = invoice.client_name || "Bespoke Client Profile";
         document.getElementById('lblClientAddress').innerText = invoice.client_address || "—";
         document.getElementById('lblClientPhone').innerText = invoice.client_phone || "—";
@@ -236,12 +213,10 @@ async function assembleInvoiceInvoiceEngine() {
             document.getElementById('lblPlotSizeWrapper').style.display = 'block';
         }
 
-        // Bind Invoice Timeline Profiles
         document.getElementById('lblInvoiceNumber').innerText = invoice.invoice_number || '—';
         document.getElementById('lblIssueDate').innerText = invoice.issue_date || '—';
         document.getElementById('lblDueDate').innerText = invoice.due_date || '—';
 
-        // Loop array items maps gracefully into raw tables grids rows HTML blocks
         const targetContainer = document.getElementById('invoiceItemsTargetRowContainer');
         targetContainer.innerHTML = "";
         
@@ -267,18 +242,15 @@ async function assembleInvoiceInvoiceEngine() {
             targetContainer.appendChild(row);
         });
 
-        // Compute balances metrics data allocations
         document.getElementById('lblSubtotal').innerText = formatCurrency(calculatedSubtotal, curr);
         document.getElementById('lblGrandTotal').innerText = formatCurrency(calculatedSubtotal, curr);
 
-        // Map relative upfront retainer message benchmarks strings instructions
         const upfrontPercentageValue = Number(invoice.upfront_percentage) || 50;
         const upfrontCalculatedRawAmount = (upfrontPercentageValue / 100) * calculatedSubtotal;
         
         document.getElementById('lblUpfrontPercent').innerText = upfrontPercentageValue;
         document.getElementById('lblUpfrontValueAmount').innerText = formatCurrency(upfrontCalculatedRawAmount, curr);
 
-        // Bind Target Remittance Accounts Details Blocks Routing
         const fallbackNaira = "Access Bank\nAccount Number: 0076849302\nName: Archilurdesignz and Architecture";
         const fallbackDollar = "Zenith Bank Plc (Domiciliary)\nAccount Number: 5071192834\nSort Code/Swift: ZEBINGLA";
         
@@ -286,7 +258,6 @@ async function assembleInvoiceInvoiceEngine() {
             ? (invoice.dollar_account_info || fallbackDollar)
             : (invoice.naira_account_info || fallbackNaira);
 
-        // Reveal Invoice Frame Containers and kill Loader transitions elements
         document.getElementById('invoiceLoadingScreen').style.display = 'none';
         document.getElementById('invoiceControlPanel').style.display = 'flex';
         document.getElementById('invoiceFrame').style.opacity = '1';
@@ -296,17 +267,12 @@ async function assembleInvoiceInvoiceEngine() {
         document.getElementById('invoiceLoadingScreen').innerHTML = "<h2>Compilation Fault</h2><p>A runtime exception blocked page assembly processes.</p>";
     }
 }
-// Add this precise handler to your invoice.html script block
+
 function triggerDeviceDownloadPDF() {
-    // Dynamically set document title so the device saves the file with a professional filename
     const invoiceNum = document.getElementById('lblInvoiceNumber').innerText || 'Document';
     const oldTitle = document.title;
     document.title = "Invoice_" + invoiceNum.replace(/[^a-zA-Z0-9-_]/g, '_');
-    
-    // Fire native device rendering layer
     window.print();
-    
-    // Restore tab title state
     document.title = oldTitle;
 }
 
