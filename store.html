@@ -326,6 +326,7 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
         <a href="/">Home</a>
         <a href="portfolio">Portfolio</a>
         <a href="about">About</a>
+        <a href="#" onclick="openEstimatorModal(event)" class="nav-link">Cost Estimator</a>
     </div>
     <div class="nav-center">
         <div class="nav-logomark">A</div>
@@ -491,7 +492,82 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
         <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.7 17.7 68.9 27.1 106.1 27.1h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.1 0-65.6-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-5.5-2.8-23.2-8.5-44.2-27.1-16.4-14.6-27.4-32.7-30.6-38.1-3.2-5.5-.3-8.4 2.4-11.2 2.5-2.5 5.5-6.4 8.3-9.6 2.8-3.2 3.7-5.5 5.5-9.3 1.9-3.7 1-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 13.2 5.7 23.5 9.2 31.6 11.8 13.3 4.2 25.4 3.6 35 2.2 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
     </a>
 </div>
+<div id="estimatorModal" class="est-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(13,12,10,0.95); z-index:99999; overflow-y:auto; padding:40px 20px;">
+    <div class="est-modal-content" style="max-width:750px; margin:0 auto; background:#1c1a17; border:1px solid #b09070; padding:30px; border-radius:4px; font-family:'Outfit', sans-serif; position:relative;">
+        <span onclick="closeEstimatorModal()" style="position:absolute; top:20px; right:20px; color:#c9bfb0; font-size:28px; cursor:pointer; line-height:1;">&times;</span>
+        
+        <h2 style="font-family:'Playfair Display', serif; color:#b09070; font-size:2rem; margin-bottom:20px; letter-spacing:1px;">CONSTRUCTION COST ESTIMATOR</h2>
+        <p style="color:#c9bfb0; margin-bottom:25px; font-size:0.95rem;">Generate an institutional-grade budget projection for your project tailored to current Nigerian macroeconomic adjustments.</p>
+        
+        <form id="calculatorForm" onsubmit="runCalculator(event)" style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+            <div>
+                <label style="display:block; color:#b09070; font-size:0.85rem; margin-bottom:6px; letter-spacing:1px; text-transform:uppercase;">Building Typology</label>
+                <select id="estTypology" required style="width:100%; padding:12px; background:#0d0c0a; border:1px solid #3d3a35; color:#faf8f4; border-radius:2px;">
+                    <option value="bungalow">4-Bedroom Bungalow</option>
+                    <option value="duplex">5-Bedroom Duplex</option>
+                </select>
+            </div>
+            <div>
+                <label style="display:block; color:#b09070; font-size:0.85rem; margin-bottom:6px; letter-spacing:1px; text-transform:uppercase;">Total Floor Area (sqm)</label>
+                <input type="number" id="estArea" value="234" required style="width:100%; padding:12px; background:#0d0c0a; border:1px solid #3d3a35; color:#faf8f4; border-radius:2px;">
+            </div>
+            <div>
+                <label style="display:block; color:#b09070; font-size:0.85rem; margin-bottom:6px; letter-spacing:1px; text-transform:uppercase;">Project Location State</label>
+                <select id="estState" required style="width:100%; padding:12px; background:#0d0c0a; border:1px solid #3d3a35; color:#faf8f4; border-radius:2px;">
+                    <option value="Lagos">Lagos</option>
+                    <option value="Abuja">Abuja</option>
+                    <option value="Rivers">Rivers</option>
+                    <option value="Kaduna">Kaduna</option>
+                    <option value="Kano">Kano</option>
+                </select>
+            </div>
+            <div>
+                <label style="display:block; color:#b09070; font-size:0.85rem; margin-bottom:6px; letter-spacing:1px; text-transform:uppercase;">Finishing Standard</label>
+                <select id="estFinish" required style="width:100%; padding:12px; background:#0d0c0a; border:1px solid #3d3a35; color:#faf8f4; border-radius:2px;">
+                    <option value="basic">Basic Finishing</option>
+                    <option value="mid-range" selected>Mid-Range Architectural Standard</option>
+                    <option value="high-end">High-End Luxury Specification</option>
+                </select>
+            </div>
+            <div>
+                <label style="display:block; color:#b09070; font-size:0.85rem; margin-bottom:6px; letter-spacing:1px; text-transform:uppercase;">Terrain Topology</label>
+                <select id="estTerrain" style="width:100%; padding:12px; background:#0d0c0a; border:1px solid #3d3a35; color:#faf8f4; border-radius:2px;">
+                    <option value="flat">Flat / Stable Ground</option>
+                    <option value="sloping">Sloping / Uneven Ground (+15%)</option>
+                    <option value="swampy">Swampy / Marshy Terrain (+35% Substructure)</option>
+                </select>
+            </div>
+            <div>
+                <label style="display:block; color:#b09070; font-size:0.85rem; margin-bottom:6px; letter-spacing:1px; text-transform:uppercase;">Site Logistics Access</label>
+                <select id="estLogistics" style="width:100%; padding:12px; background:#0d0c0a; border:1px solid #3d3a35; color:#faf8f4; border-radius:2px;">
+                    <option value="accessible">Accessible / Major Road Links</option>
+                    <option value="restricted">Restricted Access / Manual Handling Required (+4%)</option>
+                </select>
+            </div>
+            <div style="grid-column: span 2; display: flex; align-items: center; gap: 10px; padding: 10px 0;">
+                <input type="checkbox" id="estExternalWorks" checked style="accent-color:#b09070; transform: scale(1.2);">
+                <label for="estExternalWorks" style="color:#faf8f4; font-size:0.9rem; cursor:pointer;">Include External Site Infrastructures (Fencing, Gatehouse, Septic Matrix)</label>
+            </div>
+            <button type="submit" style="grid-column: span 2; padding:15px; background:#b09070; color:#0d0c0a; border:none; text-transform:uppercase; font-weight:700; letter-spacing:2px; cursor:pointer; border-radius:2px; transition:0.3s;">Generate Estimate Sheet</button>
+        </form>
 
+        <div id="estimatorOutput" style="display:none; margin-top:30px; border-top:1px solid #3d3a35; padding-top:25px;">
+            <h3 style="font-family:'Playfair Display', serif; color:#b09070; margin-bottom:15px;">Cost Valuation Framework</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:0.9rem; color:#c9bfb0; margin-bottom:20px;">
+                <div>Structural Shell Foundation-to-Roof:</div><div style="text-align:right; color:#faf8f4; font-weight:600;" id="outShell">₦0.00</div>
+                <div>Custom Interior Finishes Allocation:</div><div style="text-align:right; color:#faf8f4; font-weight:600;" id="outFinishing">₦0.00</div>
+                <div>External Infrastructures & Perimeter:</div><div style="text-align:right; color:#faf8f4; font-weight:600;" id="outExternal">₦0.00</div>
+                <div>Macroeconomic Inflation Mitigation Value:</div><div style="text-align:right; color:#7d2e2e; font-weight:600;" id="outInflation">₦0.00</div>
+                <div>Professional Practice Fees (Design & Mgmt):</div><div style="text-align:right; color:#faf8f4; font-weight:600;" id="outFees">₦0.00</div>
+                <div>Project Contingency Safety Net (5%):</div><div style="text-align:right; color:#faf8f4; font-weight:600;" id="outContingency">₦0.00</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; background:#0d0c0a; padding:15px; border-left:4px solid #b09070;">
+                <span style="color:#b09070; font-weight:700; letter-spacing:1px; text-transform:uppercase;">Gross Target Project Value:</span>
+                <span style="color:#b09070; font-weight:700; font-size:1.3rem;" id="outGrandTotal">₦0.00</span>
+            </div>
+        </div>
+    </div>
+</div>
 <footer>
     <div class="footer-top">
       <div class="footer-brand">
@@ -946,6 +1022,86 @@ document.addEventListener('keydown', e => {
 document.addEventListener('dragstart', e => {
     if (e.target.tagName === 'IMG') e.preventDefault();
 });
+    function openEstimatorModal(e) {
+    if(e) e.preventDefault();
+    document.getElementById('estimatorModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+function closeEstimatorModal() {
+    document.getElementById('estimatorModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+async function runCalculator(e) {
+    e.preventDefault();
+    
+    const typology = document.getElementById('estTypology').value;
+    const area = parseFloat(document.getElementById('estArea').value) || 0;
+    const selectedState = document.getElementById('estState').value;
+    const finish = document.getElementById('estFinish').value;
+    const terrain = document.getElementById('estTerrain').value;
+    const logistics = document.getElementById('estLogistics').value;
+    const hasExternal = document.getElementById('estExternalWorks').checked;
+
+    // 1. Fetch live metrics from your Supabase instance dynamically
+    let shellRate = typology === 'duplex' ? 76923 : 68376;
+    let finishRate = typology === 'duplex' ? 89743 : 85470;
+    let shellMod = 1.0, finMod = 1.0, inflationFactor = 1.48;
+
+    try {
+        // Query the variables setup via Admin Panel
+        const { data: typData } = await _db.from('building_typologies').select('*').eq('name', typology).maybeSingle();
+        if(typData) {
+            shellRate = parseFloat(typData.base_shell_rate_per_m2);
+            finishRate = parseFloat(typData.base_finishing_rate_per_m2);
+        }
+        const { data: stateData } = await _db.from('state_modifiers').select('*').eq('state_name', selectedState).maybeSingle();
+        if(stateData) {
+            shellMod = parseFloat(stateData.shell_modifier);
+            finMod = parseFloat(stateData.finishing_modifier);
+        }
+        // Fallback global configurations lookup can be added here
+    } catch(err) {
+        console.warn("Using baseline procedural parameters due to direct connection bypass:", err);
+    }
+
+    // Mathematical Core Calculation
+    let baseShellCost = area * shellRate * shellMod;
+    if (terrain === 'sloping') baseShellCost *= 1.15;
+    if (terrain === 'swampy') baseShellCost *= 1.35;
+    
+    let baseFinishingCost = area * finishRate * finMod;
+    if (finish === 'basic') baseFinishingCost *= 0.75;
+    if (finish === 'high-end') baseFinishingCost *= 1.85;
+
+    let baselineSubtotal = baseShellCost + baseFinishingCost;
+    if (logistics === 'restricted') baselineSubtotal *= 1.04;
+
+    const postInflationTotal = baselineSubtotal * inflationFactor;
+    const inflationBuffer = postInflationTotal - baselineSubtotal;
+
+    let externalWorks = 0;
+    if(hasExternal) {
+        externalWorks = (typology === 'duplex' ? 7500000 : 5000000) * shellMod * inflationFactor;
+    }
+
+    const compiledPreTotal = postInflationTotal + externalWorks;
+    const profFees = compiledPreTotal * 0.12;
+    const contingency = compiledPreTotal * 0.05;
+    const grandTotal = compiledPreTotal + profFees + contingency;
+
+    // Render Clean Formatting Strings
+    const fmt = (val) => '₦' + Math.round(val).toLocaleString('en-NG', { minimumFractionDigits: 2 });
+    document.getElementById('outShell').innerText = fmt(baseShellCost);
+    document.getElementById('outFinishing').innerText = fmt(baseFinishingCost);
+    document.getElementById('outExternal').innerText = fmt(externalWorks);
+    document.getElementById('outInflation').innerText = fmt(inflationBuffer);
+    document.getElementById('outFees').innerText = fmt(profFees);
+    document.getElementById('outContingency').innerText = fmt(contingency);
+    document.getElementById('outGrandTotal').innerText = fmt(grandTotal);
+
+    document.getElementById('estimatorOutput').style.display = 'block';
+}
 </script>
 </body>
 </html>
