@@ -1035,7 +1035,8 @@ function closeEstimatorModal() {
 async function runCalculator(e) {
     e.preventDefault();
     
-    const typology = document.getElementById('estTypology').value;
+    // Extracted directly from input choices
+    const floors = parseInt(document.getElementById('estFloors').value) || 1;
     const area = parseFloat(document.getElementById('estArea').value) || 0;
     const selectedState = document.getElementById('estState').value;
     const finish = document.getElementById('estFinish').value;
@@ -1043,30 +1044,38 @@ async function runCalculator(e) {
     const logistics = document.getElementById('estLogistics').value;
     const hasExternal = document.getElementById('estExternalWorks').checked;
 
-    // 1. Fetch live metrics from your Supabase instance dynamically
-    let shellRate = typology === 'duplex' ? 76923 : 68376;
-    let finishRate = typology === 'duplex' ? 89743 : 85470;
+    // Direct fallback default baseline settings
+    let shellRate = 68376;
+    let finishRate = 85470;
+    let floorMultiplierPct = 12.5; 
     let shellMod = 1.0, finMod = 1.0, inflationFactor = 1.48;
 
     try {
-        // Query the variables setup via Admin Panel
-        const { data: typData } = await _db.from('building_typologies').select('*').eq('name', typology).maybeSingle();
-        if(typData) {
-            shellRate = parseFloat(typData.base_shell_rate_per_m2);
-            finishRate = parseFloat(typData.base_finishing_rate_per_m2);
+        // Query live variables from unified control parameters
+        const { data: globalConstants } = await _db.from('rate_constants').select('*').eq('id', 1).maybeSingle();
+        if(globalConstants) {
+            shellRate = parseFloat(globalConstants.base_shell_rate_per_sqm);
+            finishRate = parseFloat(globalConstants.base_finish_rate_per_sqm);
+            floorMultiplierPct = parseFloat(globalConstants.floor_complexity_multiplier_pct);
         }
+        
         const { data: stateData } = await _db.from('state_modifiers').select('*').eq('state_name', selectedState).maybeSingle();
         if(stateData) {
             shellMod = parseFloat(stateData.shell_modifier);
             finMod = parseFloat(stateData.finishing_modifier);
         }
-        // Fallback global configurations lookup can be added here
     } catch(err) {
-        console.warn("Using baseline procedural parameters due to direct connection bypass:", err);
+        console.warn("Bypassing server pipeline queries, pulling master baseline coefficients:", err);
     }
 
-    // Mathematical Core Calculation
-    let baseShellCost = area * shellRate * shellMod;
+    // Mathematical floor level modifier configuration logic
+    // Each added level scales structural cost by a complexity percentage to factor in slab loadings
+    let structuralFloorScalar = 1.0;
+    if (floors > 1) {
+        structuralFloorScalar += ((floors - 1) * (floorMultiplierPct / 100));
+    }
+
+    let baseShellCost = area * shellRate * shellMod * structuralFloorScalar;
     if (terrain === 'sloping') baseShellCost *= 1.15;
     if (terrain === 'swampy') baseShellCost *= 1.35;
     
@@ -1082,7 +1091,8 @@ async function runCalculator(e) {
 
     let externalWorks = 0;
     if(hasExternal) {
-        externalWorks = (typology === 'duplex' ? 7500000 : 5000000) * shellMod * inflationFactor;
+        // External works scale relative to ground level footprint costs
+        externalWorks = (floors > 1 ? 7500000 : 5000000) * shellMod * inflationFactor;
     }
 
     const compiledPreTotal = postInflationTotal + externalWorks;
@@ -1090,7 +1100,6 @@ async function runCalculator(e) {
     const contingency = compiledPreTotal * 0.05;
     const grandTotal = compiledPreTotal + profFees + contingency;
 
-    // Render Clean Formatting Strings
     const fmt = (val) => '₦' + Math.round(val).toLocaleString('en-NG', { minimumFractionDigits: 2 });
     document.getElementById('outShell').innerText = fmt(baseShellCost);
     document.getElementById('outFinishing').innerText = fmt(baseFinishingCost);
