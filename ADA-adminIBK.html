@@ -1957,7 +1957,7 @@ async function submitInvoiceToSupabaseEngine() {
         business_phone: document.getElementById('invFirmPhone').value.trim() || undefined,
         upfront_percentage: parseFloat(document.getElementById('invUpfrontPct').value) || 50,
         apply_discount: document.getElementById('invApplyDiscount').checked,
-        discount_percentage: parseFloat(document.getElementById('invDiscountPct').value) || 0
+        discount_percentage: parseFloat(document.getElementById('invDiscountPct').value) || 0,
         apply_vat: document.getElementById('invApplyVat').checked,
         issue_date: formatDateString(today),
         due_date: formatDateString(dueDate),
