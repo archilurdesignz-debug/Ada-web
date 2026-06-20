@@ -708,7 +708,7 @@ async function runSearch(query) {
         }
     } catch(e) {
         console.error('Search API execution error:', e);
-    } finally {
+    } 
         const indicator = document.getElementById('searchIndicator');
         if (indicator) indicator.remove();
 
