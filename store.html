@@ -495,14 +495,10 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
         <p style="color:#c9bfb0; margin-bottom:25px; font-size:0.95rem;">Generate an institutional-grade budget projection for your project tailored to current Nigerian macroeconomic adjustments.</p>
         
         <form id="calculatorForm" onsubmit="runCalculator(event)" style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-            <div>
-                <label style="display:block; color:#b09070; font-size:0.85rem; margin-bottom:6px; letter-spacing:1px; text-transform:uppercase;">Building Levels Setup</label>
-                <select id="estFloors" required style="width:100%; padding:12px; background:#0d0c0a; border:1px solid #3d3a35; color:#faf8f4; border-radius:2px;">
-                    <option value="1">Single Floor (Bungalow/Ground Level)</option>
-                    <option value="2">Two Floors (Duplex / Suspended Slab)</option>
-                    <option value="3">Three Floors (Multi-level Structure)</option>
-                </select>
-            </div>
+           <div>
+    <label style="display:block; color:#b09070; font-size:0.85rem; margin-bottom:6px; letter-spacing:1px; text-transform:uppercase;">Number of Floors</label>
+    <input type="number" id="estFloors" value="1" min="1" step="1" required style="width:100%; padding:12px; background:#0d0c0a; border:1px solid #3d3a35; color:#faf8f4; border-radius:2px; font-family:inherit;">
+</div>
             <div>
                 <label style="display:block; color:#b09070; font-size:0.85rem; margin-bottom:6px; letter-spacing:1px; text-transform:uppercase;">Total Floor Area (sqm)</label>
                 <input type="number" id="estArea" value="234" required style="width:100%; padding:12px; background:#0d0c0a; border:1px solid #3d3a35; color:#faf8f4; border-radius:2px;">
@@ -1087,12 +1083,14 @@ async function runCalculator(e) {
         console.warn("Falling back onto local matrix asset registry buffers:", err);
     }
 
-    // Dynamic Level Structural Scalar Adjustment Engine
-    let structuralFloorScalar = 1.0;
-    if (floors > 1) {
-        structuralFloorScalar += ((floors - 1) * (floorPremiumPct / 100));
-    }
+    // Dynamic Multi-Floor Level Multiplier Logic
+// Each additional floor above ground level (floors - 1) compounds the structural complexity rate
+let structuralFloorScalar = 1.0;
+if (floors > 1) {
+    structuralFloorScalar += ((floors - 1) * (floorPremiumPct / 100));
+}
 
+let baseShellCost = area * shellRate * shellMod * structuralFloorScalar;
     let baseShellCost = area * shellRate * shellMod * structuralFloorScalar;
     if (terrain === 'sloping') baseShellCost *= 1.15;
     if (terrain === 'swampy') baseShellCost *= 1.35;
