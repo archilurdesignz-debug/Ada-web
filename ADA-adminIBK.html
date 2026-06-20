@@ -665,7 +665,54 @@
         </button>
     </div>
 </div>
-
+ <!-- ── COST ESTIMATOR CALCULATOR ────────────────────────────────────── -->
+    <div class="section-card" style="background:var(--glass); border:1px solid var(--gold); margin-top:40px; border-radius:4px; overflow:hidden;">
+    <div onclick="toggleCalculatorPanel()" style="padding:25px 30px; cursor:pointer; display:flex; justify-content:between; align-items:center; background:rgba(255,255,255,0.02); transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout darkness="this.style.background='rgba(255,255,255,0.02)'">
+        <div style="flex-grow: 1;">
+            <h2 style="margin:0; display:inline-block;">Estimator Calculator Architecture Control</h2>
+            <p style="color:var(--gold); font-size:0.9rem; margin:5px 0 0 0;">Adjust baseline parameters and live structural cost margins across target demographic metrics instantly.</p>
+        </div>
+        <span id="calcPanelArrow" style="color:var(--gold); font-size:1.5rem; transform:rotate(0deg); transition:transform 0.3s; font-family:'Cormorant Garamond', serif; font-weight:bold;">▼</span>
+    </div>
+    
+    <div id="calcPanelContent" style="max-height:0px; overflow:hidden; transition: max-height 0.4s ease-out; padding: 0 30px;">
+        <div style="padding: 25px 0 35px 0; display:grid; grid-template-columns:1fr 1fr; gap:30px; border-top:1px solid var(--glass);">
+            <div>
+                <h3 style="font-size:1.1rem; border-bottom:1px solid var(--glass); padding-bottom:10px;">Baseline Configuration Constants</h3>
+                <div style="margin-top:15px;">
+                    <label style="display:block; font-size:0.8rem; text-transform:uppercase; margin-bottom:5px;">Bungalow Base Structural Shell (per sqm)</label>
+                    <input type="number" id="admBungShell" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--gold); color:#fff; margin-bottom:15px;">
+                    
+                    <label style="display:block; font-size:0.8rem; text-transform:uppercase; margin-bottom:5px;">Bungalow Base Finishing (per sqm)</label>
+                    <input type="number" id="admBungFin" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--gold); color:#fff; margin-bottom:15px;">
+                    
+                    <button onclick="updateAdminBaseConstants()" style="background:var(--success); color:#fff; border:none; padding:10px 20px; cursor:pointer; font-weight:600; text-transform:uppercase; font-size:0.8rem;">Save Structural Coefficients</button>
+                </div>
+            </div>
+            
+            <div>
+                <h3 style="font-size:1.1rem; border-bottom:1px solid var(--glass); padding-bottom:10px;">State-by-State Factor Modifiers</h3>
+                <div style="margin-top:15px;">
+                    <label style="display:block; font-size:0.8rem; text-transform:uppercase; margin-bottom:5px;">Target State Selection</label>
+                    <select id="admStateTarget" onchange="loadTargetStateModifiers()" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--gold); color:#fff; margin-bottom:15px;">
+                        <option value="Lagos">Lagos</option>
+                        <option value="Rivers">Rivers</option>
+                        <option value="Kaduna">Kaduna</option>
+                        <option value="Kano">Kano</option>
+                    </select>
+                    
+                    <label style="display:block; font-size:0.8rem; text-transform:uppercase; margin-bottom:5px;">Substructure / Shell Modifier Scalar</label>
+                    <input type="number" step="0.01" id="admStateShellMod" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--gold); color:#fff; margin-bottom:15px;">
+                    
+                    <label style="display:block; font-size:0.8rem; text-transform:uppercase; margin-bottom:5px;">Finishing Logistics Modifier Scalar</label>
+                    <input type="number" step="0.01" id="admStateFinMod" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--gold); color:#fff; margin-bottom:15px;">
+                    
+                    <button onclick="saveAdminStateModifiers()" style="background:var(--gold); color:var(--bg); border:none; padding:10px 20px; cursor:pointer; font-weight:700; text-transform:uppercase; font-size:0.8rem;">Commit State Factors</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
     <!-- ── SERVICE TERMS MANAGER ────────────────────────────────────── -->
 <div class="section-card" style="border-top-color: #9b59b6;">
     <div class="section-toggle" onclick="toggleSection(this)">
