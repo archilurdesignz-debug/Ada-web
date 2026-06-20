@@ -1966,21 +1966,34 @@ async function submitInvoiceToSupabaseEngine() {
         dollar_account_info: document.getElementById('invDollarAccount').value.trim() || undefined
     };
 
-    const { data, error } = await _db
+ const { data, error } = await _db
         .from('invoices')
         .insert([payload])
-        .select('id')
+        .select()
         .single();
 
     if (error) {
+        console.error("Database insertion failed:", error);
         alert('Supabase Error writing transaction asset: ' + error.message);
         return;
     }
 
+    // 2. Generate your professional dynamic URL route using the origin location
     const targetUrl = window.location.origin + '/invoice.html?id=' + data.id;
-    document.getElementById('lblGeneratedInvoiceUrl').value = targetUrl;
-    document.getElementById('invoiceOutputUrlWrapper').style.display = 'block';
-    alert('✓ Invoice created successfully in database!');
+    
+    // 3. Update your admin UI element display paths
+    if (document.getElementById('lblGeneratedInvoiceUrl')) {
+        document.getElementById('lblGeneratedInvoiceUrl').value = targetUrl;
+    }
+    if (document.getElementById('invoiceOutputUrlWrapper')) {
+        document.getElementById('invoiceOutputUrlWrapper').style.display = 'block';
+    }
+
+    // 4. Alert user of absolute success
+    alert('✓ Invoice generated successfully in database!');
+
+    // 5. OPTIONAL: Run a redirect *only* if you want to automatically open it
+    // window.location.href = targetUrl; 
 }
 </script>
 </body>
