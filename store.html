@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <title>Plan Store | ADA Archilurdesignz</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -591,6 +592,17 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
 </footer>
 
 <script>
+    // ── SUPABASE CLIENT ─────────────────────────────────────────────────
+const { createClient } = window.supabase || {};
+let _db = null;
+try {
+    if (createClient) {
+        _db = createClient(
+            'https://ofaxbduvnhscxvoakeax.supabase.co',
+            'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK'
+        );
+    }
+} catch(e) { console.warn('Supabase init failed:', e); }
 const defaultPlans=[
     {
         id:'obsidian-2bed',
