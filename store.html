@@ -697,7 +697,7 @@ async function runSearch(query) {
     }
 
     let apiHits = [];
-    try {
+  try {
         const r = await fetch(`/api/get-store?search=${encodeURIComponent(q)}`);
         if (r.ok) {
             const data = await r.json();
@@ -709,21 +709,22 @@ async function runSearch(query) {
     } catch(e) {
         console.error('Search API execution error:', e);
     } 
-        const indicator = document.getElementById('searchIndicator');
-        if (indicator) indicator.remove();
 
-        if (apiHits.length > 0) {
-            apiHits.forEach(p => {
-                if (!seen.has(p.id)) {
-                    seen.add(p.id);
-                    renderCard(p, g);
-                }
-            });
-        }
+    // Cleaned execution sequence (Stray 'else' keyword and duplicate bracket removed)
+    const indicator = document.getElementById('searchIndicator');
+    if (indicator) indicator.remove();
 
-        if (seen.size === 0) {
-            g.innerHTML = `<div class="search-no-results">No plans found for "${query.toUpperCase()}"</div>`;
-        }
+    if (apiHits.length > 0) {
+        apiHits.forEach(p => {
+            if (!seen.has(p.id)) {
+                seen.add(p.id);
+                renderCard(p, g);
+            }
+        });
+    }
+
+    if (seen.size === 0) {
+        g.innerHTML = `<div class="search-no-results">No plans found for "${query.toUpperCase()}"</div>`;
     }
 }
 async function fetchStoreItems() {
