@@ -1088,8 +1088,6 @@ let structuralFloorScalar = 1.0;
 if (floors > 1) {
     structuralFloorScalar += ((floors - 1) * (floorPremiumPct / 100));
 }
-
-let baseShellCost = area * shellRate * shellMod * structuralFloorScalar;
     let baseShellCost = area * shellRate * shellMod * structuralFloorScalar;
     if (terrain === 'sloping') baseShellCost *= 1.15;
     if (terrain === 'swampy') baseShellCost *= 1.35;
