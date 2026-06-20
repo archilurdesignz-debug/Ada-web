@@ -1072,7 +1072,10 @@ async function runCalculator(e) {
 
     if(!selectedState) { alert('Kindly select a target project location state first.'); return; }
 
-   // Baseline Alignment Compliant Configurations
+    // --- FIX: DEFINED validFloors TO PREVENT THE SCRIPT FROM CRASHING ---
+    const validFloors = Math.max(1, floors);
+
+    // Baseline Alignment Compliant Configurations
     let shellRate = 68376;
     let finishRate = 85470;
     let floorPremiumPct = 12.5; 
@@ -1094,7 +1097,7 @@ async function runCalculator(e) {
         console.warn("Falling back onto local matrix asset registry buffers:", err);
     }
 
-    // Dynamic Level Structural Scalar Adjustment Engine (Duplicate line removed)
+    // Dynamic Level Structural Scalar Adjustment Engine
     let structuralFloorScalar = 1.0;
     if (validFloors > 1) {
         structuralFloorScalar += ((validFloors - 1) * (floorPremiumPct / 100));
