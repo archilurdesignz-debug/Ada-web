@@ -148,6 +148,10 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
             <span>Subtotal</span>
             <span id="lblSubtotal"></span>
         </div>
+        <div class="total-row" id="discountRowWrapper" style="display: none; margin-top: 4px; color: #af3a3a;">
+            <span>Discount (<span id="lblDiscountPercentValue">0</span>%)</span>
+            <span id="lblDiscountAmount"></span>
+        </div>
         <div class="total-row" id="vatRowWrapper" style="display: none; margin-top: 4px;">
             <span>VAT (7.5%)</span>
             <span id="lblVatAmount"></span>
@@ -185,7 +189,6 @@ const supabaseUrl = 'https://ofaxbduvnhscxvoakeax.supabase.co';
 const supabaseKey = 'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK';
 const _db = supabase.createClient(supabaseUrl, supabaseKey);
 
-// FIXED: Synchronized exactly with admin dashboard checklist names
 const MASTER_STUDIO_SERVICES_LIST = [
     "Architectural Drawing Pack",
     "Structural Engineering Design",
@@ -193,7 +196,7 @@ const MASTER_STUDIO_SERVICES_LIST = [
     "High-End 3D Photorealistic Rendering",
     "Construction/Project Supervision",
     "Bill of Quantities (BoQ) Estimates",
-    "Architecture & Graphic Services",
+    "Architectural Graphic Services",
     "Municipal Drawing Approval Processing"
 ];
 
@@ -271,12 +274,28 @@ async function assembleInvoiceInvoiceEngine() {
             targetContainer.appendChild(row);
         });
 
-        let grandTotalFinal = calculatedSubtotal;
+        // --- ACCOUNTING PIPELINE CALCULATIONS ---
+        let runningBalance = calculatedSubtotal;
         document.getElementById('lblSubtotal').innerText = formatCurrency(calculatedSubtotal, curr);
         
+        // 1. Calculate & deduct Discount first
+        if (invoice.apply_discount === true && Number(invoice.discount_percentage) > 0) {
+            const discPercent = Number(invoice.discount_percentage);
+            const discountCalculatedAmount = calculatedSubtotal * (discPercent / 100);
+            runningBalance = calculatedSubtotal - discountCalculatedAmount;
+            
+            document.getElementById('lblDiscountPercentValue').innerText = discPercent;
+            document.getElementById('lblDiscountAmount').innerText = "-" + formatCurrency(discountCalculatedAmount, curr);
+            document.getElementById('discountRowWrapper').style.display = 'flex';
+        } else {
+            document.getElementById('discountRowWrapper').style.display = 'none';
+        }
+
+        // 2. Calculate 7.5% VAT on the post-discounted balance remaining
+        let grandTotalFinal = runningBalance;
         if (invoice.apply_vat === true) {
-            const vatAmountCalculated = calculatedSubtotal * 0.075;
-            grandTotalFinal = calculatedSubtotal + vatAmountCalculated;
+            const vatAmountCalculated = runningBalance * 0.075;
+            grandTotalFinal = runningBalance + vatAmountCalculated;
             
             document.getElementById('lblVatAmount').innerText = formatCurrency(vatAmountCalculated, curr);
             document.getElementById('vatRowWrapper').style.display = 'flex';
@@ -284,8 +303,10 @@ async function assembleInvoiceInvoiceEngine() {
             document.getElementById('vatRowWrapper').style.display = 'none';
         }
 
+        // Render Grand Final Total
         document.getElementById('lblGrandTotal').innerText = formatCurrency(grandTotalFinal, curr);
 
+        // 3. Compute structural upfront percentage off the actual final invoice total
         const upfrontPercentageValue = Number(invoice.upfront_percentage) || 50;
         const upfrontCalculatedRawAmount = (upfrontPercentageValue / 100) * grandTotalFinal;
         
@@ -299,7 +320,6 @@ async function assembleInvoiceInvoiceEngine() {
             ? (invoice.dollar_account_info || fallbackDollar)
             : (invoice.naira_account_info || fallbackNaira);
 
-        // POPULATE COVERED SCOPE MATRICES DYNAMICALLY WITH EXACT TEXT MATCHES
         const serviceLedgerContainer = document.getElementById('invoiceServicesLedgerTarget');
         const scopeArray = Array.isArray(invoice.scope_of_services) ? invoice.scope_of_services : [];
         
