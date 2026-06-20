@@ -152,6 +152,10 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
             <span>Discount (<span id="lblDiscountPercentValue">0</span>%)</span>
             <span id="lblDiscountAmount"></span>
         </div>
+        <div class="total-row" id="netTotalRowWrapper" style="display: none; margin-top: 4px; border-top: 1px solid rgba(201,191,176,0.15); padding-top: 4px; font-weight: 500;">
+            <span>Net Balance (Post-Discount)</span>
+            <span id="lblNetTotal"></span>
+        </div>
         <div class="total-row" id="vatRowWrapper" style="display: none; margin-top: 4px;">
             <span>VAT (7.5%)</span>
             <span id="lblVatAmount"></span>
@@ -189,6 +193,7 @@ const supabaseUrl = 'https://ofaxbduvnhscxvoakeax.supabase.co';
 const supabaseKey = 'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK';
 const _db = supabase.createClient(supabaseUrl, supabaseKey);
 
+// Comprehensive list of available catalogued studio capabilities
 const MASTER_STUDIO_SERVICES_LIST = [
     "Architectural Drawing Pack",
     "Structural Engineering Design",
@@ -274,24 +279,37 @@ async function assembleInvoiceInvoiceEngine() {
             targetContainer.appendChild(row);
         });
 
-        // --- ACCOUNTING PIPELINE CALCULATIONS ---
+        // --- PROGRESSIVE ACCOUNTING PRICING ENGINE ---
         let runningBalance = calculatedSubtotal;
+        
+        // Render Raw Base Subtotal
         document.getElementById('lblSubtotal').innerText = formatCurrency(calculatedSubtotal, curr);
         
-        // 1. Calculate & deduct Discount first
+        // 1. Process Discount Layer first
         if (invoice.apply_discount === true && Number(invoice.discount_percentage) > 0) {
             const discPercent = Number(invoice.discount_percentage);
             const discountCalculatedAmount = calculatedSubtotal * (discPercent / 100);
             runningBalance = calculatedSubtotal - discountCalculatedAmount;
             
+            // Render discount breakdown lines
             document.getElementById('lblDiscountPercentValue').innerText = discPercent;
             document.getElementById('lblDiscountAmount').innerText = "-" + formatCurrency(discountCalculatedAmount, curr);
             document.getElementById('discountRowWrapper').style.display = 'flex';
+            
+            // Render intermediate net balance row explicitly before tax calculations
+            if (document.getElementById('lblNetTotal') && document.getElementById('netTotalRowWrapper')) {
+                document.getElementById('lblNetTotal').innerText = formatCurrency(runningBalance, curr);
+                document.getElementById('netTotalRowWrapper').style.display = 'flex';
+            }
         } else {
+            // Hide discount & net totals if no active discount parameter is configured
             document.getElementById('discountRowWrapper').style.display = 'none';
+            if (document.getElementById('netTotalRowWrapper')) {
+                document.getElementById('netTotalRowWrapper').style.display = 'none';
+            }
         }
 
-        // 2. Calculate 7.5% VAT on the post-discounted balance remaining
+        // 2. Process VAT Layer on top of the Post-Discounted running balance figure
         let grandTotalFinal = runningBalance;
         if (invoice.apply_vat === true) {
             const vatAmountCalculated = runningBalance * 0.075;
@@ -303,7 +321,7 @@ async function assembleInvoiceInvoiceEngine() {
             document.getElementById('vatRowWrapper').style.display = 'none';
         }
 
-        // Render Grand Final Total
+        // Render Grand Final Total Balance Due
         document.getElementById('lblGrandTotal').innerText = formatCurrency(grandTotalFinal, curr);
 
         // 3. Compute structural upfront percentage off the actual final invoice total
@@ -320,6 +338,7 @@ async function assembleInvoiceInvoiceEngine() {
             ? (invoice.dollar_account_info || fallbackDollar)
             : (invoice.naira_account_info || fallbackNaira);
 
+        // POPULATE COVERED SCOPE MATRICES DYNAMICALLY
         const serviceLedgerContainer = document.getElementById('invoiceServicesLedgerTarget');
         const scopeArray = Array.isArray(invoice.scope_of_services) ? invoice.scope_of_services : [];
         
