@@ -666,53 +666,58 @@
     </div>
 </div>
  <!-- ── COST ESTIMATOR CALCULATOR ────────────────────────────────────── -->
-    <div class="section-card" style="background:var(--glass); border:1px solid var(--gold); margin-top:40px; border-radius:4px; overflow:hidden;">
-    <div onclick="toggleCalculatorPanel()" style="padding:25px 30px; cursor:pointer; display:flex; justify-content:between; align-items:center; background:rgba(255,255,255,0.02); transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout darkness="this.style.background='rgba(255,255,255,0.02)'">
-        <div style="flex-grow: 1;">
-            <h2 style="margin:0; display:inline-block;">Estimator Calculator Architecture Control</h2>
-            <p style="color:var(--gold); font-size:0.9rem; margin:5px 0 0 0;">Adjust baseline parameters and live structural cost margins across target demographic metrics instantly.</p>
+    <div class="section-card" style="border-top-color: #b5a898;">
+        <div class="section-toggle" onclick="toggleSection(this)">
+            <h2>Estimator Calculator Architecture Control</h2>
+            <span class="toggle-icon">+</span>
         </div>
-        <span id="calcPanelArrow" style="color:var(--gold); font-size:1.5rem; transform:rotate(0deg); transition:transform 0.3s; font-family:'Cormorant Garamond', serif; font-weight:bold;">▼</span>
-    </div>
-    
-    <div id="calcPanelContent" style="max-height:0px; overflow:hidden; transition: max-height 0.4s ease-out; padding: 0 30px;">
-        <div style="padding: 25px 0 35px 0; display:grid; grid-template-columns:1fr 1fr; gap:30px; border-top:1px solid var(--glass);">
-            <div>
-                <h3 style="font-size:1.1rem; border-bottom:1px solid var(--glass); padding-bottom:10px;">Baseline Configuration Constants</h3>
-                <div style="margin-top:15px;">
-                    <label style="display:block; font-size:0.8rem; text-transform:uppercase; margin-bottom:5px;">Bungalow Base Structural Shell (per sqm)</label>
-                    <input type="number" id="admBungShell" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--gold); color:#fff; margin-bottom:15px;">
-                    
-                    <label style="display:block; font-size:0.8rem; text-transform:uppercase; margin-bottom:5px;">Bungalow Base Finishing (per sqm)</label>
-                    <input type="number" id="admBungFin" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--gold); color:#fff; margin-bottom:15px;">
-                    
-                    <button onclick="updateAdminBaseConstants()" style="background:var(--success); color:#fff; border:none; padding:10px 20px; cursor:pointer; font-weight:600; text-transform:uppercase; font-size:0.8rem;">Save Structural Coefficients</button>
+        <div class="section-body">
+            <p style="font-size:0.75rem; color:#666; margin-bottom:20px;">
+                Adjust baseline coefficients, core structural values, regional factors, and macroeconomic indicators instantly.
+            </p>
+            <div class="grid-2">
+                <div>
+                    <h3 style="font-size:1.1rem; border-bottom:1px solid var(--glass); padding-bottom:10px; margin-top: 0;">Baseline Parameters Constants</h3>
+                    <div style="margin-top:15px;">
+                        <label>Bungalow Base Structural Shell (per sqm)</label>
+                        <input type="number" id="admBungShell" style="margin-bottom:15px;">
+                        
+                        <label>Bungalow Base Finishing (per sqm)</label>
+                        <input type="number" id="admBungFin" style="margin-bottom:15px;">
+
+                        <label>Duplex Base Structural Shell (per sqm)</label>
+                        <input type="number" id="admDupShell" style="margin-bottom:15px;">
+                        
+                        <label>Duplex Base Finishing (per sqm)</label>
+                        <input type="number" id="admDupFin" style="margin-bottom:15px;">
+                        
+                        <button class="btn-action btn-success" onclick="updateAdminBaseConstants()" style="margin-top: 5px;">Save Constants</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 style="font-size:1.1rem; border-bottom:1px solid var(--glass); padding-bottom:10px; margin-top: 0;">State Factor Modifiers</h3>
+                    <div style="margin-top:15px;">
+                        <label>Target State Selection</label>
+                        <select id="admStateTarget" onchange="loadTargetStateModifiers()" style="margin-bottom:15px;">
+                            <option value="Lagos">Lagos</option>
+                            <option value="Rivers">Rivers</option>
+                            <option value="Kaduna">Kaduna</option>
+                            <option value="Kano">Kano</option>
+                            <option value="Abuja">Abuja</option>
+                        </select>
+                        
+                        <label>Substructure / Shell Modifier Scalar</label>
+                        <input type="number" step="0.01" id="admStateShellMod" style="margin-bottom:15px;">
+                        
+                        <label>Finishing Logistics Modifier Scalar</label>
+                        <input type="number" step="0.01" id="admStateFinMod" style="margin-bottom:15px;">
+                        
+                        <button class="btn-action" onclick="saveAdminStateModifiers()" style="margin-top: 5px;">Commit State Factors</button>
+                    </div>
                 </div>
             </div>
-            
-            <div>
-                <h3 style="font-size:1.1rem; border-bottom:1px solid var(--glass); padding-bottom:10px;">State-by-State Factor Modifiers</h3>
-                <div style="margin-top:15px;">
-                    <label style="display:block; font-size:0.8rem; text-transform:uppercase; margin-bottom:5px;">Target State Selection</label>
-                    <select id="admStateTarget" onchange="loadTargetStateModifiers()" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--gold); color:#fff; margin-bottom:15px;">
-                        <option value="Lagos">Lagos</option>
-                        <option value="Rivers">Rivers</option>
-                        <option value="Kaduna">Kaduna</option>
-                        <option value="Kano">Kano</option>
-                    </select>
-                    
-                    <label style="display:block; font-size:0.8rem; text-transform:uppercase; margin-bottom:5px;">Substructure / Shell Modifier Scalar</label>
-                    <input type="number" step="0.01" id="admStateShellMod" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--gold); color:#fff; margin-bottom:15px;">
-                    
-                    <label style="display:block; font-size:0.8rem; text-transform:uppercase; margin-bottom:5px;">Finishing Logistics Modifier Scalar</label>
-                    <input type="number" step="0.01" id="admStateFinMod" style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid var(--gold); color:#fff; margin-bottom:15px;">
-                    
-                    <button onclick="saveAdminStateModifiers()" style="background:var(--gold); color:var(--bg); border:none; padding:10px 20px; cursor:pointer; font-weight:700; text-transform:uppercase; font-size:0.8rem;">Commit State Factors</button>
-                </div>
-            </div>
         </div>
     </div>
-</div>
     <!-- ── SERVICE TERMS MANAGER ────────────────────────────────────── -->
 <div class="section-card" style="border-top-color: #9b59b6;">
     <div class="section-toggle" onclick="toggleSection(this)">
@@ -1934,6 +1939,7 @@ window.addEventListener('DOMContentLoaded', () => {
     loadPendingReviews();
     loadDefaultsVisibility();
     attachTimelineAutoSave();
+    loadEstimatorDefaultConstants();
 
     const newCurrencyDropdown = document.getElementById('newCurrencyMode');
     if (newCurrencyDropdown) {
@@ -2041,6 +2047,63 @@ async function submitInvoiceToSupabaseEngine() {
 
     // 5. OPTIONAL: Run a redirect *only* if you want to automatically open it
     // window.location.href = targetUrl; 
+}
+    // ─── COST ESTIMATOR ARCHITECTURE OPERATIONS ──────────────────────────────────
+async function loadEstimatorDefaultConstants() {
+    if(!_db) return;
+    const { data, error } = await _db.from('building_typologies').select('*');
+    if(!error && data) {
+        data.forEach(row => {
+            if(row.name === 'bungalow') {
+                document.getElementById('admBungShell').value = row.base_shell_rate_per_m2;
+                document.getElementById('admBungFin').value = row.base_finishing_rate_per_m2;
+            } else if (row.name === 'duplex') {
+                document.getElementById('admDupShell').value = row.base_shell_rate_per_m2;
+                document.getElementById('admDupFin').value = row.base_finishing_rate_per_m2;
+            }
+        });
+    }
+    await loadTargetStateModifiers();
+}
+
+async function updateAdminBaseConstants() {
+    if(!_db) { alert('Supabase connections unavailable.'); return; }
+    const bungS = parseFloat(document.getElementById('admBungShell').value) || 0;
+    const bungF = parseFloat(document.getElementById('admBungFin').value) || 0;
+    const dupS = parseFloat(document.getElementById('admDupShell').value) || 0;
+    const dupF = parseFloat(document.getElementById('admDupFin').value) || 0;
+
+    const { error: err1 } = await _db.from('building_typologies').update({ base_shell_rate_per_m2: bungS, base_finishing_rate_per_m2: bungF }).eq('name', 'bungalow');
+    const { error: err2 } = await _db.from('building_typologies').update({ base_shell_rate_per_m2: dupS, base_finishing_rate_per_m2: dupF }).eq('name', 'duplex');
+
+    if(err1 || err2) alert('Data stream failure: ' + (err1?.message || err2?.message));
+    else alert('✓ Global cost parameters updated.');
+}
+
+async function loadTargetStateModifiers() {
+    if(!_db) return;
+    const target = document.getElementById('admStateTarget').value;
+    const { data, error } = await _db.from('state_modifiers').select('*').eq('state_name', target).maybeSingle();
+    if(data) {
+        document.getElementById('admStateShellMod').value = data.shell_modifier;
+        document.getElementById('admStateFinMod').value = data.finishing_modifier;
+    } else {
+        document.getElementById('admStateShellMod').value = '1.00';
+        document.getElementById('admStateFinMod').value = '1.00';
+    }
+}
+
+async function saveAdminStateModifiers() {
+    if(!_db) { alert('Supabase interface missing.'); return; }
+    const target = document.getElementById('admStateTarget').value;
+    const sMod = parseFloat(document.getElementById('admStateShellMod').value) || 1.0;
+    const fMod = parseFloat(document.getElementById('admStateFinMod').value) || 1.0;
+
+    const { error } = await _db.from('state_modifiers')
+        .upsert({ state_name: target, shell_modifier: sMod, finishing_modifier: fMod }, { onConflict: 'state_name' });
+
+    if(error) alert('Error saving modifiers: ' + error.message);
+    else alert(`✓ Modifiers committed for ${target}.`);
 }
 </script>
 </body>
