@@ -1060,7 +1060,7 @@ async function runCalculator(e) {
 
     if(!selectedState) { alert('Kindly select a target project location state first.'); return; }
 
-    // Baseline Alignment Compliant Configurations
+   // Baseline Alignment Compliant Configurations
     let shellRate = 68376;
     let finishRate = 85470;
     let floorPremiumPct = 12.5; 
@@ -1073,7 +1073,6 @@ async function runCalculator(e) {
             finishRate = parseFloat(globalConstants.base_finish_rate_per_sqm);
             floorPremiumPct = parseFloat(globalConstants.floor_complexity_multiplier_pct);
         }
-        
         const { data: stateData } = await _db.from('state_modifiers').select('*').eq('state_name', selectedState).maybeSingle();
         if(stateData) {
             shellMod = parseFloat(stateData.shell_modifier);
@@ -1083,12 +1082,12 @@ async function runCalculator(e) {
         console.warn("Falling back onto local matrix asset registry buffers:", err);
     }
 
-    // Dynamic Multi-Floor Level Multiplier Logic
-// Each additional floor above ground level (floors - 1) compounds the structural complexity rate
-let structuralFloorScalar = 1.0;
-if (floors > 1) {
-    structuralFloorScalar += ((floors - 1) * (floorPremiumPct / 100));
-}
+    // Dynamic Level Structural Scalar Adjustment Engine (Duplicate line removed)
+    let structuralFloorScalar = 1.0;
+    if (validFloors > 1) {
+        structuralFloorScalar += ((validFloors - 1) * (floorPremiumPct / 100));
+    }
+
     let baseShellCost = area * shellRate * shellMod * structuralFloorScalar;
     if (terrain === 'sloping') baseShellCost *= 1.15;
     if (terrain === 'swampy') baseShellCost *= 1.35;
@@ -1105,10 +1104,9 @@ if (floors > 1) {
 
     let externalWorks = 0;
     if(hasExternal) {
-        externalWorks = (floors > 1 ? 7500000 : 5000000) * shellMod * inflationFactor;
+        externalWorks = (validFloors > 1 ? 7500000 : 5000000) * shellMod * inflationFactor;
     }
 
-    // Professional Management Fees layer completely removed
     const compiledPreTotal = postInflationTotal + externalWorks;
     const contingency = compiledPreTotal * 0.05;
     const grandTotal = compiledPreTotal + contingency;
