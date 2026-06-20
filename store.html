@@ -495,10 +495,10 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
         <p style="color:#c9bfb0; margin-bottom:25px; font-size:0.95rem;">Generate an institutional-grade budget projection for your project tailored to current Nigerian macroeconomic adjustments.</p>
         
         <form id="calculatorForm" onsubmit="runCalculator(event)" style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-           <div>
-    <label style="display:block; color:#b09070; font-size:0.85rem; margin-bottom:6px; letter-spacing:1px; text-transform:uppercase;">Number of Floors</label>
-    <input type="number" id="estFloors" value="1" min="1" step="1" required style="width:100%; padding:12px; background:#0d0c0a; border:1px solid #3d3a35; color:#faf8f4; border-radius:2px; font-family:inherit;">
-</div>
+            <div>
+                <label style="display:block; color:#b09070; font-size:0.85rem; margin-bottom:6px; letter-spacing:1px; text-transform:uppercase;">Number of Floors</label>
+                <input type="number" id="estFloors" value="1" min="1" step="1" required style="width:100%; padding:12px; background:#0d0c0a; border:1px solid #3d3a35; color:#faf8f4; border-radius:2px; font-family:inherit; outline:none;">
+            </div>
             <div>
                 <label style="display:block; color:#b09070; font-size:0.85rem; margin-bottom:6px; letter-spacing:1px; text-transform:uppercase;">Total Floor Area (sqm)</label>
                 <input type="number" id="estArea" value="234" required style="width:100%; padding:12px; background:#0d0c0a; border:1px solid #3d3a35; color:#faf8f4; border-radius:2px;">
@@ -506,7 +506,7 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
             <div>
                 <label style="display:block; color:#b09070; font-size:0.85rem; margin-bottom:6px; letter-spacing:1px; text-transform:uppercase;">Project Location State</label>
                 <select id="estState" required style="width:100%; padding:12px; background:#0d0c0a; border:1px solid #3d3a35; color:#faf8f4; border-radius:2px;">
-                    <option value="">-- Loading 36 States Matrix --</option>
+                    <option value="">-- Select Project State Location --</option>
                 </select>
             </div>
             <div>
@@ -552,7 +552,6 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
                 <span style="color:#b09070; font-weight:700; letter-spacing:1px; text-transform:uppercase;">Gross Target Project Value:</span>
                 <span style="color:#b09070; font-weight:700; font-size:1.3rem;" id="outGrandTotal">₦0.00</span>
             </div>
-            
             <p style="color:#7a7570; font-size:0.82rem; font-style:italic; line-height:1.5; border-top:1px dashed #3d3a35; padding-top:15px; text-align:center; letter-spacing: 0.3px;">
                 * This is only a rough estimate of your building cost, it is not exact, to obtain exact, kindly contact our ADA BoQ team.
             </p>
