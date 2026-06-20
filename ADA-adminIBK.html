@@ -666,44 +666,48 @@
     </div>
 </div>
  <!-- ── COST ESTIMATOR CALCULATOR ────────────────────────────────────── -->
-    <div class="section-card" style="border-top-color: #b5a898;">
+   <div class="section-card" style="border-top-color: #b5a898;">
         <div class="section-toggle" onclick="toggleSection(this)">
             <h2>Estimator Calculator Architecture Control</h2>
             <span class="toggle-icon">+</span>
         </div>
         <div class="section-body">
             <p style="font-size:0.75rem; color:#666; margin-bottom:20px;">
-                Adjust baseline coefficients, core structural values, regional factors, and macroeconomic indicators instantly.
+                Adjust baseline square-meter constants, structural tier multi-floor premiums, and the full multi-state modifier matrix instantly.
             </p>
             <div class="grid-2">
                 <div>
                     <h3 style="font-size:1.1rem; border-bottom:1px solid var(--glass); padding-bottom:10px; margin-top: 0;">Baseline Parameters Constants</h3>
                     <div style="margin-top:15px;">
-                        <label>Bungalow Base Structural Shell (per sqm)</label>
-                        <input type="number" id="admBungShell" style="margin-bottom:15px;">
+                        <label>Base Structural Shell Cost (per sqm)</label>
+                        <input type="number" id="admBaseShellPerSqm" style="margin-bottom:15px;">
                         
-                        <label>Bungalow Base Finishing (per sqm)</label>
-                        <input type="number" id="admBungFin" style="margin-bottom:15px;">
+                        <label>Base Finishing Cost (per sqm)</label>
+                        <input type="number" id="admBaseFinishPerSqm" style="margin-bottom:15px;">
 
-                        <label>Duplex Base Structural Shell (per sqm)</label>
-                        <input type="number" id="admDupShell" style="margin-bottom:15px;">
-                        
-                        <label>Duplex Base Finishing (per sqm)</label>
-                        <input type="number" id="admDupFin" style="margin-bottom:15px;">
+                        <label>Multi-Floor Complexity Added Premium (%)</label>
+                        <input type="number" step="0.1" id="admFloorComplexityPct" style="margin-bottom:15px;" placeholder="e.g. 12.5">
                         
                         <button class="btn-action btn-success" onclick="updateAdminBaseConstants()" style="margin-top: 5px;">Save Constants</button>
                     </div>
                 </div>
                 <div>
-                    <h3 style="font-size:1.1rem; border-bottom:1px solid var(--glass); padding-bottom:10px; margin-top: 0;">State Factor Modifiers</h3>
+                    <h3 style="font-size:1.1rem; border-bottom:1px solid var(--glass); padding-bottom:10px; margin-top: 0;">National State Factor Modifiers</h3>
                     <div style="margin-top:15px;">
                         <label>Target State Selection</label>
                         <select id="admStateTarget" onchange="loadTargetStateModifiers()" style="margin-bottom:15px;">
-                            <option value="Lagos">Lagos</option>
-                            <option value="Rivers">Rivers</option>
-                            <option value="Kaduna">Kaduna</option>
-                            <option value="Kano">Kano</option>
-                            <option value="Abuja">Abuja</option>
+                            <option value="Abia">Abia</option><option value="Adamawa">Adamawa</option><option value="Akwa Ibom">Akwa Ibom</option>
+                            <option value="Anambra">Anambra</option><option value="Bauchi">Bauchi</option><option value="Bayelsa">Bayelsa</option>
+                            <option value="Benue">Benue</option><option value="Borno">Borno</option><option value="Cross River">Cross River</option>
+                            <option value="Delta">Delta</option><option value="Ebonyi">Ebonyi</option><option value="Edo">Edo</option>
+                            <option value="Ekiti">Ekiti</option><option value="Enugu">Enugu</option><option value="Gombe">Gombe</option>
+                            <option value="Imo">Imo</option><option value="Jigawa">Jigawa</option><option value="Kaduna">Kaduna</option>
+                            <option value="Kano">Kano</option><option value="Kebbi">Kebbi</option><option value="Kogi">Kogi</option>
+                            <option value="Kwara">Kwara</option><option value="Lagos">Lagos</option><option value="Nasarawa">Nasarawa</option>
+                            <option value="Niger">Niger</option><option value="Ogun">Ogun</option><option value="Ondo">Ondo</option>
+                            <option value="Osun">Osun</option><option value="Oyo">Oyo</option><option value="Plateau">Plateau</option>
+                            <option value="Rivers">Rivers</option><option value="Sokoto">Sokoto</option><option value="Taraba">Taraba</option>
+                            <option value="Yobe">Yobe</option><option value="Zamfara">Zamfara</option><option value="Abuja">Abuja</option>
                         </select>
                         
                         <label>Substructure / Shell Modifier Scalar</label>
@@ -2049,35 +2053,30 @@ async function submitInvoiceToSupabaseEngine() {
     // window.location.href = targetUrl; 
 }
     // ─── COST ESTIMATOR ARCHITECTURE OPERATIONS ──────────────────────────────────
+// ─── COST ESTIMATOR ARCHITECTURE OPERATIONS ──────────────────────────────────
 async function loadEstimatorDefaultConstants() {
     if(!_db) return;
-    const { data, error } = await _db.from('building_typologies').select('*');
+    const { data, error } = await _db.from('rate_constants').select('*').eq('id', 1).maybeSingle();
     if(!error && data) {
-        data.forEach(row => {
-            if(row.name === 'bungalow') {
-                document.getElementById('admBungShell').value = row.base_shell_rate_per_m2;
-                document.getElementById('admBungFin').value = row.base_finishing_rate_per_m2;
-            } else if (row.name === 'duplex') {
-                document.getElementById('admDupShell').value = row.base_shell_rate_per_m2;
-                document.getElementById('admDupFin').value = row.base_finishing_rate_per_m2;
-            }
-        });
+        document.getElementById('admBaseShellPerSqm').value = data.base_shell_rate_per_sqm;
+        document.getElementById('admBaseFinishPerSqm').value = data.base_finish_rate_per_sqm;
+        document.getElementById('admFloorComplexityPct').value = data.floor_complexity_multiplier_pct;
     }
     await loadTargetStateModifiers();
 }
 
 async function updateAdminBaseConstants() {
     if(!_db) { alert('Supabase connections unavailable.'); return; }
-    const bungS = parseFloat(document.getElementById('admBungShell').value) || 0;
-    const bungF = parseFloat(document.getElementById('admBungFin').value) || 0;
-    const dupS = parseFloat(document.getElementById('admDupShell').value) || 0;
-    const dupF = parseFloat(document.getElementById('admDupFin').value) || 0;
+    const shellSqm = parseFloat(document.getElementById('admBaseShellPerSqm').value) || 0;
+    const finishSqm = parseFloat(document.getElementById('admBaseFinishPerSqm').value) || 0;
+    const floorComp = parseFloat(document.getElementById('admFloorComplexityPct').value) || 0;
 
-    const { error: err1 } = await _db.from('building_typologies').update({ base_shell_rate_per_m2: bungS, base_finishing_rate_per_m2: bungF }).eq('name', 'bungalow');
-    const { error: err2 } = await _db.from('building_typologies').update({ base_shell_rate_per_m2: dupS, base_finishing_rate_per_m2: dupF }).eq('name', 'duplex');
+    const { error } = await _db.from('rate_constants')
+        .update({ base_shell_rate_per_sqm: shellSqm, base_finish_rate_per_sqm: finishSqm, floor_complexity_multiplier_pct: floorComp })
+        .eq('id', 1);
 
-    if(err1 || err2) alert('Data stream failure: ' + (err1?.message || err2?.message));
-    else alert('✓ Global cost parameters updated.');
+    if(error) alert('Data stream update failure: ' + error.message);
+    else alert('✓ Global cost per sqm parameters updated successfully.');
 }
 
 async function loadTargetStateModifiers() {
