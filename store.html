@@ -1116,64 +1116,38 @@ async function runCalculator(e) {
 
     if(!selectedState) { alert('Kindly select a target project location state first.'); return; }
 
-    const validFloors = Math.max(1, floors);
-
-    let shellRate = 68376;
-    let finishRate = 85470;
-    let floorPremiumPct = 12.5; 
-    let shellMod = 1.0, finMod = 1.0, inflationFactor = 1.48;
-
     try {
-        const { data: globalConstants } = await _db.from('rate_constants').select('*').eq('id', 1).maybeSingle();
-        if(globalConstants) {
-            shellRate = parseFloat(globalConstants.base_shell_rate_per_sqm);
-            finishRate = parseFloat(globalConstants.base_finish_rate_per_sqm);
-            floorPremiumPct = parseFloat(globalConstants.floor_complexity_multiplier_pct);
+        // Execute the server-side calculations safely without exposing internal database columns
+        const { data, error } = await _db.rpc('secure_calculate_estimate', {
+            target_state_param: selectedState,
+            floors_param: floors,
+            area_param: area,
+            finish_param: finish,
+            terrain_param: terrain,
+            logistics_param: logistics,
+            has_external_param: hasExternal
+        });
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+            const results = data[0];
+            const fmt = (val) => '₦' + Math.round(val).toLocaleString('en-NG', { minimumFractionDigits: 2 });
+            
+            // Render compiled pricing values out to the browser UI safely
+            document.getElementById('outShell').innerText = fmt(results.out_shell);
+            document.getElementById('outFinishing').innerText = fmt(results.out_finishing);
+            document.getElementById('outExternal').innerText = fmt(results.out_external);
+            document.getElementById('outInflation').innerText = fmt(results.out_inflation);
+            document.getElementById('outContingency').innerText = fmt(results.out_contingency);
+            document.getElementById('outGrandTotal').innerText = fmt(results.out_grand_total);
+
+            document.getElementById('estimatorOutput').style.display = 'block';
         }
-        const { data: stateData } = await _db.from('state_modifiers').select('*').eq('state_name', selectedState).maybeSingle();
-        if(stateData) {
-            shellMod = parseFloat(stateData.shell_modifier);
-            finMod = parseFloat(stateData.finishing_modifier);
-        }
-    } catch(err) { console.warn("Falling back onto local matrix buffers:", err); }
-
-    let structuralFloorScalar = 1.0;
-    if (validFloors > 1) {
-        structuralFloorScalar += ((validFloors - 1) * (floorPremiumPct / 100));
+    } catch(err) {
+        console.error("Calculation transmission block failure:", err);
+        alert("An error occurred while compiling your calculation package. Please try again.");
     }
-
-    let baseShellCost = area * shellRate * shellMod * structuralFloorScalar;
-    if (terrain === 'sloping') baseShellCost *= 1.15;
-    if (terrain === 'swampy') baseShellCost *= 1.35;
-    
-    let baseFinishingCost = area * finishRate * finMod;
-    if (finish === 'basic') baseFinishingCost *= 0.75;
-    if (finish === 'high-end') baseFinishingCost *= 1.85;
-
-    let baselineSubtotal = baseShellCost + baseFinishingCost;
-    if (logistics === 'restricted') baselineSubtotal *= 1.04;
-
-    const postInflationTotal = baselineSubtotal * inflationFactor;
-    const inflationBuffer = postInflationTotal - baselineSubtotal;
-
-    let externalWorks = 0;
-    if(hasExternal) {
-        externalWorks = (validFloors > 1 ? 7500000 : 5000000) * shellMod * inflationFactor;
-    }
-
-    const compiledPreTotal = postInflationTotal + externalWorks;
-    const contingency = compiledPreTotal * 0.05;
-    const grandTotal = compiledPreTotal + contingency;
-
-    const fmt = (val) => '₦' + Math.round(val).toLocaleString('en-NG', { minimumFractionDigits: 2 });
-    document.getElementById('outShell').innerText = fmt(baseShellCost);
-    document.getElementById('outFinishing').innerText = fmt(baseFinishingCost);
-    document.getElementById('outExternal').innerText = fmt(externalWorks);
-    document.getElementById('outInflation').innerText = fmt(inflationBuffer);
-    document.getElementById('outContingency').innerText = fmt(contingency);
-    document.getElementById('outGrandTotal').innerText = fmt(grandTotal);
-
-    document.getElementById('estimatorOutput').style.display = 'block';
 }
 </script>
 </body>
