@@ -822,9 +822,13 @@ async function initDashboard() {
     }
 
     try {
+        // CRITICAL UPDATE: Pass header authentication to bypass database RLS
         const { data, error } = await _db
-            .from('projects').select('*')
-            .eq('token', projectToken).single();
+            .from('projects')
+            .select('*')
+            .eq('token', projectToken)
+            .headers({ 'x-client-token': projectToken }) // <-- Added authentication header
+            .single();
 
         if (error || !data) { showError(); return; }
         projectData = data;
@@ -838,8 +842,7 @@ async function initDashboard() {
         populateDashboard(data);
         loadHubFiles();
     } catch(e) { showError(); }
-}
-
+    
 // ─── PREVIEW ─────────────────────────────────────────────────────────────────
 function showPreview() {
     populateDashboard({
@@ -1066,13 +1069,16 @@ function populateDashboard(d) {
 // ─── HUB ─────────────────────────────────────────────────────────────────────
 async function loadHubFiles() {
     if (!projectToken || !_db) return;
+    
     const { data, error } = await _db
         .from('project_files').select('*')
         .eq('project_token', projectToken)
+        .headers({ 'x-client-token': projectToken }) // <-- CRITICAL: Unlocks the secure RLS firewall
         .order('created_at', { ascending: true });
+        
     hubFiles = (error || !data) ? [] : data;
 }
-
+    
 function renderHub() {
     const container = document.getElementById('hubContent');
     if (!container) return;
