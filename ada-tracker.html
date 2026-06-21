@@ -809,44 +809,46 @@ async function initDashboard() {
     const params = new URLSearchParams(window.location.search);
     projectToken = params.get('token');
 
-    // No token at all — show preview so the page isn't blank during dev
     if (!projectToken) {
         if (!_db) { showPreview(); return; }
         showError(); return;
     }
 
-    // Token present — try to load from DB
-    if (!_db) {
-        // Supabase not connected at all — fall back to preview with token visible
-        showPreview(); return;
-    }
+    if (!_db) { showPreview(); return; }
 
     try {
-        console.log("Searching for token:", projectToken);
-        
-        // Removed .single() to prevent crash on zero results
-        const { data, error } = await _db
+        // Try searching standard token column first
+        let response = await _db
             .from('projects')
             .select('*')
-            .eq('token', projectToken);
+            .eq('token', projectToken)
+            .maybeSingle();
 
-        if (error) {
-            console.error("Supabase Query Error:", error);
-            showError(); 
-            return;
+        // Fallback: Try project_token matching structure if token column returns null
+        if (!response.data) {
+            console.log("Checking project_token fallback column...");
+            const fallbackResponse = await _db
+                .from('projects')
+                .select('*')
+                .eq('project_token', projectToken)
+                .maybeSingle();
+                
+            if (fallbackResponse.data) {
+                response = fallbackResponse;
+            }
         }
 
-        if (!data || data.length === 0) {
-            console.warn("No project found with token:", projectToken);
-            showError(); 
-            return;
+        if (response.error) {
+            console.error("Supabase Error Details:", response.error);
         }
 
-        // Use the first result found
-        projectData = data[0]; 
-        console.log("Project Loaded Successfully:", projectData);
+        if (!response.data) { 
+            showError(); 
+            return; 
+        }
+        
+        projectData = response.data;
 
-        // Check if admin has locked the dashboard
         if (projectData.dashboard_locked && projectData.overall_percent >= 100) {
             showLockedScreen(projectData);
             return;
@@ -855,9 +857,11 @@ async function initDashboard() {
         populateDashboard(projectData);
         loadHubFiles();
     } catch(e) { 
-        console.error("Unexpected Script Error:", e);
+        console.error("Initialization Error Exception:", e);
         showError(); 
     }
+}
+
 // ─── PREVIEW ─────────────────────────────────────────────────────────────────
 function showPreview() {
     populateDashboard({
@@ -906,7 +910,6 @@ function formatCurrency(val, mode) {
             maximumFractionDigits: 2
         });
     }
-    // Default: Naira
     return '₦' + amount.toLocaleString('en-NG');
 }
 
@@ -945,7 +948,7 @@ function populateDashboard(d) {
     if (pctEl) pctEl.textContent = `${d.overall_percent || 0}%`;
     if (archEl) archEl.textContent = d.lead_architect || '—';
 
-    // Payment band
+    // Payment Summary Section
     const deposit  = d.deposit_paid;
     const total    = d.total_sum;
     const currency = d.currency_mode || 'NGN';
@@ -963,10 +966,9 @@ function populateDashboard(d) {
         if (payBand) payBand.style.display = 'grid';
     }
 
-    // Service terms
     renderServiceTerms(d.service_terms);
 
-    // Custom tracks
+    // Dynamic Execution Track Grid Rendering
     const grid = document.getElementById('customTracksGrid');
     if (grid) {
         let tracks = [];
@@ -993,14 +995,12 @@ function populateDashboard(d) {
         }
     }
 
-    // Sub-modal stages
     setStageEl('subBrief', d.stage_brief);
     setStageEl('subSchem', d.stage_schematics);
     setStageEl('subCoord', d.stage_coordination);
     setStageEl('subDev',   d.stage_dev);
-    setStageEl('subWork',  d.stage_working);
+    setStageEl('subWork',   d.stage_working);
 
-    // Unlock engineering cards
     if (d.stage_coordination === 'started' || d.stage_coordination === 'completed') {
         document.querySelectorAll('.eng-card').forEach(card => {
             card.classList.remove('locked-dependency');
@@ -1009,7 +1009,7 @@ function populateDashboard(d) {
         });
     }
 
-    // Review section
+    // Interactive Completion Reviews Block
     if (d.overall_percent >= 100) {
         const revArea   = document.getElementById('reviewArea');
         const revLock   = document.getElementById('reviewLockedContent');
@@ -1047,7 +1047,7 @@ function populateDashboard(d) {
         }
     }
 
-    // Revision protocol
+    // Revision Protocols
     const activeRevisions = d.revision_count || 0;
     const revCounterEl = document.getElementById('clientRevisionCounter');
     const triggerBox   = document.getElementById('revisionDropdownTrigger');
@@ -1064,7 +1064,7 @@ function populateDashboard(d) {
         }
     }
 
-    // Countdown
+    // Countdown Logic Initialization
     const finalDeadline = d.deadline || d.proj_deadline;
     const cDownBar = document.getElementById('countdownBar');
 
@@ -1075,12 +1075,12 @@ function populateDashboard(d) {
         if (cDownBar) cDownBar.style.display = 'none';
     }
 
-    // ── REVEAL DASHBOARD ─────────────────────────────────────────────────────
     const loadScreen = document.getElementById('loadingScreen');
     const dashMain   = document.getElementById('dashboardMain');
     if (loadScreen) loadScreen.style.display = 'none';
     if (dashMain)   dashMain.style.display   = 'block';
 }
+
 // ─── HUB ─────────────────────────────────────────────────────────────────────
 async function loadHubFiles() {
     if (!projectToken || !_db) return;
@@ -1088,7 +1088,6 @@ async function loadHubFiles() {
     const { data, error } = await _db
         .from('project_files').select('*')
         .eq('project_token', projectToken)
-        .headers({ 'x-client-token': projectToken }) // <-- CRITICAL: Unlocks the secure RLS firewall
         .order('created_at', { ascending: true });
         
     hubFiles = (error || !data) ? [] : data;
@@ -1129,12 +1128,12 @@ function renderHub() {
     html += '</div>';
     container.innerHTML = html;
 }
+
 // ─── SERVICE TERMS RENDERER ───────────────────────────────────────────────────
 function renderServiceTerms(t) {
     const display = document.getElementById('termsDisplay');
     if (!display) return;
 
-    // No terms published yet — fall back to static defaults
     if (!t || !Array.isArray(t.sections) || !t.sections.length) {
         display.innerHTML = `
             <h3>Intellectual Licensure</h3>
@@ -1171,14 +1170,8 @@ function renderServiceTerms(t) {
         return;
     }
 
-    // Dynamic terms from Supabase
-    const para = text => text
-        ? `<p>${text.replace(/\n/g, '<br>')}</p>`
-        : '';
-
-    const bullets = arr => Array.isArray(arr) && arr.length
-        ? `<ul>${arr.map(b => `<li>${b}</li>`).join('')}</ul>`
-        : '';
+    const para = text => text ? `<p>${text.replace(/\n/g, '<br>')}</p>` : '';
+    const bullets = arr => Array.isArray(arr) && arr.length ? `<ul>${arr.map(b => `<li>${b}</li>`).join('')}</ul>` : '';
 
     const sectionsHTML = t.sections.map(s => `
         <h3>${s.heading || ''}</h3>
@@ -1186,12 +1179,11 @@ function renderServiceTerms(t) {
         ${s.type === 'bullets' || s.type === 'both' ? bullets(s.bullets) : ''}
     `).join('');
 
-    const footerHTML = t.footer
-        ? `<p style="margin-top:48px; font-size:0.75rem; color:var(--mist); border-top:1px solid var(--rule); padding-top:20px;">${t.footer}</p>`
-        : '';
+    const footerHTML = t.footer ? `<p style="margin-top:48px; font-size:0.75rem; color:var(--mist); border-top:1px solid var(--rule); padding-top:20px;">${t.footer}</p>` : '';
 
     display.innerHTML = sectionsHTML + footerHTML;
 }
+
 // ─── SUB-MODAL ────────────────────────────────────────────────────────────────
 function toggleSubModal(show) {
     const subM = document.getElementById('subModal');
@@ -1223,17 +1215,14 @@ async function submitReview() {
     if (error) {
         alert('Submission failed. Please try again.');
     } else {
-        // 1. Track submission state locally so the box stays locked if they refresh
         sessionStorage.setItem(`submitted_review_${projectToken}`, 'true');
         
-        // 2. Force countdown values to zero out instantly
         if (countdownInterval) clearInterval(countdownInterval);
         ['cdDays', 'cdHours', 'cdMins', 'cdSecs'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.textContent = '00';
         });
 
-        // 3. Render the Thank You state inside the review area immediately
         const revUnlock = document.getElementById('reviewUnlockedContent');
         if (revUnlock) {
             revUnlock.innerHTML = `
@@ -1243,7 +1232,6 @@ async function submitReview() {
                 </p>`;
         }
         
-        // 4. Lock the protocol bar header block visually immediately
         const revCounterEl = document.getElementById('clientRevisionCounter');
         const triggerBox = document.getElementById('revisionDropdownTrigger');
         if (revCounterEl) revCounterEl.innerText = "PROTOCOL LOCKED";
@@ -1320,7 +1308,7 @@ if (wa) {
     document.addEventListener('mousemove', e=>{
         if(dr){ wa.style.left=(e.clientX-ox)+'px'; wa.style.top=(e.clientY-oy)+'px'; wa.style.right=wa.style.bottom='auto'; }
     });
-    document.addEventListener('mouseup', ()=>{ dr=false; wa.style.transition='transform 0.3s'; });
+    document.addEventListener('mouseup', () => { dr=false; wa.style.transition='transform 0.3s'; });
 }
 
 // ─── LOCKED SCREEN ────────────────────────────────────────────────────────────
@@ -1369,7 +1357,7 @@ async function submitLockedReview() {
             .update({ dashboard_locked: false })
             .eq('token', projectToken);
     }
-    // Set storage key flag before reloading dashboard views
+    
     sessionStorage.setItem(`submitted_review_${projectToken}`, 'true');
     document.getElementById('lockedScreen').innerHTML = `
         <div style="text-align:center; padding:80px 10%;">
@@ -1407,21 +1395,17 @@ function toggleRevisionNotice() {
     
     if (!noticeBox) return;
     
-  // Check if the protocol is explicitly locked (Strictly at 100% completion AND review cleared)
     const reviewAlreadySubmitted = sessionStorage.getItem(`submitted_review_${projectToken}`) || projectData?.review_approved;
     const isProtocolLocked = projectData && (projectData.overall_percent >= 100 && reviewAlreadySubmitted);
+    
     if (noticeBox.style.display === 'none') {
         if (isProtocolLocked) {
-            // Update the counter header dynamically to show it's locked
             if (revCounterEl) revCounterEl.innerText = "PROTOCOL LOCKED";
-            
             noticeBox.innerHTML = `
                 <div style="text-align: center; padding: 10px 0; color: var(--accent);">
                     <strong>Protocol Locked:</strong> You have already left a review. The revision box and architectural modifications are now permanently locked.
-                </div>
-            `;
+                </div>`;
         } else {
-            // Standard active tracking text
             if (revCounterEl) revCounterEl.innerText = `REVISION COUNT (${currentCount}/3)`;
             noticeBox.innerHTML = `
                 <strong>Revision Policy Notice:</strong> You have currently utilized 
@@ -1434,7 +1418,8 @@ function toggleRevisionNotice() {
         noticeBox.style.display = 'none';
     }
 }
-    // ─── START ────────────────────────────────────────────────────────────────────
+
+// ─── START ────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', initDashboard);
 </script>
 </body>
