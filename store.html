@@ -750,7 +750,7 @@ async function executeCombinedEngine() {
         const tagsString = Array.isArray(p.tags) ? p.tags.join(' ') : '';
 
         let textPool = [
-            p.title, p.meta, p.category, p.price, tagsString, // <-- Added tagsString right here
+            p.title, p.meta, p.category, p.price, tagsString,
             p.features?.plotSuitability,
             p.features?.levels?.map(l => l.name + ' ' + (l.spaces?.join(' ') || '')).join(' ')
         ].filter(Boolean).join(' ').toLowerCase();
@@ -762,8 +762,10 @@ async function executeCombinedEngine() {
 
         let matchesCategory = true;
         if (activeCategoryFilter !== 'all') {
-            // Force activeCategoryFilter to lowercase to avoid strict casing mismatches (e.g. '3 BEDS' vs '3 beds')
-            matchesCategory = textPool.includes(activeCategoryFilter.toLowerCase());
+            // Split the active filter text by spaces (e.g., "3 beds" -> ["3", "beds"])
+            // This ensures variations like "3 BEDS - 280 SQM" evaluate as a true match!
+            const filterWords = activeCategoryFilter.toLowerCase().split(' ');
+            matchesCategory = filterWords.every(word => textPool.includes(word));
         }
 
         return matchesSearch && matchesCategory;
