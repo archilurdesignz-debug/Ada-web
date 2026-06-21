@@ -582,7 +582,6 @@
                 <div class="form-group"><label>Price</label><input type="text" id="sPrice"></div>
                 <div class="form-group"><label>Meta (e.g. 4 Beds • 350 SQM)</label><input type="text" id="sMeta"></div>
             </div>
-            
  <div class="form-group" style="margin-top: 30px; border-top: 1px solid var(--glass); padding-top: 25px; background: rgba(255,255,255,0.01); padding: 20px; border-radius: 4px;">
     <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--gold);">Architectural Spatial Parameters</h3>
     
@@ -608,7 +607,11 @@
             <input type="text" id="levelNameInput" placeholder="Level Name (e.g., Ground Floor Plan)" style="flex:1; padding:12px; background:rgba(0,0,0,0.5); border:1px solid var(--glass); color:#fff; outline: none; font-family: inherit;">
             <button type="button" onclick="addAdminFloorLevelNode()" style="padding:12px 24px; background:var(--gold); border:none; color:#0c0b09; font-weight:600; cursor:pointer; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Create Level</button>
         </div>
-        <div class="grid-2">
+        
+        <div id="adminFloorLevelsContainer" style="display:flex; flex-direction:column; gap:16px; margin-top: 15px;"></div>
+    </div>
+</div>
+            <div class="grid-2">
                 <div class="form-group">
                     <label>Design Style Cluster</label>
                     <input type="text" id="sCategory" placeholder="e.g. Tropical Contemporary">
@@ -618,10 +621,7 @@
                     <input type="text" id="sTags" placeholder="e.g. 2 bedrooms, bungalow, 1 plot fit, terrace, hotel">
                 </div>
             </div>
-        <div id="adminFloorLevelsContainer" style="display:flex; flex-direction:column; gap:16px; margin-top: 15px;"></div>
-    </div>
-</div>
-            <div class="form-group"><label>Category</label><input type="text" id="sCategory" placeholder="e.g. Tropical Contemporary"></div>
+
             <label style="margin-bottom:8px; display:block;">Gallery Image URLs (first = main/cover)</label>
             <div class="form-group" style="margin-bottom:10px; background:#fdfaf0; padding:10px; border-radius:4px; border:1px dashed #f1c40f;">
                 <label style="font-weight:bold; color:#b7950b;">⚡ Quick Dropbox Gallery Uploader</label>
@@ -1290,7 +1290,7 @@ async function uploadStore() {
 
     const rawTags = getVal('sTags');
     const tagsArray = rawTags ? rawTags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean) : [];
-    
+
     const payload = {
         title:       getVal('sTitle'),
         price:       getVal('sPrice'),
@@ -1312,44 +1312,8 @@ async function uploadStore() {
     if (!_db) { alert('Supabase not connected.'); return; }
 
     const { error } = await _db.from('plans').insert([payload]);
-    if (error) {
-        alert('Upload Error: ' + error.message);
-    } else {
-        alert('✓ Fresh design plan published to store.');
-        clearAdminPlanFormView();
-    }
-}
-
-async function editPlan(id) {
-    if (!_db) { alert('Supabase not connected.'); return; }
-    
-    const { data, error } = await _db.from('plans').select('*').eq('id', id).single();
-    if (error || !data) { alert('Could not retrieve plan details.'); return; }
-
-    setVal('sTitle', data.title || '');
-    setVal('sPrice', data.price || '');
-    setVal('sMeta', data.meta || '');
-    setVal('sCategory', data.category || '');
-    setVal('sTags', data.tags ? data.tags.join(', ') : '');
-    document.getElementById('sFeatured').checked = !!data.is_featured;
-    
-    if (data.image_urls) {
-        for (let i = 1; i <= 6; i++) {
-            setVal(`sImg${i}`, data.image_urls[i-1] || '');
-        }
-    }
-
-    const feat = data.features || {};
-    setVal('planLength', feat.length || '');
-    setVal('planWidth', feat.width || '');
-    setVal('planPlotSuitability', feat.plotSuitability || '');
-
-    compiledFloorLevelsMatrix = feat.levels || [];
-    renderAdminFloorLevelsUI();
-
-    currentEditingPlanId = data.id; 
-    const statusTextNode = document.getElementById('sUploadStatus');
-    if (statusTextNode) statusTextNode.innerText = `Currently Editing Plan ID: ${data.id}`;
+    if (error) alert('Upload Error: ' + error.message);
+    else { alert('✓ Fresh design plan published to store.'); clearAdminPlanFormView(); }
 }
 
 async function updateStore() {
@@ -1359,11 +1323,15 @@ async function updateStore() {
     const images = [1,2,3,4,5,6].map(i => getVal(`sImg${i}`)).filter(u => u);
     if (!images.length) { alert('Add at least one image URL.'); return; }
 
+    const rawTags = getVal('sTags');
+    const tagsArray = rawTags ? rawTags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean) : [];
+
     const payload = {
         title:       getVal('sTitle'),
         price:       getVal('sPrice'),
         meta:        getVal('sMeta'),
         category:    getVal('sCategory'),
+        tags:        tagsArray,
         image_urls:  images,
         main_image:  images[0],
         is_featured: document.getElementById('sFeatured').checked,
@@ -1376,17 +1344,38 @@ async function updateStore() {
     };
 
     const { error } = await _db.from('plans').update(payload).eq('id', currentEditingPlanId);
+    if (error) alert('Update Error: ' + error.message);
+    else { alert('✓ Plan record row updated successfully.'); clearAdminPlanFormView(); }
+}
+
+async function editPlan(id) {
+    if (!_db) { alert('Supabase not connected.'); return; }
+    const { data, error } = await _db.from('plans').select('*').eq('id', id).single();
+    if (error || !data) { alert('Could not retrieve plan details.'); return; }
+
+    setVal('sTitle', data.title || '');
+    setVal('sPrice', data.price || '');
+    setVal('sMeta', data.meta || '');
+    setVal('sCategory', data.category || '');
+    setVal('sTags', data.tags ? data.tags.join(', ') : '');
+    document.getElementById('sFeatured').checked = !!data.is_featured;
     
-    if (error) {
-        alert('Update Error: ' + error.message);
-    } else {
-        alert('✓ Plan record row updated successfully.');
-        clearAdminPlanFormView();
+    if (data.image_urls) {
+        for (let i = 1; i <= 6; i++) setVal(`sImg${i}`, data.image_urls[i-1] || '');
     }
+
+    const feat = data.features || {};
+    setVal('planLength', feat.length || '');
+    setVal('planWidth', feat.width || '');
+    setVal('planPlotSuitability', feat.plotSuitability || '');
+
+    compiledFloorLevelsMatrix = feat.levels || [];
+    renderAdminFloorLevelsUI();
+    currentEditingPlanId = data.id; 
+    if (document.getElementById('sUploadStatus')) document.getElementById('sUploadStatus').innerText = `Currently Editing Plan ID: ${data.id}`;
 }
 
 function clearAdminPlanFormView() {
- function clearAdminPlanFormView() {
     ['sTitle','sPrice','sMeta','sCategory','sTags','sImg1','sImg2','sImg3','sImg4','sImg5','sImg6', 'planLength', 'planWidth', 'planPlotSuitability', 'levelNameInput']
         .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     if (document.getElementById('sFeatured')) document.getElementById('sFeatured').checked = false;
@@ -1395,7 +1384,6 @@ function clearAdminPlanFormView() {
     currentEditingPlanId = null;
     if (document.getElementById('sUploadStatus')) document.getElementById('sUploadStatus').innerText = ""; 
 }
-
 // ─── DYNAMIC INTERACTIVE FLOORS AND SPACES ENGINE ────────────────────────────
 function addAdminFloorLevelNode() {
     const nameInput = document.getElementById('levelNameInput');
