@@ -746,8 +746,11 @@ async function executeCombinedEngine() {
     
     // Evaluate match across criteria
     const evaluater = (p) => {
+        // Force tags into an evaluatable string pool if they exist
+        const tagsString = Array.isArray(p.tags) ? p.tags.join(' ') : '';
+
         let textPool = [
-            p.title, p.meta, p.category, p.price,
+            p.title, p.meta, p.category, p.price, tagsString, // <-- Added tagsString right here
             p.features?.plotSuitability,
             p.features?.levels?.map(l => l.name + ' ' + (l.spaces?.join(' ') || '')).join(' ')
         ].filter(Boolean).join(' ').toLowerCase();
@@ -759,7 +762,8 @@ async function executeCombinedEngine() {
 
         let matchesCategory = true;
         if (activeCategoryFilter !== 'all') {
-            matchesCategory = textPool.includes(activeCategoryFilter);
+            // Force activeCategoryFilter to lowercase to avoid strict casing mismatches (e.g. '3 BEDS' vs '3 beds')
+            matchesCategory = textPool.includes(activeCategoryFilter.toLowerCase());
         }
 
         return matchesSearch && matchesCategory;
