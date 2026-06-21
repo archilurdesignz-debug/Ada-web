@@ -822,28 +822,42 @@ async function initDashboard() {
     }
 
     try {
-        // CRITICAL UPDATE: Pass header authentication to bypass database RLS
+        console.log("Searching for token:", projectToken);
+        
+        // Removed .single() to prevent crash on zero results
         const { data, error } = await _db
             .from('projects')
             .select('*')
-            .eq('token', projectToken)
-            .headers({ 'x-client-token': projectToken }) // <-- Added authentication header
-            .single();
+            .eq('token', projectToken);
 
-        if (error || !data) { showError(); return; }
-        projectData = data;
-
-        // Check if admin has locked the dashboard
-        if (data.dashboard_locked && data.overall_percent >= 100) {
-            showLockedScreen(data);
+        if (error) {
+            console.error("Supabase Query Error:", error);
+            showError(); 
             return;
         }
 
-        populateDashboard(data);
+        if (!data || data.length === 0) {
+            console.warn("No project found with token:", projectToken);
+            showError(); 
+            return;
+        }
+
+        // Use the first result found
+        projectData = data[0]; 
+        console.log("Project Loaded Successfully:", projectData);
+
+        // Check if admin has locked the dashboard
+        if (projectData.dashboard_locked && projectData.overall_percent >= 100) {
+            showLockedScreen(projectData);
+            return;
+        }
+
+        populateDashboard(projectData);
         loadHubFiles();
-    } catch(e) { showError(); }
+    } catch(e) { 
+        console.error("Unexpected Script Error:", e);
+        showError(); 
     }
-    
 // ─── PREVIEW ─────────────────────────────────────────────────────────────────
 function showPreview() {
     populateDashboard({
