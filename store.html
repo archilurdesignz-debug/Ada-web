@@ -762,10 +762,13 @@ async function executeCombinedEngine() {
 
         let matchesCategory = true;
         if (activeCategoryFilter !== 'all') {
-            // Split the active filter text by spaces (e.g., "3 beds" -> ["3", "beds"])
-            // This ensures variations like "3 BEDS - 280 SQM" evaluate as a true match!
             const filterWords = activeCategoryFilter.toLowerCase().split(' ');
-            matchesCategory = filterWords.every(word => textPool.includes(word));
+            
+            // CRITICAL FIX: Use word boundaries (\b) so "1" doesn't match "180 SQM"
+            matchesCategory = filterWords.every(word => {
+                const regex = new RegExp('\\b' + word + '\\b', 'i');
+                return regex.test(textPool);
+            });
         }
 
         return matchesSearch && matchesCategory;
@@ -807,7 +810,6 @@ async function executeCombinedEngine() {
         g.innerHTML = `<div class="search-no-results">No properties fit the specified criteria or filter configurations.</div>`;
     }
 }
-
 async function fetchStoreItems() {
     if (isLoading || !hasMore || isSearchMode) return;
     isLoading = true;
