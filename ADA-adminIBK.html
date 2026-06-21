@@ -582,6 +582,7 @@
                 <div class="form-group"><label>Price</label><input type="text" id="sPrice"></div>
                 <div class="form-group"><label>Meta (e.g. 4 Beds • 350 SQM)</label><input type="text" id="sMeta"></div>
             </div>
+            
  <div class="form-group" style="margin-top: 30px; border-top: 1px solid var(--glass); padding-top: 25px; background: rgba(255,255,255,0.01); padding: 20px; border-radius: 4px;">
     <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--gold);">Architectural Spatial Parameters</h3>
     
@@ -607,7 +608,16 @@
             <input type="text" id="levelNameInput" placeholder="Level Name (e.g., Ground Floor Plan)" style="flex:1; padding:12px; background:rgba(0,0,0,0.5); border:1px solid var(--glass); color:#fff; outline: none; font-family: inherit;">
             <button type="button" onclick="addAdminFloorLevelNode()" style="padding:12px 24px; background:var(--gold); border:none; color:#0c0b09; font-weight:600; cursor:pointer; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Create Level</button>
         </div>
-        
+        <div class="grid-2">
+                <div class="form-group">
+                    <label>Design Style Cluster</label>
+                    <input type="text" id="sCategory" placeholder="e.g. Tropical Contemporary">
+                </div>
+                <div class="form-group">
+                    <label>Plan Filter Tags (Comma-separated structural tags)</label>
+                    <input type="text" id="sTags" placeholder="e.g. 2 bedrooms, bungalow, 1 plot fit, terrace, hotel">
+                </div>
+            </div>
         <div id="adminFloorLevelsContainer" style="display:flex; flex-direction:column; gap:16px; margin-top: 15px;"></div>
     </div>
 </div>
@@ -1278,11 +1288,15 @@ async function uploadStore() {
     const images = [1,2,3,4,5,6].map(i => getVal(`sImg${i}`)).filter(u => u);
     if (!images.length) { alert('Add at least one image URL.'); return; }
 
+    const rawTags = getVal('sTags');
+    const tagsArray = rawTags ? rawTags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean) : [];
+    
     const payload = {
         title:       getVal('sTitle'),
         price:       getVal('sPrice'),
         meta:        getVal('sMeta'),
         category:    getVal('sCategory'),
+        tags:        tagsArray,
         image_urls:  images,
         main_image:  images[0],
         is_featured: document.getElementById('sFeatured').checked,
@@ -1316,6 +1330,7 @@ async function editPlan(id) {
     setVal('sPrice', data.price || '');
     setVal('sMeta', data.meta || '');
     setVal('sCategory', data.category || '');
+    setVal('sTags', data.tags ? data.tags.join(', ') : '');
     document.getElementById('sFeatured').checked = !!data.is_featured;
     
     if (data.image_urls) {
@@ -1371,23 +1386,14 @@ async function updateStore() {
 }
 
 function clearAdminPlanFormView() {
-    ['sTitle','sPrice','sMeta','sCategory','sImg1','sImg2','sImg3','sImg4','sImg5','sImg6', 'planLength', 'planWidth', 'planPlotSuitability', 'levelNameInput']
-        .forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.value = '';
-        });
-    
-    const featuredCheck = document.getElementById('sFeatured');
-    if (featuredCheck) featuredCheck.checked = false;
-    
+ function clearAdminPlanFormView() {
+    ['sTitle','sPrice','sMeta','sCategory','sTags','sImg1','sImg2','sImg3','sImg4','sImg5','sImg6', 'planLength', 'planWidth', 'planPlotSuitability', 'levelNameInput']
+        .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    if (document.getElementById('sFeatured')) document.getElementById('sFeatured').checked = false;
     compiledFloorLevelsMatrix = [];
     renderAdminFloorLevelsUI();
     currentEditingPlanId = null;
-    
-    const sStatus = document.getElementById('sUploadStatus');
-    if (sStatus) sStatus.innerText = ""; 
-    
-    if (typeof fetchAdminStoreItems === "function") fetchAdminStoreItems();
+    if (document.getElementById('sUploadStatus')) document.getElementById('sUploadStatus').innerText = ""; 
 }
 
 // ─── DYNAMIC INTERACTIVE FLOORS AND SPACES ENGINE ────────────────────────────
