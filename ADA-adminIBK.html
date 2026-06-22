@@ -526,6 +526,62 @@
         </div>
     </div>
 
+      <!-- ── BLOG POST UPLOAD ──────────────────────────────────────── -->
+<div class="section-card" style="border-top-color: #e74c3c;">
+    <div class="section-toggle" onclick="toggleSection(this)">
+        <h2>Manage Journal Blog Entries</h2>
+        <span class="toggle-icon">+</span>
+    </div>
+    <div class="section-body">
+        <p style="font-size:0.75rem; color:#666; margin-bottom:20px;">
+            Publish dynamic thoughts, design logs, and operational updates with text constraints (3,000–5,000 characters) and variable image/video slots.
+        </p>
+        
+        <div class="form-group">
+            <label>Article Title</label>
+            <input type="text" id="blog-title" placeholder="e.g., Designing With the Axon Archives Aesthetic">
+        </div>
+
+        <div class="form-group">
+            <label>Hero Layout Asset Type</label>
+            <select id="blog-media-type" onchange="updateBlogMediaPlaceholder(this.value)">
+                <option value="image">Dropbox Photo Layout Link</option>
+                <option value="video">YouTube Video URL/Token</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label id="lblBlogMediaUrl">Dropbox Image String Source</label>
+            <input type="text" id="blog-media-url" placeholder="https://www.dropbox.com/scl/fi/.../image.jpg?dl=0">
+            <p id="blog-media-hint" class="text-xs text-neutral-500 mt-1.5" style="font-size:0.65rem; color:#555; margin-top:4px;">
+                Paste your raw asset path directly. The script parses query parameters to append direct rendering string tags (?raw=1).
+            </p>
+        </div>
+
+        <div class="form-group">
+            <label>Article Core Content Canvas</label>
+            <div style="display:flex; flex-wrap:wrap; gap:5px; background:rgba(255,255,255,0.02); border:1px solid #333; border-bottom:0; padding:8px;">
+                <button type="button" class="btn-small" onclick="insertFormatText('<b>', '</b>')" style="padding:4px 10px; font-size:0.65rem;">Bold</button>
+                <button type="button" class="btn-small" onclick="insertFormatText('<i>', '</i>')" style="padding:4px 10px; font-size:0.65rem;">Italic</button>
+                <button type="button" class="btn-small" onclick="insertFormatText('<h2>', '</h2>')" style="padding:4px 10px; font-size:0.65rem;">H2</button>
+                <button type="button" class="btn-small" onclick="insertFormatText('<h3>', '</h3>')" style="padding:4px 10px; font-size:0.65rem;">H3</button>
+                <button type="button" class="btn-small" onclick="insertFormatText('<blockquote>', '</blockquote>')" style="padding:4px 10px; font-size:0.65rem;">Quote</button>
+                <button type="button" class="btn-small" onclick="insertFormatText('<p>', '</p>')" style="padding:4px 10px; font-size:0.65rem;">Paragraph</button>
+            </div>
+            <textarea id="blog-body-content" rows="12" oninput="trackBlogCharacterMetrics()" placeholder="Draft long-form analysis parameters here..."></textarea>
+            
+            <div style="display:flex; justify-content:between; align-items:center; margin-top:6px;">
+                <span style="font-size:0.65rem; color:#555;">Target Bounds: 3,000 to 5,000 character counts.</span>
+                <span style="font-size:0.75rem; font-weight:600; color:var(--danger);" id="blog-char-counter">0 / 5,000</span>
+            </div>
+        </div>
+
+        <button type="button" id="blog-publish-btn" disabled class="btn-action" style="background:#555; color:#888; cursor:not-allowed;" onclick="publishJournalPostToSupabase()">
+            Publish Entry to Journal
+        </button>
+    </div>
+</div>
+    
     <!-- ── UPLOAD TO PORTFOLIO ──────────────────────────────────────── -->
     <div class="section-card" style="border-top-color: #3498db;">
         <div class="section-toggle" onclick="toggleSection(this)">
@@ -1835,6 +1891,116 @@ function attachTimelineAutoSave() {
     statusInput.addEventListener('change', triggerSave);
 }
 
+    // ─── JOURNAL BLOGGING SYSTEM OPERATIONAL MATRIX ──────────────────────────────
+function updateBlogMediaPlaceholder(mode) {
+    const label = document.getElementById('lblBlogMediaUrl');
+    const input = document.getElementById('blog-media-url');
+    const hint = document.getElementById('blog-media-hint');
+    
+    if (mode === 'image') {
+        label.innerText = "Dropbox Image String Source";
+        input.placeholder = "https://www.dropbox.com/scl/fi/.../image.jpg?dl=0";
+        hint.innerHTML = "Paste your raw asset path directly. The script parses query parameters to append direct rendering string tags (?raw=1).";
+    } else {
+        label.innerText = "YouTube Video URL String";
+        input.placeholder = "https://www.youtube.com/watch?v=... or share path link";
+        hint.innerHTML = "Paste the standard share string; the formatting execution module automatically transforms native links into responsive embedded players (/embed/).";
+    }
+}
+
+function insertFormatText(openTag, closeTag) {
+    const textCanvas = document.getElementById('blog-body-content');
+    const startPos = textCanvas.selectionStart;
+    const endPos = textCanvas.selectionEnd;
+    const rawText = textCanvas.value;
+    
+    const selectedText = rawText.substring(startPos, endPos);
+    const replacement = openTag + selectedText + closeTag;
+    
+    textCanvas.value = rawText.substring(0, startPos) + replacement + rawText.substring(endPos, rawText.length);
+    textCanvas.focus();
+    textCanvas.setSelectionRange(startPos + openTag.length, startPos + openTag.length + selectedText.length);
+    trackBlogCharacterMetrics();
+}
+
+function trackBlogCharacterMetrics() {
+    const bodyText = document.getElementById('blog-body-content').value;
+    const counterDisplay = document.getElementById('blog-char-counter');
+    const actionBtn = document.getElementById('blog-publish-btn');
+    const currentLength = bodyText.length;
+
+    counterDisplay.innerText = `${currentLength.toLocaleString()} / 5,000`;
+
+    if (currentLength >= 3000 && currentLength <= 5000) {
+        counterDisplay.style.color = "var(--success)";
+        actionBtn.disabled = false;
+        actionBtn.style.background = "var(--gold)";
+        actionBtn.style.color = "#000";
+        actionBtn.style.cursor = "pointer";
+    } else {
+        counterDisplay.style.color = "var(--danger)";
+        actionBtn.disabled = true;
+        actionBtn.style.background = "#222";
+        actionBtn.style.color = "#555";
+        actionBtn.style.cursor = "not-allowed";
+    }
+}
+
+async function publishJournalPostToSupabase() {
+    if (!_db) { alert('Supabase client connection not verified.'); return; }
+
+    const title = document.getElementById('blog-title').value.trim();
+    const mediaType = document.getElementById('blog-media-type').value;
+    const rawMediaUrl = document.getElementById('blog-media-url').value.trim();
+    const bodyContent = document.getElementById('blog-body-content').value.trim();
+
+    if (!title || !rawMediaUrl || !bodyContent) {
+        alert('Please complete all article profile details before firing.');
+        return;
+    }
+
+    // Process media URL strings based on selection options
+    let finalProcessedMediaUrl = "";
+    if (mediaType === 'image') {
+        let cleanUrl = rawMediaUrl.split('?')[0];
+        finalProcessedMediaUrl = `${cleanUrl}?raw=1`;
+    } else {
+        let token = "";
+        if (rawMediaUrl.includes('youtu.be/')) {
+            token = rawMediaUrl.split('youtu.be/')[1].split('?')[0];
+        } else if (rawMediaUrl.includes('v=')) {
+            token = rawMediaUrl.split('v=')[1].split('&')[0];
+        } else if (rawMediaUrl.includes('embed/')) {
+            token = rawMediaUrl.split('embed/')[1].split('?')[0];
+        } else {
+            token = rawMediaUrl;
+        }
+        finalProcessedMediaUrl = `https://www.youtube.com/embed/${token}`;
+    }
+
+    // Automatically normalize design strings to modern URL slugs
+    const computedSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
+    const payload = {
+        title: title,
+        slug: computedSlug,
+        content: bodyContent,
+        media_type: mediaType,
+        hero_media_url: finalProcessedMediaUrl
+    };
+
+    const { error } = await _db.from('posts').insert([payload]);
+
+    if (error) {
+        alert('Supabase Transmission Blockage Error: ' + error.message);
+    } else {
+        alert('✓ Fresh journal entry published cleanly to live platform feed layers!');
+        document.getElementById('blog-title').value = "";
+        document.getElementById('blog-media-url').value = "";
+        document.getElementById('blog-body-content').value = "";
+        trackBlogCharacterMetrics();
+    }
+}
 // ─── ADMIN TIMELINE PREVIEW COUNTDOWN MOTOR ──────────────────────────────────
 function startAdminCountdownPreview() {
     clearInterval(adminCountdownInterval);
