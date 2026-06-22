@@ -1,0 +1,21 @@
+/* global.css */
+:root {
+    /* Baseline Light Mode Constants (Website Default Setup) */
+    --ink: #faf8f4;
+    --paper: #0d0c0a;
+    --glass: rgba(13, 12, 10, 0.04);
+    --nav-bg: rgba(250, 248, 244, 0.94);
+    --nav-border: rgba(13, 12, 10, 0.08);
+    
+    /* Smoothly animate background transitions */
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Global Forced Dark-Theme Overwrite */
+:root.dark-theme {
+    --ink: #0d0c0a;
+    --paper: #faf8f4;
+    --glass: rgba(255, 255, 255, 0.04);
+    --nav-bg: rgba(13, 12, 10, 0.94);
+    --nav-border: rgba(201, 191, 176, 0.08);
+}
