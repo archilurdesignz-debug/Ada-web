@@ -130,7 +130,10 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
             <p><strong>Due Date:</strong> <span id="lblDueDate">—</span></p>
         </div>
     </section>
-
+<div class="project-title-wrapper" style="background: #faf8f4; border-left: 3px solid #b09070; padding: 16px 20px; margin-bottom: 25px; border-top: 1px solid rgba(201,191,176,0.2); border-right: 1px solid rgba(201,191,176,0.2); border-bottom: 1px solid rgba(201,191,176,0.2);">
+    <h3 style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 2px; color: #7a7570; margin-bottom: 4px; font-weight: 500;">Project Assignment / Reference</h3>
+    <p id="lblProjectTitle" style="font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 500; color: #1c1a17; letter-spacing: 0.5px;">Loading Project Specific Details...</p>
+</div>
     <table class="item-table">
         <thead>
             <tr>
@@ -217,6 +220,7 @@ async function assembleInvoiceInvoiceEngine() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const invoiceId = urlParams.get('id');
+        document.getElementById('lblProjectTitle').innerText = invoice.project_request_title || "Bespoke Architectural Project Execution";
 
         if (!invoiceId) {
             document.getElementById('invoiceLoadingScreen').innerHTML = "<h2>Engine Failure</h2><p>Missing absolute invoice sequence ID reference token query.</p>";
