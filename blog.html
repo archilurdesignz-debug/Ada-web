@@ -7,24 +7,27 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Direct specificity overrides for Tailwind prose lists */
-    .prose :where(ul > li):not(:where([class~="not-prose"] *)) {
-      margin-top: 2px !important;
-      margin-bottom: 2px !important;
-      padding-top: 0px !important;
-      padding-bottom: 0px !important;
-    }
-    
-    .prose :where(ul):not(:where([class~="not-prose"] *)) {
-      margin-top: 6px !important;
-      margin-bottom: 6px !important;
+    /* 1. FORCE THE CANVAS TO HONOR ALL NATURAL PARAGRAPH BREAKS (\n) */
+    #post-body {
+      white-space: pre-line !important;
     }
 
-    /* Clear padding if your content canvas adds paragraph blocks inside items */
-    .prose :where(ul > li > p):not(:where([class~="not-prose"] *)) {
+    /* 2. COLLAPSE EXTRA SPACING ON SEPARATE USER BULLET LISTS */
+    #post-body ul {
       margin-top: 0px !important;
       margin-bottom: 0px !important;
-      padding: 0px !important;
+      padding-left: 1.25rem !important;
+      display: block !important;
+    }
+    
+    #post-body ul br {
+      display: none !important; /* Disables the unwanted <br> tags inside lists */
+    }
+
+    #post-body li {
+      margin-top: 4px !important;
+      margin-bottom: 4px !important;
+      line-height: 1.5 !important;
     }
   </style>
 </head>
