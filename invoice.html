@@ -220,13 +220,13 @@ async function assembleInvoiceInvoiceEngine() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const invoiceId = urlParams.get('id');
-        document.getElementById('lblProjectTitle').innerText = invoice.project_request_title || "Bespoke Architectural Project Execution";
 
         if (!invoiceId) {
             document.getElementById('invoiceLoadingScreen').innerHTML = "<h2>Engine Failure</h2><p>Missing absolute invoice sequence ID reference token query.</p>";
             return;
         }
 
+        // 1. Fetch data from DB first
         const { data: invoice, error } = await _db
             .from('invoices')
             .select('*')
@@ -240,6 +240,9 @@ async function assembleInvoiceInvoiceEngine() {
         }
 
         const curr = invoice.currency || 'NGN';
+
+        // 2. NOW it is safe to pull properties off the 'invoice' object:
+        document.getElementById('lblProjectTitle').innerText = invoice.project_request_title || "Bespoke Architectural Project Execution";
 
         document.getElementById('lblFirmAddress').innerText = invoice.business_address || "No 18, Omerelu Street, GRA, Port Harcourt, Nigeria";
         document.getElementById('lblFirmPhone').innerText = invoice.business_phone || "+234 813 858 0315";
@@ -283,36 +286,28 @@ async function assembleInvoiceInvoiceEngine() {
             targetContainer.appendChild(row);
         });
 
-        // --- PROGRESSIVE ACCOUNTING PRICING ENGINE ---
         let runningBalance = calculatedSubtotal;
-        
-        // Render Raw Base Subtotal
         document.getElementById('lblSubtotal').innerText = formatCurrency(calculatedSubtotal, curr);
         
-        // 1. Process Discount Layer first
         if (invoice.apply_discount === true && Number(invoice.discount_percentage) > 0) {
             const discPercent = Number(invoice.discount_percentage);
             const discountCalculatedAmount = calculatedSubtotal * (discPercent / 100);
             runningBalance = calculatedSubtotal - discountCalculatedAmount;
             
-            // Render discount breakdown lines
             document.getElementById('lblDiscountPercentValue').innerText = discPercent;
             document.getElementById('lblDiscountAmount').innerText = "-" + formatCurrency(discountCalculatedAmount, curr);
             document.getElementById('discountRowWrapper').style.display = 'flex';
             
-            // Render intermediate net balance row explicitly before tax calculations
             if (document.getElementById('lblNetTotal') && document.getElementById('netTotalRowWrapper')) {
                 document.getElementById('lblNetTotal').innerText = formatCurrency(runningBalance, curr);
                 document.getElementById('netTotalRowWrapper').style.display = 'flex';
             }
         } else {
-            // Hide discount & net totals if no active discount parameter is configured
             document.getElementById('discountRowWrapper').style.display = 'none';
             if (document.getElementById('netTotalRowWrapper')) {
                 document.getElementById('netTotalRowWrapper').style.display = 'none';
             }
         }
-
         // 2. Process VAT Layer on top of the Post-Discounted running balance figure
         let grandTotalFinal = runningBalance;
         if (invoice.apply_vat === true) {
