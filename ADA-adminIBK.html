@@ -558,23 +558,42 @@
             </p>
         </div>
 
-        <div class="form-group">
-            <label>Article Core Content Canvas</label>
-            <div style="display:flex; flex-wrap:wrap; gap:5px; background:rgba(255,255,255,0.02); border:1px solid #333; border-bottom:0; padding:8px;">
-                <button type="button" class="btn-small" onclick="insertFormatText('<b>', '</b>')" style="padding:4px 10px; font-size:0.65rem;">Bold</button>
-                <button type="button" class="btn-small" onclick="insertFormatText('<i>', '</i>')" style="padding:4px 10px; font-size:0.65rem;">Italic</button>
-                <button type="button" class="btn-small" onclick="insertFormatText('<h2>', '</h2>')" style="padding:4px 10px; font-size:0.65rem;">H2</button>
-                <button type="button" class="btn-small" onclick="insertFormatText('<h3>', '</h3>')" style="padding:4px 10px; font-size:0.65rem;">H3</button>
-                <button type="button" class="btn-small" onclick="insertFormatText('<blockquote>', '</blockquote>')" style="padding:4px 10px; font-size:0.65rem;">Quote</button>
-                <button type="button" class="btn-small" onclick="insertFormatText('<p>', '</p>')" style="padding:4px 10px; font-size:0.65rem;">Paragraph</button>
-            </div>
-            <textarea id="blog-body-content" rows="12" oninput="trackBlogCharacterMetrics()" placeholder="Draft long-form analysis parameters here..."></textarea>
-            
-            <div style="display:flex; justify-content:between; align-items:center; margin-top:6px;">
-                <span style="font-size:0.65rem; color:#555;">Target Bounds: 3,000 to 5,000 character counts.</span>
-                <span style="font-size:0.75rem; font-weight:600; color:var(--danger);" id="blog-char-counter">0 / 5,000</span>
-            </div>
-        </div>
+     <!-- TEXT AREA FRAME WITH HIGH-END EXTENDED FORMATTING TOOLBAR -->
+<div>
+  <label class="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-2">Article Core Content Canvas</label>
+  
+  <!-- Premium Editing Tools Ribbon -->
+  <div style="display:flex; flex-wrap:wrap; gap:6px; bg:rgba(255,255,255,0.02); border:1px solid #333; border-bottom:0; padding:10px; align-items:center; background: rgba(255,255,255,0.01);">
+      <!-- Typography Blocks -->
+      <button type="button" class="btn-small" onclick="insertFormatText('<b>', '</b>')" style="padding:4px 10px; font-size:0.65rem;" title="Bold"><b>B</b></button>
+      <button type="button" class="btn-small" onclick="insertFormatText('<i>', '</i>')" style="padding:4px 10px; font-size:0.65rem;" title="Italic"><i>I</i></button>
+      <button type="button" class="btn-small" onclick="insertFormatText('<u>', '</u>')" style="padding:4px 10px; font-size:0.65rem;" title="Underline"><u>U</u></button>
+      <span style="color:#333; margin:0 4px;">|</span>
+      
+      <!-- Layout Alignments -->
+      <button type="button" class="btn-small" onclick="insertFormatText('<div style=\'text-align: left;\'>', '</div>')" style="padding:4px 10px; font-size:0.65rem;" title="Align Left">Left</button>
+      <button type="button" class="btn-small" onclick="insertFormatText('<div style=\'text-align: center;\'>', '</div>')" style="padding:4px 10px; font-size:0.65rem;" title="Center Align">Center</button>
+      <button type="button" class="btn-small" onclick="insertFormatText('<div style=\'text-align: justify;\'>', '</div>')" style="padding:4px 10px; font-size:0.65rem;" title="Justify Text">Justify</button>
+      <span style="color:#333; margin:0 4px;">|</span>
+      
+      <!-- Structural Elements -->
+      <button type="button" class="btn-small" onclick="insertFormatText('<h2>', '</h2>')" style="padding:4px 10px; font-size:0.65rem;">H2</button>
+      <button type="button" class="btn-small" onclick="insertFormatText('<h3>', '</h3>')" style="padding:4px 10px; font-size:0.65rem;">H3</button>
+      <button type="button" class="btn-small" onclick="insertFormatText('<blockquote style=\'border-left:2px solid var(--gold); padding-left:15px; font-style:italic; color:#888;\'>', '</blockquote>')" style="padding:4px 10px; font-size:0.65rem;" title="Blockquote">Quote</button>
+      <span style="color:#333; margin:0 4px;">|</span>
+      
+      <!-- Interactive Lists & Links -->
+      <button type="button" class="btn-small" onclick="insertFormatText('<ul style=\'list-style-type: disc; margin-left: 20px;\'><br>  <li>', '</li><br></ul>')" style="padding:4px 10px; font-size:0.65rem;" title="Bullet List">Bullet List</button>
+      <button type="button" class="btn-small" onclick="generateHyperlinkInCanvas()" style="padding:4px 10px; font-size:0.65rem; background:#3d2255; color:white;" title="Insert Link">Make Link 🔗</button>
+  </div>
+  
+  <textarea id="blog-body-content" rows="14" oninput="trackBlogCharacterMetrics()" placeholder="Draft long-form analysis parameters here using native layout ribbon tools..." style="font-family:'Courier New', Courier, monospace; font-size:0.9rem; line-height: 1.6;"></textarea>
+  
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+      <span style="font-size:0.65rem; color:#555;">Target Bounds: 3,000 to 5,000 character counts.</span>
+      <span style="font-size:0.75rem; font-weight:600; color:var(--danger);" id="blog-char-counter">0 / 5,000</span>
+  </div>
+</div>
 
         <button type="button" id="blog-publish-btn" disabled class="btn-action" style="background:#555; color:#888; cursor:not-allowed;" onclick="publishJournalPostToSupabase()">
             Publish Entry to Journal
@@ -1921,6 +1940,16 @@ function insertFormatText(openTag, closeTag) {
     textCanvas.focus();
     textCanvas.setSelectionRange(startPos + openTag.length, startPos + openTag.length + selectedText.length);
     trackBlogCharacterMetrics();
+}
+    function generateHyperlinkInCanvas() {
+    const destinationUrl = prompt("Enter target destination URL path (e.g., https://dropbox.com/axon-archives):");
+    if (!destinationUrl) return;
+    
+    // Structure a clean HTML link anchor tag with standard gold highlighting styles
+    const openingTag = `<a href="${destinationUrl}" target="_blank" style="color:var(--gold); text-decoration:underline; font-weight:600;">`;
+    const closingTag = `</a>`;
+    
+    insertFormatText(openingTag, closingTag);
 }
 
 function trackBlogCharacterMetrics() {
