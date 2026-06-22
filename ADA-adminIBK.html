@@ -2017,7 +2017,7 @@ function trackBlogCharacterMetrics() {
 
     counterDisplay.innerText = `${currentLength.toLocaleString()} / 5,000`;
 
-    if (currentLength >= 3000 && currentLength <= 5000) {
+    if (currentLength >= 0 && currentLength <= 5000) {
         counterDisplay.style.color = "var(--success)";
         actionBtn.disabled = false;
         actionBtn.style.background = "var(--gold)";
