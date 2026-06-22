@@ -7,21 +7,24 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* target standard list items rendered by the prose plugin */
-    .prose ul {
-      margin-top: 0.5rem !important;
-      margin-bottom: 0.5rem !important;
+    /* Direct specificity overrides for Tailwind prose lists */
+    .prose :where(ul > li):not(:where([class~="not-prose"] *)) {
+      margin-top: 2px !important;
+      margin-bottom: 2px !important;
+      padding-top: 0px !important;
+      padding-bottom: 0px !important;
     }
-    .prose li {
-      margin-top: 0.15rem !important;
-      margin-bottom: 0.15rem !important;
-      padding-top: 0 !important;
-      padding-bottom: 0 !important;
-      line-height: 1.5 !important;
+    
+    .prose :where(ul):not(:where([class~="not-prose"] *)) {
+      margin-top: 6px !important;
+      margin-bottom: 6px !important;
     }
-    /* catch fallback embedded block margins */
-    #post-body ul {
-      padding-left: 1.25rem;
+
+    /* Clear padding if your content canvas adds paragraph blocks inside items */
+    .prose :where(ul > li > p):not(:where([class~="not-prose"] *)) {
+      margin-top: 0px !important;
+      margin-bottom: 0px !important;
+      padding: 0px !important;
     }
   </style>
 </head>
