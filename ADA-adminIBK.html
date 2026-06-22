@@ -231,7 +231,10 @@
                     <input type="email" id="invClientEmail" placeholder="Client Email Address (Optional)" style="margin-bottom:8px;">
                     <input type="text" id="invClientAddr" placeholder="Client Billing/Site Coordinates" style="margin-bottom:8px;">
                     <div class="form-group" style="margin-top: 15px;">
-                        
+                    <div style="margin-bottom: 20px;">
+    <label style="display:block; font-size:0.8rem; text-transform:uppercase; color:var(--gold); margin-bottom:8px; letter-spacing:1px;">Project Request Title / Assignment Reference</label>
+    <input type="text" id="invoiceProjectTitle" placeholder="e.g., Luxury 5 Bedroom Custom Duplex Execution" style="width:100%; padding:12px; background:var(--glass); border:1px solid rgba(255,255,255,0.1); color:var(--white); font-family:inherit; outline:none;">
+    </div>
     <label>Scope of Services Covered</label>
     <div id="servicesCatalogueContainer" style="background:#000; border:1px solid #333; padding:12px; max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
         <label style="display:flex; align-items:center; gap:8px; color:#fff; font-size:0.75rem; cursor:pointer; text-transform:none; letter-spacing:0;">
@@ -2249,12 +2252,13 @@ async function submitInvoiceToSupabaseEngine() {
         alert('Please provide an Invoice Number and Client Name minimum.'); 
         return; 
     }
-
+    const projectRequestTitle = document.getElementById('invoiceProjectTitle').value.trim() || "Bespoke Architectural Project Execution";
     const compiledItems = [];
     document.querySelectorAll('.invoice-item-entry-row').forEach(row => {
         const name = row.querySelector('.item-name-input').value.trim();
         const qty = parseInt(row.querySelector('.item-qty-input').value) || 1;
         const price = parseFloat(row.querySelector('.item-price-input').value) || 0;
+        
         if (name) compiledItems.push({ name, qty, unit_price: price });
     });
 
@@ -2277,6 +2281,7 @@ async function submitInvoiceToSupabaseEngine() {
         client_phone: document.getElementById('invClientPhone').value.trim(),
         client_email: document.getElementById('invClientEmail').value.trim(),
         client_address: document.getElementById('invClientAddr').value.trim(),
+        project_request_title: projectRequestTitle,
         scope_of_services: selectedServicesArray,
         business_address: document.getElementById('invFirmAddr').value.trim() || undefined, 
         business_phone: document.getElementById('invFirmPhone').value.trim() || undefined,
