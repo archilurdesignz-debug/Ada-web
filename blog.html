@@ -6,6 +6,24 @@
   <title>ADA Insights & Architecture Blog</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* target standard list items rendered by the prose plugin */
+    .prose ul {
+      margin-top: 0.5rem !important;
+      margin-bottom: 0.5rem !important;
+    }
+    .prose li {
+      margin-top: 0.15rem !important;
+      margin-bottom: 0.15rem !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      line-height: 1.5 !important;
+    }
+    /* catch fallback embedded block margins */
+    #post-body ul {
+      padding-left: 1.25rem;
+    }
+  </style>
 </head>
 <body class="bg-white text-neutral-900 font-sans selection:bg-neutral-200">
 
