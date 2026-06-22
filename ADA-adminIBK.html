@@ -550,12 +550,19 @@
             </select>
         </div>
 
-        <div class="form-group">
+       <div class="form-group">
             <label id="lblBlogMediaUrl">Dropbox Image String Source</label>
-            <input type="text" id="blog-media-url" placeholder="https://www.dropbox.com/scl/fi/.../image.jpg?dl=0">
+            <div style="display:flex; gap:10px; align-items:center;">
+                <input type="text" id="blog-media-url" placeholder="https://www.dropbox.com/scl/fi/.../image.jpg?dl=0" style="flex:1;">
+                <label id="blog-upload-btn-container" class="btn-action" style="width:auto; margin:0; padding:10px 15px; cursor:pointer; text-align:center; background-color:#2ecc71; color:#000;">
+                    📁 Upload to Dropbox
+                    <input type="file" id="blogFileInput" accept="image/*" style="display:none;" onchange="handleBlogImageDirectUpload()">
+                </label>
+            </div>
             <p id="blog-media-hint" class="text-xs text-neutral-500 mt-1.5" style="font-size:0.65rem; color:#555; margin-top:4px;">
-                Paste your raw asset path directly. The script parses query parameters to append direct rendering string tags (?raw=1).
+                Paste your raw asset path directly or click the upload button to automatically route images to Dropbox.
             </p>
+            <small id="blogUploadStatus" style="display:block; margin-top:5px; color:#7f8c8d; font-size:0.65rem; letter-spacing:0.5px;"></small>
         </div>
 
      <!-- TEXT AREA FRAME WITH HIGH-END EXTENDED FORMATTING TOOLBAR -->
@@ -1910,20 +1917,70 @@ function attachTimelineAutoSave() {
     statusInput.addEventListener('change', triggerSave);
 }
 
-    // ─── JOURNAL BLOGGING SYSTEM OPERATIONAL MATRIX ──────────────────────────────
+// ─── JOURNAL BLOGGING SYSTEM OPERATIONAL MATRIX ──────────────────────────────
 function updateBlogMediaPlaceholder(mode) {
     const label = document.getElementById('lblBlogMediaUrl');
     const input = document.getElementById('blog-media-url');
     const hint = document.getElementById('blog-media-hint');
+    const uploadBtn = document.getElementById('blog-upload-btn-container');
+    const statusText = document.getElementById('blogUploadStatus');
     
+    // Reset status reporting
+   if (statusText) statusText.innerText = "";
+
     if (mode === 'image') {
         label.innerText = "Dropbox Image String Source";
-        input.placeholder = "https://www.dropbox.com/scl/fi/.../image.jpg?dl=0";
-        hint.innerHTML = "Paste your raw asset path directly. The script parses query parameters to append direct rendering string tags (?raw=1).";
+        input.placeholder = "https://www.dropbox.com/scl/fi/.../image.jpg&dl=0";
+        hint.innerHTML = "Paste your raw asset path directly or click the upload button to automatically route images to Dropbox.";
+        if (uploadBtn) uploadBtn.style.display = "block";
     } else {
         label.innerText = "YouTube Video URL String";
         input.placeholder = "https://www.youtube.com/watch?v=... or share path link";
         hint.innerHTML = "Paste the standard share string; the formatting execution module automatically transforms native links into responsive embedded players (/embed/).";
+        if (uploadBtn) uploadBtn.style.display = "none";
+    }
+}
+
+async function handleBlogImageDirectUpload() {
+    const fileInput = document.getElementById('blogFileInput');
+    const targetInput = document.getElementById('blog-media-url');
+    const statusText = document.getElementById('blogUploadStatus');
+
+    if (!fileInput.files.length) return;
+    const file = fileInput.files[0];
+
+    statusText.innerText = "⏳ Uploading blog image to Dropbox...";
+    statusText.style.color = "#3498db";
+
+    try {
+        const base64Data = await getBase64(file);
+        const response = await fetch('/api/upload-to-dropbox', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: file.name, filedata: base64Data })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.url) {
+            // Universal clean: Strips out any trailing dl=0 or dl=1 safely, regardless of ? or &
+            let cleanUrl = data.url.replace(/[?&]dl=[01][^#]*/, '');
+            
+            // Dynamically choose the glue character (? or &) so it resolves as &raw=1 when keys exist
+            let separator = cleanUrl.includes('?') ? '&' : '?';
+            let rawUrl = `${cleanUrl}${separator}raw=1`;
+            
+            targetInput.value = rawUrl; 
+            statusText.innerText = "✅ Uploaded successfully and raw link attached!";
+            statusText.style.color = "#2ecc71";
+        } else {
+            throw new Error(data.error || "Upload failed");
+        }
+    } catch (err) { // <--- Added the matching brace right here to close the "try" block cleanly
+        statusText.innerText = `❌ Error: ${err.message}`;
+        statusText.style.color = "#e74c3c";
+    } finally {
+        fileInput.value = ""; // Clear file buffer channel
     }
 }
 
@@ -1989,10 +2046,13 @@ async function publishJournalPostToSupabase() {
     }
 
     // Process media URL strings based on selection options
-    let finalProcessedMediaUrl = "";
     if (mediaType === 'image') {
-        let cleanUrl = rawMediaUrl.split('?')[0];
-        finalProcessedMediaUrl = `${cleanUrl}?raw=1`;
+        // Fallback Protection: Strip off any pasted trailing dl parameters safely
+        let cleanUrl = rawMediaUrl.replace(/[?&]dl=[01][^#]*/, '');
+        
+        // Dynamically choose the correct glue character (? or &) so it resolves as &raw=1 when keys exist
+        let separator = cleanUrl.includes('?') ? '&' : '?';
+        finalProcessedMediaUrl = `${cleanUrl}${separator}raw=1`;
     } else {
         let token = "";
         if (rawMediaUrl.includes('youtu.be/')) {
