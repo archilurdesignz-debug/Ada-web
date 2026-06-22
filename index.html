@@ -48,35 +48,49 @@ html, body {
 img, svg, video { max-width:100%; height:auto; display:block; }
 
 /* ── TOKENS ─────────────────────────────────────────────────────────── */
+/* 1. DEFINE DEFAULT (DARK) VARIABLES */
 :root {
-    --ink:     #0d0c0a;
-    --ink2:    #1c1a17;
-    --ink3:    #2e2b26;
-    --mist:    #7a7570;
-    --sand:    #c9bfb0;
-    --paper:   #f3ede4;
-    --paper2:  #ede5d8;
-    --gold:    #b09070;
-    --gold2:   #d4b896;
-    --accent:  #c8a87a;
-    --white:   #faf8f4;
-    --glass:   rgba(255,255,255,0.04);
-    --wa:      #25D366;
-    --shadow:  0 8px 40px rgba(26,23,20,0.12);
+    --ink: #0d0c0a;
+    --ink2: #1c1a17;
+    --ink3: #2e2b26;
+    --mist: #7a7570;
+    --sand: #c9bfb0;
+    --paper: #f3ede4;
+    --paper2: #ede5d8;
+    --gold: #b09070;
+    --gold2: #d4b896;
+    --accent: #c8a87a;
+    --white: #faf8f4;
+    --glass: rgba(255,255,255,0.04);
+    --wa: #25D366;
+    --shadow: 0 8px 40px rgba(26,23,20,0.12);
 
     --f-display: 'Playfair Display', Georgia, serif;
-    --f-body:    'Outfit', sans-serif;
-
+    --f-body: 'Outfit', sans-serif;
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
 }
 
+/* 2. DEFINE LIGHT MODE OVERRIDES */
+[data-theme='light'] {
+    --ink: #f3ede4;   /* Inverted from --paper */
+    --ink2: #ede5d8;  /* Inverted from --paper2 */
+    --ink3: #d6cdc1;  /* Adjusted for contrast */
+    --mist: #5c5752;  /* Darkened for readability on light background */
+    --sand: #7a7570;  /* Darkened for readability */
+    --paper: #0d0c0a; /* Inverted from --ink */
+    --paper2: #1c1a17;/* Inverted from --ink2 */
+    --white: #2e2b26; /* Adjusted */
+    --glass: rgba(0,0,0,0.06); /* Darkened for light mode */
+    --shadow: 0 8px 40px rgba(0,0,0,0.08);
+}
 body {
     background: var(--ink);
     color: var(--paper);
     font-family: var(--f-body);
     line-height: 1.65;
     cursor: default;
+    transition: background 0.4s ease, color 0.4s ease;
 }
 
 /* ── CUSTOM CURSOR ───────────────────────────────────────────────────── */
@@ -1112,6 +1126,13 @@ footer {
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
+    (function() {
+    const savedTheme = localStorage.getItem('ada-theme');
+    if (savedTheme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+})();
+    
     // Initialize EmailJS
     emailjs.init("BxYPs2WHunB4bKb2w");
 
@@ -1416,6 +1437,20 @@ window.addEventListener('DOMContentLoaded', () => {
     loadReviews();
     observeReveal();
 });
+    function toggleGlobalTheme() {
+    const html = document.documentElement;
+    const toggleText = document.querySelector('.theme-toggle-text');
+
+    if (html.getAttribute('data-theme') === 'light') {
+        html.removeAttribute('data-theme');
+        localStorage.setItem('ada-theme', 'dark'); // Save preference
+        toggleText.innerText = 'Light View';
+    } else {
+        html.setAttribute('data-theme', 'light');
+        localStorage.setItem('ada-theme', 'light'); // Save preference
+        toggleText.innerText = 'Dark View';
+    }
+}
 </script>
 </body>
 </html>
