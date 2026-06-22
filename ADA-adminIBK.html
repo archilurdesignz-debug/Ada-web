@@ -2033,8 +2033,7 @@ function trackBlogCharacterMetrics() {
 }
 
 async function publishJournalPostToSupabase() {
-    if (!_db) { alert('Supabase client connection not verified.'); return; }
-
+    // We bypass the direct client check here because we are routing securely via fetch
     const title = document.getElementById('blog-title').value.trim();
     const mediaType = document.getElementById('blog-media-type').value;
     const rawMediaUrl = document.getElementById('blog-media-url').value.trim();
@@ -2044,6 +2043,74 @@ async function publishJournalPostToSupabase() {
         alert('Please complete all article profile details before firing.');
         return;
     }
+
+    // ─── DYNAMIC MEDIA STRING PROCESSING PIPELINE ────────────────────────────
+    let finalProcessedMediaUrl = "";
+    
+    if (mediaType === 'image') {
+        // Fallback Protection: Strip off any pasted trailing dl parameters safely
+        let cleanUrl = rawMediaUrl.replace(/[?&]dl=[01][^#]*/, '');
+        
+        // Dynamically choose the correct glue character (? or &) so it resolves as &raw=1 when keys exist
+        let separator = cleanUrl.includes('?') ? '&' : '?';
+        finalProcessedMediaUrl = `${cleanUrl}${separator}raw=1`;
+    } else {
+        // YouTube Embed Formatting Pipeline
+        let token = "";
+        if (rawMediaUrl.includes('youtu.be/')) {
+            token = rawMediaUrl.split('youtu.be/')[1].split('?')[0];
+        } else if (rawMediaUrl.includes('v=')) {
+            token = rawMediaUrl.split('v=')[1].split('&')[0];
+        } else if (rawMediaUrl.includes('embed/')) {
+            token = rawMediaUrl.split('embed/')[1].split('?')[0];
+        } else {
+            token = rawMediaUrl;
+        }
+        finalProcessedMediaUrl = `https://www.youtube.com/embed/${token}`;
+    }
+
+    // Automatically normalize design strings to modern browser URL slugs
+    const computedSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
+    // Compile the secure transaction packet payload
+    const payload = {
+        title: title,
+        slug: computedSlug,
+        content: bodyContent,
+        media_type: mediaType,
+        hero_media_url: finalProcessedMediaUrl
+    };
+
+    // ─── SECURE SERVERLESS API LAYER DISPATCH ───────────────────────────────
+    try {
+        // Post the clean payload straight to your secure serverless backend route
+        const response = await fetch('/api/publish-post', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Serverless pipeline connection failure.');
+        }
+
+        // Execution success path
+        alert('✓ Fresh journal entry published cleanly to live platform feed layers!');
+        
+        // Clear workspace form values for next draft iteration
+        document.getElementById('blog-title').value = "";
+        document.getElementById('blog-media-url').value = "";
+        document.getElementById('blog-body-content').value = "";
+        
+        // Refresh character counter indicators
+        trackBlogCharacterMetrics();
+
+    } catch (err) {
+        alert('Supabase Transmission Blockage Error: ' + err.message);
+    }
+}
 
     // Process media URL strings based on selection options
     if (mediaType === 'image') {
