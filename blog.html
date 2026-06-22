@@ -12,7 +12,7 @@
       white-space: pre-line !important;
     }
 
-    /* 2. COLLAPSE EXTRA SPACING ON SEPARATE USER BULLET LISTS */
+    /* 2. COLLAPSE SPACING ON SEPARATE USER BULLET LISTS */
     #post-body ul {
       margin-top: 0px !important;
       margin-bottom: 0px !important;
@@ -20,14 +20,23 @@
       display: block !important;
     }
     
-    #post-body ul br {
-      display: none !important; /* Disables the unwanted <br> tags inside lists */
+    /* Force consecutive list blocks to stack tightly with zero vertical gap */
+    #post-body ul + ul {
+      margin-top: -12px !important; 
+    }
+
+    /* Hide any floating or embedded break tags inside or near the lists */
+    #post-body ul br, 
+    #post-body br + ul {
+      display: none !important;
     }
 
     #post-body li {
-      margin-top: 4px !important;
-      margin-bottom: 4px !important;
-      line-height: 1.5 !important;
+      margin-top: 2px !important;
+      margin-bottom: 2px !important;
+      padding-top: 0px !important;
+      padding-bottom: 0px !important;
+      line-height: 1.4 !important;
     }
   </style>
 </head>
