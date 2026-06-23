@@ -42,10 +42,8 @@
 </head>
 <body class="bg-white text-neutral-900 font-sans selection:bg-neutral-200">
 
-  <!-- Full Page Flex Layout -->
   <div class="flex min-h-screen">
     
-    <!-- LEFT SIDE PANEL: All Available Topics -->
     <aside class="w-80 border-r border-neutral-100 h-screen sticky top-0 p-6 hidden md:flex flex-col justify-between bg-neutral-50">
       <div>
         <div class="mb-10">
@@ -62,12 +60,9 @@
       </div>
     </aside>
 
-    <!-- RIGHT MAIN CANVAS: Post Display & Engagement Panel -->
     <main class="flex-1 max-w-4xl mx-auto px-6 py-12 md:px-16">
       
-      <!-- ARTICLE CANVAS -->
       <article class="prose prose-neutral max-w-none">
-        <!-- Date & Time Metatag -->
         <div class="flex items-center gap-2 text-xs tracking-wider text-neutral-400 uppercase mb-4">
           <span id="post-date">-- --, ----</span>
           <span>&bull;</span>
@@ -78,23 +73,19 @@
           Loading article...
         </h1>
         
-        <!-- Social Sharing Action -->
         <div class="mb-8 flex items-center justify-between">
           <button onclick="copyShareLink()" class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider bg-neutral-100 hover:bg-neutral-200 px-3 py-1.5 rounded transition">
             🔗 <span id="share-btn-text">Copy Unique Link</span>
           </button>
         </div>
 
-        <!-- CONDITIONAL HERO SLOT: Dropbox Image or YouTube Video Frame -->
         <div id="hero-media-container" class="w-full rounded-xl overflow-hidden mb-10 bg-neutral-100 min-h-[300px] flex items-center justify-center">
           <span class="text-xs text-neutral-400 font-mono">Loading Media Element...</span>
         </div>
 
-        <!-- Core Article Body String HTML render -->
         <div id="post-body" class="text-neutral-700 leading-relaxed text-base space-y-6"></div>
       </article>
 
-      <!-- LIKE & DISLIKE REACTION SECTION -->
       <section class="mt-12 pt-6 border-t border-neutral-100 flex items-center gap-3">
         <button id="like-btn" onclick="submitReaction('like')" class="flex items-center gap-2 px-4 py-2 border border-neutral-200 hover:bg-neutral-50 rounded-full transition text-sm font-medium">
           👍 Like <span id="like-count" class="text-neutral-400 font-normal">0</span>
@@ -104,11 +95,9 @@
         </button>
       </section>
 
-      <!-- COMMENTS INTERACTIVE HUB -->
       <section class="mt-16">
         <h3 class="text-xl font-bold tracking-tight mb-8">Discussion Panel</h3>
         
-        <!-- Top Level Comment Creation Box -->
         <div class="bg-neutral-50 border border-neutral-100 p-6 rounded-xl mb-10">
           <h4 class="text-sm font-bold uppercase tracking-wider text-neutral-500 mb-4">Add a thought</h4>
           <div class="grid grid-cols-1 gap-4">
@@ -121,7 +110,6 @@
           </div>
         </div>
 
-        <!-- Render Nest Tree Mount Point -->
         <div id="comments-container" class="space-y-6"></div>
 
       </section>
@@ -142,18 +130,18 @@
     // 2. PARSE CURRENT URL FOR THE POST SLUG ROUTE
     function getPostSlugFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      return params.get('slug') || 'exploring-warm-ambient-lighting'; // Fallback sample target
+      return params.get('slug'); // Returns null if no explicit slug parameter exists
     }
 
     // 3. APPLICATION LIFECYCLE BOOTSTRAPPING
     window.addEventListener('DOMContentLoaded', async () => {
       const slug = getPostSlugFromUrl();
-      await fetchSidebarTopics();
+      await fetchSidebarTopics(slug);
       await loadBlogPostData(slug);
     });
 
     // 4. SIDEBAR RECOVERY: FETCH ALL TOPICS FROM SUPABASE
-    async function fetchSidebarTopics() {
+    async function fetchSidebarTopics(activeSlug) {
       const { data, error } = await _supabase
         .from('posts')
         .select('title, slug')
@@ -164,9 +152,11 @@
       const listContainer = document.getElementById('topics-list');
       listContainer.innerHTML = '';
       
+      // Dynamic fall-back context highlighting: if there is no URL slug, highlight the newest entry
+      const targetActiveSlug = activeSlug || (data[0] ? data[0].slug : null);
+      
       data.forEach(topic => {
-        const currentSlug = getPostSlugFromUrl();
-        const isCurrent = topic.slug === currentSlug;
+        const isCurrent = topic.slug === targetActiveSlug;
         
         const anchor = document.createElement('a');
         anchor.href = `?slug=${topic.slug}`;
@@ -180,15 +170,21 @@
 
     // 5. CORE CONTENT RENDERING LOOPS
     async function loadBlogPostData(slug) {
-      // Fetch post along with aggregated interaction metadata counts
-      const { data: post, error } = await _supabase
-        .from('posts')
-        .select('*')
-        .eq('slug', slug)
-        .maybeSingle();
+      let query = _supabase.from('posts').select('*');
+      
+      if (slug) {
+        // Fetch explicitly requested post via query string route
+        query = query.eq('slug', slug).maybeSingle();
+      } else {
+        // Dynamic Fallback: Retrieve the single newest chronological database row
+        query = query.order('created_at', { ascending: false }).limit(1).maybeSingle();
+      }
+
+      const { data: post, error } = await query;
 
       if (error || !post) {
         document.getElementById('post-title').innerText = "Post Not Found";
+        document.getElementById('hero-media-container').innerHTML = '';
         return;
       }
 
