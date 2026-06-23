@@ -706,7 +706,11 @@
                     <input type="text" id="sTags" placeholder="e.g. 2 bedrooms, bungalow, 1 plot fit, terrace, hotel">
                 </div>
             </div>
-
+<label style="margin-bottom:8px; display:block; margin-top: 20px;">Video Walkthrough (Optional)</label>
+<div class="form-group" style="margin-bottom: 20px;">
+    <input type="text" id="sVideoUrl" placeholder="Paste YouTube link here (e.g., https://www.youtube.com/watch?v=...)" style="width:100%; padding:12px; background:rgba(0,0,0,0.3); border:1px solid var(--glass); color:#fff; outline:none;">
+    <small style="color:#7f8c8d; font-size: 0.75rem;">If provided, this video will replace the cover image as the primary view in the store submodal.</small>
+</div>
             <label style="margin-bottom:8px; display:block;">Gallery Image URLs (first = main/cover)</label>
             <div class="form-group" style="margin-bottom:10px; background:#fdfaf0; padding:10px; border-radius:4px; border:1px dashed #f1c40f;">
                 <label style="font-weight:bold; color:#b7950b;">⚡ Quick Dropbox Gallery Uploader</label>
@@ -1372,9 +1376,12 @@ async function uploadPortfolio() {
 async function uploadStore() {
     const images = [1,2,3,4,5,6].map(i => getVal(`sImg${i}`)).filter(u => u);
     if (!images.length) { alert('Add at least one image URL.'); return; }
-
+    
     const rawTags = getVal('sTags');
     const tagsArray = rawTags ? rawTags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean) : [];
+    
+    // Capture the Video URL
+    const videoUrl = getVal('sVideoUrl') || '';
 
     const payload = {
         title:       getVal('sTitle'),
@@ -1384,6 +1391,7 @@ async function uploadStore() {
         tags:        tagsArray,
         image_urls:  images,
         main_image:  images[0],
+        video_url:   videoUrl, // Appended to payload
         is_featured: document.getElementById('sFeatured').checked,
         features: {
             length: document.getElementById('planLength').value.trim(),
@@ -1410,6 +1418,9 @@ async function updateStore() {
 
     const rawTags = getVal('sTags');
     const tagsArray = rawTags ? rawTags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean) : [];
+    
+    // Capture the Video URL
+    const videoUrl = getVal('sVideoUrl') || '';
 
     const payload = {
         title:       getVal('sTitle'),
@@ -1419,6 +1430,7 @@ async function updateStore() {
         tags:        tagsArray,
         image_urls:  images,
         main_image:  images[0],
+        video_url:   videoUrl, // Appended to payload
         is_featured: document.getElementById('sFeatured').checked,
         features: {
             length: document.getElementById('planLength').value.trim(),
@@ -1443,6 +1455,10 @@ async function editPlan(id) {
     setVal('sMeta', data.meta || '');
     setVal('sCategory', data.category || '');
     setVal('sTags', data.tags ? data.tags.join(', ') : '');
+    
+    // Map existing video URL back to the form
+    setVal('sVideoUrl', data.video_url || ''); 
+    
     document.getElementById('sFeatured').checked = !!data.is_featured;
     
     if (data.image_urls) {
@@ -1461,8 +1477,10 @@ async function editPlan(id) {
 }
 
 function clearAdminPlanFormView() {
-    ['sTitle','sPrice','sMeta','sCategory','sTags','sImg1','sImg2','sImg3','sImg4','sImg5','sImg6', 'planLength', 'planWidth', 'planPlotSuitability', 'levelNameInput']
+    // Added 'sVideoUrl' to the clearing array
+    ['sTitle','sPrice','sMeta','sCategory','sTags','sVideoUrl','sImg1','sImg2','sImg3','sImg4','sImg5','sImg6', 'planLength', 'planWidth', 'planPlotSuitability', 'levelNameInput']
         .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        
     if (document.getElementById('sFeatured')) document.getElementById('sFeatured').checked = false;
     compiledFloorLevelsMatrix = [];
     renderAdminFloorLevelsUI();
