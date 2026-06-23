@@ -44,7 +44,7 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 .store-header-section .eyebrow::before{content:'';width:24px;height:1px;background:var(--gold);}
 .store-header-section h1{font-family:var(--f-display);font-size:clamp(2.2rem,4vw,3.8rem);font-weight:400;letter-spacing:2px;text-transform:uppercase;color:var(--white);margin-bottom:0;}
 
-/* CONTROLS (SEARCH & FILTER COMPONENT) */
+/* CONTROLS (SEARCH & FILTER) */
 .store-controls-container{max-width:1100px;margin:0 auto;padding:10px 5% 40px;display:flex;flex-direction:column;gap:24px;}
 .search-wrap{display:flex;justify-content:center;width:100%;}
 .search-box{position:relative;width:100%;max-width:580px;}
@@ -54,7 +54,7 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 .search-box input:focus{border-color:var(--accent);background:rgba(255,255,255,0.06);}
 #searchClear{position:absolute;right:16px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--gold);display:none;font-size:1rem;line-height:1;background:none;border:none;}
 
-/* FILTER STRIP STYLES */
+/* FILTER STRIP */
 .filter-scroll-wrapper{width:100%;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;-ms-overflow-style:none;}
 .filter-scroll-wrapper::-webkit-scrollbar{display:none;}
 .filter-strip{display:flex;gap:10px;justify-content:flex-start;min-width:max-content;padding:2px 4px;}
@@ -62,7 +62,7 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 .filter-btn:hover{border-color:var(--gold);color:var(--white);}
 .filter-btn.active{background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:500;}
 
-/* GRID */
+/* CATALOG GRID */
 .catalog-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;padding:0 5% 100px;max-width:1600px;margin:0 auto;}
 .plan-card{background:var(--ink2);border:1px solid rgba(201,191,176,0.07);cursor:pointer;transition:transform 0.45s var(--ease-out),border-color 0.4s,box-shadow 0.4s;overflow:hidden;}
 .plan-card:hover{border-color:rgba(201,191,176,0.2);transform:translateY(-6px);box-shadow:0 24px 60px rgba(0,0,0,0.5);}
@@ -73,43 +73,43 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 .plan-overlay h3{font-family:var(--f-display);font-size:1.1rem;letter-spacing:2px;text-transform:uppercase;color:var(--white);margin-bottom:4px;}
 .plan-overlay p{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);}
 
-/* MODAL CONFIGURATIONS */
-.modal{position:fixed;inset:0;background:var(--ink);z-index:2000;display:none;overflow-y:auto;padding:90px 5%;-webkit-overflow-scrolling:touch;}
+/* ─── NEW MODAL ARCHITECTURE ─── */
+.modal{position:fixed;inset:0;background:var(--ink);z-index:2000;display:none;overflow-y:auto;padding:70px 5% 90px;-webkit-overflow-scrolling:touch;}
 .modal.open{display:block;}
-.modal-grid{display:grid;grid-template-columns:1.1fr 0.9fr;gap:60px;max-width:1200px;margin:0 auto;}
-.gallery-strip img{width:100%;border:1px solid rgba(201,191,176,0.08);margin-bottom:16px;}
-#modalTitle{font-family:var(--f-display);font-size:2.6rem;color:var(--gold2);font-weight:400;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
-#modalMeta{font-size:0.68rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--mist);margin-bottom:24px;display:block;}
+.modal-grid{display:flex;flex-direction:column;max-width:1400px;margin:0 auto;gap:30px;}
 
-/* SINGLE BOX TABBED SELECTOR */
-.tabbed-package-box {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(201, 191, 176, 0.12);
-    padding: 32px 28px;
-    margin-bottom: 28px;
-    border-radius: 4px;
-}
-.package-tabs {
-    display: flex;
-    border-bottom: 1px solid rgba(201, 191, 176, 0.15);
-    margin-bottom: 24px;
-    gap: 8px;
-}
-.package-tab {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--mist);
-    font-family: var(--f-display);
-    font-size: 1.05rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 14px 8px;
-    cursor: pointer;
-    text-align: center;
-    border-bottom: 2px solid transparent;
-    transition: all 0.3s var(--ease-out);
-}
+/* Hero Gallery */
+.hero-container{width:100%;margin-bottom:10px;position:relative;}
+#modalGallery{position:relative;width:100%;height:75vh;background:#000;border:1px solid rgba(201,191,176,0.12);overflow:hidden;border-radius:4px;}
+#heroDisplayArea{width:100%;height:100%;}
+.gallery-hero{width:100%;height:100%;object-fit:cover;display:block;}
+.hero-overlay{position:absolute;bottom:30px;left:30px;z-index:10;background:rgba(13,12,10,0.85);backdrop-filter:blur(8px);padding:24px 30px;border-left:2px solid var(--gold);border-radius:0 4px 4px 0;}
+#modalTitle{font-family:var(--f-display);font-size:2.8rem;color:var(--white);margin-bottom:6px;line-height:1.1;}
+#modalMeta{font-size:0.85rem;letter-spacing:3px;color:var(--gold2);text-transform:uppercase;display:block;}
+#modalPrice{font-size:1.2rem;color:var(--accent);font-weight:500;margin-top:6px;display:block;font-family:var(--f-body);}
+
+/* Carousel Nav */
+.carousel-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(13,12,10,0.6);color:var(--sand);border:1px solid rgba(201,191,176,0.2);width:54px;height:54px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;z-index:20;transition:all 0.3s;border-radius:50%;backdrop-filter:blur(4px);}
+.carousel-arrow:hover{background:var(--gold);color:var(--ink);border-color:var(--gold);}
+.carousel-arrow.left{left:24px;}
+.carousel-arrow.right{right:24px;}
+
+/* Thumbnails */
+.thumbnail-strip{display:flex;gap:12px;margin-top:16px;overflow-x:auto;padding-bottom:10px;scrollbar-width:thin;scrollbar-color:var(--gold) var(--ink);}
+.thumbnail-strip::-webkit-scrollbar {height:6px;}
+.thumbnail-strip::-webkit-scrollbar-thumb {background:var(--gold);border-radius:3px;}
+.thumbnail-item{width:100px;height:65px;object-fit:cover;cursor:pointer;border:2px solid transparent;border-radius:2px;transition:all 0.3s;flex-shrink:0;opacity:0.5;}
+.thumbnail-item:hover, .thumbnail-item.active{border-color:var(--accent);opacity:1;}
+.video-thumb{display:flex;align-items:center;justify-content:center;background:rgba(201,191,176,0.05);color:var(--gold2);font-size:1.4rem;border:2px solid transparent;opacity:0.7;}
+.video-thumb.active { border-color:var(--gold2); opacity:1;}
+
+/* Two Column Layout */
+.content-section{display:grid;grid-template-columns:1fr 1fr;gap:50px; margin-bottom: 20px;}
+
+/* Packages & Forms */
+.tabbed-package-box {background: rgba(255, 255, 255, 0.02);border: 1px solid rgba(201, 191, 176, 0.12);padding: 32px 28px;margin-bottom: 28px;border-radius: 4px;}
+.package-tabs {display: flex;border-bottom: 1px solid rgba(201, 191, 176, 0.15);margin-bottom: 24px;gap: 8px;}
+.package-tab {flex: 1;background: transparent;border: none;color: var(--mist);font-family: var(--f-display);font-size: 1.05rem;letter-spacing: 1.5px;text-transform: uppercase;padding: 14px 8px;cursor: pointer;text-align: center;border-bottom: 2px solid transparent;transition: all 0.3s var(--ease-out);}
 .package-tab:hover { color: var(--sand); }
 .package-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 .tab-content-pane { display: none; animation: fadeInTab 0.4s var(--ease-out); }
@@ -120,100 +120,34 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 .tier-spec-item { display: flex; align-items: center; gap: 8px; }
 .tier-spec-item .icon-check { color: var(--wa); font-weight: bold; }
 .tier-spec-item .icon-cross { color: #ff4d4d; font-weight: bold; }
+@keyframes fadeInTab { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
 
-@keyframes fadeInTab {
-    from { opacity: 0; transform: translateY(2px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+/* 3 COLUMN FAQ SECTION */
+.faq-bottom-section {display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; border-top: 1px solid rgba(201, 191, 176, 0.08); padding-top: 40px;}
+.faq-trigger-card {background: rgba(255, 255, 255, 0.02);border: 1px solid rgba(201, 191, 176, 0.12);padding: 24px;cursor: pointer;text-align: left;transition: all 0.3s var(--ease-out);display: flex;flex-direction: column;justify-content: center;}
+.faq-trigger-card:hover {border-color: var(--accent);background: rgba(200, 168, 122, 0.04);}
+.faq-trigger-title {font-family: var(--f-display);font-size: 1.2rem;color: var(--gold2);text-transform: uppercase;letter-spacing: 0.5px;margin-bottom: 8px;}
+.faq-trigger-desc {font-size: 0.85rem;color: var(--mist);line-height: 1.5;}
 
-/* FAQ TRIGGERS GRID */
-.faq-triggers-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin-top: 24px;
-    margin-bottom: 28px;
-}
-.faq-trigger-card {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(201, 191, 176, 0.12);
-    padding: 20px 18px;
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.3s var(--ease-out);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-.faq-trigger-card:hover {
-    border-color: var(--accent);
-    background: rgba(200, 168, 122, 0.04);
-}
-.faq-trigger-title {
-    font-family: var(--f-display);
-    font-size: 1.1rem;
-    color: var(--gold2);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
-}
-.faq-trigger-desc {
-    font-size: 0.78rem;
-    color: var(--mist);
-    line-height: 1.4;
-}
+.store-faq-link-block {background: rgba(255, 255, 255, 0.01); border: 1px dashed rgba(201, 191, 176, 0.2); padding: 24px; font-size: 0.9rem; color: var(--sand); line-height: 1.6; display: flex; align-items: center; justify-content: center; text-align: center;}
+.store-faq-hyperlink {color: var(--gold2);font-weight: 500;position: relative;white-space: nowrap;display: inline-block;transition: color 0.35s var(--ease-out);}
+.store-faq-hyperlink::after {content: '';position: absolute;bottom: -1px;left: 0;width: 100%;height: 1px;background: var(--accent);transform: scaleX(0);transform-origin: right;transition: transform 0.35s var(--ease-out);}
+.store-faq-hyperlink:hover {color: var(--white);}
+.store-faq-hyperlink:hover::after {transform: scaleX(1);transform-origin: left;}
+
+/* FULL WIDTH NOTICE */
+.notice-box-full {margin-top: 24px; padding: 20px 24px; border-left: 3px solid var(--gold); background: rgba(176,144,112,0.05); display: flex; align-items: center; gap: 10px;}
+.notice-box-full p {font-size: 0.85rem; color: var(--mist); line-height: 1.6; font-style: italic; margin: 0;}
 
 /* FIXED POSITION CENTERED SUB-MODAL CARD */
-.sub-modal-layer {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: calc(100% - 30px);
-    max-width: 480px;
-    max-height: calc(100vh - 40px);
-    background: rgba(13, 12, 10, 0.88);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    border: 1px solid rgba(201, 191, 176, 0.16);
-    z-index: 2500;
-    display: none;
-    padding: 32px 28px;
-    overflow-y: auto;
-    border-radius: 4px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
-    animation: subModalSlide 0.4s var(--ease-out);
-}
+.sub-modal-layer {position: fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);width: calc(100% - 30px);max-width: 480px;max-height: calc(100vh - 40px);background: rgba(13, 12, 10, 0.88);backdrop-filter: blur(25px);-webkit-backdrop-filter: blur(25px);border: 1px solid rgba(201, 191, 176, 0.16);z-index: 2500;display: none;padding: 32px 28px;overflow-y: auto;border-radius: 4px;box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);animation: subModalSlide 0.4s var(--ease-out);}
 .sub-modal-layer.open { display: block; }
-.sub-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid rgba(201, 191, 176, 0.12);
-    padding-bottom: 14px;
-    margin-bottom: 22px;
-}
-.sub-modal-title {
-    font-family: var(--f-display);
-    font-size: 1.25rem;
-    color: var(--gold2);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-.sub-modal-back-btn {
-    background: none;
-    border: none;
-    color: var(--sand);
-    font-family: var(--f-body);
-    font-size: 0.7rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: color 0.3s;
-}
+.sub-modal-header {display: flex;justify-content: space-between;align-items: center;border-bottom: 1px solid rgba(201, 191, 176, 0.12);padding-bottom: 14px;margin-bottom: 22px;}
+.sub-modal-title {font-family: var(--f-display);font-size: 1.25rem;color: var(--gold2);text-transform: uppercase;letter-spacing: 1px;}
+.sub-modal-back-btn {background: none;border: none;color: var(--sand);font-family: var(--f-body);font-size: 0.7rem;letter-spacing: 1.5px;text-transform: uppercase;cursor: pointer;transition: color 0.3s;}
 .sub-modal-back-btn:hover { color: var(--white); }
 
-/* ACCORDIONS WITHIN SUB MODAL */
+/* ACCORDIONS */
 .accordion-wrapper { display: flex; flex-direction: column; gap: 12px; }
 .accordion-item { background: rgba(255,255,255,0.02); border: 1px solid rgba(201,191,176,0.08); overflow: hidden; transition: 0.3s; }
 .accordion-trigger-header { width: 100%; background: none; border: none; display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; cursor: pointer; text-align: left; gap: 12px; }
@@ -229,8 +163,6 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 /* INTERACTIVE PIECES & FORM */
 .btn-modal-primary{width:100%;padding:16px;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:0.68rem;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;border:none;cursor:pointer;transition:all 0.3s;margin-bottom:10px;}
 .btn-modal-primary:hover{background:var(--accent);color:var(--white);}
-.notice-box{padding:16px 18px;border-left:2px solid var(--gold);background:rgba(176,144,112,0.05);}
-.notice-box p{font-size:0.75rem;color:var(--mist);line-height:1.7;font-style:italic;}
 .input-field{width:100%;padding:13px 15px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,191,176,0.12);color:var(--white);font-family:var(--f-body);font-size:0.8rem;outline:none;margin-bottom:12px;transition:border-color 0.3s;}
 .input-field:focus{border-color:rgba(201,191,176,0.4);}
 .modal-close{position:fixed;right:40px;top:30px;cursor:pointer;color:var(--sand);font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;z-index:2100;transition:color 0.3s;background:none;border:none;font-family:var(--f-body);}
@@ -260,16 +192,19 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
 .footer-ig svg {width: 16px; height: 16px; flex-shrink: 0;}
 .footer-ig:hover {color: var(--gold2);}
 
-/* PROTECTIONS AND WATERMARKING */
+/* PROTECTIONS AND WATERMARKING (FIXED POINTER EVENTS) */
 img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-select: none; pointer-events: none;}
-.p-item, .plan-card, .plan-img-wrap {pointer-events: auto;}
+.p-item, .plan-card, .plan-img-wrap, .thumbnail-item, .carousel-arrow {pointer-events: auto;}
 .p-item::after, .plan-img-wrap::after {
     content: 'ADA Archilurdesignz'; position: absolute; bottom: 8px; right: 10px; font-size: 0.55rem;
     letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.25); pointer-events: none; z-index: 2; font-family: var(--f-body);
 }
 
 /* RESPONSIVE LAYOUT BREAKPOINTS */
-@media(max-width:1024px){.modal-grid{grid-template-columns:1fr;}}
+@media(max-width:1024px){
+    .content-section{gap:30px;}
+    .faq-bottom-section{grid-template-columns: 1fr 1fr;}
+}
 @media(max-width:768px){
     nav{padding:0 5%;height:62px;}
     .nav-center {display:none;}
@@ -277,53 +212,20 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
     .store-header-section{padding:110px 5% 30px;}
     .store-controls-container{padding-bottom:30px; gap:16px;}
     .catalog-grid{grid-template-columns:1fr;padding:0 5% 60px;}
-    .modal{padding:70px 5% 40px;}
-    .modal-grid{display:flex;flex-direction:column;}
-    #modalDetails{order:1; position: relative;}
-    #modalGallery{order:2;margin-top:30px;}
+    .modal{padding:60px 5% 40px;}
+    .content-section{grid-template-columns:1fr;gap:40px;}
+    .faq-bottom-section{grid-template-columns: 1fr; gap: 16px;}
+    #modalGallery{height:45vh;}
+    .carousel-arrow { width: 40px; height: 40px; font-size: 1.2rem; }
+    .hero-overlay{left:15px;bottom:15px;padding:15px;}
     #modalTitle{font-size:2rem;}
     .tabbed-package-box { padding: 22px 18px; }
     .package-tab { font-size: 0.85rem; padding: 12px 2px; letter-spacing: 0.5px; }
     .tier-title-desc { font-size: 1rem; }
     .tier-body-desc { font-size: 0.85rem; }
     .tier-specs { grid-template-columns: 1fr; gap: 8px; }
-    .faq-triggers-grid { grid-template-columns: 1fr; gap: 10px; }
     .sub-modal-layer { top: 50%; bottom: auto; right: auto; left: 50%; width: calc(100% - 20px); max-height: calc(100vh - 30px); padding: 20px 14px; }
     .footer-top{grid-template-columns:1fr;}
-}
-.store-faq-link-block {
-    margin-top: 15px;
-    margin-bottom: 24px;
-    font-size: 0.88rem;
-    color: var(--sand);
-    line-height: 1.6;
-}
-.store-faq-hyperlink {
-    color: var(--gold2);
-    font-weight: 400;
-    position: relative;
-    white-space: nowrap;
-    display: inline-block;
-    transition: color 0.35s var(--ease-out);
-}
-.store-faq-hyperlink::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background: var(--accent);
-    transform: scaleX(0);
-    transform-origin: right;
-    transition: transform 0.35s var(--ease-out);
-}
-.store-faq-hyperlink:hover {
-    color: var(--white);
-}
-.store-faq-hyperlink:hover::after {
-    transform: scaleX(1);
-    transform-origin: left;
 }
 </style>
 </head>
@@ -387,103 +289,145 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
 <div id="planModal" class="modal">
     <button class="modal-close" onclick="closePlan()">Close ✕</button>
     <div class="modal-grid">
-        <div class="gallery-strip" id="modalGallery"></div>
-        <div class="modal-details" id="modalDetails">
-            <h2 id="modalTitle"></h2>
-            <span id="modalMeta"></span>
-
-        <div id="modalArchitecturalFeaturesPanel" style="margin-bottom: 32px; border-bottom: 1px solid rgba(201,191,176,0.12); padding-bottom: 24px; display:none;">
-    
-    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; background: rgba(255,255,255,0.02); border:1px solid rgba(201,191,176,0.06); padding: 16px 20px;">
-        <div>
-            <p style="font-size: 0.62rem; color: var(--mist); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Building Dimensions</p>
-            <p id="featDimensionsTarget" style="font-size: 1rem; color: var(--white); font-weight: 400; font-family: var(--f-display);"></p>
-        </div>
-        <div>
-            <p style="font-size: 0.62rem; color: var(--mist); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Plot Size Suitability</p>
-            <p id="featPlotTarget" style="font-size: 0.9rem; color: var(--gold2); font-weight: 300;"></p>
-        </div>
-    </div>
-
-    <div id="featLevelsListWrapper">
-        <p class="form-section-title" style="font-size: 1.15rem; margin-bottom: 16px;">Building Features &amp; Layout</p>
-        <div id="featLevelsTargetContainer" style="display: flex; flex-direction: column; gap: 24px;"></div>
-    </div>
-</div>
-            <div id="initialActions">
-                <p class="form-section-title" style="font-size: 1.15rem; margin-bottom: 14px;">Select Plan Package</p>
+        
+        <div class="hero-container">
+            <div id="modalGallery">
+                <button class="carousel-arrow left" onclick="navigateHero(-1)">&#10094;</button>
+                <div id="heroDisplayArea"></div>
+                <button class="carousel-arrow right" onclick="navigateHero(1)">&#10095;</button>
                 
-                <div class="tabbed-package-box">
-                    <div class="package-tabs">
-                        <button class="package-tab active" onclick="switchPackageTab(this, 'Basic Package', 'basic-pane')">Basic</button>
-                        <button class="package-tab" onclick="switchPackageTab(this, 'Standard Package', 'standard-pane')">Standard</button>
-                        <button class="package-tab" onclick="switchPackageTab(this, 'Premium Package', 'premium-pane')">Premium</button>
-                        <button class="package-tab" onclick="switchPackageTab(this, 'Customize Package', 'customize-pane')">Customize</button>
-                    </div>
+                <div class="hero-overlay">
+                    <h2 id="modalTitle"></h2>
+                    <span id="modalMeta"></span>
+                    <span id="modalPrice"></span> </div>
+            </div>
+            <div id="thumbnailStrip" class="thumbnail-strip"></div>
+        </div>
 
-                    <div id="basic-pane" class="tab-content-pane active">
-                        <p class="tier-title-desc">Floor Plan Only</p>
-                        <p class="tier-body-desc">Obtain a fully dimensioned floor plan(s).</p>
-                        <div class="tier-specs">
-                            <div class="tier-spec-item">Revisions: 0</div>
-                            <div class="tier-spec-item">Delivery: 1 Day</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
-                            <div class="tier-spec-item"><span class="icon-cross">✕</span> Ext 3D Renders</div>
-                            <div class="tier-spec-item"><span class="icon-cross">✕</span> Printables</div>
+        <div class="content-section">
+            
+            <div class="modal-details" id="modalDetails">
+                <div id="modalArchitecturalFeaturesPanel" style="display:none;">
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 30px; background: rgba(255,255,255,0.02); border:1px solid rgba(201,191,176,0.06); padding: 16px 20px;">
+                        <div>
+                            <p style="font-size: 0.62rem; color: var(--mist); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Building Dimensions</p>
+                            <p id="featDimensionsTarget" style="font-size: 1rem; color: var(--white); font-weight: 400; font-family: var(--f-display);"></p>
+                        </div>
+                        <div>
+                            <p style="font-size: 0.62rem; color: var(--mist); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Plot Size Suitability</p>
+                            <p id="featPlotTarget" style="font-size: 0.9rem; color: var(--gold2); font-weight: 300;"></p>
                         </div>
                     </div>
 
-                    <div id="standard-pane" class="tab-content-pane">
-                        <p class="tier-title-desc">Full Architectural Drawings Only</p>
-                        <p class="tier-body-desc">Obtain the full architectural working drawings. Site Plan Revision Only.</p>
-                        <div class="tier-specs">
-                            <div class="tier-spec-item">Revisions: 1</div>
-                            <div class="tier-spec-item">Delivery: 7 Days</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
-                            <div class="tier-spec-item"><span class="icon-cross">✕</span> Printables</div>
-                        </div>
-                    </div>
-
-                    <div id="premium-pane" class="tab-content-pane">
-                        <p class="tier-title-desc">Approval Ready Drawings</p>
-                        <p class="tier-body-desc">Obtain the full Architectural, Structural, Mechanical and Electricals ready for approval. Site Plan Revision Only.</p>
-                        <div class="tier-specs">
-                            <div class="tier-spec-item">Revisions: 1</div>
-                            <div class="tier-spec-item">Delivery: 14 Days</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> Printables</div>
-                        </div>
-                    </div>
-
-                    <div id="customize-pane" class="tab-content-pane">
-                        <p class="tier-title-desc">Custom Your Design</p>
-                        <p class="tier-body-desc">Customize your design to suite your land. Obtain Full Architectural, Structural, Mechanical and Electrical drawings for your custom design.</p>
-                        <div class="tier-specs">
-                            <div class="tier-spec-item">Revisions: 3</div>
-                            <div class="tier-spec-item">Delivery: 30 Days</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> High Details </div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> Printables</div>
-                        </div>
+                    <div id="featLevelsListWrapper">
+                        <p class="form-section-title" style="font-size: 1.15rem; margin-bottom: 16px;">Building Features &amp; Layout</p>
+                        <div id="featLevelsTargetContainer" style="display: flex; flex-direction: column; gap: 24px;"></div>
                     </div>
                 </div>
+            </div>
 
-                <button class="btn-modal-primary" style="background: var(--accent); color: var(--white);" onclick="goToForm()">Contact For Price</button>
+            <div class="modal-actions">
+                <div id="initialActions">
+                    <p class="form-section-title" style="font-size: 1.15rem; margin-bottom: 14px;">Select Plan Package</p>
+                    
+                    <div class="tabbed-package-box">
+                        <div class="package-tabs">
+                            <button class="package-tab active" onclick="switchPackageTab(this, 'Basic Package', 'basic-pane')">Basic</button>
+                            <button class="package-tab" onclick="switchPackageTab(this, 'Standard Package', 'standard-pane')">Standard</button>
+                            <button class="package-tab" onclick="switchPackageTab(this, 'Premium Package', 'premium-pane')">Premium</button>
+                            <button class="package-tab" onclick="switchPackageTab(this, 'Customize Package', 'customize-pane')">Customize</button>
+                        </div>
 
-<div class="faq-triggers-grid">
-    <div class="faq-trigger-card" onclick="openFaqSubModal('Ready Made Design')">
-        <p class="faq-trigger-title">Ready Made Plans FAQ</p>
-        <p class="faq-trigger-desc">Questions about delivery modifications, formats, and reuse rights.</p>
-    </div>
-    <div class="faq-trigger-card" onclick="openFaqSubModal('Custom Design')">
-        <p class="faq-trigger-title">Custom Design FAQ</p>
-        <p class="faq-trigger-desc">Questions about custom layouts, specifications, and layout revisions.</p>
+                        <div id="basic-pane" class="tab-content-pane active">
+                            <p class="tier-title-desc">Floor Plan Only</p>
+                            <p class="tier-body-desc">Obtain a fully dimensioned floor plan(s).</p>
+                            <div class="tier-specs">
+                                <div class="tier-spec-item">Revisions: 0</div>
+                                <div class="tier-spec-item">Delivery: 1 Day</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
+                                <div class="tier-spec-item"><span class="icon-cross">✕</span> Ext 3D Renders</div>
+                                <div class="tier-spec-item"><span class="icon-cross">✕</span> Printables</div>
+                            </div>
+                        </div>
+
+                        <div id="standard-pane" class="tab-content-pane">
+                            <p class="tier-title-desc">Full Architectural Drawings Only</p>
+                            <p class="tier-body-desc">Obtain the full architectural working drawings. Site Plan Revision Only.</p>
+                            <div class="tier-specs">
+                                <div class="tier-spec-item">Revisions: 1</div>
+                                <div class="tier-spec-item">Delivery: 7 Days</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
+                                <div class="tier-spec-item"><span class="icon-cross">✕</span> Printables</div>
+                            </div>
+                        </div>
+
+                        <div id="premium-pane" class="tab-content-pane">
+                            <p class="tier-title-desc">Approval Ready Drawings</p>
+                            <p class="tier-body-desc">Obtain the full Architectural, Structural, Mechanical and Electricals ready for approval. Site Plan Revision Only.</p>
+                            <div class="tier-specs">
+                                <div class="tier-spec-item">Revisions: 1</div>
+                                <div class="tier-spec-item">Delivery: 14 Days</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> Printables</div>
+                            </div>
+                        </div>
+
+                        <div id="customize-pane" class="tab-content-pane">
+                            <p class="tier-title-desc">Custom Your Design</p>
+                            <p class="tier-body-desc">Customize your design to suite your land. Obtain Full Architectural, Structural, Mechanical and Electrical drawings for your custom design.</p>
+                            <div class="tier-specs">
+                                <div class="tier-spec-item">Revisions: 3</div>
+                                <div class="tier-spec-item">Delivery: 30 Days</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> High Details </div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> Printables</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-modal-primary" style="background: var(--accent); color: var(--white);" onclick="goToForm()">Contact For Price</button>
+                </div>
+
+                <div id="requestForm" style="display:none;">
+                    <p class="form-section-title" id="formActionTitle"></p>
+                    <input type="text" id="clientName" class="input-field" placeholder="Your Full Name">
+                    <input type="email" id="clientEmail" class="input-field" placeholder="Email Address">
+                    <input type="text" id="clientPhone" class="input-field" placeholder="WhatsApp Number">
+                    <button class="btn-modal-primary" onclick="processFinalRequest()">Send Request</button>
+                    <button class="back-link" onclick="hideRequestForm()">← Back</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="faq-bottom-section">
+            <div class="faq-trigger-card" onclick="openFaqSubModal('Ready Made Design')">
+                <p class="faq-trigger-title">Ready Made Plans FAQ</p>
+                <p class="faq-trigger-desc">Questions about delivery modifications, formats, and reuse rights.</p>
+            </div>
+            
+            <div class="faq-trigger-card" onclick="openFaqSubModal('Custom Design')">
+                <p class="faq-trigger-title">Custom Design FAQ</p>
+                <p class="faq-trigger-desc">Questions about custom layouts, specifications, and layout revisions.</p>
+            </div>
+            
+            <div class="store-faq-link-block">
+                <span>Want to explore more?<br>Visit our dedicated <br><a href="faq" class="store-faq-hyperlink">Frequently Asked Questions</a><br>page for a full operational overview.</span>
+            </div>
+        </div>
+
+        <div class="notice-box-full">
+            <strong style="color:var(--gold2); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Notice:</strong>
+            <p>For safe construction and implementation, please consult our architectural team to adjust plans to your site's unique topographical and structural requirements.</p>
+        </div>
+
     </div>
 </div>
 
@@ -492,28 +436,7 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
         <h3 id="subModalCategoryTitle" class="sub-modal-title">FAQ</h3>
         <button class="sub-modal-back-btn" onclick="closeFaqSubModal()">Close ✕</button>
     </div>
-    <div class="accordion-wrapper" id="subModalFaqAccordionTarget">
-    </div>
-</div>
-                <div class="store-faq-link-block">
-    <p>Want to explore more? Visit our dedicated <a href="faq" class="store-faq-hyperlink">Frequently Asked Questions (FAQ)</a> page for a full operational overview.</p>
-</div>
-                <div class="notice-box">
-                    <p><strong style="color:var(--gold2);">Notice:</strong></p>
-                    <p>For safe construction and implementation, please consult our architectural team to adjust plans to your site's requirements.</p>
-                </div>
-            </div>
-
-            <div id="requestForm" style="display:none;">
-                <p class="form-section-title" id="formActionTitle"></p>
-                <input type="text" id="clientName" class="input-field" placeholder="Your Full Name">
-                <input type="email" id="clientEmail" class="input-field" placeholder="Email Address">
-                <input type="text" id="clientPhone" class="input-field" placeholder="WhatsApp Number">
-                <button class="btn-modal-primary" onclick="processFinalRequest()">Send Request</button>
-                <button class="back-link" onclick="hideRequestForm()">← Back</button>
-            </div>
-        </div>
-    </div>
+    <div class="accordion-wrapper" id="subModalFaqAccordionTarget"></div>
 </div>
     
 <div id="estimatorModal" class="est-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(13,12,10,0.95); z-index:99999; overflow-y:auto; padding:40px 20px;">
@@ -575,12 +498,12 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
                 <div>Finishes Allocation:</div><div style="text-align:right; color:#faf8f4; font-weight:600;" id="outFinishing">₦0.00</div>
                 <div>External Infrastructures & Perimeter:</div><div style="text-align:right; color:#faf8f4; font-weight:600;" id="outExternal">₦0.00</div>
                 <div>
-    <span style="display: block;">Macroeconomic Inflation Mitigation Value:</span>
-    <span style="display: block; font-size: 0.72rem; color: #7a7570; font-style: italic; margin-top: 2px; line-height: 1.3;">
-        (To accommodate possible fluctuations in material prices, this amount should be considered as part of your final estimated project cost.)
-    </span>
-</div>
-<div style="text-align:right; color:#7d2e2e; font-weight:600; padding-top: 4px;" id="outInflation">₦0.00</div>
+                    <span style="display: block;">Macroeconomic Inflation Mitigation Value:</span>
+                    <span style="display: block; font-size: 0.72rem; color: #7a7570; font-style: italic; margin-top: 2px; line-height: 1.3;">
+                        (To accommodate possible fluctuations in material prices, this amount should be considered as part of your final estimated project cost.)
+                    </span>
+                </div>
+                <div style="text-align:right; color:#7d2e2e; font-weight:600; padding-top: 4px;" id="outInflation">₦0.00</div>
                 <div>Project Contingency Safety Net (5%):</div><div style="text-align:right; color:#faf8f4; font-weight:600;" id="outContingency">₦0.00</div>
             </div>
             <div style="display:flex; justify-content:space-between; background:#0d0c0a; padding:15px; border-left:4px solid #b09070; margin-bottom: 20px;">
@@ -593,6 +516,7 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
         </div>
     </div>
 </div>
+
 <div id="waDraggable">
     <a href="https://wa.me/2348138580315" target="_blank">
         <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.7 17.7 68.9 27.1 106.1 27.1h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.1 0-65.6-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-5.5-2.8-23.2-8.5-44.2-27.1-16.4-14.6-27.4-32.7-30.6-38.1-3.2-5.5-.3-8.4 2.4-11.2 2.5-2.5 5.5-6.4 8.3-9.6 2.8-3.2 3.7-5.5 5.5-9.3 1.9-3.7 1-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 13.2 5.7 23.5 9.2 31.6 11.8 13.3 4.2 25.4 3.6 35 2.2 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
@@ -604,9 +528,7 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
     <span class="fb-name">ADA</span>
     <span class="fb-rc">RC: 9176834</span>
     <p>Archilurdesignz and Architecture — crafting bespoke luxury spaces across Nigeria and beyond since 2012.</p>
-    <a href="https://www.instagram.com/archilurdesignz?igsh=YzEwaHVyNzY0aTZv"
-       target="_blank" rel="noopener noreferrer"
-       class="footer-ig">
+    <a href="https://www.instagram.com/archilurdesignz?igsh=YzEwaHVyNzY0aTZv" target="_blank" rel="noopener noreferrer" class="footer-ig">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
             <circle cx="12" cy="12" r="4"/>
@@ -647,6 +569,7 @@ const defaultPlans=[
         price:'',
         main_image:'images/2BEDS4.webp',
         image_urls:['','images/2BED2.webp','images/2BED3.webp','images/2BEDS4.webp'],
+        video_url: '', 
         features: {
             width: "14.6m",
             length: "18.8m",
@@ -668,6 +591,7 @@ const defaultPlans=[
         price:'',
         main_image:'images/2BEDSTY2B.webp',
         image_urls:['','images/2BEDSTY2C.webp','images/2BEDSTY2D.webp','images/2BEDSTY2B.webp'],
+        video_url: '',
         features: {
             width: "12.7m",
             length: "16.0m",
@@ -685,6 +609,10 @@ const defaultPlans=[
 
 let dynamicData={},currentAction='',currentPlan='',page=1,isLoading=false,hasMore=true,searchTimeout=null,isSearchMode=false,activeCategoryFilter='all';
 
+// Variables for Hero Carousel
+let currentHeroMedia = [];
+let currentHeroIndex = 0;
+
 /* ── PREMIUM MICRO-BLENDING CURSOR MOTOR ──────────────────────────── */
 if (window.matchMedia('(pointer:fine)').matches) {
     const cur = document.getElementById('cursor');
@@ -697,7 +625,7 @@ if (window.matchMedia('(pointer:fine)').matches) {
         });
 
         const bindCursorHoverEffects = () => {
-            document.querySelectorAll('a, button, .accordion-trigger-header, .store-faq-hyperlink, .package-tab, .faq-trigger-card, .filter-btn').forEach(el => {
+            document.querySelectorAll('a, button, .accordion-trigger-header, .store-faq-hyperlink, .package-tab, .faq-trigger-card, .filter-btn, .thumbnail-item, .carousel-arrow').forEach(el => {
                 el.addEventListener('mouseenter', () => cur.classList.add('expanded'));
                 el.addEventListener('mouseleave', () => cur.classList.remove('expanded'));
             });
@@ -736,7 +664,6 @@ function setCategoryFilter(categoryKey, element) {
     executeCombinedEngine();
 }
 
-// Master search filter structural pipeline
 async function executeCombinedEngine() {
     const searchQuery = document.getElementById('storeSearch').value.toLowerCase().replace(/[₦,]/g, '').trim();
     const g = document.getElementById('storeGrid');
@@ -744,11 +671,8 @@ async function executeCombinedEngine() {
 
     isSearchMode = searchQuery.length > 0 || activeCategoryFilter !== 'all';
     
-    // Evaluate match across criteria
     const evaluater = (p) => {
-        // Force tags into an evaluatable string pool if they exist
         const tagsString = Array.isArray(p.tags) ? p.tags.join(' ') : '';
-
         let textPool = [
             p.title, p.meta, p.category, p.price, tagsString,
             p.features?.plotSuitability,
@@ -763,14 +687,11 @@ async function executeCombinedEngine() {
         let matchesCategory = true;
         if (activeCategoryFilter !== 'all') {
             const filterWords = activeCategoryFilter.toLowerCase().split(' ');
-            
-            // CRITICAL FIX: Use word boundaries (\b) so "1" doesn't match "180 SQM"
             matchesCategory = filterWords.every(word => {
                 const regex = new RegExp('\\b' + word + '\\b', 'i');
                 return regex.test(textPool);
             });
         }
-
         return matchesSearch && matchesCategory;
     };
 
@@ -787,7 +708,6 @@ async function executeCombinedEngine() {
         }
     });
 
-    // Query backend if query parameters are missing locally
     if (searchQuery.length > 0) {
         try {
             const r = await fetch(`/api/get-store?search=${encodeURIComponent(searchQuery)}`);
@@ -810,6 +730,7 @@ async function executeCombinedEngine() {
         g.innerHTML = `<div class="search-no-results">No properties fit the specified criteria or filter configurations.</div>`;
     }
 }
+
 async function fetchStoreItems() {
     if (isLoading || !hasMore || isSearchMode) return;
     isLoading = true;
@@ -830,7 +751,6 @@ async function fetchStoreItems() {
                 renderCard(i, g);
             }
         });
-
         page++;
     } catch (err) { console.error('Fetch store error:', err); }
     isLoading = false;
@@ -858,7 +778,8 @@ function renderCard(item, container){
             item.meta || '',
             item.price || 'Contact for Price',
             getGalleryImages(item.image_urls || item.images),
-            item.features 
+            item.features,
+            item.video_url || null 
         );
     });
     c.innerHTML = `<div class="plan-img-container"><div class="plan-img" style="background-image:url('${item.main_image || ''}')"></div><div class="plan-overlay"><h3>${item.title || 'Untitled'}</h3><p>${item.category || item.meta || ''}</p></div></div>`;
@@ -866,17 +787,90 @@ function renderCard(item, container){
 }
 
 // ─── MASTER DETAILED MODAL RENDERING MOTOR ─────────────────────────────────────
-function fillModal(title, meta, price, images, features) {
-    currentPlan = title; 
+function getYoutubeEmbed(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}?autoplay=1&rel=0` : null;
+}
+
+function renderHeroItem(index) {
+    if (!currentHeroMedia.length) return;
     
+    // Cycle bounds
+    if (index < 0) index = currentHeroMedia.length - 1;
+    if (index >= currentHeroMedia.length) index = 0;
+    currentHeroIndex = index;
+
+    const item = currentHeroMedia[currentHeroIndex];
+    const heroArea = document.getElementById('heroDisplayArea');
+    
+    if (item.type === 'video') {
+        const embedUrl = getYoutubeEmbed(item.url);
+        if (embedUrl) {
+            heroArea.innerHTML = `<iframe src="${embedUrl}" class="gallery-hero" frameborder="0" allowfullscreen></iframe>`;
+        }
+    } else {
+        heroArea.innerHTML = `<img src="${item.url}" class="gallery-hero">`;
+    }
+
+    // Sync thumbnails
+    document.querySelectorAll('.thumbnail-item').forEach((el, i) => {
+        if (i === currentHeroIndex) el.classList.add('active');
+        else el.classList.remove('active');
+    });
+}
+
+function navigateHero(direction) {
+    renderHeroItem(currentHeroIndex + direction);
+}
+
+function fillModal(title, meta, price, images, features, videoUrl = null) {
+    currentPlan = title; 
     document.getElementById('modalTitle').innerText = title;
     document.getElementById('modalMeta').innerText = meta;
-    
+
+    // RESTORED FIX: Safely parse and assign price if the target exists
     const priceNode = document.getElementById('modalPrice');
-    if (priceNode) priceNode.innerText = price;
+    if (priceNode) priceNode.innerText = price || '';
     
-    document.getElementById('modalGallery').innerHTML = (images || []).map(img => `<img src="${img}">`).join('');
+    const thumbStrip = document.getElementById('thumbnailStrip');
+    thumbStrip.innerHTML = ''; 
+
+    // Build the Media Array for Carousel
+    currentHeroMedia = [];
+    currentHeroIndex = 0;
+
+    if (videoUrl) {
+        currentHeroMedia.push({ type: 'video', url: videoUrl });
+    }
     
+    if (images && images.length > 0) {
+        images.forEach(img => {
+            if (img) currentHeroMedia.push({ type: 'image', url: img });
+        });
+    }
+
+    // Generate Thumbnails from Media Array
+    currentHeroMedia.forEach((media, idx) => {
+        if (media.type === 'video') {
+            const vidThumb = document.createElement('div');
+            vidThumb.className = 'thumbnail-item video-thumb';
+            vidThumb.innerHTML = '▶';
+            vidThumb.onclick = () => renderHeroItem(idx);
+            thumbStrip.appendChild(vidThumb);
+        } else {
+            const img = document.createElement('img');
+            img.src = media.url;
+            img.className = 'thumbnail-item';
+            img.onclick = () => renderHeroItem(idx);
+            thumbStrip.appendChild(img);
+        }
+    });
+
+    // Render Initial State
+    renderHeroItem(0);
+
+    // Populate Features
     const featPanel = document.getElementById('modalArchitecturalFeaturesPanel');
     const dimTarget = document.getElementById('featDimensionsTarget');
     const plotTarget = document.getElementById('featPlotTarget');
@@ -932,9 +926,37 @@ function fillModal(title, meta, price, images, features) {
     hideRequestForm();
 }
 
-function closePlan(){document.getElementById('planModal').classList.remove('open');document.body.style.overflow='';}
+function closePlan(){
+    document.getElementById('planModal').classList.remove('open');
+    document.body.style.overflow='';
+    // Clear media on close to prevent background audio
+    document.getElementById('heroDisplayArea').innerHTML = '';
+    currentHeroMedia = [];
+}
+
 function showRequestForm(a){currentAction=a;currentPlan=document.getElementById('modalTitle').innerText;document.getElementById('formActionTitle').innerText=a+' Request';document.getElementById('initialActions').style.display='none';document.getElementById('requestForm').style.display='block';}
 function hideRequestForm(){document.getElementById('initialActions').style.display='block';document.getElementById('requestForm').style.display='none';}
+
+// RESTORED FIX: Stand-in form submission processor
+function processFinalRequest() {
+    const name = document.getElementById('clientName').value.trim();
+    const email = document.getElementById('clientEmail').value.trim();
+    const phone = document.getElementById('clientPhone').value.trim();
+    
+    if (!name || !email || !phone) {
+        alert("Please complete all fields to submit your request.");
+        return;
+    }
+    
+    // You can connect your Supabase .insert() logic here
+    alert(`Your request for the ${currentPlan} (${currentAction}) has been prepared for submission!`);
+    
+    // Clear fields and hide
+    document.getElementById('clientName').value = '';
+    document.getElementById('clientEmail').value = '';
+    document.getElementById('clientPhone').value = '';
+    hideRequestForm();
+}
 
 function switchPackageTab(tabElement, tierName, paneId) {
     document.querySelectorAll('.package-tab').forEach(tab => tab.classList.remove('active'));
@@ -1024,12 +1046,12 @@ async function checkUrlForPlan() {
 
     const local = defaultPlans.find(p => p.id === id);
     if (local) {
-        fillModal(local.title, local.meta, local.price, getGalleryImages(local.image_urls), local.features);
+        fillModal(local.title, local.meta, local.price, getGalleryImages(local.image_urls), local.features, local.video_url);
         return;
     }
     if (dynamicData[id]) {
         const p = dynamicData[id];
-        fillModal(p.title, p.meta, p.price, getGalleryImages(p.image_urls), p.features);
+        fillModal(p.title, p.meta, p.price, getGalleryImages(p.image_urls), p.features, p.video_url);
         return;
     }
     try {
@@ -1039,7 +1061,7 @@ async function checkUrlForPlan() {
             const plan = Array.isArray(data) ? data[0] : data;
             if (plan) {
                 dynamicData[plan.id] = plan;
-                fillModal(plan.title, plan.meta, plan.price, getGalleryImages(plan.image_urls), plan.features);
+                fillModal(plan.title, plan.meta, plan.price, getGalleryImages(plan.image_urls), plan.features, plan.video_url);
                 return;
             }
         }
@@ -1055,9 +1077,7 @@ document.addEventListener('mouseup',()=>{dr=false;wa.style.transition='transform
 
 window.addEventListener('DOMContentLoaded', async () => {
     const g = document.getElementById('storeGrid');
-
     shuffleArray(defaultPlans).forEach(p => renderCard(p, g));
-
     fetchStoreItems();
     await checkUrlForPlan();
     await loadEstimatorStates();
@@ -1083,9 +1103,7 @@ async function loadEstimatorStates() {
     const dropdown = document.getElementById('estState');
     if (!dropdown || !_db) return;
     try {
-        // Query the secure database channel that only handles text names
         const { data: list, error } = await _db.rpc('get_available_states');
-
         if (error) throw error;
         
         if (list && list.length > 0) {
@@ -1099,8 +1117,6 @@ async function loadEstimatorStates() {
         }
     } catch (err) {
         console.warn("Table restrictions active — compiling interface local fallback buffers:", err);
-        
-        // High-fidelity fallback list to protect client interface continuity
         const fallbacks = [
             "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", 
             "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "Gombe", "Imo", 
@@ -1118,6 +1134,7 @@ async function loadEstimatorStates() {
         });
     }
 }
+
 async function runCalculator(e) {
     e.preventDefault();
     
@@ -1132,7 +1149,6 @@ async function runCalculator(e) {
     if(!selectedState) { alert('Kindly select a target project location state first.'); return; }
 
     try {
-        // Execute the server-side calculations safely without exposing internal database columns
         const { data, error } = await _db.rpc('secure_calculate_estimate', {
             target_state_param: selectedState,
             floors_param: floors,
@@ -1149,7 +1165,6 @@ async function runCalculator(e) {
             const results = data[0];
             const fmt = (val) => '₦' + Math.round(val).toLocaleString('en-NG', { minimumFractionDigits: 2 });
             
-            // Render compiled pricing values out to the browser UI safely
             document.getElementById('outShell').innerText = fmt(results.out_shell);
             document.getElementById('outFinishing').innerText = fmt(results.out_finishing);
             document.getElementById('outExternal').innerText = fmt(results.out_external);
