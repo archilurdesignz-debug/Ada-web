@@ -1077,7 +1077,9 @@ document.addEventListener('mouseup',()=>{dr=false;wa.style.transition='transform
 
 window.addEventListener('DOMContentLoaded', async () => {
     const g = document.getElementById('storeGrid');
+
     shuffleArray(defaultPlans).forEach(p => renderCard(p, g));
+
     fetchStoreItems();
     await checkUrlForPlan();
     await loadEstimatorStates();
