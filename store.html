@@ -44,7 +44,7 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 .store-header-section .eyebrow::before{content:'';width:24px;height:1px;background:var(--gold);}
 .store-header-section h1{font-family:var(--f-display);font-size:clamp(2.2rem,4vw,3.8rem);font-weight:400;letter-spacing:2px;text-transform:uppercase;color:var(--white);margin-bottom:0;}
 
-/* CONTROLS (SEARCH & FILTER COMPONENT) */
+/* CONTROLS (SEARCH & FILTER) */
 .store-controls-container{max-width:1100px;margin:0 auto;padding:10px 5% 40px;display:flex;flex-direction:column;gap:24px;}
 .search-wrap{display:flex;justify-content:center;width:100%;}
 .search-box{position:relative;width:100%;max-width:580px;}
@@ -54,7 +54,7 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 .search-box input:focus{border-color:var(--accent);background:rgba(255,255,255,0.06);}
 #searchClear{position:absolute;right:16px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--gold);display:none;font-size:1rem;line-height:1;background:none;border:none;}
 
-/* FILTER STRIP STYLES */
+/* FILTER STRIP */
 .filter-scroll-wrapper{width:100%;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;-ms-overflow-style:none;}
 .filter-scroll-wrapper::-webkit-scrollbar{display:none;}
 .filter-strip{display:flex;gap:10px;justify-content:flex-start;min-width:max-content;padding:2px 4px;}
@@ -62,7 +62,7 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 .filter-btn:hover{border-color:var(--gold);color:var(--white);}
 .filter-btn.active{background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:500;}
 
-/* GRID */
+/* CATALOG GRID */
 .catalog-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;padding:0 5% 100px;max-width:1600px;margin:0 auto;}
 .plan-card{background:var(--ink2);border:1px solid rgba(201,191,176,0.07);cursor:pointer;transition:transform 0.45s var(--ease-out),border-color 0.4s,box-shadow 0.4s;overflow:hidden;}
 .plan-card:hover{border-color:rgba(201,191,176,0.2);transform:translateY(-6px);box-shadow:0 24px 60px rgba(0,0,0,0.5);}
@@ -73,43 +73,43 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 .plan-overlay h3{font-family:var(--f-display);font-size:1.1rem;letter-spacing:2px;text-transform:uppercase;color:var(--white);margin-bottom:4px;}
 .plan-overlay p{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);}
 
-/* MODAL CONFIGURATIONS */
-.modal{position:fixed;inset:0;background:var(--ink);z-index:2000;display:none;overflow-y:auto;padding:90px 5%;-webkit-overflow-scrolling:touch;}
+/* ─── NEW MODAL ARCHITECTURE ─── */
+.modal{position:fixed;inset:0;background:var(--ink);z-index:2000;display:none;overflow-y:auto;padding:70px 5% 90px;-webkit-overflow-scrolling:touch;}
 .modal.open{display:block;}
-.modal-grid{display:grid;grid-template-columns:1.1fr 0.9fr;gap:60px;max-width:1200px;margin:0 auto;}
-.gallery-strip img{width:100%;border:1px solid rgba(201,191,176,0.08);margin-bottom:16px;}
-#modalTitle{font-family:var(--f-display);font-size:2.6rem;color:var(--gold2);font-weight:400;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
-#modalMeta{font-size:0.68rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--mist);margin-bottom:24px;display:block;}
+.modal-grid{display:flex;flex-direction:column;max-width:1400px;margin:0 auto;gap:30px;}
 
-/* SINGLE BOX TABBED SELECTOR */
-.tabbed-package-box {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(201, 191, 176, 0.12);
-    padding: 32px 28px;
-    margin-bottom: 28px;
-    border-radius: 4px;
-}
-.package-tabs {
-    display: flex;
-    border-bottom: 1px solid rgba(201, 191, 176, 0.15);
-    margin-bottom: 24px;
-    gap: 8px;
-}
-.package-tab {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--mist);
-    font-family: var(--f-display);
-    font-size: 1.05rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 14px 8px;
-    cursor: pointer;
-    text-align: center;
-    border-bottom: 2px solid transparent;
-    transition: all 0.3s var(--ease-out);
-}
+/* Hero Gallery */
+.hero-container{width:100%;margin-bottom:10px;position:relative;}
+#modalGallery{position:relative;width:100%;height:75vh;background:#000;border:1px solid rgba(201,191,176,0.12);overflow:hidden;border-radius:4px;}
+#heroDisplayArea{width:100%;height:100%;}
+.gallery-hero{width:100%;height:100%;object-fit:cover;display:block;}
+.hero-overlay{position:absolute;bottom:30px;left:30px;z-index:10;background:rgba(13,12,10,0.85);backdrop-filter:blur(8px);padding:24px 30px;border-left:2px solid var(--gold);border-radius:0 4px 4px 0;}
+#modalTitle{font-family:var(--f-display);font-size:2.8rem;color:var(--white);margin-bottom:6px;line-height:1.1;}
+#modalMeta{font-size:0.85rem;letter-spacing:3px;color:var(--gold2);text-transform:uppercase;display:block;}
+#modalPrice{font-size:1.2rem;color:var(--accent);font-weight:500;margin-top:6px;display:block;font-family:var(--f-body);}
+
+/* Carousel Nav */
+.carousel-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(13,12,10,0.6);color:var(--sand);border:1px solid rgba(201,191,176,0.2);width:54px;height:54px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;z-index:20;transition:all 0.3s;border-radius:50%;backdrop-filter:blur(4px);}
+.carousel-arrow:hover{background:var(--gold);color:var(--ink);border-color:var(--gold);}
+.carousel-arrow.left{left:24px;}
+.carousel-arrow.right{right:24px;}
+
+/* Thumbnails */
+.thumbnail-strip{display:flex;gap:12px;margin-top:16px;overflow-x:auto;padding-bottom:10px;scrollbar-width:thin;scrollbar-color:var(--gold) var(--ink);}
+.thumbnail-strip::-webkit-scrollbar {height:6px;}
+.thumbnail-strip::-webkit-scrollbar-thumb {background:var(--gold);border-radius:3px;}
+.thumbnail-item{width:100px;height:65px;object-fit:cover;cursor:pointer;border:2px solid transparent;border-radius:2px;transition:all 0.3s;flex-shrink:0;opacity:0.5;}
+.thumbnail-item:hover, .thumbnail-item.active{border-color:var(--accent);opacity:1;}
+.video-thumb{display:flex;align-items:center;justify-content:center;background:rgba(201,191,176,0.05);color:var(--gold2);font-size:1.4rem;border:2px solid transparent;opacity:0.7;}
+.video-thumb.active { border-color:var(--gold2); opacity:1;}
+
+/* Two Column Layout */
+.content-section{display:grid;grid-template-columns:1fr 1fr;gap:50px; margin-bottom: 20px;}
+
+/* Packages & Forms */
+.tabbed-package-box {background: rgba(255, 255, 255, 0.02);border: 1px solid rgba(201, 191, 176, 0.12);padding: 32px 28px;margin-bottom: 28px;border-radius: 4px;}
+.package-tabs {display: flex;border-bottom: 1px solid rgba(201, 191, 176, 0.15);margin-bottom: 24px;gap: 8px;}
+.package-tab {flex: 1;background: transparent;border: none;color: var(--mist);font-family: var(--f-display);font-size: 1.05rem;letter-spacing: 1.5px;text-transform: uppercase;padding: 14px 8px;cursor: pointer;text-align: center;border-bottom: 2px solid transparent;transition: all 0.3s var(--ease-out);}
 .package-tab:hover { color: var(--sand); }
 .package-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 .tab-content-pane { display: none; animation: fadeInTab 0.4s var(--ease-out); }
@@ -120,100 +120,34 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 .tier-spec-item { display: flex; align-items: center; gap: 8px; }
 .tier-spec-item .icon-check { color: var(--wa); font-weight: bold; }
 .tier-spec-item .icon-cross { color: #ff4d4d; font-weight: bold; }
+@keyframes fadeInTab { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
 
-@keyframes fadeInTab {
-    from { opacity: 0; transform: translateY(2px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+/* 3 COLUMN FAQ SECTION */
+.faq-bottom-section {display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; border-top: 1px solid rgba(201, 191, 176, 0.08); padding-top: 40px;}
+.faq-trigger-card {background: rgba(255, 255, 255, 0.02);border: 1px solid rgba(201, 191, 176, 0.12);padding: 24px;cursor: pointer;text-align: left;transition: all 0.3s var(--ease-out);display: flex;flex-direction: column;justify-content: center;}
+.faq-trigger-card:hover {border-color: var(--accent);background: rgba(200, 168, 122, 0.04);}
+.faq-trigger-title {font-family: var(--f-display);font-size: 1.2rem;color: var(--gold2);text-transform: uppercase;letter-spacing: 0.5px;margin-bottom: 8px;}
+.faq-trigger-desc {font-size: 0.85rem;color: var(--mist);line-height: 1.5;}
 
-/* FAQ TRIGGERS GRID */
-.faq-triggers-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin-top: 24px;
-    margin-bottom: 28px;
-}
-.faq-trigger-card {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(201, 191, 176, 0.12);
-    padding: 20px 18px;
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.3s var(--ease-out);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-.faq-trigger-card:hover {
-    border-color: var(--accent);
-    background: rgba(200, 168, 122, 0.04);
-}
-.faq-trigger-title {
-    font-family: var(--f-display);
-    font-size: 1.1rem;
-    color: var(--gold2);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
-}
-.faq-trigger-desc {
-    font-size: 0.78rem;
-    color: var(--mist);
-    line-height: 1.4;
-}
+.store-faq-link-block {background: rgba(255, 255, 255, 0.01); border: 1px dashed rgba(201, 191, 176, 0.2); padding: 24px; font-size: 0.9rem; color: var(--sand); line-height: 1.6; display: flex; align-items: center; justify-content: center; text-align: center;}
+.store-faq-hyperlink {color: var(--gold2);font-weight: 500;position: relative;white-space: nowrap;display: inline-block;transition: color 0.35s var(--ease-out);}
+.store-faq-hyperlink::after {content: '';position: absolute;bottom: -1px;left: 0;width: 100%;height: 1px;background: var(--accent);transform: scaleX(0);transform-origin: right;transition: transform 0.35s var(--ease-out);}
+.store-faq-hyperlink:hover {color: var(--white);}
+.store-faq-hyperlink:hover::after {transform: scaleX(1);transform-origin: left;}
+
+/* FULL WIDTH NOTICE */
+.notice-box-full {margin-top: 24px; padding: 20px 24px; border-left: 3px solid var(--gold); background: rgba(176,144,112,0.05); display: flex; align-items: center; gap: 10px;}
+.notice-box-full p {font-size: 0.85rem; color: var(--mist); line-height: 1.6; font-style: italic; margin: 0;}
 
 /* FIXED POSITION CENTERED SUB-MODAL CARD */
-.sub-modal-layer {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: calc(100% - 30px);
-    max-width: 480px;
-    max-height: calc(100vh - 40px);
-    background: rgba(13, 12, 10, 0.88);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    border: 1px solid rgba(201, 191, 176, 0.16);
-    z-index: 2500;
-    display: none;
-    padding: 32px 28px;
-    overflow-y: auto;
-    border-radius: 4px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
-    animation: subModalSlide 0.4s var(--ease-out);
-}
+.sub-modal-layer {position: fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);width: calc(100% - 30px);max-width: 480px;max-height: calc(100vh - 40px);background: rgba(13, 12, 10, 0.88);backdrop-filter: blur(25px);-webkit-backdrop-filter: blur(25px);border: 1px solid rgba(201, 191, 176, 0.16);z-index: 2500;display: none;padding: 32px 28px;overflow-y: auto;border-radius: 4px;box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);animation: subModalSlide 0.4s var(--ease-out);}
 .sub-modal-layer.open { display: block; }
-.sub-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid rgba(201, 191, 176, 0.12);
-    padding-bottom: 14px;
-    margin-bottom: 22px;
-}
-.sub-modal-title {
-    font-family: var(--f-display);
-    font-size: 1.25rem;
-    color: var(--gold2);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-.sub-modal-back-btn {
-    background: none;
-    border: none;
-    color: var(--sand);
-    font-family: var(--f-body);
-    font-size: 0.7rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: color 0.3s;
-}
+.sub-modal-header {display: flex;justify-content: space-between;align-items: center;border-bottom: 1px solid rgba(201, 191, 176, 0.12);padding-bottom: 14px;margin-bottom: 22px;}
+.sub-modal-title {font-family: var(--f-display);font-size: 1.25rem;color: var(--gold2);text-transform: uppercase;letter-spacing: 1px;}
+.sub-modal-back-btn {background: none;border: none;color: var(--sand);font-family: var(--f-body);font-size: 0.7rem;letter-spacing: 1.5px;text-transform: uppercase;cursor: pointer;transition: color 0.3s;}
 .sub-modal-back-btn:hover { color: var(--white); }
 
-/* ACCORDIONS WITHIN SUB MODAL */
+/* ACCORDIONS */
 .accordion-wrapper { display: flex; flex-direction: column; gap: 12px; }
 .accordion-item { background: rgba(255,255,255,0.02); border: 1px solid rgba(201,191,176,0.08); overflow: hidden; transition: 0.3s; }
 .accordion-trigger-header { width: 100%; background: none; border: none; display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; cursor: pointer; text-align: left; gap: 12px; }
@@ -229,8 +163,6 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 /* INTERACTIVE PIECES & FORM */
 .btn-modal-primary{width:100%;padding:16px;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:0.68rem;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;border:none;cursor:pointer;transition:all 0.3s;margin-bottom:10px;}
 .btn-modal-primary:hover{background:var(--accent);color:var(--white);}
-.notice-box{padding:16px 18px;border-left:2px solid var(--gold);background:rgba(176,144,112,0.05);}
-.notice-box p{font-size:0.75rem;color:var(--mist);line-height:1.7;font-style:italic;}
 .input-field{width:100%;padding:13px 15px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,191,176,0.12);color:var(--white);font-family:var(--f-body);font-size:0.8rem;outline:none;margin-bottom:12px;transition:border-color 0.3s;}
 .input-field:focus{border-color:rgba(201,191,176,0.4);}
 .modal-close{position:fixed;right:40px;top:30px;cursor:pointer;color:var(--sand);font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;z-index:2100;transition:color 0.3s;background:none;border:none;font-family:var(--f-body);}
@@ -260,16 +192,19 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
 .footer-ig svg {width: 16px; height: 16px; flex-shrink: 0;}
 .footer-ig:hover {color: var(--gold2);}
 
-/* PROTECTIONS AND WATERMARKING */
+/* PROTECTIONS AND WATERMARKING (FIXED POINTER EVENTS) */
 img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-select: none; pointer-events: none;}
-.p-item, .plan-card, .plan-img-wrap {pointer-events: auto;}
+.p-item, .plan-card, .plan-img-wrap, .thumbnail-item, .carousel-arrow {pointer-events: auto;}
 .p-item::after, .plan-img-wrap::after {
     content: 'ADA Archilurdesignz'; position: absolute; bottom: 8px; right: 10px; font-size: 0.55rem;
     letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.25); pointer-events: none; z-index: 2; font-family: var(--f-body);
 }
 
 /* RESPONSIVE LAYOUT BREAKPOINTS */
-@media(max-width:1024px){.modal-grid{grid-template-columns:1fr;}}
+@media(max-width:1024px){
+    .content-section{gap:30px;}
+    .faq-bottom-section{grid-template-columns: 1fr 1fr;}
+}
 @media(max-width:768px){
     nav{padding:0 5%;height:62px;}
     .nav-center {display:none;}
@@ -277,53 +212,20 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
     .store-header-section{padding:110px 5% 30px;}
     .store-controls-container{padding-bottom:30px; gap:16px;}
     .catalog-grid{grid-template-columns:1fr;padding:0 5% 60px;}
-    .modal{padding:70px 5% 40px;}
-    .modal-grid{display:flex;flex-direction:column;}
-    #modalDetails{order:1; position: relative;}
-    #modalGallery{order:2;margin-top:30px;}
+    .modal{padding:60px 5% 40px;}
+    .content-section{grid-template-columns:1fr;gap:40px;}
+    .faq-bottom-section{grid-template-columns: 1fr; gap: 16px;}
+    #modalGallery{height:45vh;}
+    .carousel-arrow { width: 40px; height: 40px; font-size: 1.2rem; }
+    .hero-overlay{left:15px;bottom:15px;padding:15px;}
     #modalTitle{font-size:2rem;}
     .tabbed-package-box { padding: 22px 18px; }
     .package-tab { font-size: 0.85rem; padding: 12px 2px; letter-spacing: 0.5px; }
     .tier-title-desc { font-size: 1rem; }
     .tier-body-desc { font-size: 0.85rem; }
     .tier-specs { grid-template-columns: 1fr; gap: 8px; }
-    .faq-triggers-grid { grid-template-columns: 1fr; gap: 10px; }
     .sub-modal-layer { top: 50%; bottom: auto; right: auto; left: 50%; width: calc(100% - 20px); max-height: calc(100vh - 30px); padding: 20px 14px; }
     .footer-top{grid-template-columns:1fr;}
-}
-.store-faq-link-block {
-    margin-top: 15px;
-    margin-bottom: 24px;
-    font-size: 0.88rem;
-    color: var(--sand);
-    line-height: 1.6;
-}
-.store-faq-hyperlink {
-    color: var(--gold2);
-    font-weight: 400;
-    position: relative;
-    white-space: nowrap;
-    display: inline-block;
-    transition: color 0.35s var(--ease-out);
-}
-.store-faq-hyperlink::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background: var(--accent);
-    transform: scaleX(0);
-    transform-origin: right;
-    transition: transform 0.35s var(--ease-out);
-}
-.store-faq-hyperlink:hover {
-    color: var(--white);
-}
-.store-faq-hyperlink:hover::after {
-    transform: scaleX(1);
-    transform-origin: left;
 }
 </style>
 </head>
@@ -387,103 +289,145 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
 <div id="planModal" class="modal">
     <button class="modal-close" onclick="closePlan()">Close ✕</button>
     <div class="modal-grid">
-        <div class="gallery-strip" id="modalGallery"></div>
-        <div class="modal-details" id="modalDetails">
-            <h2 id="modalTitle"></h2>
-            <span id="modalMeta"></span>
-
-        <div id="modalArchitecturalFeaturesPanel" style="margin-bottom: 32px; border-bottom: 1px solid rgba(201,191,176,0.12); padding-bottom: 24px; display:none;">
-    
-    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; background: rgba(255,255,255,0.02); border:1px solid rgba(201,191,176,0.06); padding: 16px 20px;">
-        <div>
-            <p style="font-size: 0.62rem; color: var(--mist); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Building Dimensions</p>
-            <p id="featDimensionsTarget" style="font-size: 1rem; color: var(--white); font-weight: 400; font-family: var(--f-display);"></p>
-        </div>
-        <div>
-            <p style="font-size: 0.62rem; color: var(--mist); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Plot Size Suitability</p>
-            <p id="featPlotTarget" style="font-size: 0.9rem; color: var(--gold2); font-weight: 300;"></p>
-        </div>
-    </div>
-
-    <div id="featLevelsListWrapper">
-        <p class="form-section-title" style="font-size: 1.15rem; margin-bottom: 16px;">Building Features &amp; Layout</p>
-        <div id="featLevelsTargetContainer" style="display: flex; flex-direction: column; gap: 24px;"></div>
-    </div>
-</div>
-            <div id="initialActions">
-                <p class="form-section-title" style="font-size: 1.15rem; margin-bottom: 14px;">Select Plan Package</p>
+        
+        <div class="hero-container">
+            <div id="modalGallery">
+                <button class="carousel-arrow left" onclick="navigateHero(-1)">&#10094;</button>
+                <div id="heroDisplayArea"></div>
+                <button class="carousel-arrow right" onclick="navigateHero(1)">&#10095;</button>
                 
-                <div class="tabbed-package-box">
-                    <div class="package-tabs">
-                        <button class="package-tab active" onclick="switchPackageTab(this, 'Basic Package', 'basic-pane')">Basic</button>
-                        <button class="package-tab" onclick="switchPackageTab(this, 'Standard Package', 'standard-pane')">Standard</button>
-                        <button class="package-tab" onclick="switchPackageTab(this, 'Premium Package', 'premium-pane')">Premium</button>
-                        <button class="package-tab" onclick="switchPackageTab(this, 'Customize Package', 'customize-pane')">Customize</button>
-                    </div>
+                <div class="hero-overlay">
+                    <h2 id="modalTitle"></h2>
+                    <span id="modalMeta"></span>
+                    <span id="modalPrice"></span> </div>
+            </div>
+            <div id="thumbnailStrip" class="thumbnail-strip"></div>
+        </div>
 
-                    <div id="basic-pane" class="tab-content-pane active">
-                        <p class="tier-title-desc">Floor Plan Only</p>
-                        <p class="tier-body-desc">Obtain a fully dimensioned floor plan(s).</p>
-                        <div class="tier-specs">
-                            <div class="tier-spec-item">Revisions: 0</div>
-                            <div class="tier-spec-item">Delivery: 1 Day</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
-                            <div class="tier-spec-item"><span class="icon-cross">✕</span> Ext 3D Renders</div>
-                            <div class="tier-spec-item"><span class="icon-cross">✕</span> Printables</div>
+        <div class="content-section">
+            
+            <div class="modal-details" id="modalDetails">
+                <div id="modalArchitecturalFeaturesPanel" style="display:none;">
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 30px; background: rgba(255,255,255,0.02); border:1px solid rgba(201,191,176,0.06); padding: 16px 20px;">
+                        <div>
+                            <p style="font-size: 0.62rem; color: var(--mist); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Building Dimensions</p>
+                            <p id="featDimensionsTarget" style="font-size: 1rem; color: var(--white); font-weight: 400; font-family: var(--f-display);"></p>
+                        </div>
+                        <div>
+                            <p style="font-size: 0.62rem; color: var(--mist); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">Plot Size Suitability</p>
+                            <p id="featPlotTarget" style="font-size: 0.9rem; color: var(--gold2); font-weight: 300;"></p>
                         </div>
                     </div>
 
-                    <div id="standard-pane" class="tab-content-pane">
-                        <p class="tier-title-desc">Full Architectural Drawings Only</p>
-                        <p class="tier-body-desc">Obtain the full architectural working drawings. Site Plan Revision Only.</p>
-                        <div class="tier-specs">
-                            <div class="tier-spec-item">Revisions: 1</div>
-                            <div class="tier-spec-item">Delivery: 7 Days</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
-                            <div class="tier-spec-item"><span class="icon-cross">✕</span> Printables</div>
-                        </div>
-                    </div>
-
-                    <div id="premium-pane" class="tab-content-pane">
-                        <p class="tier-title-desc">Approval Ready Drawings</p>
-                        <p class="tier-body-desc">Obtain the full Architectural, Structural, Mechanical and Electricals ready for approval. Site Plan Revision Only.</p>
-                        <div class="tier-specs">
-                            <div class="tier-spec-item">Revisions: 1</div>
-                            <div class="tier-spec-item">Delivery: 14 Days</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> Printables</div>
-                        </div>
-                    </div>
-
-                    <div id="customize-pane" class="tab-content-pane">
-                        <p class="tier-title-desc">Custom Your Design</p>
-                        <p class="tier-body-desc">Customize your design to suite your land. Obtain Full Architectural, Structural, Mechanical and Electrical drawings for your custom design.</p>
-                        <div class="tier-specs">
-                            <div class="tier-spec-item">Revisions: 3</div>
-                            <div class="tier-spec-item">Delivery: 30 Days</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> High Details </div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
-                            <div class="tier-spec-item"><span class="icon-check">✓</span> Printables</div>
-                        </div>
+                    <div id="featLevelsListWrapper">
+                        <p class="form-section-title" style="font-size: 1.15rem; margin-bottom: 16px;">Building Features &amp; Layout</p>
+                        <div id="featLevelsTargetContainer" style="display: flex; flex-direction: column; gap: 24px;"></div>
                     </div>
                 </div>
+            </div>
 
-                <button class="btn-modal-primary" style="background: var(--accent); color: var(--white);" onclick="goToForm()">Contact For Price</button>
+            <div class="modal-actions">
+                <div id="initialActions">
+                    <p class="form-section-title" style="font-size: 1.15rem; margin-bottom: 14px;">Select Plan Package</p>
+                    
+                    <div class="tabbed-package-box">
+                        <div class="package-tabs">
+                            <button class="package-tab active" onclick="switchPackageTab(this, 'Basic Package', 'basic-pane')">Basic</button>
+                            <button class="package-tab" onclick="switchPackageTab(this, 'Standard Package', 'standard-pane')">Standard</button>
+                            <button class="package-tab" onclick="switchPackageTab(this, 'Premium Package', 'premium-pane')">Premium</button>
+                            <button class="package-tab" onclick="switchPackageTab(this, 'Customize Package', 'customize-pane')">Customize</button>
+                        </div>
 
-<div class="faq-triggers-grid">
-    <div class="faq-trigger-card" onclick="openFaqSubModal('Ready Made Design')">
-        <p class="faq-trigger-title">Ready Made Plans FAQ</p>
-        <p class="faq-trigger-desc">Questions about delivery modifications, formats, and reuse rights.</p>
-    </div>
-    <div class="faq-trigger-card" onclick="openFaqSubModal('Custom Design')">
-        <p class="faq-trigger-title">Custom Design FAQ</p>
-        <p class="faq-trigger-desc">Questions about custom layouts, specifications, and layout revisions.</p>
+                        <div id="basic-pane" class="tab-content-pane active">
+                            <p class="tier-title-desc">Floor Plan Only</p>
+                            <p class="tier-body-desc">Obtain a fully dimensioned floor plan(s).</p>
+                            <div class="tier-specs">
+                                <div class="tier-spec-item">Revisions: 0</div>
+                                <div class="tier-spec-item">Delivery: 1 Day</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
+                                <div class="tier-spec-item"><span class="icon-cross">✕</span> Ext 3D Renders</div>
+                                <div class="tier-spec-item"><span class="icon-cross">✕</span> Printables</div>
+                            </div>
+                        </div>
+
+                        <div id="standard-pane" class="tab-content-pane">
+                            <p class="tier-title-desc">Full Architectural Drawings Only</p>
+                            <p class="tier-body-desc">Obtain the full architectural working drawings. Site Plan Revision Only.</p>
+                            <div class="tier-specs">
+                                <div class="tier-spec-item">Revisions: 1</div>
+                                <div class="tier-spec-item">Delivery: 7 Days</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
+                                <div class="tier-spec-item"><span class="icon-cross">✕</span> Printables</div>
+                            </div>
+                        </div>
+
+                        <div id="premium-pane" class="tab-content-pane">
+                            <p class="tier-title-desc">Approval Ready Drawings</p>
+                            <p class="tier-body-desc">Obtain the full Architectural, Structural, Mechanical and Electricals ready for approval. Site Plan Revision Only.</p>
+                            <div class="tier-specs">
+                                <div class="tier-spec-item">Revisions: 1</div>
+                                <div class="tier-spec-item">Delivery: 14 Days</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> High Detail</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> Printables</div>
+                            </div>
+                        </div>
+
+                        <div id="customize-pane" class="tab-content-pane">
+                            <p class="tier-title-desc">Custom Your Design</p>
+                            <p class="tier-body-desc">Customize your design to suite your land. Obtain Full Architectural, Structural, Mechanical and Electrical drawings for your custom design.</p>
+                            <div class="tier-specs">
+                                <div class="tier-spec-item">Revisions: 3</div>
+                                <div class="tier-spec-item">Delivery: 30 Days</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> 2D Details</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> High Details </div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> Ext 3D Renders</div>
+                                <div class="tier-spec-item"><span class="icon-check">✓</span> Printables</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-modal-primary" style="background: var(--accent); color: var(--white);" onclick="goToForm()">Contact For Price</button>
+                </div>
+
+                <div id="requestForm" style="display:none;">
+                    <p class="form-section-title" id="formActionTitle"></p>
+                    <input type="text" id="clientName" class="input-field" placeholder="Your Full Name">
+                    <input type="email" id="clientEmail" class="input-field" placeholder="Email Address">
+                    <input type="text" id="clientPhone" class="input-field" placeholder="WhatsApp Number">
+                    <button class="btn-modal-primary" onclick="processFinalRequest()">Send Request</button>
+                    <button class="back-link" onclick="hideRequestForm()">← Back</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="faq-bottom-section">
+            <div class="faq-trigger-card" onclick="openFaqSubModal('Ready Made Design')">
+                <p class="faq-trigger-title">Ready Made Plans FAQ</p>
+                <p class="faq-trigger-desc">Questions about delivery modifications, formats, and reuse rights.</p>
+            </div>
+            
+            <div class="faq-trigger-card" onclick="openFaqSubModal('Custom Design')">
+                <p class="faq-trigger-title">Custom Design FAQ</p>
+                <p class="faq-trigger-desc">Questions about custom layouts, specifications, and layout revisions.</p>
+            </div>
+            
+            <div class="store-faq-link-block">
+                <span>Want to explore more?<br>Visit our dedicated <br><a href="faq" class="store-faq-hyperlink">Frequently Asked Questions</a><br>page for a full operational overview.</span>
+            </div>
+        </div>
+
+        <div class="notice-box-full">
+            <strong style="color:var(--gold2); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Notice:</strong>
+            <p>For safe construction and implementation, please consult our architectural team to adjust plans to your site's unique topographical and structural requirements.</p>
+        </div>
+
     </div>
 </div>
 
@@ -492,28 +436,7 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
         <h3 id="subModalCategoryTitle" class="sub-modal-title">FAQ</h3>
         <button class="sub-modal-back-btn" onclick="closeFaqSubModal()">Close ✕</button>
     </div>
-    <div class="accordion-wrapper" id="subModalFaqAccordionTarget">
-    </div>
-</div>
-                <div class="store-faq-link-block">
-    <p>Want to explore more? Visit our dedicated <a href="faq" class="store-faq-hyperlink">Frequently Asked Questions (FAQ)</a> page for a full operational overview.</p>
-</div>
-                <div class="notice-box">
-                    <p><strong style="color:var(--gold2);">Notice:</strong></p>
-                    <p>For safe construction and implementation, please consult our architectural team to adjust plans to your site's requirements.</p>
-                </div>
-            </div>
-
-            <div id="requestForm" style="display:none;">
-                <p class="form-section-title" id="formActionTitle"></p>
-                <input type="text" id="clientName" class="input-field" placeholder="Your Full Name">
-                <input type="email" id="clientEmail" class="input-field" placeholder="Email Address">
-                <input type="text" id="clientPhone" class="input-field" placeholder="WhatsApp Number">
-                <button class="btn-modal-primary" onclick="processFinalRequest()">Send Request</button>
-                <button class="back-link" onclick="hideRequestForm()">← Back</button>
-            </div>
-        </div>
-    </div>
+    <div class="accordion-wrapper" id="subModalFaqAccordionTarget"></div>
 </div>
     
 <div id="estimatorModal" class="est-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(13,12,10,0.95); z-index:99999; overflow-y:auto; padding:40px 20px;">
@@ -575,12 +498,12 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
                 <div>Finishes Allocation:</div><div style="text-align:right; color:#faf8f4; font-weight:600;" id="outFinishing">₦0.00</div>
                 <div>External Infrastructures & Perimeter:</div><div style="text-align:right; color:#faf8f4; font-weight:600;" id="outExternal">₦0.00</div>
                 <div>
-    <span style="display: block;">Macroeconomic Inflation Mitigation Value:</span>
-    <span style="display: block; font-size: 0.72rem; color: #7a7570; font-style: italic; margin-top: 2px; line-height: 1.3;">
-        (To accommodate possible fluctuations in material prices, this amount should be considered as part of your final estimated project cost.)
-    </span>
-</div>
-<div style="text-align:right; color:#7d2e2e; font-weight:600; padding-top: 4px;" id="outInflation">₦0.00</div>
+                    <span style="display: block;">Macroeconomic Inflation Mitigation Value:</span>
+                    <span style="display: block; font-size: 0.72rem; color: #7a7570; font-style: italic; margin-top: 2px; line-height: 1.3;">
+                        (To accommodate possible fluctuations in material prices, this amount should be considered as part of your final estimated project cost.)
+                    </span>
+                </div>
+                <div style="text-align:right; color:#7d2e2e; font-weight:600; padding-top: 4px;" id="outInflation">₦0.00</div>
                 <div>Project Contingency Safety Net (5%):</div><div style="text-align:right; color:#faf8f4; font-weight:600;" id="outContingency">₦0.00</div>
             </div>
             <div style="display:flex; justify-content:space-between; background:#0d0c0a; padding:15px; border-left:4px solid #b09070; margin-bottom: 20px;">
@@ -593,6 +516,7 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
         </div>
     </div>
 </div>
+
 <div id="waDraggable">
     <a href="https://wa.me/2348138580315" target="_blank">
         <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.7 17.7 68.9 27.1 106.1 27.1h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.1 0-65.6-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-5.5-2.8-23.2-8.5-44.2-27.1-16.4-14.6-27.4-32.7-30.6-38.1-3.2-5.5-.3-8.4 2.4-11.2 2.5-2.5 5.5-6.4 8.3-9.6 2.8-3.2 3.7-5.5 5.5-9.3 1.9-3.7 1-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 13.2 5.7 23.5 9.2 31.6 11.8 13.3 4.2 25.4 3.6 35 2.2 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
@@ -604,9 +528,7 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
     <span class="fb-name">ADA</span>
     <span class="fb-rc">RC: 9176834</span>
     <p>Archilurdesignz and Architecture — crafting bespoke luxury spaces across Nigeria and beyond since 2012.</p>
-    <a href="https://www.instagram.com/archilurdesignz?igsh=YzEwaHVyNzY0aTZv"
-       target="_blank" rel="noopener noreferrer"
-       class="footer-ig">
+    <a href="https://www.instagram.com/archilurdesignz?igsh=YzEwaHVyNzY0aTZv" target="_blank" rel="noopener noreferrer" class="footer-ig">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
             <circle cx="12" cy="12" r="4"/>
@@ -624,418 +546,557 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
         <p class="footer-copy">contactus@archilurdesignz.com</p>
     </div>
 </footer>
-
 <script>
-// ── SUPABASE CLIENT ─────────────────────────────────────────────────
+    // ── SUPABASE CLIENT ─────────────────────────────────────────────────
 const { createClient } = window.supabase || {};
 let _db = null;
 try {
     if (createClient) {
         _db = createClient(
             'https://ofaxbduvnhscxvoakeax.supabase.co',
-            'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK'
+            'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK' // Ensure this is your public anon key
         );
     }
 } catch(e) { console.warn('Supabase init failed:', e); }
 
-// INSERT YOUR NEW FUNCTIONS HERE:
-function getYoutubeEmbed(url) {
-    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=))([^"&?\/\s]{11})/);
-    return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1` : null;
-}
-
-const defaultPlans=[
+const defaultPlans = [
     {
-        id:'obsidian-2bed',
-        title:'Obsidian',
-        meta:'2 BEDS • 210 SQM',
-        category:'Tropical Contemporary 2 Bedrooms Bungalow',
-        price:'',
-        main_image:'images/2BEDS4.webp',
-        image_urls:['','images/2BED2.webp','images/2BED3.webp','images/2BEDS4.webp'],
+        id: 'obsidian-2bed',
+        title: 'Obsidian',
+        meta: '2 BEDS • 210 SQM',
+        category: 'Tropical Contemporary 2 Bedrooms Bungalow',
+        price: '',
+        main_image: 'images/2BEDS4.webp',
+        image_urls: ['', 'images/2BED2.webp', 'images/2BED3.webp', 'images/2BEDS4.webp'],
+        video_url: '',
         features: {
-            width: "14.6m",
-            length: "18.8m",
+            width: "14.6m", length: "18.8m",
             plotSuitability: "Fits on a 100ft x 100ft minimum plot (1 plot fit)",
-            levels: [
-                {
-                    id: 1711122334455,
-                    name: "Ground Floor Plan",
-                    spaces: ["Entrance","Ante room","Visitor's Toilet", "Living room", "Dining room","2 Nos Bedrooms Ensuite", "Kitchen","Laundry","Store","Sit-Outs"]
-                }
-            ]
+            levels: [{ id: 1711122334455, name: "Ground Floor Plan", spaces: ["Entrance","Ante room","Visitor's Toilet","Living room","Dining room","2 Nos Bedrooms Ensuite","Kitchen","Laundry","Store","Sit-Outs"] }]
         }
     },
     {
-        id:'modeer-2bed',
-        title:'Modeer',
-        meta:'2 BEDS • 165 SQM',
-        category:'Tropical Contemporary Bungalow 2 Bedrooms',
-        price:'',
-        main_image:'images/2BEDSTY2B.webp',
-        image_urls:['','images/2BEDSTY2C.webp','images/2BEDSTY2D.webp','images/2BEDSTY2B.webp'],
+        id: 'modeer-2bed',
+        title: 'Modeer',
+        meta: '2 BEDS • 165 SQM',
+        category: 'Tropical Contemporary Bungalow 2 Bedrooms',
+        price: '',
+        main_image: 'images/2BEDSTY2B.webp',
+        image_urls: ['', 'images/2BEDSTY2C.webp', 'images/2BEDSTY2D.webp', 'images/2BEDSTY2B.webp'],
+        video_url: '',
         features: {
-            width: "12.7m",
-            length: "16.0m",
+            width: "12.7m", length: "16.0m",
             plotSuitability: "Fits on a 50ft x 100ft plot minimum (1 plot fit)",
-            levels: [
-                {
-                    id: 1711122388999,
-                    name: "Ground Floor Plan",
-                    spaces: ["Entrance", "Ante Room", "Visitor's Toilet", "Living Room", "Dining Room", "2 Nos Bedrooms Ensuite", "Kitchen", "Store", "Sit-Out"]
-                }
-            ]
+            levels: [{ id: 1711122388999, name: "Ground Floor Plan", spaces: ["Entrance","Ante Room","Visitor's Toilet","Living Room","Dining Room","2 Nos Bedrooms Ensuite","Kitchen","Store","Sit-Out"] }]
         }
     }
 ];
 
-let dynamicData={},currentAction='',currentPlan='',page=1,isLoading=false,hasMore=true,searchTimeout=null,isSearchMode=false,activeCategoryFilter='all';
+let dynamicData = {}, currentAction = '', currentPlan = '',
+    page = 1, isLoading = false, hasMore = true,
+    searchTimeout = null, isFilterActive = false,
+    activeCategoryFilter = 'all';
 
-/* ── PREMIUM MICRO-BLENDING CURSOR MOTOR ──────────────────────────── */
+let currentHeroMedia = [], currentHeroIndex = 0;
+
+/* ── CURSOR ─────────────────────────────────────────────────────────── */
 if (window.matchMedia('(pointer:fine)').matches) {
     const cur = document.getElementById('cursor');
     if (cur) {
         cur.style.display = 'block';
-        
         document.addEventListener('mousemove', e => {
             cur.style.left = e.clientX + 'px';
-            cur.style.top = e.clientY + 'px';
+            cur.style.top  = e.clientY + 'px';
         });
-
-        const bindCursorHoverEffects = () => {
-            document.querySelectorAll('a, button, .accordion-trigger-header, .store-faq-hyperlink, .package-tab, .faq-trigger-card, .filter-btn').forEach(el => {
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('a, button, .accordion-trigger-header, .store-faq-hyperlink, .package-tab, .faq-trigger-card, .filter-btn, .thumbnail-item, .carousel-arrow').forEach(el => {
                 el.addEventListener('mouseenter', () => cur.classList.add('expanded'));
                 el.addEventListener('mouseleave', () => cur.classList.remove('expanded'));
             });
-        };
-
-        document.addEventListener('DOMContentLoaded', bindCursorHoverEffects);
+        });
     }
 }
 
-/* ── SEARCH & FILTER HARMONIZED MOTOR ───────────────────────────────── */
-document.addEventListener('DOMContentLoaded',()=>{
-    const inp=document.getElementById('storeSearch'),clr=document.getElementById('searchClear');
-    inp.addEventListener('input',()=>{
-        const q=inp.value.trim();
-        clr.style.display=q?'block':'none';
-        clearTimeout(searchTimeout);
-        if(!q && activeCategoryFilter === 'all'){
-            clearSearch();
-            return;
-        }
-        searchTimeout=setTimeout(()=>executeCombinedEngine(),300);
-    });
+/* ── SEARCH & FILTER ─────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+    const inp = document.getElementById('storeSearch');
+    const clr = document.getElementById('searchClear');
+    
+    if (inp) {
+        inp.addEventListener('input', () => {
+            const q = inp.value.trim();
+            if (clr) clr.style.display = q ? 'block' : 'none';
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => executeCombinedEngine(), 300);
+        });
+    }
 });
 
-function clearSearch(){
-    document.getElementById('storeSearch').value='';
-    document.getElementById('searchClear').style.display='none';
-    isSearchMode=false;
-    executeCombinedEngine();
+function clearSearch() {
+    const inp = document.getElementById('storeSearch');
+    const clr = document.getElementById('searchClear');
+    if (inp) inp.value = '';
+    if (clr) clr.style.display = 'none';
+    
+    activeCategoryFilter = 'all';
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    
+    // Safely target the specific "All" button rather than just the first one
+    const allBtn = document.querySelector('.filter-btn[data-category="all"]') || document.querySelector('.filter-btn');
+    if (allBtn) allBtn.classList.add('active');
+    
+    isFilterActive = false;
+    resetGrid();
 }
 
 function setCategoryFilter(categoryKey, element) {
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    element.classList.add('active');
-    activeCategoryFilter = categoryKey.toLowerCase();
+    if (element) element.classList.add('active');
+    activeCategoryFilter = categoryKey ? categoryKey.toLowerCase() : 'all';
+    isFilterActive = activeCategoryFilter !== 'all';
     executeCombinedEngine();
 }
 
-// Master search filter structural pipeline
+function buildTextPool(p) {
+    const tagsString = Array.isArray(p.tags) ? p.tags.join(' ') : '';
+    return [
+        p.title, p.meta, p.category, p.price, tagsString,
+        p.features?.plotSuitability,
+        p.features?.levels?.map(l => l.name + ' ' + (l.spaces?.join(' ') || '')).join(' ')
+    ].filter(Boolean).join(' ').toLowerCase();
+}
+
+function planMatchesFilters(p, searchQuery, categoryFilter) {
+    const pool = buildTextPool(p);
+
+    if (searchQuery.length > 0) {
+        const words = searchQuery.split(/\s+/).filter(Boolean);
+        if (!words.every(w => pool.includes(w))) return false;
+    }
+
+    if (categoryFilter !== 'all') {
+        const filterWords = categoryFilter.split(/\s+/).filter(Boolean);
+        if (!filterWords.every(w => pool.includes(w))) return false;
+    }
+
+    return true;
+}
+
 async function executeCombinedEngine() {
-    const searchQuery = document.getElementById('storeSearch').value.toLowerCase().replace(/[₦,]/g, '').trim();
+    const searchInp = document.getElementById('storeSearch');
     const g = document.getElementById('storeGrid');
     if (!g) return;
 
-    isSearchMode = searchQuery.length > 0 || activeCategoryFilter !== 'all';
-    
-    // Evaluate match across criteria
-    const evaluater = (p) => {
-        // Force tags into an evaluatable string pool if they exist
-        const tagsString = Array.isArray(p.tags) ? p.tags.join(' ') : '';
+    const searchQuery = searchInp ? searchInp.value.toLowerCase().replace(/[₦,]/g, '').trim() : '';
+    const isFiltering = searchQuery.length > 0 || activeCategoryFilter !== 'all';
 
-        let textPool = [
-            p.title, p.meta, p.category, p.price, tagsString,
-            p.features?.plotSuitability,
-            p.features?.levels?.map(l => l.name + ' ' + (l.spaces?.join(' ') || '')).join(' ')
-        ].filter(Boolean).join(' ').toLowerCase();
-
-        let matchesSearch = true;
-        if (searchQuery.length > 0) {
-            matchesSearch = searchQuery.split(' ').every(word => textPool.includes(word));
-        }
-
-        let matchesCategory = true;
-        if (activeCategoryFilter !== 'all') {
-            const filterWords = activeCategoryFilter.toLowerCase().split(' ');
-            
-            // CRITICAL FIX: Use word boundaries (\b) so "1" doesn't match "180 SQM"
-            matchesCategory = filterWords.every(word => {
-                const regex = new RegExp('\\b' + word + '\\b', 'i');
-                return regex.test(textPool);
-            });
-        }
-
-        return matchesSearch && matchesCategory;
-    };
-
-    const defaultHits = defaultPlans.filter(evaluater);
-    const dynamicHits = Object.values(dynamicData).filter(evaluater);
+    if (!isFiltering) {
+        resetGrid();
+        return;
+    }
 
     g.innerHTML = '';
     const seen = new Set();
-    
-    [...defaultHits, ...dynamicHits].forEach(p => {
-        if (!seen.has(p.id)) {
+
+    [...defaultPlans, ...Object.values(dynamicData)].forEach(p => {
+        if (!seen.has(p.id) && planMatchesFilters(p, searchQuery, activeCategoryFilter)) {
             seen.add(p.id);
             renderCard(p, g);
         }
     });
 
-    // Query backend if query parameters are missing locally
     if (searchQuery.length > 0) {
         try {
             const r = await fetch(`/api/get-store?search=${encodeURIComponent(searchQuery)}`);
             if (r.ok) {
                 const data = await r.json();
-                if (Array.isArray(data) && data.length) {
-                    data.forEach(p => { 
-                        dynamicData[p.id] = p; 
-                        if (evaluater(p) && !seen.has(p.id)) {
+                if (Array.isArray(data)) {
+                    data.forEach(p => {
+                        dynamicData[p.id] = p;
+                        if (!seen.has(p.id) && planMatchesFilters(p, searchQuery, activeCategoryFilter)) {
                             seen.add(p.id);
                             renderCard(p, g);
                         }
                     });
                 }
             }
-        } catch(e) { console.error('API query engine sync error:', e); }
+        } catch(e) { console.error('API search error:', e); }
     }
 
     if (seen.size === 0) {
-        g.innerHTML = `<div class="search-no-results">No properties fit the specified criteria or filter configurations.</div>`;
+        g.innerHTML = `<div class="search-no-results">No properties match the selected criteria.</div>`;
     }
 }
-async function fetchStoreItems() {
-    if (isLoading || !hasMore || isSearchMode) return;
-    isLoading = true;
 
+/* ── PAGINATION ──────────────────────────────────────────────────────── */
+function resetGrid() {
+    page = 1;
+    hasMore = true;
+    isFilterActive = false;
+    const g = document.getElementById('storeGrid');
+    if (!g) return;
+    
+    g.innerHTML = '';
+    shuffleArray(defaultPlans).forEach(p => renderCard(p, g));
+    dynamicData = {};
+    fetchStoreItems();
+}
+
+async function fetchStoreItems() {
+    const searchInp = document.getElementById('storeSearch');
+    const searchQuery = searchInp ? searchInp.value.trim() : '';
+    
+    if (isLoading || !hasMore || searchQuery || activeCategoryFilter !== 'all') return;
+
+    isLoading = true;
     try {
         const r = await fetch(`/api/get-store?page=${page}`);
+        if (!r.ok) throw new Error('API error');
         const items = await r.json();
 
         if (!items || !items.length) {
             hasMore = false;
+            isLoading = false;
             return;
         }
 
         const g = document.getElementById('storeGrid');
-        items.forEach(i => {
-            if (!dynamicData[i.id]) {
-                dynamicData[i.id] = i;
-                renderCard(i, g);
-            }
-        });
-
+        if (g) {
+            items.forEach(i => {
+                if (!dynamicData[i.id]) {
+                    dynamicData[i.id] = i;
+                    renderCard(i, g);
+                }
+            });
+        }
         page++;
-    } catch (err) { console.error('Fetch store error:', err); }
+    } catch (err) {
+        console.error('Fetch store error:', err);
+    }
     isLoading = false;
 }
 
 window.addEventListener('scroll', () => {
-    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 300) {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 400) {
         fetchStoreItems();
     }
-});
+}, { passive: true });
 
+/* ── CARD RENDER ─────────────────────────────────────────────────────── */
 function getGalleryImages(images) {
-    return images && images.length > 1 ? [images[1], images[0], ...images.slice(2)] : images || [];
-}   
+    return images && images.length > 1
+        ? [images[1], images[0], ...images.slice(2)]
+        : images || [];
+}
 
-function shuffleArray(array) { return [...array].sort(() => Math.random() - 0.5); }
+function shuffleArray(arr) { return [...arr].sort(() => Math.random() - 0.5); }
 
-function renderCard(item, container){
+function renderCard(item, container) {
     if (!item || !container) return;
     const c = document.createElement('div');
     c.className = 'plan-card';
-    c.addEventListener('click', () => {
-        fillModal(
-            item.title || 'Untitled Plan',
-            item.meta || '',
-            item.price || 'Contact for Price',
-            getGalleryImages(item.image_urls || item.images),
-            item.features 
-        );
-    });
-    c.innerHTML = `<div class="plan-img-container"><div class="plan-img" style="background-image:url('${item.main_image || ''}')"></div><div class="plan-overlay"><h3>${item.title || 'Untitled'}</h3><p>${item.category || item.meta || ''}</p></div></div>`;
+    c.addEventListener('click', () => fillModal(
+        item.title || 'Untitled Plan',
+        item.meta  || '',
+        item.price || 'Contact for Price',
+        getGalleryImages(item.image_urls || item.images),
+        item.features,
+        item.video_url || null
+    ));
+    c.innerHTML = `
+        <div class="plan-img-container">
+            <div class="plan-img" style="background-image:url('${item.main_image || ''}')"></div>
+            <div class="plan-overlay">
+                <h3>${item.title || 'Untitled'}</h3>
+                <p>${item.category || item.meta || ''}</p>
+            </div>
+        </div>`;
     container.appendChild(c);
 }
 
-// ─── MASTER DETAILED MODAL RENDERING MOTOR ─────────────────────────────────────
-function fillModal(title, meta, price, images, features) {
-    currentPlan = title; 
+/* ── HERO CAROUSEL ───────────────────────────────────────────────────── */
+function getYoutubeEmbed(url) {
+    const m = url.match(/^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
+    return (m && m[2].length === 11) ? `https://www.youtube.com/embed/${m[2]}?autoplay=1&rel=0` : null;
+}
+
+function renderHeroItem(index) {
+    if (!currentHeroMedia.length) return;
+    if (index < 0) index = currentHeroMedia.length - 1;
+    if (index >= currentHeroMedia.length) index = 0;
+    currentHeroIndex = index;
+
+    const item = currentHeroMedia[index];
+    const heroArea = document.getElementById('heroDisplayArea');
+    if (!heroArea) return;
+
+    if (item.type === 'video') {
+        const embed = getYoutubeEmbed(item.url);
+        heroArea.innerHTML = embed
+            ? `<iframe src="${embed}" class="gallery-hero" frameborder="0" allowfullscreen></iframe>`
+            : '';
+    } else {
+        heroArea.innerHTML = `<img src="${item.url}" class="gallery-hero">`;
+    }
+
+    document.querySelectorAll('.thumbnail-item').forEach((el, i) => {
+        el.classList.toggle('active', i === currentHeroIndex);
+    });
+}
+
+function navigateHero(dir) { renderHeroItem(currentHeroIndex + dir); }
+
+/* ── FILL MODAL ──────────────────────────────────────────────────────── */
+function fillModal(title, meta, price, images, features, videoUrl = null) {
+    currentPlan = title;
     
-    document.getElementById('modalTitle').innerText = title;
-    document.getElementById('modalMeta').innerText = meta;
+    // Safely update DOM text
+    const titleEl = document.getElementById('modalTitle');
+    const metaEl = document.getElementById('modalMeta');
+    const priceEl = document.getElementById('modalPrice');
     
-    const priceNode = document.getElementById('modalPrice');
-    if (priceNode) priceNode.innerText = price;
+    if (titleEl) titleEl.innerText = title;
+    if (metaEl) metaEl.innerText = meta;
+    if (priceEl) priceEl.innerText = price || '';
+
+    currentHeroMedia  = [];
+    currentHeroIndex  = 0;
     
-    document.getElementById('modalGallery').innerHTML = (images || []).map(img => `<img src="${img}">`).join('');
-    
+    const thumbStrip = document.getElementById('thumbnailStrip');
+    if (thumbStrip) thumbStrip.innerHTML = '';
+
+    if (videoUrl) currentHeroMedia.push({ type: 'video', url: videoUrl });
+    (images || []).forEach(img => { if (img) currentHeroMedia.push({ type: 'image', url: img }); });
+
+    if (thumbStrip) {
+        currentHeroMedia.forEach((media, idx) => {
+            if (media.type === 'video') {
+                const div = document.createElement('div');
+                div.className = 'thumbnail-item video-thumb';
+                div.innerHTML = '▶';
+                div.onclick = () => renderHeroItem(idx);
+                thumbStrip.appendChild(div);
+            } else {
+                const img = document.createElement('img');
+                img.src = media.url;
+                img.className = 'thumbnail-item';
+                img.onclick = () => renderHeroItem(idx);
+                thumbStrip.appendChild(img);
+            }
+        });
+    }
+
+    renderHeroItem(0);
+
+    // Features panel parsing safely
     const featPanel = document.getElementById('modalArchitecturalFeaturesPanel');
     const dimTarget = document.getElementById('featDimensionsTarget');
     const plotTarget = document.getElementById('featPlotTarget');
     const levelsContainer = document.getElementById('featLevelsTargetContainer');
+    const listWrapper = document.getElementById('featLevelsListWrapper');
 
     if (featPanel) featPanel.style.display = 'none';
     if (levelsContainer) levelsContainer.innerHTML = '';
 
-    if (features && (features.length || features.width || features.plotSuitability || (features.levels && features.levels.length))) {
+    if (features && (features.width || features.plotSuitability || features.levels?.length)) {
         if (featPanel) featPanel.style.display = 'block';
-        
-        const lengthStr = features.length || '—';
-        const widthStr = features.width || '—';
-        if (dimTarget) dimTarget.innerText = `${lengthStr} Length × ${widthStr} Width`;
+        if (dimTarget)  dimTarget.innerText  = `${features.length || '—'} Length × ${features.width || '—'} Width`;
         if (plotTarget) plotTarget.innerText = features.plotSuitability || 'Review Site Conditions';
 
-        if (features.levels && features.levels.length > 0) {
-            const listWrapper = document.getElementById('featLevelsListWrapper');
+        if (features.levels?.length > 0) {
             if (listWrapper) listWrapper.style.display = 'block';
-            
             if (levelsContainer) {
-                levelsContainer.innerHTML = features.levels.map(lvl => {
-                    const spacesHtml = (lvl.spaces || []).map(space => `
-                        <li style="position: relative; padding-left: 14px; font-size: 0.88rem; color: var(--sand); line-height: 1.6; list-style:none; margin-bottom:4px;">
-                            <span style="position: absolute; left: 0; color: var(--accent);">•</span> ${space}
-                        </li>
-                    `).join('');
-
-                    return `
-                        <div style="border-left: 1px solid rgba(200, 168, 122, 0.2); padding-left: 18px; margin-bottom: 16px;">
-                            <h4 style="font-family: var(--f-display); font-size: 1.05rem; color: var(--gold2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">${lvl.name}</h4>
-                            <ul style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px 16px; margin: 0; padding: 0;">
-                                ${spacesHtml || '<li style="color:var(--mist); font-size:0.8rem; list-style:none;">Open Layout Mapping</li>'}
-                            </ul>
-                        </div>
-                    `;
-                }).join('');
+                levelsContainer.innerHTML = features.levels.map(lvl => `
+                    <div style="border-left:1px solid rgba(200,168,122,0.2);padding-left:18px;margin-bottom:16px;">
+                        <h4 style="font-family:var(--f-display);font-size:1.05rem;color:var(--gold2);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">${lvl.name}</h4>
+                        <ul style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px 16px;margin:0;padding:0;">
+                            ${(lvl.spaces || []).map(s => `
+                                <li style="position:relative;padding-left:14px;font-size:0.88rem;color:var(--sand);line-height:1.6;list-style:none;margin-bottom:4px;">
+                                    <span style="position:absolute;left:0;color:var(--accent);">•</span> ${s}
+                                </li>`).join('') || '<li style="color:var(--mist);font-size:0.8rem;list-style:none;">Open Layout Mapping</li>'}
+                        </ul>
+                    </div>`).join('');
             }
         } else {
-            const listWrapper = document.getElementById('featLevelsListWrapper');
             if (listWrapper) listWrapper.style.display = 'none';
         }
     }
 
-    document.getElementById('planModal').classList.add('open');
-    document.body.style.overflow = 'hidden';
-    
-    const defaultTab = document.querySelector('.package-tab');
-    if (defaultTab) {
-        switchPackageTab(defaultTab, 'Basic Package', 'basic-pane');
+    const modalWindow = document.getElementById('planModal');
+    if (modalWindow) {
+        modalWindow.classList.add('open');
+        document.body.style.overflow = 'hidden';
     }
+
+    const defaultTab = document.querySelector('.package-tab');
+    if (defaultTab) switchPackageTab(defaultTab, 'Basic Package', 'basic-pane');
+    
     closeFaqSubModal();
     hideRequestForm();
 }
 
-function closePlan(){document.getElementById('planModal').classList.remove('open');document.body.style.overflow='';}
-function showRequestForm(a){currentAction=a;currentPlan=document.getElementById('modalTitle').innerText;document.getElementById('formActionTitle').innerText=a+' Request';document.getElementById('initialActions').style.display='none';document.getElementById('requestForm').style.display='block';}
-function hideRequestForm(){document.getElementById('initialActions').style.display='block';document.getElementById('requestForm').style.display='none';}
-
-function switchPackageTab(tabElement, tierName, paneId) {
-    document.querySelectorAll('.package-tab').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-content-pane').forEach(pane => pane.classList.remove('active'));
+function closePlan() {
+    const modalWindow = document.getElementById('planModal');
+    if (modalWindow) modalWindow.classList.remove('open');
+    document.body.style.overflow = '';
     
-    tabElement.classList.add('active');
-    document.getElementById(paneId).classList.add('active');
+    const heroArea = document.getElementById('heroDisplayArea');
+    if (heroArea) heroArea.innerHTML = '';
+    currentHeroMedia = [];
+}
+
+/* ── PACKAGE TABS ────────────────────────────────────────────────────── */
+function switchPackageTab(tabEl, tierName, paneId) {
+    if (!tabEl) return;
+    document.querySelectorAll('.package-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content-pane').forEach(p => p.classList.remove('active'));
+    
+    tabEl.classList.add('active');
+    const pane = document.getElementById(paneId);
+    if (pane) pane.classList.add('active');
+    
     currentAction = tierName;
 }
 
 function goToForm() { showRequestForm(currentAction); }
 
+function showRequestForm(a) {
+    currentAction = a;
+    const titleNode = document.getElementById('modalTitle');
+    currentPlan = titleNode ? titleNode.innerText : currentPlan;
+    
+    const actionTitle = document.getElementById('formActionTitle');
+    const initialActions = document.getElementById('initialActions');
+    const requestForm = document.getElementById('requestForm');
+    
+    if (actionTitle) actionTitle.innerText = a + ' Request';
+    if (initialActions) initialActions.style.display = 'none';
+    if (requestForm) requestForm.style.display = 'block';
+}
+
+function hideRequestForm() {
+    const initialActions = document.getElementById('initialActions');
+    const requestForm = document.getElementById('requestForm');
+    
+    if (initialActions) initialActions.style.display = 'block';
+    if (requestForm) requestForm.style.display = 'none';
+}
+
+/* ── CONTACT FOR PRICE → WHATSAPP ────────────────────────────────────── */
+function processFinalRequest() {
+    const nameEl  = document.getElementById('clientName');
+    const emailEl = document.getElementById('clientEmail');
+    const phoneEl = document.getElementById('clientPhone');
+
+    const name  = nameEl ? nameEl.value.trim() : '';
+    const email = emailEl ? emailEl.value.trim() : '';
+    const phone = phoneEl ? phoneEl.value.trim() : '';
+
+    if (!name || !email || !phone) {
+        alert('Please complete all fields before submitting.');
+        return;
+    }
+
+    const message =
+`ADA PLAN STORE — PACKAGE REQUEST
+
+Plan: ${currentPlan || 'Unspecified'}
+Package Selected: ${currentAction || 'Standard'}
+
+Client Name: ${name}
+Email Address: ${email}
+WhatsApp Number: ${phone}
+
+Sent from the ADA Archilurdesignz Plan Store.`;
+
+    const waUrl = `https://wa.me/2348138580315?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, '_blank');
+
+    if (nameEl) nameEl.value  = '';
+    if (emailEl) emailEl.value = '';
+    if (phoneEl) phoneEl.value = '';
+    hideRequestForm();
+}
+
+/* ── FAQ SUB-MODAL ───────────────────────────────────────────────────── */
 const globalFaqDataMock = [
     { category: "Ready Made Plans FAQs", question: "Are the plans in your store ready for direct construction?", answer: "No. Plans and 3D models sold directly on our store platform are presentation and conceptual-based models. They are not fully dimensioned architectural working drawings and are not intended for direct construction use without a comprehensive professional review." },
     { category: "Ready Made Plans FAQs", question: "What is required before I can build using a plan from the store?", answer: "It is mandatory that all purchased catalog plans are formally reviewed, adapted, and approved by a registered professional before construction operations begin on site to ensure compliance with your land parameters and local building codes." },
     { category: "Ready Made Plans FAQs", question: "How many times can I construct a house using a single purchased plan?", answer: "Purchased designs are licensed under a strict limitation of use. They are granted a single-use construction license for one approved project site only. Any reuse, resale, duplication, redistribution, or modification without written authorization from ADA is prohibited." },
     { category: "Custom Design FAQs", question: "What services are covered under custom commission frameworks?", answer: "ADA provides a comprehensive suite of professional architectural and engineering support lines, including Bespoke Architectural Design & 3D Visualization, Structural/Mechanical/Electrical coordination, Quantity Surveying & Bill of Quantities (BoQ), and Construction Support frameworks." },
     { category: "Custom Design FAQs", question: "What are my obligations as a client during a custom design phase?", answer: "Clients are required to provide accurate project details and site data, cooperate actively throughout the design cycle, approve milestone design steps promptly, and enter into separate, formalized individual service contracts where requested." },
-    { category: "Custom Design FAQs", question: "How are timelines handled for customized projects?", answer: "All development schedules are technical estimates. Final delivery timelines are inherently dependent on project scope, design complexity, engineering consultant coordination, and client feedback speed. Timelines may fluctuate dynamically to prioritize strict technical accuracy and quality control." }
+    { category: "Custom Design FAQs", question: "How are timelines handled for customized projects?", answer: "All development schedules are technical estimates. Final delivery timelines are inherently dependent on project scope, design complexity, engineering consultant coordination, and client feedback speed." }
 ];
 
 async function openFaqSubModal(targetCategory) {
-    let backendSearchCategory = targetCategory;
-    
-    if (targetCategory === "Ready Made Design" || targetCategory === "Ready Made Plans") {
-        backendSearchCategory = "Ready Made Plans FAQs";
-    } else if (targetCategory === "Custom Design") {
-        backendSearchCategory = "Custom Design FAQs";
-    }
+    let cat = targetCategory;
+    if (cat === 'Ready Made Design' || cat === 'Ready Made Plans') cat = 'Ready Made Plans FAQs';
+    else if (cat === 'Custom Design') cat = 'Custom Design FAQs';
 
-    document.getElementById('subModalCategoryTitle').innerText = backendSearchCategory;
+    const titleEl = document.getElementById('subModalCategoryTitle');
     const container = document.getElementById('subModalFaqAccordionTarget');
-    container.innerHTML = "";
+    const layer = document.getElementById('faqSubModalLayer');
+
+    if (titleEl) titleEl.innerText = cat;
+    if (!container) return;
     
-    let sourceData = [];
+    container.innerHTML = '';
+
+    let data = [];
     try {
-        const response = await fetch('/api/get-faqs');
-        sourceData = response.ok ? await response.json() : globalFaqDataMock;
-    } catch (e) { sourceData = globalFaqDataMock; }
+        const r = await fetch('/api/get-faqs');
+        data = r.ok ? await r.json() : globalFaqDataMock;
+    } catch(e) { data = globalFaqDataMock; }
 
-    const filtered = sourceData.filter(faq => {
-        const itemCat = String(faq.category).trim().toLowerCase();
-        const targetCat = String(backendSearchCategory).trim().toLowerCase();
-        return itemCat === targetCat;
-    });
+    const filtered = data.filter(f =>
+        String(f.category).trim().toLowerCase() === cat.toLowerCase()
+    );
 
-    if (filtered.length === 0) {
-        container.innerHTML = `<p style="font-size:0.85rem; color:var(--mist); font-style:italic; padding: 15px 0; text-align:center;">No answers registered under the "${backendSearchCategory}" cluster section.</p>`;
-    } else {
-        container.innerHTML = filtered.map(faq => `
+    container.innerHTML = filtered.length === 0
+        ? `<p style="font-size:0.85rem;color:var(--mist);font-style:italic;padding:15px 0;text-align:center;">No FAQs registered under "${cat}" yet.</p>`
+        : filtered.map(faq => `
             <div class="accordion-item">
                 <button type="button" class="accordion-trigger-header" onclick="toggleSubModalFaqAccordion(this)">
                     <span class="accordion-question-text">${faq.question}</span>
-                    <span class="faq-accordion-plus-sign" style="color:var(--sand); font-size:1.1rem; transition:0.3s; pointer-events:none;">+</span>
+                    <span class="faq-accordion-plus-sign" style="color:var(--sand);font-size:1.1rem;transition:0.3s;pointer-events:none;">+</span>
                 </button>
-                <div class="accordion-body-pane">
-                    <p>${faq.answer}</p>
-                </div>
-            </div>
-        `).join('');
-    }
+                <div class="accordion-body-pane"><p>${faq.answer}</p></div>
+            </div>`).join('');
 
-    document.getElementById('faqSubModalLayer').classList.add('open');
+    if (layer) layer.classList.add('open');
 }
 
-function closeFaqSubModal() { document.getElementById('faqSubModalLayer').classList.remove('open'); }
+function closeFaqSubModal() { 
+    const layer = document.getElementById('faqSubModalLayer');
+    if (layer) layer.classList.remove('open'); 
+}
 
-function toggleSubModalFaqAccordion(buttonElement) {
-    const item = buttonElement.parentElement;
-    const pane = item.querySelector('.accordion-body-pane');
-    const sign = buttonElement.querySelector('.faq-accordion-plus-sign');
+function toggleSubModalFaqAccordion(btn) {
+    if (!btn || !btn.parentElement) return;
+    const pane = btn.parentElement.querySelector('.accordion-body-pane');
+    const sign = btn.querySelector('.faq-accordion-plus-sign');
     
-    if (pane.style.maxHeight === '0px' || !pane.style.maxHeight) {
-        pane.style.maxHeight = pane.scrollHeight + 'px';
-        sign.innerText = '−';
-        sign.style.color = 'var(--accent)';
-    } else {
-        pane.style.maxHeight = '0px';
-        sign.innerText = '+';
-        sign.style.color = 'var(--sand)';
-    }
+    if (!pane || !sign) return;
+
+    const isOpen = pane.style.maxHeight && pane.style.maxHeight !== '0px';
+    pane.style.maxHeight = isOpen ? '0px' : pane.scrollHeight + 'px';
+    sign.innerText = isOpen ? '+' : '−';
+    sign.style.color = isOpen ? 'var(--sand)' : 'var(--accent)';
 }
 
+/* ── URL PLAN DEEP-LINK ──────────────────────────────────────────────── */
 async function checkUrlForPlan() {
     const id = new URLSearchParams(window.location.search).get('plan');
     if (!id) return;
 
     const local = defaultPlans.find(p => p.id === id);
     if (local) {
-        fillModal(local.title, local.meta, local.price, getGalleryImages(local.image_urls), local.features);
+        fillModal(local.title, local.meta, local.price, getGalleryImages(local.image_urls), local.features, local.video_url);
         return;
     }
     if (dynamicData[id]) {
         const p = dynamicData[id];
-        fillModal(p.title, p.meta, p.price, getGalleryImages(p.image_urls), p.features);
+        fillModal(p.title, p.meta, p.price, getGalleryImages(p.image_urls), p.features, p.video_url);
         return;
     }
     try {
@@ -1045,131 +1106,154 @@ async function checkUrlForPlan() {
             const plan = Array.isArray(data) ? data[0] : data;
             if (plan) {
                 dynamicData[plan.id] = plan;
-                fillModal(plan.title, plan.meta, plan.price, getGalleryImages(plan.image_urls), plan.features);
-                return;
+                fillModal(plan.title, plan.meta, plan.price, getGalleryImages(plan.image_urls), plan.features, plan.video_url);
             }
         }
-    } catch(e) { console.error('Plan fetch by id failed:', e); }
+    } catch(e) { console.error('Plan lookup failed:', e); }
 }
 
-window.addEventListener('scroll',()=>{document.getElementById('navbar').classList.toggle('solid',window.scrollY>60);},{passive:true});
+/* ── NAV / WA DRAG ───────────────────────────────────────────────────── */
+window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    if (nav) nav.classList.toggle('solid', window.scrollY > 60);
+}, { passive: true });
 
-const wa=document.getElementById('waDraggable');let dr=false,ox=0,oy=0;
-wa.addEventListener('mousedown',e=>{dr=true;ox=e.clientX-wa.offsetLeft;oy=e.clientY-wa.offsetTop;wa.style.transition='none';});
-document.addEventListener('mousemove',e=>{if(dr){wa.style.left=(e.clientX-ox)+'px';wa.style.top=(e.clientY-oy)+'px';wa.style.right=wa.style.bottom='auto';}});
-document.addEventListener('mouseup',()=>{dr=false;wa.style.transition='transform 0.3s';});
-
-window.addEventListener('DOMContentLoaded', async () => {
-    const g = document.getElementById('storeGrid');
-
-    shuffleArray(defaultPlans).forEach(p => renderCard(p, g));
-
-    fetchStoreItems();
-    await checkUrlForPlan();
-    await loadEstimatorStates();
-});
+const wa = document.getElementById('waDraggable');
+if (wa) {
+    let dr = false, ox = 0, oy = 0;
+    wa.addEventListener('mousedown', e => { 
+        dr = true; 
+        ox = e.clientX - wa.offsetLeft; 
+        oy = e.clientY - wa.offsetTop; 
+        wa.style.transition = 'none'; 
+    });
+    document.addEventListener('mousemove', e => { 
+        if(dr) { 
+            wa.style.left = (e.clientX - ox) + 'px'; 
+            wa.style.top = (e.clientY - oy) + 'px'; 
+            wa.style.right = wa.style.bottom = 'auto'; 
+        } 
+    });
+    document.addEventListener('mouseup', () => { 
+        dr = false; 
+        wa.style.transition = 'transform 0.3s'; 
+    });
+}
 
 document.addEventListener('contextmenu', e => {
-    if (e.target.tagName === 'IMG' || e.target.closest('.p-item') || e.target.closest('.plan-card') || e.target.closest('.plan-img-wrap')) {
-        e.preventDefault();
-    }
+    if (e.target.tagName === 'IMG' || e.target.closest('.p-item, .plan-card, .plan-img-wrap')) e.preventDefault();
 });
 
-function openEstimatorModal(e) {
-    if(e) e.preventDefault();
-    document.getElementById('estimatorModal').style.display = 'block';
-    document.body.style.overflow = 'hidden';
+/* ── ESTIMATOR ───────────────────────────────────────────────────────── */
+function openEstimatorModal(e) { 
+    if(e) e.preventDefault(); 
+    const modal = document.getElementById('estimatorModal');
+    if (modal) {
+        modal.style.display = 'block'; 
+        document.body.style.overflow = 'hidden'; 
+    }
 }
-function closeEstimatorModal() {
-    document.getElementById('estimatorModal').style.display = 'none';
-    document.body.style.overflow = 'auto';
+function closeEstimatorModal() { 
+    const modal = document.getElementById('estimatorModal');
+    if (modal) {
+        modal.style.display = 'none'; 
+        document.body.style.overflow = 'auto'; 
+    }
 }
 
 async function loadEstimatorStates() {
     const dropdown = document.getElementById('estState');
     if (!dropdown || !_db) return;
     try {
-        // Query the secure database channel that only handles text names
         const { data: list, error } = await _db.rpc('get_available_states');
-
         if (error) throw error;
-        
-        if (list && list.length > 0) {
+        if (list?.length) {
             dropdown.innerHTML = '<option value="">-- Select Project State Location --</option>';
-            list.forEach(row => {
-                const opt = document.createElement('option');
-                opt.value = row.state_name;
-                opt.textContent = row.state_name;
-                dropdown.appendChild(opt);
-            });
-        }
-    } catch (err) {
-        console.warn("Table restrictions active — compiling interface local fallback buffers:", err);
-        
-        // High-fidelity fallback list to protect client interface continuity
-        const fallbacks = [
-            "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", 
-            "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "Gombe", "Imo", 
-            "Jigawa", "Kaduna", "Kano", "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", 
-            "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", 
-            "Taraba", "Yobe", "Zamfara", "Abuja"
-        ];
-        
-        dropdown.innerHTML = '<option value="">-- Select Project State Location --</option>';
-        fallbacks.forEach(stateName => {
-            const opt = document.createElement('option');
-            opt.value = stateName;
-            opt.textContent = stateName;
-            dropdown.appendChild(opt);
-        });
-    }
-}
-async function runCalculator(e) {
-    e.preventDefault();
-    
-    const floors = parseInt(document.getElementById('estFloors').value) || 1;
-    const area = parseFloat(document.getElementById('estArea').value) || 0;
-    const selectedState = document.getElementById('estState').value;
-    const finish = document.getElementById('estFinish').value;
-    const terrain = document.getElementById('estTerrain').value;
-    const logistics = document.getElementById('estLogistics').value;
-    const hasExternal = document.getElementById('estExternalWorks').checked;
-
-    if(!selectedState) { alert('Kindly select a target project location state first.'); return; }
-
-    try {
-        // Execute the server-side calculations safely without exposing internal database columns
-        const { data, error } = await _db.rpc('secure_calculate_estimate', {
-            target_state_param: selectedState,
-            floors_param: floors,
-            area_param: area,
-            finish_param: finish,
-            terrain_param: terrain,
-            logistics_param: logistics,
-            has_external_param: hasExternal
-        });
-
-        if (error) throw error;
-
-        if (data && data.length > 0) {
-            const results = data[0];
-            const fmt = (val) => '₦' + Math.round(val).toLocaleString('en-NG', { minimumFractionDigits: 2 });
-            
-            // Render compiled pricing values out to the browser UI safely
-            document.getElementById('outShell').innerText = fmt(results.out_shell);
-            document.getElementById('outFinishing').innerText = fmt(results.out_finishing);
-            document.getElementById('outExternal').innerText = fmt(results.out_external);
-            document.getElementById('outInflation').innerText = fmt(results.out_inflation);
-            document.getElementById('outContingency').innerText = fmt(results.out_contingency);
-            document.getElementById('outGrandTotal').innerText = fmt(results.out_grand_total);
-
-            document.getElementById('estimatorOutput').style.display = 'block';
+            list.forEach(row => { const o = document.createElement('option'); o.value = o.textContent = row.state_name; dropdown.appendChild(o); });
         }
     } catch(err) {
-        console.error("Calculation transmission block failure:", err);
-        alert("An error occurred while compiling your calculation package. Please try again.");
+        const states = ["Abia","Adamawa","Akwa Ibom","Anambra","Bauchi","Bayelsa","Benue","Borno","Cross River","Delta","Ebonyi","Edo","Ekiti","Enugu","Gombe","Imo","Jigawa","Kaduna","Kano","Kebbi","Kogi","Kwara","Lagos","Nasarawa","Niger","Ogun","Ondo","Osun","Oyo","Plateau","Rivers","Sokoto","Taraba","Yobe","Zamfara","Abuja"];
+        dropdown.innerHTML = '<option value="">-- Select Project State Location --</option>';
+        states.forEach(s => { const o = document.createElement('option'); o.value = o.textContent = s; dropdown.appendChild(o); });
     }
 }
+
+async function runCalculator(e) {
+    if (e) e.preventDefault();
+    
+    // Critical fallback: If Supabase fails to initialize, alert the user rather than crashing
+    if (!_db) {
+        alert("The estimator database is currently unreachable. Please refresh or try again later.");
+        return;
+    }
+
+    const stateDropdown = document.getElementById('estState');
+    const floorsInput = document.getElementById('estFloors');
+    const areaInput = document.getElementById('estArea');
+    const finishInput = document.getElementById('estFinish');
+    const terrainInput = document.getElementById('estTerrain');
+    const logisticsInput = document.getElementById('estLogistics');
+    const extWorksInput = document.getElementById('estExternalWorks');
+
+    if (!stateDropdown || !floorsInput) return; // Prevent crashes if elements are missing
+
+    const selectedState = stateDropdown.value;
+    const floors  = parseInt(floorsInput.value) || 1;
+    const area    = parseFloat(areaInput.value) || 0;
+    const finish  = finishInput ? finishInput.value : '';
+    const terrain = terrainInput ? terrainInput.value : '';
+    const logistics = logisticsInput ? logisticsInput.value : '';
+    const hasExternal = extWorksInput ? extWorksInput.checked : false;
+
+    if (!selectedState) { 
+        alert('Kindly select a target project location state first.'); 
+        return; 
+    }
+
+    try {
+        const { data, error } = await _db.rpc('secure_calculate_estimate', {
+            target_state_param: selectedState, floors_param: floors, area_param: area,
+            finish_param: finish, terrain_param: terrain, logistics_param: logistics, has_external_param: hasExternal
+        });
+        if (error) throw error;
+
+        if (data?.length) {
+            const r = data[0];
+            const fmt = v => '₦' + Math.round(v).toLocaleString('en-NG', { minimumFractionDigits: 2 });
+            
+            const mapping = {
+                'outShell': r.out_shell,
+                'outFinishing': r.out_finishing,
+                'outExternal': r.out_external,
+                'outInflation': r.out_inflation,
+                'outContingency': r.out_contingency,
+                'outGrandTotal': r.out_grand_total
+            };
+
+            for (const [id, value] of Object.entries(mapping)) {
+                const el = document.getElementById(id);
+                if (el) el.innerText = fmt(value);
+            }
+
+            const outputContainer = document.getElementById('estimatorOutput');
+            if (outputContainer) outputContainer.style.display = 'block';
+        }
+    } catch(err) {
+        console.error('Calculation error:', err);
+        alert('An error occurred during calculation. Please verify your inputs and try again.');
+    }
+}
+
+/* ── INIT ────────────────────────────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', async () => {
+    const g = document.getElementById('storeGrid');
+    if (g) {
+        shuffleArray(defaultPlans).forEach(p => renderCard(p, g));
+        fetchStoreItems();
+    }
+    await checkUrlForPlan();
+    await loadEstimatorStates();
+});
 </script>
 </body>
 </html>
