@@ -2246,7 +2246,6 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-    // ─── INVOICE DYNAMIC SUB-ENGINE WORKERS ───────────────────────────────────────
 // ─── INVOICE DYNAMIC SUB-ENGINE WORKERS ───────────────────────────────────────
 function addNewInvoiceLineItemInputRow() {
     const container = document.getElementById('invItemsFormContainer');
@@ -2294,10 +2293,11 @@ async function submitInvoiceToSupabaseEngine() {
     document.querySelectorAll('input[name="studioService"]:checked').forEach(checkbox => {
         selectedServicesArray.push(checkbox.value);
     });
+    const invoiceToken = generateToken();   // ← generates e.g. ADA-2026-4821
 
     const payload = {
         invoice_number: num,
-        token: num,
+        token: invoiceToken,
         currency: document.getElementById('invCurrency').value,
         client_name: cName,
         client_phone: document.getElementById('invClientPhone').value.trim(),
