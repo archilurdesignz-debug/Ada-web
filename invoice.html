@@ -130,10 +130,12 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
             <p><strong>Due Date:</strong> <span id="lblDueDate">—</span></p>
         </div>
     </section>
-<div class="project-title-wrapper" style="background: #faf8f4; border-left: 3px solid #b09070; padding: 16px 20px; margin-bottom: 25px; border-top: 1px solid rgba(201,191,176,0.2); border-right: 1px solid rgba(201,191,176,0.2); border-bottom: 1px solid rgba(201,191,176,0.2);">
-    <h3 style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 2px; color: #7a7570; margin-bottom: 4px; font-weight: 500;">Project Detail(s)</h3>
-    <p id="lblProjectTitle" style="font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 500; color: #1c1a17; letter-spacing: 0.5px;">Loading Project Specific Details...</p>
-</div>
+
+    <div class="project-title-wrapper" style="background: #faf8f4; border-left: 3px solid #b09070; padding: 16px 20px; margin-bottom: 25px; border-top: 1px solid rgba(201,191,176,0.2); border-right: 1px solid rgba(201,191,176,0.2); border-bottom: 1px solid rgba(201,191,176,0.2);">
+        <h3 style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 2px; color: #7a7570; margin-bottom: 4px; font-weight: 500;">Project Detail(s)</h3>
+        <p id="lblProjectTitle" style="font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 500; color: #1c1a17; letter-spacing: 0.5px;">Loading Project Specific Details...</p>
+    </div>
+
     <table class="item-table">
         <thead>
             <tr>
@@ -170,10 +172,12 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
     </div>
 
     <footer class="invoice-footer-notes">
-        <div class="notice-upfront-box" id="upfrontNoticePanel" style="display: none;">
-    <p><strong>Upfront Remittance Structure Note:</strong><br>
-    Pursuant to ADA Client Service Terms, a mandatory <span id="lblUpfrontPercent"></span>% upfront deposit representing <strong id="lblUpfrontValueAmount" style="color:#b09070;"></strong> is required to formally schedule project milestones and allocate engineering resources.</p>
-</div>
+        <div>
+            <!-- Retained inside grid cell block to preserve flex flow and layout stability -->
+            <div class="notice-upfront-box" id="upfrontNoticePanel" style="display: none;">
+                <p><strong>Upfront Remittance Structure Note:</strong><br>
+                Pursuant to ADA Client Service Terms, a mandatory <span id="lblUpfrontPercent"></span>% upfront deposit representing <strong id="lblUpfrontValueAmount" style="color:#b09070;"></strong> is required to formally schedule project milestones and allocate engineering resources.</p>
+            </div>
             <div class="services-ledger-box">
                 <h5>Studio Service Coverage Log</h5>
                 <div class="ledger-grid" id="invoiceServicesLedgerTarget"></div>
@@ -194,7 +198,6 @@ const supabaseUrl = 'https://ofaxbduvnhscxvoakeax.supabase.co';
 const supabaseKey = 'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK';
 const _db = supabase.createClient(supabaseUrl, supabaseKey);
 
-// Comprehensive list of available catalogued studio capabilities
 const MASTER_STUDIO_SERVICES_LIST = [
     "Architectural Drawing Pack",
     "Structural Engineering Design",
@@ -224,7 +227,6 @@ async function assembleInvoiceInvoiceEngine() {
             return;
         }
 
-        // 1. Fetch data from DB first
         const { data: invoice, error } = await _db
             .from('invoices')
             .select('*')
@@ -239,9 +241,7 @@ async function assembleInvoiceInvoiceEngine() {
 
         const curr = invoice.currency || 'NGN';
 
-        // 2. NOW it is safe to pull properties off the 'invoice' object:
         document.getElementById('lblProjectTitle').innerText = invoice.project_request_title || "Bespoke Architectural Project Execution";
-
         document.getElementById('lblFirmAddress').innerText = invoice.business_address || "No 18, Omerelu Street, GRA, Port Harcourt, Nigeria";
         document.getElementById('lblFirmPhone').innerText = invoice.business_phone || "+234 813 858 0315";
         
@@ -306,7 +306,7 @@ async function assembleInvoiceInvoiceEngine() {
                 document.getElementById('netTotalRowWrapper').style.display = 'none';
             }
         }
-        // 2. Process VAT Layer on top of the Post-Discounted running balance figure
+
         let grandTotalFinal = runningBalance;
         if (invoice.apply_vat === true) {
             const vatAmountCalculated = runningBalance * 0.075;
@@ -318,24 +318,21 @@ async function assembleInvoiceInvoiceEngine() {
             document.getElementById('vatRowWrapper').style.display = 'none';
         }
 
-        // Render Grand Final Total Balance Due
         document.getElementById('lblGrandTotal').innerText = formatCurrency(grandTotalFinal, curr);
 
-        // 3. Conditional Upfront Remittance Structure Layer
-const upfrontNoticePanel = document.getElementById('upfrontNoticePanel');
-
-// If the column is missing or explicitly true, show it. If false, hide it.
-if (invoice.show_upfront_note !== false) {
-    upfrontNoticePanel.style.display = 'block';
-    
-    const upfrontPercentageValue = Number(invoice.upfront_percentage) || 50;
-    const upfrontCalculatedRawAmount = (upfrontPercentageValue / 100) * grandTotalFinal;
-    
-    document.getElementById('lblUpfrontPercent').innerText = upfrontPercentageValue;
-    document.getElementById('lblUpfrontValueAmount').innerText = formatCurrency(upfrontCalculatedRawAmount, curr);
-} else {
-    upfrontNoticePanel.style.display = 'none';
-}
+        // CONDITIONAL SEPARATION STABILITY: Keeps structural layouts clean
+        const upfrontNoticePanel = document.getElementById('upfrontNoticePanel');
+        if (invoice.show_upfront_note !== false) {
+            upfrontNoticePanel.style.display = 'block';
+            
+            const upfrontPercentageValue = Number(invoice.upfront_percentage) || 50;
+            const upfrontCalculatedRawAmount = (upfrontPercentageValue / 100) * grandTotalFinal;
+            
+            document.getElementById('lblUpfrontPercent').innerText = upfrontPercentageValue;
+            document.getElementById('lblUpfrontValueAmount').innerText = formatCurrency(upfrontCalculatedRawAmount, curr);
+        } else {
+            upfrontNoticePanel.style.display = 'none';
+        }
 
         const fallbackNaira = "Access Bank\nAccount Number: 0076849302\nName: Archilurdesignz and Architecture";
         const fallbackDollar = "Zenith Bank Plc (Domiciliary)\nAccount Number: 5071192834\nSort Code/Swift: ZEBINGLA";
@@ -344,7 +341,6 @@ if (invoice.show_upfront_note !== false) {
             ? (invoice.dollar_account_info || fallbackDollar)
             : (invoice.naira_account_info || fallbackNaira);
 
-        // POPULATE COVERED SCOPE MATRICES DYNAMICALLY
         const serviceLedgerContainer = document.getElementById('invoiceServicesLedgerTarget');
         const scopeArray = Array.isArray(invoice.scope_of_services) ? invoice.scope_of_services : [];
         
