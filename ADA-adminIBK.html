@@ -274,12 +274,13 @@
                     <input type="checkbox" id="invApplyDiscount" style="width:16px; height:16px; accent-color:var(--gold); cursor:pointer;" onchange="document.getElementById('discountInputWrapper').style.display = this.checked ? 'block' : 'none'">
                     <label for="invApplyDiscount" style="margin-bottom:0; cursor:pointer;">Apply Percentage Discount</label>
                     </div>
-                    <!-- Admin Controls: Financial Toggles -->
-                    <div class="form-group-checkbox" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                   <input type="checkbox" id="chkShowUpfrontNote" checked style="width: 16px; height: 16px; cursor: pointer;">
-     <label for="chkShowUpfrontNote" style="font-family: 'Outfit', sans-serif; font-size: 0.9rem; color: #1c1a17; cursor: pointer; user-select: none;">Include Upfront Remittance Structure Note</label>
+               
+    <div class="form-group-checkbox" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+    <input type="checkbox" id="invShowUpfrontNote" checked style="width: 16px; height: 16px; cursor: pointer;">
+    <label for="invShowUpfrontNote" style="font-family: 'Outfit', sans-serif; font-size: 0.9rem; color: #ffffff; cursor: pointer; user-select: none;">
+        Include Upfront Remittance Structure Note
+    </label>
 </div>
-    
                     <div id="discountInputWrapper" style="display:none; margin-left:26px; margin-top:5px;">
                     <label style="font-size:0.75rem; color:#ccc; display:block; margin-bottom:4px;">Discount Rate (%)</label>
                     <input type="number" id="invDiscountPct" min="0" max="100" step="0.5" value="0" style="width:100px; padding:6px; background:#1c1a17; border:1px solid rgba(201,191,176,0.3); color:#fff; font-family:'Outfit';">
