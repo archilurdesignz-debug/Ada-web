@@ -274,6 +274,13 @@
                     <input type="checkbox" id="invApplyDiscount" style="width:16px; height:16px; accent-color:var(--gold); cursor:pointer;" onchange="document.getElementById('discountInputWrapper').style.display = this.checked ? 'block' : 'none'">
                     <label for="invApplyDiscount" style="margin-bottom:0; cursor:pointer;">Apply Percentage Discount</label>
                     </div>
+                    <!-- Admin Controls: Financial Toggles -->
+                    <div class="form-group-checkbox" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                   <input type="checkbox" id="chkShowUpfrontNote" checked style="width: 16px; height: 16px; cursor: pointer;">
+     <label for="chkShowUpfrontNote" style="font-family: 'Outfit', sans-serif; font-size: 0.9rem; color: #1c1a17; cursor: pointer; user-select: none;">
+        Include Upfront Remittance Structure Note
+    </label>
+</div>
     
                     <div id="discountInputWrapper" style="display:none; margin-left:26px; margin-top:5px;">
                     <label style="font-size:0.75rem; color:#ccc; display:block; margin-bottom:4px;">Discount Rate (%)</label>
@@ -2244,6 +2251,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
     // ─── INVOICE DYNAMIC SUB-ENGINE WORKERS ───────────────────────────────────────
+// ─── INVOICE DYNAMIC SUB-ENGINE WORKERS ───────────────────────────────────────
 function addNewInvoiceLineItemInputRow() {
     const container = document.getElementById('invItemsFormContainer');
     const d = document.createElement('div');
@@ -2303,6 +2311,7 @@ async function submitInvoiceToSupabaseEngine() {
         scope_of_services: selectedServicesArray,
         business_address: document.getElementById('invFirmAddr').value.trim() || undefined, 
         business_phone: document.getElementById('invFirmPhone').value.trim() || undefined,
+        show_upfront_note: document.getElementById('invShowUpfrontNote') ? document.getElementById('invShowUpfrontNote').checked : true,
         upfront_percentage: parseFloat(document.getElementById('invUpfrontPct').value) || 50,
         apply_discount: document.getElementById('invApplyDiscount').checked,
         discount_percentage: parseFloat(document.getElementById('invDiscountPct').value) || 0,
