@@ -170,12 +170,10 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
     </div>
 
     <footer class="invoice-footer-notes">
-        <div>
-            <div class="notice-upfront-box" id="upfrontNoticePanel">
-                <p><strong>Upfront Remittance Structure Note:</strong><br>
-                Pursuant to ADA Client Service Terms, a mandatory <span id="lblUpfrontPercent"></span>% upfront deposit representing <strong id="lblUpfrontValueAmount" style="color:#b09070;"></strong> is required to formally schedule project milestones and allocate engineering resources.</p>
-            </div>
-            
+        <div class="notice-upfront-box" id="upfrontNoticePanel" style="display: none;">
+    <p><strong>Upfront Remittance Structure Note:</strong><br>
+    Pursuant to ADA Client Service Terms, a mandatory <span id="lblUpfrontPercent"></span>% upfront deposit representing <strong id="lblUpfrontValueAmount" style="color:#b09070;"></strong> is required to formally schedule project milestones and allocate engineering resources.</p>
+</div>
             <div class="services-ledger-box">
                 <h5>Studio Service Coverage Log</h5>
                 <div class="ledger-grid" id="invoiceServicesLedgerTarget"></div>
@@ -323,12 +321,21 @@ async function assembleInvoiceInvoiceEngine() {
         // Render Grand Final Total Balance Due
         document.getElementById('lblGrandTotal').innerText = formatCurrency(grandTotalFinal, curr);
 
-        // 3. Compute structural upfront percentage off the actual final invoice total
-        const upfrontPercentageValue = Number(invoice.upfront_percentage) || 50;
-        const upfrontCalculatedRawAmount = (upfrontPercentageValue / 100) * grandTotalFinal;
-        
-        document.getElementById('lblUpfrontPercent').innerText = upfrontPercentageValue;
-        document.getElementById('lblUpfrontValueAmount').innerText = formatCurrency(upfrontCalculatedRawAmount, curr);
+        // 3. Conditional Upfront Remittance Structure Layer
+const upfrontNoticePanel = document.getElementById('upfrontNoticePanel');
+
+// If the column is missing or explicitly true, show it. If false, hide it.
+if (invoice.show_upfront_note !== false) {
+    upfrontNoticePanel.style.display = 'block';
+    
+    const upfrontPercentageValue = Number(invoice.upfront_percentage) || 50;
+    const upfrontCalculatedRawAmount = (upfrontPercentageValue / 100) * grandTotalFinal;
+    
+    document.getElementById('lblUpfrontPercent').innerText = upfrontPercentageValue;
+    document.getElementById('lblUpfrontValueAmount').innerText = formatCurrency(upfrontCalculatedRawAmount, curr);
+} else {
+    upfrontNoticePanel.style.display = 'none';
+}
 
         const fallbackNaira = "Access Bank\nAccount Number: 0076849302\nName: Archilurdesignz and Architecture";
         const fallbackDollar = "Zenith Bank Plc (Domiciliary)\nAccount Number: 5071192834\nSort Code/Swift: ZEBINGLA";
