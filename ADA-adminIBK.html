@@ -2621,12 +2621,17 @@ async function removeInstallmentFromInvoiceLog(index) {
 }
 
 function generateReceiptShareLink() {
-    if (!activelySelectedInvoiceRow) return;
+    if (!activelySelectedInvoiceRow) {
+        alert("Please select an active invoice and load details first.");
+        return;
+    }
     
     const receiptUrl = window.location.origin + '/receipt.html?id=' + activelySelectedInvoiceRow.id;
     
+    // Fixed style selector block
     document.getElementById('lblGeneratedReceiptUrl').value = receiptUrl;
-    document.getElementById('receiptOutputUrlWrapper').style.style.display = 'block';
+    document.getElementById('receiptOutputUrlWrapper').style.display = 'block';
+    
     alert("✓ Live client receipt asset route generated.");
 }
 </script>
