@@ -2569,7 +2569,10 @@ function renderInvoiceDepositsLedgerUI() {
 }
 
 async function addInstallmentToInvoiceLog() {
-    if (!_db || !activelySelectedInvoiceRow) return;
+    if (!_db || !activelySelectedInvoiceRow) {
+        alert("No active invoice record row loaded in context layout memory.");
+        return;
+    }
 
     const amtInput = document.getElementById('newDepositAmount');
     const dateInput = document.getElementById('newDepositDate');
@@ -2581,6 +2584,38 @@ async function addInstallmentToInvoiceLog() {
         alert("Please enter a valid allocation amount and select a confirmation clearance date.");
         return;
     }
+
+    // Ensure state integrity
+    if (!activelySelectedInvoiceRow.deposits_log || !Array.isArray(activelySelectedInvoiceRow.deposits_log)) {
+        activelySelectedInvoiceRow.deposits_log = [];
+    }
+
+    // Append entry segment object
+    const newEntry = { amount: amount, date: date };
+    
+    // Create a pristine deep copy of the array layout to prevent object pointer errors
+    const updatedLog = [...activelySelectedInvoiceRow.deposits_log, newEntry];
+
+    console.log("Dispatching updated jsonb packet payload to Supabase:", updatedLog);
+
+    // Fire network write transactional request
+    const { data, error } = await _db
+        .from('invoices')
+        .update({ deposits_log: updatedLog }) // Explicit array pass
+        .eq('id', activelySelectedInvoiceRow.id)
+        .select();
+
+    if (error) {
+        console.error("Supabase Database write failure payload details:", error);
+        alert("Transaction push failure vector: " + error.message + "\nCode: " + error.code + "\nDetails: " + error.details);
+    } else {
+        // Sync local memory state cache on absolute confirmation feedback success
+        activelySelectedInvoiceRow.deposits_log = updatedLog;
+        amtInput.value = "";
+        renderInvoiceDepositsLedgerUI();
+        alert("✓ Installment transaction log added successfully to live backend registers.");
+    }
+}
 
     // Initialize log tracking array if null
     if (!Array.isArray(activelySelectedInvoiceRow.deposits_log)) {
