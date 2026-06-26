@@ -319,6 +319,62 @@
             </div>
         </div>
     </div>
+<!-- ── MANAGE RECEIPTS ─────────────────────────────── -->
+    <div class="section-card" style="border-top-color: #2e7d52;">
+        <div class="section-toggle" onclick="toggleSection(this)">
+            <h2>Manage Receipts & Deposits</h2>
+            <span class="toggle-icon">+</span>
+        </div>
+        <div class="section-body">
+            <p style="font-size:0.75rem; color:#666; margin-bottom:20px;">
+                Select a generated contract invoice to update progressive installment deposits, clear historical remittance logs, or compile real-time printable receipt sharing tokens.
+            </p>
+            
+            <div class="form-group">
+                <label>Select Active Studio Invoice</label>
+                <select id="receiptInvoiceSelector" onchange="loadInvoiceDepositDetails()">
+                    <option value="">-- Select Active Client Invoice --</option>
+                </select>
+            </div>
+
+            <div id="receiptManagementFields" style="display:none; margin-top:20px;">
+                <div class="grid-2" style="margin-bottom:20px;">
+                    <div style="background:rgba(0,0,0,0.2); padding:15px; border:1px solid #222;">
+                        <h4 style="font-size:0.75rem; color:var(--gold); text-transform:uppercase; margin-bottom:10px; letter-spacing:1px;">Active Balance Matrix</h4>
+                        <p style="font-size:0.85rem; margin-bottom:6px;">Client Name: <strong id="lblReceiptClientName" style="color:white;">—</strong></p>
+                        <p style="font-size:0.85rem; margin-bottom:6px;">Project Title: <strong id="lblReceiptProjectTitle" style="color:white;">—</strong></p>
+                        <p style="font-size:0.85rem;">Accumulated Cleared Funds: <strong id="lblReceiptClearedTotal" style="color:#2e7d52;">—</strong></p>
+                    </div>
+                    
+                    <div style="background:rgba(255,255,255,0.01); padding:15px; border:1px solid #222;">
+                        <h4 style="font-size:0.75rem; color:var(--gold); text-transform:uppercase; margin-bottom:12px; letter-spacing:1px;">Log New Payment Installment</h4>
+                        <div class="grid-2" style="gap:10px;">
+                            <div>
+                                <label>Amount Received</label>
+                                <input type="number" id="newDepositAmount" placeholder="e.g. 500000">
+                            </div>
+                            <div>
+                                <label>Clearance Date</label>
+                                <input type="date" id="newDepositDate">
+                            </div>
+                        </div>
+                        <button type="button" class="btn-small" style="background:var(--success); color:white; width:100%; margin-top:10px; padding:10px;" onclick="addInstallmentToInvoiceLog()">Commit Deposit Entry</button>
+                    </div>
+                </div>
+
+                <h3 style="margin-top:20px; margin-bottom:12px;">Remittance Statement History Ledger</h3>
+                <div id="receiptInstallmentsLedgerContainer" style="margin-bottom:25px; display:flex; flex-direction:column; gap:8px;">
+                    </div>
+
+                <button type="button" class="btn-action" style="background:var(--success); color:white; margin-top:0;" onclick="generateReceiptShareLink()">Compile and Generate Receipt Share Link</button>
+                
+                <div id="receiptOutputUrlWrapper" style="margin-top:20px; display:none; background:rgba(46,125,82,0.1); border:1px solid var(--success); padding:16px;">
+                    <p style="font-size:0.8rem; color:var(--gold); margin-bottom:6px; text-transform:uppercase; letter-spacing:1px;">✓ Official Receipt Document Share Path Compiled:</p>
+                    <input type="text" id="lblGeneratedReceiptUrl" readonly style="color:#2e7d52; font-family:monospace; font-size:0.85rem; background: #000; border: 1px solid #333;" onclick="this.select()">
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- ── INITIALIZE CLIENT DASHBOARD ─────────────────────────────── -->
     <div class="section-card" style="border-top-color: var(--success);">
         <div class="section-toggle" onclick="toggleSection(this)">
@@ -2236,6 +2292,7 @@ window.addEventListener('DOMContentLoaded', () => {
     loadDefaultsVisibility();
     attachTimelineAutoSave();
     loadEstimatorDefaultConstants();
+    loadReceiptInvoiceSelectors();
 
     const newCurrencyDropdown = document.getElementById('newCurrencyMode');
     if (newCurrencyDropdown) {
@@ -2316,7 +2373,8 @@ async function submitInvoiceToSupabaseEngine() {
         due_date: formatDateString(dueDate),
         items: compiledItems,
         naira_account_info: document.getElementById('invNairaAccount').value.trim() || undefined,
-        dollar_account_info: document.getElementById('invDollarAccount').value.trim() || undefined
+        dollar_account_info: document.getElementById('invDollarAccount').value.trim() || undefined,
+        deposits_log: []
     };
 
  const { data, error } = await _db
@@ -2414,6 +2472,162 @@ async function saveAdminStateModifiers() {
 
     if(error) alert('Error saving modifiers: ' + error.message);
     else alert(`✓ Modifiers committed for ${target}.`);
+}
+    // ─── PROGRESSIVE RECEIPTS & INSTALLMENTS ENGINE WORKERS ────────────────────────
+async function loadReceiptInvoiceSelectors() {
+    if (!_db) return;
+    const { data, error } = await _db
+        .from('invoices')
+        .select('id, invoice_number, client_name, project_request_title')
+        .order('created_at', { ascending: false });
+
+    if (error || !data) return;
+
+    const sel = document.getElementById('receiptInvoiceSelector');
+    if (!sel) return;
+    sel.innerHTML = `<option value="">-- Select Active Client Invoice --</option>`;
+    data.forEach(inv => {
+        const opt = document.createElement('option');
+        opt.value = inv.id;
+        opt.textContent = `${inv.client_name} — ${inv.project_request_title || 'Bespoke Design Project'} (${inv.invoice_number})`;
+        sel.appendChild(opt);
+    });
+}
+
+// Global cached lookup reference holder
+let activelySelectedInvoiceRow = null;
+
+async function loadInvoiceDepositDetails() {
+    const invoiceId = document.getElementById('receiptInvoiceSelector').value;
+    const fieldsPanel = document.getElementById('receiptManagementFields');
+    
+    if (!invoiceId) {
+        fieldsPanel.style.display = 'none';
+        return;
+    }
+
+    fieldsPanel.style.display = 'block';
+    if (!_db) return;
+
+    const { data: invoice, error } = await _db
+        .from('invoices')
+        .select('*')
+        .eq('id', invoiceId)
+        .single();
+
+    if (error || !invoice) return;
+    activelySelectedInvoiceRow = invoice;
+
+    document.getElementById('lblReceiptClientName').innerText = invoice.client_name || "—";
+    document.getElementById('lblReceiptProjectTitle').innerText = invoice.project_request_title || "Bespoke Architecture Service";
+    
+    // Set default payment capture date to current date stamp
+    document.getElementById('newDepositDate').value = new Date().toISOString().split('T')[0];
+    
+    renderInvoiceDepositsLedgerUI();
+}
+
+function renderInvoiceDepositsLedgerUI() {
+    const container = document.getElementById('receiptInstallmentsLedgerContainer');
+    if (!container || !activelySelectedInvoiceRow) return;
+
+    const logs = Array.isArray(activelySelectedInvoiceRow.deposits_log) ? activelySelectedInvoiceRow.deposits_log : [];
+    const sym = activelySelectedInvoiceRow.currency === 'USD' ? '$' : '₦';
+    
+    let sumTotalAccumulated = 0;
+    container.innerHTML = "";
+
+    if (logs.length === 0) {
+        container.innerHTML = `<p style="font-size:0.8rem; color:#555; font-style:italic;">No historical remittance allocations captured against this ledger sequence sheet.</p>`;
+        document.getElementById('lblReceiptClearedTotal').innerText = sym + "0.00";
+        return;
+    }
+
+    logs.forEach((log, index) => {
+        const amt = Number(log.amount) || 0;
+        sumTotalAccumulated += amt;
+
+        const row = document.createElement('div');
+        row.className = 'file-row';
+        row.style.cssText = 'grid-template-columns: 2fr 1fr auto; align-items: center; background: rgba(0,0,0,0.2); padding: 10px; border: 1px solid #222; margin-bottom: 0;';
+        row.innerHTML = `
+            <div>
+                <span style="font-size:0.8rem; color:white;">Installment Allocation Segment #${index + 1}</span>
+                <p style="font-size:0.65rem; color:#666; margin-top:2px;">Cleared Processing Date: ${log.date || '—'}</p>
+            </div>
+            <div>
+                <strong style="color:#2e7d52; font-size:0.85rem;">+ ${sym}${amt.toLocaleString()}</strong>
+            </div>
+            <div>
+                <button type="button" class="btn-small btn-remove" onclick="removeInstallmentFromInvoiceLog(${index})">Delete</button>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+
+    document.getElementById('lblReceiptClearedTotal').innerText = sym + sumTotalAccumulated.toLocaleString();
+}
+
+async function addInstallmentToInvoiceLog() {
+    if (!_db || !activelySelectedInvoiceRow) return;
+
+    const amtInput = document.getElementById('newDepositAmount');
+    const dateInput = document.getElementById('newDepositDate');
+    
+    const amount = parseFloat(amtInput.value) || 0;
+    const date = dateInput.value;
+
+    if (amount <= 0 || !date) {
+        alert("Please enter a valid allocation amount and select a confirmation clearance date.");
+        return;
+    }
+
+    // Initialize log tracking array if null
+    if (!Array.isArray(activelySelectedInvoiceRow.deposits_log)) {
+        activelySelectedInvoiceRow.deposits_log = [];
+    }
+
+    activelySelectedInvoiceRow.deposits_log.push({ amount, date });
+
+    const { error } = await _db
+        .from('invoices')
+        .update({ deposits_log: activelySelectedInvoiceRow.deposits_log })
+        .eq('id', activelySelectedInvoiceRow.id);
+
+    if (error) {
+        alert("Transaction push failure vector: " + error.message);
+    } else {
+        amtInput.value = "";
+        renderInvoiceDepositsLedgerUI();
+        alert("✓ Installment transaction log added successfully.");
+    }
+}
+
+async function removeInstallmentFromInvoiceLog(index) {
+    if (!confirm("Are you sure you want to permanently strip this transaction row record entry?") || !activelySelectedInvoiceRow) return;
+
+    activelySelectedInvoiceRow.deposits_log.splice(index, 1);
+
+    const { error } = await _db
+        .from('invoices')
+        .update({ deposits_log: activelySelectedInvoiceRow.deposits_log })
+        .eq('id', activelySelectedInvoiceRow.id);
+
+    if (error) {
+        alert("Failed clearing row record target segment: " + error.message);
+    } else {
+        renderInvoiceDepositsLedgerUI();
+    }
+}
+
+function generateReceiptShareLink() {
+    if (!activelySelectedInvoiceRow) return;
+    
+    const receiptUrl = window.location.origin + '/receipt.html?id=' + activelySelectedInvoiceRow.id;
+    
+    document.getElementById('lblGeneratedReceiptUrl').value = receiptUrl;
+    document.getElementById('receiptOutputUrlWrapper').style.style.display = 'block';
+    alert("✓ Live client receipt asset route generated.");
 }
 </script>
 </body>
