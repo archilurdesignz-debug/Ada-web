@@ -2601,9 +2601,8 @@ async function addInstallmentToInvoiceLog() {
     // Fire network write transactional request
     const { data, error } = await _db
         .from('invoices')
-        .update({ deposits_log: updatedLog }) // Explicit array pass
-        .eq('id', activelySelectedInvoiceRow.id)
-        .select();
+        .update({ deposits_log: updatedLog }) 
+        .eq('id', activelySelectedInvoiceRow.id);
 
     if (error) {
         console.error("Supabase Database write failure payload details:", error);
@@ -2614,27 +2613,6 @@ async function addInstallmentToInvoiceLog() {
         amtInput.value = "";
         renderInvoiceDepositsLedgerUI();
         alert("✓ Installment transaction log added successfully to live backend registers.");
-    }
-}
-
-    // Initialize log tracking array if null
-    if (!Array.isArray(activelySelectedInvoiceRow.deposits_log)) {
-        activelySelectedInvoiceRow.deposits_log = [];
-    }
-
-    activelySelectedInvoiceRow.deposits_log.push({ amount, date });
-
-    const { error } = await _db
-        .from('invoices')
-        .update({ deposits_log: activelySelectedInvoiceRow.deposits_log })
-        .eq('id', activelySelectedInvoiceRow.id);
-
-    if (error) {
-        alert("Transaction push failure vector: " + error.message);
-    } else {
-        amtInput.value = "";
-        renderInvoiceDepositsLedgerUI();
-        alert("✓ Installment transaction log added successfully.");
     }
 }
 
@@ -2663,7 +2641,6 @@ function generateReceiptShareLink() {
     
     const receiptUrl = window.location.origin + '/receipt.html?id=' + activelySelectedInvoiceRow.id;
     
-    // Fixed style selector block
     document.getElementById('lblGeneratedReceiptUrl').value = receiptUrl;
     document.getElementById('receiptOutputUrlWrapper').style.display = 'block';
     
