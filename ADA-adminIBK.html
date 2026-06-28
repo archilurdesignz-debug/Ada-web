@@ -2445,13 +2445,16 @@ async function submitInvoiceToSupabaseEngine() {
         return;
     }
 
-    // Update the 'token' column to match the newly generated database ID (UUID)
+    -- 2. Sync both the 'token' and your new 'receipttoken' column to match the record's actual UUID ID
     await _db
         .from('invoices')
-        .update({ token: data.id })
+        .update({ 
+            token: data.id,
+            receipttoken: data.id 
+        })
         .eq('id', data.id);
 
-    // Hardcoded absolute professional path route
+    // 3. Hardcoded absolute professional path route
     const targetUrl = 'https://www.archilurdesignz.com/invoice.html?id=' + data.id;
     
     // Update your admin UI element display paths
@@ -2462,7 +2465,7 @@ async function submitInvoiceToSupabaseEngine() {
         document.getElementById('invoiceOutputUrlWrapper').style.display = 'block';
     }
 
-    alert('✓ Invoice generated successfully in database!');
+    alert('✓ Invoice and receipttoken generated successfully in database!');
 
     // 5. OPTIONAL: Run a redirect *only* if you want to automatically open it
     // window.location.href = targetUrl; 
