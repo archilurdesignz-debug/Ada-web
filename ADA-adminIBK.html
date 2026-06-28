@@ -2445,14 +2445,14 @@ async function submitInvoiceToSupabaseEngine() {
         return;
     }
 
-    // FIX: Update the 'token' column to match the newly generated database ID (UUID)
+    // Update the 'token' column to match the newly generated database ID (UUID)
     await _db
         .from('invoices')
         .update({ token: data.id })
         .eq('id', data.id);
 
-    // Generate your professional dynamic URL route using the origin location
-    const targetUrl = window.location.origin + '/invoice.html?id=' + data.id;
+    // Hardcoded absolute professional path route
+    const targetUrl = 'https://www.archilurdesignz.com/invoice.html?id=' + data.id;
     
     // Update your admin UI element display paths
     if (document.getElementById('lblGeneratedInvoiceUrl')) {
