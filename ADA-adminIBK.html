@@ -2432,7 +2432,8 @@ async function submitInvoiceToSupabaseEngine() {
         deposits_log: []
     };
 
- const { data, error } = await _db
+// Fire insertion down to Supabase layers
+    const { data, error } = await _db
         .from('invoices')
         .insert([payload])
         .select()
@@ -2444,10 +2445,16 @@ async function submitInvoiceToSupabaseEngine() {
         return;
     }
 
-    // 2. Generate your professional dynamic URL route using the origin location
+    // FIX: Update the 'token' column to match the newly generated database ID (UUID)
+    await _db
+        .from('invoices')
+        .update({ token: data.id })
+        .eq('id', data.id);
+
+    // Generate your professional dynamic URL route using the origin location
     const targetUrl = window.location.origin + '/invoice.html?id=' + data.id;
     
-    // 3. Update your admin UI element display paths
+    // Update your admin UI element display paths
     if (document.getElementById('lblGeneratedInvoiceUrl')) {
         document.getElementById('lblGeneratedInvoiceUrl').value = targetUrl;
     }
@@ -2455,7 +2462,6 @@ async function submitInvoiceToSupabaseEngine() {
         document.getElementById('invoiceOutputUrlWrapper').style.display = 'block';
     }
 
-    // 4. Alert user of absolute success
     alert('✓ Invoice generated successfully in database!');
 
     // 5. OPTIONAL: Run a redirect *only* if you want to automatically open it
