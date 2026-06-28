@@ -329,7 +329,6 @@ async function assembleReceiptEngine() {
         
         let totalDepositedAccumulator = 0;
 
-        // Reads values populated via your admin dashboard
         if (invoice.deposits_log && Array.isArray(invoice.deposits_log) && invoice.deposits_log.length > 0) {
             invoice.deposits_log.forEach((payment, idx) => {
                 const amt = Number(payment.amount) || 0;
@@ -344,7 +343,6 @@ async function assembleReceiptEngine() {
                 historyContainer.appendChild(dRow);
             });
         } else {
-            // Fallback gracefully to singular entry fields if your table relies on 'amount_paid'/'deposit' columns
             const singleDepositFallback = Number(invoice.amount_paid || invoice.amount_deposited || 0);
             totalDepositedAccumulator = singleDepositFallback;
             
@@ -367,17 +365,14 @@ async function assembleReceiptEngine() {
 
         balanceField.innerText = formatCurrency(remainingBalanceDue, curr);
 
-        // Track how many transaction installments exist in the ledger array
         const installmentCount = invoice.deposits_log && Array.isArray(invoice.deposits_log) ? invoice.deposits_log.length : 1;
 
-        if (remainingBalanceDue <= 5) { // Account for slight rounding floats
+        if (remainingBalanceDue <= 5) {
             balanceWrapper.className = "total-row balance-outstanding settled";
             
-            // If the balance is 0 and it took multiple payments to get here
             if (installmentCount > 1) {
                 statusWatermark.innerText = "Fully Paid, Balance Completed";
                 statusWatermark.className = "receipt-status-badge";
-                // Adjust styling dynamically in case the text wrap expands slightly
                 statusWatermark.style.fontSize = "0.9rem"; 
             } else {
                 statusWatermark.innerText = "Fully Paid";
@@ -389,7 +384,6 @@ async function assembleReceiptEngine() {
             balanceWrapper.className = "total-row balance-outstanding unsettled";
         }
 
-        // Capabilities scope array matrix assignment
         const serviceLedgerContainer = document.getElementById('receiptServicesLedgerTarget');
         const scopeArray = Array.isArray(invoice.scope_of_services) ? invoice.scope_of_services : [];
         
@@ -405,7 +399,6 @@ async function assembleReceiptEngine() {
             `;
         }).join('');
 
-        // Frame Visibility Handshake
         document.getElementById('receiptLoadingScreen').style.display = 'none';
         document.getElementById('receiptControlPanel').style.display = 'flex';
         document.getElementById('receiptFrame').style.opacity = '1';
@@ -422,6 +415,21 @@ function triggerDeviceDownloadPDF() {
     document.title = "Receipt_" + receiptNum.replace(/[^a-zA-Z0-9-_]/g, '_');
     window.print();
     document.title = oldTitle;
+}
+
+// UPDATE: Aligned link logic to hardcoded path matching your UUID setup
+function generateReceiptShareLink() {
+    if (!activelySelectedInvoiceRow) {
+        alert("Please select an active invoice and load details first.");
+        return;
+    }
+    
+    const receiptUrl = 'https://www.archilurdesignz.com/receipt.html?id=' + activelySelectedInvoiceRow.id;
+    
+    document.getElementById('lblGeneratedReceiptUrl').value = receiptUrl;
+    document.getElementById('receiptOutputUrlWrapper').style.display = 'block';
+    
+    alert("✓ Live client receipt asset route generated.");
 }
 
 document.addEventListener('DOMContentLoaded', assembleReceiptEngine);
