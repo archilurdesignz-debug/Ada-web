@@ -2410,6 +2410,7 @@ async function submitInvoiceToSupabaseEngine() {
     const payload = {
         invoice_number: num,
         token: invoiceToken,
+        receipttoken: invoiceToken,
         currency: document.getElementById('invCurrency').value,
         client_name: cName,
         client_phone: document.getElementById('invClientPhone').value.trim(),
