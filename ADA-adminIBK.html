@@ -2445,7 +2445,7 @@ async function submitInvoiceToSupabaseEngine() {
         return;
     }
 
-    -- 2. Sync both the 'token' and your new 'receipttoken' column to match the record's actual UUID ID
+    //2. Sync both the 'token' and your new 'receipttoken' column to match the record's actual UUID ID
     await _db
         .from('invoices')
         .update({ 
