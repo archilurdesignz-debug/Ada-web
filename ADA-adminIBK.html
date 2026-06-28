@@ -1189,53 +1189,54 @@ async function createNewProject() {
     const depositPaid = parseFloat(getVal('newDepositPaid')) || 0;
     const totalSum    = parseFloat(getVal('newTotalSum'))    || 0;
     const dashboardUrl = `${window.location.origin}/ada-tracker.html?token=${token}`;
-    const dollarServiceTermsTemplate = {
-    footer: "Last Updated: June 2026 | Document Ref: ADA-CST-USD-V1",
-    sections: [
-        {
-            type: "heading",
-            heading: "Intellectual Licensure & Brand Alignment",
-            body: "All architectural drawings, spatial layouts, 3D renderings, and animation files prepared for this project remain the sole intellectual property of the Architect, who retains all copyright and authorship rights. The Client is granted a non-transferable, non-exclusive, limited license to utilize these documents solely for the execution of this specific project.\n\n• Brand Formatting: Where requested, final spatial layouts and presentations will be formatted and delivered utilizing the Client's corporate identity and brand-approved title blocks.\n\n• Restrictions: Any unauthorized reproduction, reuse, modification, or application of these design assets for other projects, or the removal of proprietary design marks without prior written consent, is strictly prohibited."
-        },
-        {
-            type: "heading",
-            heading: "Payment Terms and Project Commencement",
-            body: "Work typically begins upon receipt of a 50% deposit via our international payment gateways. In specific cases where work commences prior to deposit clearance, the initial invoice must be settled before the expiration of the invoice due date."
-        },
-        {
-            type: "heading",
-            heading: "Delivery Timeline and Fast-Track Services",
-            body: "Following the receipt of the initial deposit, the standard timeline for final delivery will be estimated based on the project scope. This timeline is subject to prompt client feedback and assumes no major structural or programmatic revisions.\n\n• Expedited Services: Should the Client require an expedited delivery ahead of the standard schedule, a \"Fast-Track\" premium of an additional 10% of the total contract value shall be applied."
-        },
-        {
-            type: "heading",
-            heading: "Design Workflow and Methodology",
-            body: "Depending on work scope, our specialized remote workflow is limited to the following:\n\n• Spatial Analysis & Programming: Evaluation of client-provided site dimensions, survey plans, or base building files.\n\n• Schematic Spatial Design: Preparation of conceptual floor plans, spatial layouts, and initial design directions.\n\n• Design Development: Refining chosen layouts into precise architectural spatial configurations.\n\n• Visualization & Asset Creation: 3D Modelling, Generation of high-fidelity 3D photorealistic renderings and animations (if included in the scope)."
-        },
-        {
-            type: "heading",
-            heading: "Technical Input & Remote Verification Logistics",
-            body: "As this is a remote design and visualization service, the Client is exclusively responsible for providing accurate, verified site data, including CAD/BIM files, survey plans, and accurate structural dimensions. Any physical site visits, local code compliance verification, or physical dimension checks required by local jurisdictions fall completely outside this scope and must be managed by the Client's local representatives."
-        },
-        {
-            type: "heading",
-            heading: "Final Digital Deliverables & Presentation Packages",
-            body: "Upon successful completion of the project, the final package will be delivered digitally via a secure cloud presentation link or shared directory. The package shall consist of any of any/all of the following as the project scope may be:\n\n• Spatial Documentation: High-resolution digital vector files (PDF/DWG format) of approved floor plans, roof plans, sections, and elevations.\n\n• Visualization Assets: High-fidelity, photorealistic exterior/interior 3D renderings.\n\n• Cinematics (Optional): Full HD/4K architectural walkthrough animations, formatted for presentation or marketing use (as specified in the project scope)."
-        },
-        {
-            type: "heading",
-            heading: "Revision Policy and Scope Variances",
-            body: "To ensure a seamless workflow, a maximum of three (3) design revisions are permitted while the project is in the schematic and planning stages. As the project transitions into asset implementation, 3D rendering, or animation production, the design baseline is established. Subsequent structural or layout alterations represent a change in scope and will be treated as additional design services subject to additional billing."
-        },
-        {
-            type: "heading",
-            heading: "Exclusion of Local Construction Administration",
-            body: "This agreement is strictly for architectural planning, spatial design, and graphic visualization assets. It explicitly excludes local engineering certifications, MEP documentation, building authority approvals, and post-design construction site monitoring. The client is advised to engage local licensed professionals to adapt these conceptual spatial designs to meet regional building codes and construction compliance."
-        }
-    ]
-};
+    const currencySelected = getVal('newCurrencyMode');
 
-const currencySelected = getVal('newCurrencyMode');
+    const dollarServiceTermsTemplate = {
+        footer: "Last Updated: June 2026 | Document Ref: ADA-CST-USD-V1",
+        sections: [
+            {
+                type: "heading",
+                heading: "Intellectual Licensure & Brand Alignment",
+                body: "All architectural drawings, spatial layouts, 3D renderings, and animation files prepared for this project remain the sole intellectual property of the Architect, who retains all copyright and authorship rights. The Client is granted a non-transferable, non-exclusive, limited license to utilize these documents solely for the execution of this specific project.\n\n• Brand Formatting: Where requested, final spatial layouts and presentations will be formatted and delivered utilizing the Client's corporate identity and brand-approved title blocks.\n\n• Restrictions: Any unauthorized reproduction, reuse, modification, or application of these design assets for other projects, or the removal of proprietary design marks without prior written consent, is strictly prohibited."
+            },
+            {
+                type: "heading",
+                heading: "Payment Terms and Project Commencement",
+                body: "Work typically begins upon receipt of a 50% deposit via our international payment gateways. In specific cases where work commences prior to deposit clearance, the initial invoice must be settled before the expiration of the invoice due date."
+            },
+            {
+                type: "heading",
+                heading: "Delivery Timeline and Fast-Track Services",
+                body: "Following the receipt of the initial deposit, the standard timeline for final delivery will be estimated based on the project scope. This timeline is subject to prompt client feedback and assumes no major structural or programmatic revisions.\n\n• Expedited Services: Should the Client require an expedited delivery ahead of the standard schedule, a \"Fast-Track\" premium of an additional 10% of the total contract value shall be applied."
+            },
+            {
+                type: "heading",
+                heading: "Design Workflow and Methodology",
+                body: "Depending on work scope, our specialized remote workflow is limited to the following:\n\n• Spatial Analysis & Programming: Evaluation of client-provided site dimensions, survey plans, or base building files.\n\n• Schematic Spatial Design: Preparation of conceptual floor plans, spatial layouts, and initial design directions.\n\n• Design Development: Refining chosen layouts into precise architectural spatial configurations.\n\n• Visualization & Asset Creation: 3D Modelling, Generation of high-fidelity 3D photorealistic renderings and animations (if included in the scope)."
+            },
+            {
+                type: "heading",
+                heading: "Technical Input & Remote Verification Logistics",
+                body: "As this is a remote design and visualization service, the Client is exclusively responsible for providing accurate, verified site data, including CAD/BIM files, survey plans, and accurate structural dimensions. Any physical site visits, local code compliance verification, or physical dimension checks required by local jurisdictions fall completely outside this scope and must be managed by the Client's local representatives."
+            },
+            {
+                type: "heading",
+                heading: "Final Digital Deliverables & Presentation Packages",
+                body: "Upon successful completion of the project, the final package will be delivered digitally via a secure cloud presentation link or shared directory. The package shall consist of any of any/all of the following as the project scope may be:\n\n• Spatial Documentation: High-resolution digital vector files (PDF/DWG format) of approved floor plans, roof plans, sections, and elevations.\n\n• Visualization Assets: High-fidelity, photorealistic exterior/interior 3D renderings.\n\n• Cinematics (Optional): Full HD/4K architectural walkthrough animations, formatted for presentation or marketing use (as specified in the project scope)."
+            },
+            {
+                type: "heading",
+                heading: "Revision Policy and Scope Variances",
+                body: "To ensure a seamless workflow, a maximum of three (3) design revisions are permitted while the project is in the schematic and planning stages. As the project transitions into asset implementation, 3D rendering, or animation production, the design baseline is established. Subsequent structural or layout alterations represent a change in scope and will be treated as additional design services subject to additional billing."
+            },
+            {
+                type: "heading",
+                heading: "Exclusion of Local Construction Administration",
+                body: "This agreement is strictly for architectural planning, spatial design, and graphic visualization assets. It explicitly excludes local engineering certifications, MEP documentation, building authority approvals, and post-design construction site monitoring. The client is advised to engage local licensed professionals to adapt these conceptual spatial designs to meet regional building codes and construction compliance."
+            }
+        ]
+    };
+
     const payload = {
         token,
         client_name:    getVal('newClientName'),
@@ -1244,11 +1245,10 @@ const currencySelected = getVal('newCurrencyMode');
         lead_architect: getVal('newLeadArch'),
         deposit_paid:   depositPaid,
         total_sum:      totalSum,
-        currency_mode:  getVal('newCurrencyMode'),
+        currency_mode:  currencySelected,
         custom_tracks: [{ heading: "Architectural Plan Schemes", percent: 0 }],
         client_url:     dashboardUrl,
         service_terms:  currencySelected === 'USD' ? dollarServiceTermsTemplate : null
-};
     };
 
     if (!payload.client_name || !payload.project_title) {
@@ -1262,15 +1262,16 @@ const currencySelected = getVal('newCurrencyMode');
     }
 
     const resultBox = document.getElementById('creationResult');
-    resultBox.style.display = 'block';
-    resultBox.innerHTML = `
-        <p>✓ Project initialized for <strong>${payload.client_name}</strong></p>
-        <p style="margin-top:10px;">Dashboard Token: <code>${token}</code></p>
-        <p style="margin-top:8px; font-size:0.75rem;">Client Link:</p>
-        <code style="font-size:0.7rem; word-break:break-all;">${dashboardUrl}</code>
-        <p style="margin-top:10px; font-size:0.7rem; color:#888;">Send this link to your client. They need no login — the token in the URL identifies their project.</p>
-    `;
-
+    if (resultBox) {
+        resultBox.style.display = 'block';
+        resultBox.innerHTML = `
+            <p>✓ Project initialized for <strong>${payload.client_name}</strong></p>
+            <p style="margin-top:10px;">Dashboard Token: <code>${token}</code></p>
+            <p style="margin-top:8px; font-size:0.75rem;">Client Link:</p>
+            <code style="font-size:0.7rem; word-break:break-all;">${dashboardUrl}</code>
+            <p style="margin-top:10px; font-size:0.7rem; color:#888;">Send this link to your client. They need no login — the token in the URL identifies their project.</p>
+        `;
+    }
     loadProjectSelectors();
 }
 
