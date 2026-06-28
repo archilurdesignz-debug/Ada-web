@@ -367,10 +367,22 @@ async function assembleReceiptEngine() {
 
         balanceField.innerText = formatCurrency(remainingBalanceDue, curr);
 
+        // Track how many transaction installments exist in the ledger array
+        const installmentCount = invoice.deposits_log && Array.isArray(invoice.deposits_log) ? invoice.deposits_log.length : 1;
+
         if (remainingBalanceDue <= 5) { // Account for slight rounding floats
-            statusWatermark.innerText = "Fully Paid";
-            statusWatermark.className = "receipt-status-badge";
             balanceWrapper.className = "total-row balance-outstanding settled";
+            
+            // If the balance is 0 and it took multiple payments to get here
+            if (installmentCount > 1) {
+                statusWatermark.innerText = "Fully Paid, Balance Completed";
+                statusWatermark.className = "receipt-status-badge";
+                // Adjust styling dynamically in case the text wrap expands slightly
+                statusWatermark.style.fontSize = "0.9rem"; 
+            } else {
+                statusWatermark.innerText = "Fully Paid";
+                statusWatermark.className = "receipt-status-badge";
+            }
         } else {
             statusWatermark.innerText = "Partial Payment";
             statusWatermark.className = "receipt-status-badge partial";
