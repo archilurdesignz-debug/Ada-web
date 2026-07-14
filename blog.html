@@ -130,32 +130,46 @@
     // 2. PARSE CURRENT URL FOR THE POST SLUG ROUTE
     function getPostSlugFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      return params.get('slug'); // Returns null if no explicit slug parameter exists
+      return params.get('slug'); 
     }
 
     // 3. APPLICATION LIFECYCLE BOOTSTRAPPING
     window.addEventListener('DOMContentLoaded', async () => {
       const slug = getPostSlugFromUrl();
+      
+      // Execute as entirely isolated runtime tasks
       await fetchSidebarTopics(slug);
       await loadBlogPostData(slug);
     });
 
     // 4. SIDEBAR RECOVERY: FETCH ALL TOPICS FROM SUPABASE
     async function fetchSidebarTopics(activeSlug) {
-      // Fetching clean records without bleed-over limits
+      console.log("Sidebar: Fetching all topics...");
+      
+      // We explicitly bypass client caching by constructing a brand new selection query
       const { data, error } = await _supabase
         .from('posts')
-        .select('title, slug')
+        .select('title, slug, created_at')
         .order('created_at', { ascending: false });
 
-      if (error) return console.error('Error fetching sidebar indexes:', error);
-      if (!data || data.length === 0) return;
+      if (error) {
+        console.error('Error fetching sidebar indexes:', error);
+        return;
+      }
+      
+      console.log(`Sidebar loaded: ${data ? data.length : 0} total posts retrieved.`, data);
       
       const listContainer = document.getElementById('topics-list');
+      if (!listContainer) return;
       listContainer.innerHTML = '';
       
-      // Dynamic fall-back context highlighting: if there is no URL slug, highlight the newest entry
-      const targetActiveSlug = activeSlug || (data[0] ? data[0].slug : null);
+      if (!data || data.length === 0) {
+        listContainer.innerHTML = '<p class="text-xs text-neutral-400 italic">No topics found.</p>';
+        return;
+      }
+      
+      // Determine which slug gets the bold active treatment
+      const targetActiveSlug = activeSlug || data[0].slug;
       
       data.forEach(topic => {
         const isCurrent = topic.slug === targetActiveSlug;
@@ -172,18 +186,20 @@
 
     // 5. CORE CONTENT RENDERING LOOPS
     async function loadBlogPostData(slug) {
-      let queryResult;
-
+      console.log(`Loading active post data for: ${slug || 'Latest Fallback'}`);
+      
+      let response;
+      
       if (slug) {
-        // Fetch explicitly requested post via query string route
-        queryResult = await _supabase
+        // Fetch requested post by unique slug
+        response = await _supabase
           .from('posts')
           .select('*')
           .eq('slug', slug)
           .maybeSingle();
       } else {
-        // Dynamic Fallback: Retrieve the single newest chronological database row
-        queryResult = await _supabase
+        // Use an entirely self-contained query with its own closed modifiers
+        response = await _supabase
           .from('posts')
           .select('*')
           .order('created_at', { ascending: false })
@@ -191,9 +207,10 @@
           .maybeSingle();
       }
 
-      const { data: post, error } = queryResult;
+      const { data: post, error } = response;
 
       if (error || !post) {
+        console.error("Error loading blog post body:", error);
         document.getElementById('post-title').innerText = "Post Not Found";
         document.getElementById('hero-media-container').innerHTML = '';
         return;
@@ -430,5 +447,5 @@
       setTimeout(() => { textBtn.innerText = "Copy Unique Link"; }, 2500);
     }
   </script>
-</body>
-</html>
+  </html>
+  </body>
