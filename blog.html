@@ -143,10 +143,10 @@
     });
 
     // 4. SIDEBAR RECOVERY: FETCH ALL TOPICS FROM SUPABASE
+    // 4. SIDEBAR RECOVERY: FETCH ALL TOPICS FROM SUPABASE
     async function fetchSidebarTopics(activeSlug) {
       console.log("Sidebar: Fetching all topics...");
       
-      // We explicitly bypass client caching by constructing a brand new selection query
       const { data, error } = await _supabase
         .from('posts')
         .select('title, slug, created_at')
@@ -168,7 +168,6 @@
         return;
       }
       
-      // Determine which slug gets the bold active treatment
       const targetActiveSlug = activeSlug || data[0].slug;
       
       data.forEach(topic => {
@@ -176,14 +175,16 @@
         
         const anchor = document.createElement('a');
         anchor.href = `?slug=${topic.slug}`;
+        
+        // Improved distinct visual structure for sidebar links
         anchor.className = isCurrent 
-          ? "block text-sm font-bold text-neutral-900 border-l-2 border-black pl-3 py-1"
-          : "block text-sm text-neutral-500 hover:text-neutral-900 pl-3 py-1 transition";
+          ? "block text-sm font-bold text-neutral-900 border-l-2 border-black pl-3 py-2 bg-neutral-100/50 rounded-r transition"
+          : "block text-sm font-medium text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100/30 border-l-2 border-transparent hover:border-neutral-300 pl-3 py-2 transition";
+          
         anchor.innerText = topic.title;
         listContainer.appendChild(anchor);
       });
     }
-
     // 5. CORE CONTENT RENDERING LOOPS
     async function loadBlogPostData(slug) {
       console.log(`Loading active post data for: ${slug || 'Latest Fallback'}`);
