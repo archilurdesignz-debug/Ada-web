@@ -142,12 +142,14 @@
 
     // 4. SIDEBAR RECOVERY: FETCH ALL TOPICS FROM SUPABASE
     async function fetchSidebarTopics(activeSlug) {
+      // Fetching clean records without bleed-over limits
       const { data, error } = await _supabase
         .from('posts')
         .select('title, slug')
         .order('created_at', { ascending: false });
 
       if (error) return console.error('Error fetching sidebar indexes:', error);
+      if (!data || data.length === 0) return;
       
       const listContainer = document.getElementById('topics-list');
       listContainer.innerHTML = '';
@@ -170,17 +172,26 @@
 
     // 5. CORE CONTENT RENDERING LOOPS
     async function loadBlogPostData(slug) {
-      let query = _supabase.from('posts').select('*');
-      
+      let queryResult;
+
       if (slug) {
         // Fetch explicitly requested post via query string route
-        query = query.eq('slug', slug).maybeSingle();
+        queryResult = await _supabase
+          .from('posts')
+          .select('*')
+          .eq('slug', slug)
+          .maybeSingle();
       } else {
         // Dynamic Fallback: Retrieve the single newest chronological database row
-        query = query.order('created_at', { ascending: false }).limit(1).maybeSingle();
+        queryResult = await _supabase
+          .from('posts')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
       }
 
-      const { data: post, error } = await query;
+      const { data: post, error } = queryResult;
 
       if (error || !post) {
         document.getElementById('post-title').innerText = "Post Not Found";
