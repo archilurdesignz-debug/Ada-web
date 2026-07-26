@@ -244,20 +244,22 @@
 
     // 6. CONDITIONAL MEDIA COMPONENT RENDER SELECTION
     function renderHeroMediaComponent(post) {
-      const container = document.getElementById('hero-media-container');
-      container.innerHTML = '';
+  const container = document.getElementById('hero-media-container');
+  container.innerHTML = '';
 
-      if (post.media_type === 'video') {
-        container.className = "w-full aspect-video rounded-xl overflow-hidden mb-10 bg-black shadow-inner";
-        container.innerHTML = `
-          <iframe src="${post.hero_media_url}" title="ADA Embedded Player" frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowfullscreen class="w-full h-full"></iframe>`;
-      } else {
-        container.className = "w-full h-96 md:h-[450px] overflow-hidden rounded-xl mb-10 bg-neutral-100";
-        container.innerHTML = `<img src="${post.hero_media_url}" alt="Cover Framing Layout" class="w-full h-full object-cover">`;
-      }
-    }
+  if (post.media_type === 'video') {
+    container.className = "w-full aspect-video rounded-xl overflow-hidden mb-10 bg-black shadow-inner";
+    container.innerHTML = `
+      <iframe src="${post.hero_media_url}" title="ADA Embedded Player" frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen class="w-full h-full"></iframe>`;
+  } else {
+    // FIX: Set auto height on mobile, fixed height on desktop, and contain the image aspect ratio
+    container.className = "w-full h-auto md:h-[450px] overflow-hidden rounded-xl mb-10 bg-neutral-100 flex items-center justify-center";
+    container.innerHTML = `<img src="${post.hero_media_url}" alt="Cover Framing Layout" class="w-full h-auto max-h-[450px] object-contain">`;
+  }
+}
+
 
     // 7. ALPHANUMERIC NAME FORM VALIDATION CONSTRAINT
     function validateInputName(inputElement) {
