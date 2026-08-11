@@ -144,53 +144,68 @@ export default async function handler(req, res) {
       await loadBlogPostData(slug);
     });
 
-    async function fetchSidebarTopics(activeSlug) {
-      const { data, error } = await _supabase.from('posts').select('title, slug, created_at').order('created_at', { ascending: false });
-      if (error) return;
-      const listContainer = document.getElementById('topics-list');
-      if (!listContainer) return;
-      listContainer.innerHTML = '';
-      if (!data || data.length === 0) {
-        listContainer.innerHTML = '<p class="text-xs text-neutral-400 italic">No topics found.</p>';
-        return;
-      }
-      const targetActiveSlug = activeSlug || data[0].slug;
-      data.forEach(topic => {
-        const isCurrent = topic.slug === targetActiveSlug;
-        const anchor = document.createElement('a');
-        anchor.href = \`?slug=\${topic.slug}\`;
-        anchor.className = isCurrent 
-          ? "block text-sm font-bold text-neutral-900 border-l-2 border-black pl-3 py-2 bg-neutral-100/50 rounded-r transition"
-          : "block text-sm font-medium text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100/30 border-l-2 border-transparent hover:border-neutral-300 pl-3 py-2 transition";
-        anchor.innerText = topic.title;
-        listContainer.appendChild(anchor);
-      });
-    }
-
+async function fetchSidebarTopics(activeSlug) {
+  const { data, error } = await _supabase.from('posts').select('title, slug, created_at').order('created_at', { ascending: false });
+  if (error) return;
+  
+  const listContainer = document.getElementById('topics-list');
+  if (!listContainer) return;
+  listContainer.innerHTML = '';
+  
+  if (!data || data.length === 0) {
+    listContainer.innerHTML = '<p class="text-xs text-neutral-400 italic">No topics found.</p>';
+    return;
+  }
+  
+  const targetActiveSlug = activeSlug || data[0].slug;
+  
+  data.forEach(topic => {
+    const isCurrent = topic.slug === targetActiveSlug;
+    const anchor = document.createElement('a');
+    
+    // Explicit route destination with slug query parameter
+    anchor.href = `/blog?slug=${topic.slug}`;
+    
+    anchor.className = isCurrent 
+      ? "block text-sm font-bold text-neutral-900 border-l-2 border-black pl-3 py-2 bg-neutral-100/50 rounded-r transition"
+      : "block text-sm font-medium text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100/30 border-l-2 border-transparent hover:border-neutral-300 pl-3 py-2 transition";
+      
+    anchor.innerText = topic.title;
+    listContainer.appendChild(anchor);
+  });
+}
     async function loadBlogPostData(slug) {
-      let response;
-      if (slug) {
-        response = await _supabase.from('posts').select('*').eq('slug', slug).maybeSingle();
-      } else {
-        response = await _supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(1).maybeSingle();
-      }
-      const { data: post, error } = response;
-      if (error || !post) {
-        document.getElementById('post-title').innerText = "Post Not Found";
-        document.getElementById('hero-media-container').innerHTML = '';
-        return;
-      }
-      currentPost = post;
-      const timestamp = new Date(post.created_at);
-      document.getElementById('post-date').innerText = timestamp.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-      document.getElementById('post-time').innerText = timestamp.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-      document.getElementById('post-title').innerText = post.title;
-      document.getElementById('post-body').innerHTML = post.content;
-      renderHeroMediaComponent(post);
-      await fetchReactionCounts();
-      await fetchPostComments();
-    }
+  let response;
+  if (slug) {
+    response = await _supabase.from('posts').select('*').eq('slug', slug).maybeSingle();
+  } else {
+    response = await _supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(1).maybeSingle();
+  }
+  
+  const { data: post, error } = response;
+  if (error || !post) {
+    document.getElementById('post-title').innerText = "Post Not Found";
+    document.getElementById('hero-media-container').innerHTML = '';
+    return;
+  }
+  
+  currentPost = post;
 
+  // Dynamically update browser address bar with slug if URL was missing it
+  if (!slug && post.slug) {
+    window.history.replaceState(null, '', `/blog?slug=${post.slug}`);
+  }
+
+  const timestamp = new Date(post.created_at);
+  document.getElementById('post-date').innerText = timestamp.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  document.getElementById('post-time').innerText = timestamp.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('post-title').innerText = post.title;
+  document.getElementById('post-body').innerHTML = post.content;
+  
+  renderHeroMediaComponent(post);
+  await fetchReactionCounts();
+  await fetchPostComments();
+}
     function renderHeroMediaComponent(post) {
       const container = document.getElementById('hero-media-container');
       container.innerHTML = '';
@@ -344,11 +359,23 @@ export default async function handler(req, res) {
     }
 
     function copyShareLink() {
-      navigator.clipboard.writeText(window.location.href);
-      const textBtn = document.getElementById('share-btn-text');
-      textBtn.innerText = "Link Copied!";
-      setTimeout(() => { textBtn.innerText = "Copy Unique Link"; }, 2500);
-    }
+  // Construct explicit shareable URL with post slug if available
+  let shareableUrl = window.location.href;
+  
+  if (currentPost && currentPost.slug) {
+    shareableUrl = `${window.location.origin}/blog?slug=${currentPost.slug}`;
+  }
+
+  navigator.clipboard.writeText(shareableUrl);
+  
+  const textBtn = document.getElementById('share-btn-text');
+  if (textBtn) {
+    textBtn.innerText = "Link Copied!";
+    setTimeout(() => { 
+      textBtn.innerText = "Copy Unique Link"; 
+    }, 2500);
+  }
+}
   </script>
 </body>
 </html>`;
