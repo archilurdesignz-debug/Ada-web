@@ -1,9 +1,3 @@
-const { createClient } = require('@supabase/supabase-js');
-
-const SUPABASE_URL = "https://ofaxbduvnhscxvoakeax.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK";
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 module.exports = async function handler(req, res) {
   try {
     const slug = req.query ? req.query.slug : null;
@@ -12,26 +6,40 @@ module.exports = async function handler(req, res) {
     let image = "https://www.archilurdesignz.com/apple-touch-icon.png";
     let description = "Explore spatial compositions and architectural insights by Archilurdesignz and Architecture.";
 
+    // Fetch meta details directly via Supabase REST API (No external npm library required)
     if (slug) {
-      const { data: post, error } = await supabase
-        .from('posts')
-        .select('title, hero_media_url, content')
-        .eq('slug', slug)
-        .maybeSingle();
+      try {
+        const supabaseUrl = "https://ofaxbduvnhscxvoakeax.supabase.co";
+        const supabaseAnonKey = "sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK";
+        
+        const endpoint = `${supabaseUrl}/rest/v1/posts?slug=eq.${encodeURIComponent(slug)}&select=title,hero_media_url,content`;
+        
+        const response = await fetch(endpoint, {
+          headers: {
+            'apikey': supabaseAnonKey,
+            'Authorization': `Bearer ${supabaseAnonKey}`
+          }
+        });
 
-      if (post && !error) {
-        title = post.title + " | ADA Journal";
-        if (post.hero_media_url) image = post.hero_media_url;
-        if (post.content) {
-          description = post.content
-            .replace(/<[^>]*>?/gm, '')
-            .replace(/\n/g, ' ')
-            .substring(0, 160) + '...';
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            const post = data[0];
+            title = post.title + " | ADA Journal";
+            if (post.hero_media_url) image = post.hero_media_url;
+            if (post.content) {
+              description = post.content
+                .replace(/<[^>]*>?/gm, '')
+                .replace(/\n/g, ' ')
+                .substring(0, 160) + '...';
+            }
+          }
         }
+      } catch (dbErr) {
+        console.error("Supabase REST Fetch Error:", dbErr);
       }
     }
 
-    // Build the page using explicit standard string concatenation to prevent JS string interpolation syntax errors
     const html = '<!DOCTYPE html>\n' +
 '<html lang="en">\n' +
 '<head>\n' +
@@ -312,7 +320,7 @@ module.exports = async function handler(req, res) {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     return res.status(200).send(html);
   } catch (err) {
-    console.error("Server Error:", err);
-    return res.status(500).send("Server Error: " + err.message);
+    console.error("Fatal Handler Error:", err);
+    return res.status(500).send("Serverless Function Error: " + err.message);
   }
 };
