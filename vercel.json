@@ -1,3 +1,13 @@
 {
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/blog",
+      "destination": "/api"
+    },
+    {
+      "source": "/blog.html",
+      "destination": "/api"
+    }
+  ]
 }
