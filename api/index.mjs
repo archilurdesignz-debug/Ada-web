@@ -7,42 +7,46 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 export default async function handler(req, res) {
   const { slug } = req.query || {};
 
-  // Fallback metadata for main blog view
+  // Default fallback meta details
   let title = "ADA Insights & Architecture Blog";
-  let image = "https://yourdomain.com/path-to-default-ada-logo.png"; // Replace with your live ADA logo absolute URL
+  let image = "https://www.archilurdesignz.com/apple-touch-icon.png"; 
   let description = "Explore spatial compositions and architectural insights by Archilurdesignz and Architecture.";
 
-  // Fetch post-specific dynamic metadata from Supabase
+  // Fetch post metadata from Supabase server-side for crawler preview cards
   if (slug) {
-    const { data: post } = await supabase
-      .from('posts')
-      .select('title, hero_media_url, content')
-      .eq('slug', slug)
-      .maybeSingle();
+    try {
+      const { data: post } = await supabase
+        .from('posts')
+        .select('title, hero_media_url, content')
+        .eq('slug', slug)
+        .maybeSingle();
 
-    if (post) {
-      title = `${post.title} | ADA Journal`;
-      if (post.hero_media_url) image = post.hero_media_url;
-      if (post.content) {
-        description = post.content
-          .replace(/<[^>]*>?/gm, '') // Strip HTML tags
-          .replace(/\n/g, ' ')       // Clean line breaks
-          .substring(0, 160) + '...';
+      if (post) {
+        title = `${post.title} | ADA Journal`;
+        if (post.hero_media_url) image = post.hero_media_url;
+        if (post.content) {
+          description = post.content
+            .replace(/<[^>]*>?/gm, '') 
+            .replace(/\n/g, ' ')       
+            .substring(0, 160) + '...';
+        }
       }
+    } catch (err) {
+      console.error("Error fetching meta server-side:", err);
     }
   }
 
-  // Generate HTML response with injected Open Graph tags
+  // Construct complete HTML string with unescaped client-side variables
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- Dynamic Meta / Open Graph Tags -->
   <title>${title}</title>
   <meta name="description" content="${description}">
   
+  <!-- Open Graph Meta Tags -->
   <meta property="og:type" content="article" />
   <meta property="og:title" content="${title}" />
   <meta property="og:description" content="${description}" />
@@ -50,7 +54,7 @@ export default async function handler(req, res) {
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   
-  <!-- Twitter Card Meta Tags (YouTube Style Wide Image) -->
+  <!-- Twitter Card Meta Tags -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${title}" />
   <meta name="twitter:description" content="${description}" />
@@ -89,7 +93,7 @@ export default async function handler(req, res) {
         <div class="flex items-center gap-2 text-xs tracking-wider text-neutral-400 uppercase mb-4">
           <span id="post-date">-- --, ----</span><span>&bull;</span><span id="post-time">--:-- --</span>
         </div>
-        <h1 id="post-title" class="text-3xl md:text-5xl font-bold tracking-tight mb-6 leading-tight">${title}</h1>
+        <h1 id="post-title" class="text-3xl md:text-5xl font-bold tracking-tight mb-6 leading-tight">Loading article...</h1>
         <div class="mb-8 flex items-center justify-between">
           <button onclick="copyShareLink()" class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider bg-neutral-100 hover:bg-neutral-200 px-3 py-1.5 rounded transition">
             🔗 <span id="share-btn-text">Copy Unique Link</span>
@@ -144,77 +148,74 @@ export default async function handler(req, res) {
       await loadBlogPostData(slug);
     });
 
-async function fetchSidebarTopics(activeSlug) {
-  const { data, error } = await _supabase.from('posts').select('title, slug, created_at').order('created_at', { ascending: false });
-  if (error) return;
-  
-  const listContainer = document.getElementById('topics-list');
-  if (!listContainer) return;
-  listContainer.innerHTML = '';
-  
-  if (!data || data.length === 0) {
-    listContainer.innerHTML = '<p class="text-xs text-neutral-400 italic">No topics found.</p>';
-    return;
-  }
-  
-  const targetActiveSlug = activeSlug || data[0].slug;
-  
-  data.forEach(topic => {
-    const isCurrent = topic.slug === targetActiveSlug;
-    const anchor = document.createElement('a');
-    
-    // Explicit route destination with slug query parameter
-    anchor.href = `/blog?slug=${topic.slug}`;
-    
-    anchor.className = isCurrent 
-      ? "block text-sm font-bold text-neutral-900 border-l-2 border-black pl-3 py-2 bg-neutral-100/50 rounded-r transition"
-      : "block text-sm font-medium text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100/30 border-l-2 border-transparent hover:border-neutral-300 pl-3 py-2 transition";
+    async function fetchSidebarTopics(activeSlug) {
+      const { data, error } = await _supabase.from('posts').select('title, slug, created_at').order('created_at', { ascending: false });
+      if (error) return;
       
-    anchor.innerText = topic.title;
-    listContainer.appendChild(anchor);
-  });
-}
+      const listContainer = document.getElementById('topics-list');
+      if (!listContainer) return;
+      listContainer.innerHTML = '';
+      
+      if (!data || data.length === 0) {
+        listContainer.innerHTML = '<p class="text-xs text-neutral-400 italic">No topics found.</p>';
+        return;
+      }
+      
+      const targetActiveSlug = activeSlug || data[0].slug;
+      
+      data.forEach(topic => {
+        const isCurrent = topic.slug === targetActiveSlug;
+        const anchor = document.createElement('a');
+        anchor.href = '/blog?slug=' + topic.slug;
+        anchor.className = isCurrent 
+          ? "block text-sm font-bold text-neutral-900 border-l-2 border-black pl-3 py-2 bg-neutral-100/50 rounded-r transition"
+          : "block text-sm font-medium text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100/30 border-l-2 border-transparent hover:border-neutral-300 pl-3 py-2 transition";
+        anchor.innerText = topic.title;
+        listContainer.appendChild(anchor);
+      });
+    }
+
     async function loadBlogPostData(slug) {
-  let response;
-  if (slug) {
-    response = await _supabase.from('posts').select('*').eq('slug', slug).maybeSingle();
-  } else {
-    response = await _supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(1).maybeSingle();
-  }
-  
-  const { data: post, error } = response;
-  if (error || !post) {
-    document.getElementById('post-title').innerText = "Post Not Found";
-    document.getElementById('hero-media-container').innerHTML = '';
-    return;
-  }
-  
-  currentPost = post;
+      let response;
+      if (slug) {
+        response = await _supabase.from('posts').select('*').eq('slug', slug).maybeSingle();
+      } else {
+        response = await _supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(1).maybeSingle();
+      }
+      
+      const { data: post, error } = response;
+      if (error || !post) {
+        document.getElementById('post-title').innerText = "Post Not Found";
+        document.getElementById('hero-media-container').innerHTML = '';
+        return;
+      }
+      
+      currentPost = post;
 
-  // Dynamically update browser address bar with slug if URL was missing it
-  if (!slug && post.slug) {
-    window.history.replaceState(null, '', `/blog?slug=${post.slug}`);
-  }
+      if (!slug && post.slug) {
+        window.history.replaceState(null, '', '/blog?slug=' + post.slug);
+      }
 
-  const timestamp = new Date(post.created_at);
-  document.getElementById('post-date').innerText = timestamp.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  document.getElementById('post-time').innerText = timestamp.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  document.getElementById('post-title').innerText = post.title;
-  document.getElementById('post-body').innerHTML = post.content;
-  
-  renderHeroMediaComponent(post);
-  await fetchReactionCounts();
-  await fetchPostComments();
-}
+      const timestamp = new Date(post.created_at);
+      document.getElementById('post-date').innerText = timestamp.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      document.getElementById('post-time').innerText = timestamp.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('post-title').innerText = post.title;
+      document.getElementById('post-body').innerHTML = post.content;
+      
+      renderHeroMediaComponent(post);
+      await fetchReactionCounts();
+      await fetchPostComments();
+    }
+
     function renderHeroMediaComponent(post) {
       const container = document.getElementById('hero-media-container');
       container.innerHTML = '';
       if (post.media_type === 'video') {
         container.className = "w-full aspect-video rounded-xl overflow-hidden mb-10 bg-black shadow-inner";
-        container.innerHTML = \`<iframe src="\${post.hero_media_url}" title="ADA Embedded Player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full h-full"></iframe>\`;
+        container.innerHTML = '<iframe src="' + post.hero_media_url + '" title="ADA Embedded Player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full h-full"></iframe>';
       } else {
         container.className = "w-full aspect-video md:aspect-auto md:h-[450px] overflow-hidden rounded-xl mb-10 bg-neutral-100 flex items-center justify-center";
-        container.innerHTML = \`<img src="\${post.hero_media_url}" alt="Cover Framing Layout" class="w-full h-full object-cover">\`;
+        container.innerHTML = '<img src="' + post.hero_media_url + '" alt="Cover Framing Layout" class="w-full h-full object-cover">';
       }
     }
 
@@ -242,7 +243,7 @@ async function fetchSidebarTopics(activeSlug) {
       container.innerHTML = '';
       const topLevelComments = currentPostComments.filter(c => !c.parent_id);
       if(topLevelComments.length === 0) {
-        container.innerHTML = \`<p class="text-sm text-neutral-400 italic">No community remarks listed yet.</p>\`;
+        container.innerHTML = '<p class="text-sm text-neutral-400 italic">No community remarks listed yet.</p>';
         return;
       }
       topLevelComments.forEach(comment => {
@@ -252,9 +253,9 @@ async function fetchSidebarTopics(activeSlug) {
 
     function buildCommentHTMLNode(comment, depth) {
       const node = document.createElement('div');
-      node.className = \`border-l-2 border-neutral-200 pl-4 py-2 relative my-4 \${depth > 0 ? 'ml-6 border-neutral-100' : ''}\`;
+      node.className = 'border-l-2 border-neutral-200 pl-4 py-2 relative my-4 ' + (depth > 0 ? 'ml-6 border-neutral-100' : '');
       const dateStr = new Date(comment.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-      node.innerHTML = \`
+      node.innerHTML = `
         <div class="flex items-center justify-between mb-1">
           <span class="text-sm font-bold text-neutral-800">\${comment.author_name}</span>
           <span class="text-xs text-neutral-400">\${dateStr}</span>
@@ -262,7 +263,7 @@ async function fetchSidebarTopics(activeSlug) {
         <p class="text-sm text-neutral-700 mt-1">\${comment.content}</p>
         <button onclick="instantiateReplyBox('\${comment.id}', this)" class="text-xs font-semibold text-neutral-400 hover:text-black mt-2 uppercase tracking-wider block">Reply</button>
         <div id="reply-box-mount-\${comment.id}" class="mt-3"></div>
-      \`;
+      `;
       const subReplies = currentPostComments.filter(c => c.parent_id === comment.id);
       subReplies.forEach(reply => {
         node.appendChild(buildCommentHTMLNode(reply, depth + 1));
@@ -273,8 +274,8 @@ async function fetchSidebarTopics(activeSlug) {
     function instantiateReplyBox(parentId, buttonElement) {
       document.querySelectorAll('[id^="reply-box-mount-"]').forEach(box => box.innerHTML = '');
       activeReplyTargetId = parentId;
-      const injectionTarget = document.getElementById(\`reply-box-mount-\${parentId}\`);
-      injectionTarget.innerHTML = \`
+      const injectionTarget = document.getElementById('reply-box-mount-' + parentId);
+      injectionTarget.innerHTML = `
         <div class="bg-neutral-50 p-4 border border-neutral-200 rounded-lg max-w-xl mt-2 space-y-3">
           <input type="text" id="reply-author-name" placeholder="Your Name (At least 4 chars)" class="w-full p-2 text-xs bg-white border border-neutral-200 rounded focus:outline-none focus:border-black">
           <textarea id="reply-body-text" rows="2" placeholder="Write reply choice..." class="w-full p-2 text-xs bg-white border border-neutral-200 rounded focus:outline-none focus:border-black"></textarea>
@@ -283,7 +284,7 @@ async function fetchSidebarTopics(activeSlug) {
             <button onclick="postComment('\${parentId}')" class="text-xs bg-black text-white px-3 py-1 rounded hover:bg-neutral-800">Post Reply</button>
           </div>
         </div>
-      \`;
+      `;
     }
 
     async function postComment(parentId = null) {
@@ -318,10 +319,10 @@ async function fetchSidebarTopics(activeSlug) {
       const { data: likes, error: e1 } = await _supabase.from('post_interactions').select('id', { count: 'exact' }).eq('post_id', currentPost.id).eq('interaction_type', 'like');
       const { data: dislikes, error: e2 } = await _supabase.from('post_interactions').select('id', { count: 'exact' }).eq('post_id', currentPost.id).eq('interaction_type', 'dislike');
       if (!e1 && !e2) {
-        document.getElementById('like-count').innerText = likes.length || 0;
-        document.getElementById('dislike-count').innerText = dislikes.length || 0;
+        document.getElementById('like-count').innerText = likes ? likes.length : 0;
+        document.getElementById('dislike-count').innerText = dislikes ? dislikes.length : 0;
       }
-      updateReactionButtonsVisualState(localStorage.getItem(\`interaction_\${currentPost.id}\`));
+      updateReactionButtonsVisualState(localStorage.getItem('interaction_' + currentPost.id));
     }
 
     function updateReactionButtonsVisualState(choice) {
@@ -334,7 +335,7 @@ async function fetchSidebarTopics(activeSlug) {
     }
 
     async function submitReaction(type) {
-      const storageKey = \`interaction_\${currentPost.id}\`;
+      const storageKey = 'interaction_' + currentPost.id;
       const existingChoice = localStorage.getItem(storageKey);
       if (existingChoice === type) return;
 
@@ -359,27 +360,21 @@ async function fetchSidebarTopics(activeSlug) {
     }
 
     function copyShareLink() {
-  // Construct explicit shareable URL with post slug if available
-  let shareableUrl = window.location.href;
-  
-  if (currentPost && currentPost.slug) {
-    shareableUrl = `${window.location.origin}/blog?slug=${currentPost.slug}`;
-  }
-
-  navigator.clipboard.writeText(shareableUrl);
-  
-  const textBtn = document.getElementById('share-btn-text');
-  if (textBtn) {
-    textBtn.innerText = "Link Copied!";
-    setTimeout(() => { 
-      textBtn.innerText = "Copy Unique Link"; 
-    }, 2500);
-  }
-}
+      let shareableUrl = window.location.href;
+      if (currentPost && currentPost.slug) {
+        shareableUrl = window.location.origin + '/blog?slug=' + currentPost.slug;
+      }
+      navigator.clipboard.writeText(shareableUrl);
+      const textBtn = document.getElementById('share-btn-text');
+      if (textBtn) {
+        textBtn.innerText = "Link Copied!";
+        setTimeout(() => { textBtn.innerText = "Copy Unique Link"; }, 2500);
+      }
+    }
   </script>
 </body>
 </html>`;
 
-  res.setHeader('Content-Type', 'text/html');
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
   return res.status(200).send(html);
 }
