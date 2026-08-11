@@ -7,7 +7,7 @@ export default async function handler(req) {
   const slug = url.searchParams.get('slug');
 
   let title = "ADA Insights & Architecture Blog";
-  let image = "https://www.archilurdesignz.com/apple-touch-icon.png"; // Fallback static preview image
+  let image = "https://www.archilurdesignz.com/apple-touch-icon.png";
   let description = "Explore spatial compositions and architectural insights by Archilurdesignz and Architecture.";
 
   if (slug) {
@@ -15,24 +15,30 @@ export default async function handler(req) {
       const supabaseUrl = "https://ofaxbduvnhscxvoakeax.supabase.co";
       const supabaseAnonKey = "sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK";
       
-      const res = await fetch(`${supabaseUrl}/rest/v1/posts?slug=eq.${encodeURIComponent(slug)}&select=title,hero_media_url,media_type,content`, {
+      // Clean and sanitize slug parameter
+      const cleanSlug = slug.trim();
+      const endpoint = `${supabaseUrl}/rest/v1/posts?slug=eq.${encodeURIComponent(cleanSlug)}&select=title,hero_media_url,media_type,content`;
+      
+      const res = await fetch(endpoint, {
+        method: 'GET',
         headers: {
           'apikey': supabaseAnonKey,
-          'Authorization': `Bearer ${supabaseAnonKey}`
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'Content-Type': 'application/json'
         }
       });
 
       if (res.ok) {
         const data = await res.json();
-        if (data && data.length > 0) {
+        if (Array.isArray(data) && data.length > 0) {
           const post = data[0];
           title = `${post.title} | ADA Journal`;
 
-          // 1. Process Hero Media Image URL
+          // Process Thumbnail Image
           if (post.hero_media_url) {
             let mediaUrl = post.hero_media_url.trim();
 
-            // Handle YouTube Video links -> Convert to YouTube Thumbnail Image
+            // Convert YouTube Embeds or Watch URLs to HD Image Thumbnails
             if (post.media_type === 'video' || mediaUrl.includes('youtube.com') || mediaUrl.includes('youtu.be')) {
               const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
               const match = mediaUrl.match(regExp);
@@ -41,7 +47,7 @@ export default async function handler(req) {
               }
             }
 
-            // Ensure the URL is absolute (includes domain)
+            // Ensure absolute HTTPS URL formatting
             if (!mediaUrl.startsWith('http://') && !mediaUrl.startsWith('https://')) {
               mediaUrl = `https://www.archilurdesignz.com${mediaUrl.startsWith('/') ? '' : '/'}${mediaUrl}`;
             }
@@ -49,17 +55,18 @@ export default async function handler(req) {
             image = mediaUrl;
           }
 
-          // 2. Clean up Post Description
+          // Strip HTML tags for clean description excerpt
           if (post.content) {
             description = post.content
               .replace(/<[^>]*>?/gm, '')
               .replace(/\n/g, ' ')
+              .trim()
               .substring(0, 160) + '...';
           }
         }
       }
     } catch (e) {
-      console.error(e);
+      console.error("OG Metadata Edge Error:", e);
     }
   }
 
@@ -70,22 +77,21 @@ export default async function handler(req) {
   <title>${title}</title>
   <meta name="description" content="${description}">
   
-  <!-- Open Graph / Facebook / WhatsApp Meta Tags -->
+  <!-- Open Graph / Facebook / WhatsApp -->
   <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Archilurdesignz" />
   <meta property="og:title" content="${title}" />
   <meta property="og:description" content="${description}" />
   <meta property="og:image" content="${image}" />
   <meta property="og:image:secure_url" content="${image}" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
   
-  <!-- Twitter Card Meta Tags (YouTube Style Large Thumbnail) -->
+  <!-- Twitter Cards (Wide Preview) -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${title}" />
   <meta name="twitter:description" content="${description}" />
   <meta name="twitter:image" content="${image}" />
 
-  <meta http-equiv="refresh" content="0;url=/blog?slug=${slug || ''}">
+  <meta http-equiv="refresh" content="0;url=/blog?slug=${encodeURIComponent(slug || '')}">
 </head>
 <body>
   <p>Redirecting to ADA Journal...</p>
@@ -93,6 +99,9 @@ export default async function handler(req) {
 </html>`;
 
   return new Response(html, {
-    headers: { 'content-type': 'text/html; charset=utf-8' },
+    headers: { 
+      'content-type': 'text/html; charset=utf-8',
+      'cache-control': 'public, max-age=3600, s-maxage=3600'
+    },
   });
 }
