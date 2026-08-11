@@ -1,0 +1,65 @@
+export const config = {
+  runtime: 'edge',
+};
+
+export default async function handler(req) {
+  const url = new URL(req.url);
+  const slug = url.searchParams.get('slug');
+
+  let title = "ADA Insights & Architecture Blog";
+  let image = "https://www.archilurdesignz.com/apple-touch-icon.png";
+  let description = "Explore spatial compositions and architectural insights by Archilurdesignz and Architecture.";
+
+  if (slug) {
+    try {
+      const supabaseUrl = "https://ofaxbduvnhscxvoakeax.supabase.co";
+      const supabaseAnonKey = "sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK";
+      
+      const res = await fetch(`${supabaseUrl}/rest/v1/posts?slug=eq.${encodeURIComponent(slug)}&select=title,hero_media_url,content`, {
+        headers: {
+          'apikey': supabaseAnonKey,
+          'Authorization': `Bearer ${supabaseAnonKey}`
+        }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const post = data[0];
+          title = `${post.title} | ADA Journal`;
+          if (post.hero_media_url) image = post.hero_media_url;
+          if (post.content) {
+            description = post.content.replace(/<[^>]*>?/gm, '').replace(/\n/g, ' ').substring(0, 160) + '...';
+          }
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>${title}</title>
+  <meta name="description" content="${description}">
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="${title}" />
+  <meta property="og:description" content="${description}" />
+  <meta property="og:image" content="${image}" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${title}" />
+  <meta name="twitter:description" content="${description}" />
+  <meta name="twitter:image" content="${image}" />
+  <meta http-equiv="refresh" content="0;url=/blog?slug=${slug || ''}">
+</head>
+<body>
+  <p>Redirecting to ADA Journal...</p>
+</body>
+</html>`;
+
+  return new Response(html, {
+    headers: { 'content-type': 'text/html; charset=utf-8' },
+  });
+}
