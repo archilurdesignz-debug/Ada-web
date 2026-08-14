@@ -687,6 +687,155 @@ nav:hover .nav-logomark { border-color: var(--gold); }
     .hero-content { padding:0 5% 60px; width: 100%; }
     /* ... keeping the rest of your mobile rules below ... */
 }
+        /* ── AUDIT SECTION ───────────────────────────────────────────────────── */
+.audit-section {
+    padding: 100px 5%;
+    background: var(--ink);
+    border-top: 1px solid rgba(201,191,176,0.06);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+}
+
+.audit-tag {
+    font-family: var(--f-body);
+    font-size: 0.58rem;
+    font-weight: 400;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    display: block;
+}
+
+.audit-title {
+    font-family: var(--f-display);
+    font-size: clamp(2.2rem, 3.8vw, 3.4rem);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--white);
+    margin-bottom: 24px;
+}
+
+.audit-title em {
+    font-style: italic;
+    color: var(--gold2);
+}
+
+.audit-desc {
+    font-size: 0.82rem;
+    font-weight: 200;
+    color: var(--mist);
+    line-height: 1.85;
+    letter-spacing: 0.2px;
+    max-width: 500px;
+    margin-bottom: 36px;
+}
+
+.audit-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 36px;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--f-body);
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.35s var(--ease-out);
+    cursor: pointer;
+}
+
+.audit-cta:hover {
+    background: var(--accent);
+    color: var(--white);
+    transform: translateY(-3px);
+}
+
+/* Panel Box Right */
+.audit-panel {
+    background: var(--ink2);
+    border: 1px solid rgba(201,191,176,0.08);
+    padding: 44px 40px;
+    display: flex;
+    flex-direction: column;
+}
+
+.audit-point {
+    display: flex;
+    gap: 28px;
+    padding: 24px 0;
+    border-bottom: 1px solid rgba(201,191,176,0.06);
+}
+
+.audit-point:first-child { padding-top: 0; }
+.audit-point:last-child { padding-bottom: 0; border-bottom: none; }
+
+.audit-point-num {
+    font-family: var(--f-display);
+    font-size: 0.95rem;
+    font-style: italic;
+    color: var(--gold);
+    letter-spacing: 1px;
+    flex-shrink: 0;
+    padding-top: 2px;
+}
+
+.audit-point-title {
+    font-family: var(--f-display);
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--white);
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+
+.audit-point-desc {
+    font-size: 0.75rem;
+    font-weight: 200;
+    color: var(--mist);
+    line-height: 1.7;
+}
+
+/* ── RESPONSIVE OVERRIDES (TABLETS & PHONES) ───────────────────────── */
+@media (max-width: 1024px) {
+    .audit-section {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        padding: 70px 5%;
+    }
+}
+
+@media (max-width: 768px) {
+    .audit-section {
+        padding: 60px 5%;
+    }
+    
+    .audit-panel {
+        padding: 32px 24px;
+    }
+    
+    .audit-point {
+        gap: 18px;
+        padding: 20px 0;
+    }
+
+    .audit-title {
+        font-size: 2.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .audit-cta {
+        width: 100%;
+        text-align: center;
+    }
+}
 /* ── FOOTER ──────────────────────────────────────────────────────────── */
 footer {
     background:var(--ink2); padding:64px 5% 28px;
@@ -917,7 +1066,39 @@ footer {
         </button>
     </div>
 </section>
-
+    
+<!-- ── DRAWING AUDIT SECTION ──────────────────────────────────────────── -->
+<section class="audit-section s-reveal">
+    <div>
+        <span class="audit-tag">New service</span>
+        <h2 class="audit-title">Already have plans?<br><em>Get them audited</em> before you build.</h2>
+        <p class="audit-desc">Send us your existing architectural, MEP, or structural drawings for an independent technical review — redflag checks, spatial optimization, and constructability sanity checks, before you break ground.</p>
+        <a href="audit" class="audit-cta">Start a drawing audit →</a>
+    </div>
+    <div class="audit-panel">
+        <div class="audit-point">
+            <span class="audit-point-num">01</span>
+            <div>
+                <div class="audit-point-title">Expert technical review</div>
+                <div class="audit-point-desc">Licensed review of your existing plans, flagged and annotated.</div>
+            </div>
+        </div>
+        <div class="audit-point">
+            <span class="audit-point-num">02</span>
+            <div>
+                <div class="audit-point-title">3–5 day turnaround</div>
+                <div class="audit-point-desc">Fast review cycle so you're not delayed before site work begins.</div>
+            </div>
+        </div>
+        <div class="audit-point">
+            <span class="audit-point-num">03</span>
+            <div>
+                <div class="audit-point-title">Google Drive upload</div>
+                <div class="audit-point-desc">Simply share a folder link — no software, no file size limits.</div>
+            </div>
+        </div>
+    </div>
+</section>
 <!-- ── SERVICES ───────────────────────────────────────────────────────── -->
 <section id="services">
     <div class="services-top">
