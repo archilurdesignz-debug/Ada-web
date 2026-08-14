@@ -601,7 +601,77 @@
             </div>
         </div>
     </div>
+    
+<!-- ── DRAWING AUDIT CASE STUDIES MANAGER ──────────────────────── -->
+<div class="section-card" style="border-top-color: #c8a87a;">
+    <div class="section-toggle" onclick="toggleSection(this)">
+        <h2>Audit Case Studies Showcase Manager</h2>
+        <span class="toggle-icon">+</span>
+    </div>
+    <div class="section-body">
+        <p style="font-size:0.75rem; color:#666; margin-bottom:20px;">
+            Upload Before & After audit floor plan comparisons. Images are routed directly to Dropbox and saved in Supabase with clean rendering links (`raw=1`).
+        </p>
 
+        <div class="form-group">
+            <label>Project Title / Location</label>
+            <input type="text" id="auditCaseTitle" placeholder="e.g., 3-Bedroom Bungalow — Lekki Phase 1">
+        </div>
+
+        <div class="grid-2">
+            <!-- Un-audited Image Upload -->
+            <div class="form-group">
+                <label>Un-audited Original Drawing (Dropbox Image)</label>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="text" id="auditUnAuditedUrl" placeholder="https://www.dropbox.com/...raw=1" style="flex:1;">
+                    <label class="btn-action" style="width:auto; margin:0; padding:10px 15px; cursor:pointer; text-align:center; background-color:#2ecc71; color:#000;">
+                        📁 Upload
+                        <input type="file" id="auditUnAuditedFile" accept="image/*" style="display:none;" onchange="handleAuditImageUpload('auditUnAuditedFile', 'auditUnAuditedUrl', 'auditUnAuditedStatus')">
+                    </label>
+                </div>
+                <small id="auditUnAuditedStatus" style="display:block; margin-top:5px; color:#7f8c8d; font-size:0.65rem;"></small>
+            </div>
+
+            <!-- Audited Image Upload -->
+            <div class="form-group">
+                <label>ADA Audited Drawing (Dropbox Image)</label>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="text" id="auditAuditedUrl" placeholder="https://www.dropbox.com/...raw=1" style="flex:1;">
+                    <label class="btn-action" style="width:auto; margin:0; padding:10px 15px; cursor:pointer; text-align:center; background-color:#2ecc71; color:#000;">
+                        📁 Upload
+                        <input type="file" id="auditAuditedFile" accept="image/*" style="display:none;" onchange="handleAuditImageUpload('auditAuditedFile', 'auditAuditedUrl', 'auditAuditedStatus')">
+                    </label>
+                </div>
+                <small id="auditAuditedStatus" style="display:block; margin-top:5px; color:#7f8c8d; font-size:0.65rem;"></small>
+            </div>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div class="grid-3" style="margin-top:10px;">
+            <div class="form-group">
+                <label>Circulation Improvement</label>
+                <input type="text" id="auditMetricCirculation" placeholder="e.g., +18%">
+            </div>
+            <div class="form-group">
+                <label>Ventilation Gain</label>
+                <input type="text" id="auditMetricVentilation" placeholder="e.g., +24%">
+            </div>
+            <div class="form-group">
+                <label>Structural Cost Savings</label>
+                <input type="text" id="auditMetricSavings" placeholder="e.g., ₦1.2m">
+            </div>
+        </div>
+
+        <button class="btn-action" style="background:var(--gold); color:#000; margin-top:15px;" onclick="publishAuditCaseStudy()">
+            Publish Case Study to Live Feed
+        </button>
+
+        <h3 style="margin-top:30px; margin-bottom:15px;">Active Audit Case Studies</h3>
+        <div id="auditCaseStudiesList" style="display:flex; flex-direction:column; gap:12px;">
+            <p style="font-size:0.75rem; color:#444;">Loading case studies...</p>
+        </div>
+    </div>
+</div>
       <!-- ── BLOG POST UPLOAD ──────────────────────────────────────── -->
 <div class="section-card" style="border-top-color: #e74c3c;">
     <div class="section-toggle" onclick="toggleSection(this)">
@@ -2059,7 +2129,134 @@ function attachTimelineAutoSave() {
     deadlineInput.addEventListener('change', triggerSave);
     statusInput.addEventListener('change', triggerSave);
 }
+    
+// ─── AUDIT CASE STUDIES SHOWCASE ENGINE ─────────────────────────
 
+// 1. Direct Dropbox Upload Pipeline with raw=1 Normalization
+async function handleAuditImageUpload(fileInputId, targetInputId, statusTextId) {
+    const fileInput = document.getElementById(fileInputId);
+    const targetInput = document.getElementById(targetInputId);
+    const statusText = document.getElementById(statusTextId);
+
+    if (!fileInput.files.length) return;
+    const file = fileInput.files[0];
+
+    statusText.innerText = "⏳ Uploading image to Dropbox...";
+    statusText.style.color = "#3498db";
+
+    try {
+        const base64Data = await getBase64(file);
+        const response = await fetch('/api/upload-to-dropbox', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: file.name, filedata: base64Data })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.url) {
+            // Strip out trailing dl=0/1 parameters
+            let cleanUrl = data.url.replace(/[?&]dl=[01][^#]*/, '');
+            
+            // Append &raw=1 or ?raw=1 dynamically
+            let separator = cleanUrl.includes('?') ? '&' : '?';
+            let rawUrl = `${cleanUrl}${separator}raw=1`;
+
+            targetInput.value = rawUrl; 
+            statusText.innerText = "✅ Uploaded successfully and raw link attached!";
+            statusText.style.color = "#2ecc71";
+        } else {
+            throw new Error(data.error || "Upload failed");
+        }
+    } catch (err) {
+        statusText.innerText = `❌ Error: ${err.message}`;
+        statusText.style.color = "#e74c3c";
+    } finally {
+        fileInput.value = ""; 
+    }
+}
+
+// 2. Publish New Case Study to Supabase
+async function publishAuditCaseStudy() {
+    const title       = getVal('auditCaseTitle');
+    const unAudited   = getVal('auditUnAuditedUrl');
+    const audited     = getVal('auditAuditedUrl');
+    const circulation = getVal('auditMetricCirculation') || '+0%';
+    const ventilation = getVal('auditMetricVentilation') || '+0%';
+    const savings     = getVal('auditMetricSavings') || '₦0';
+
+    if (!title || !unAudited || !audited) {
+        alert('Please fill in the project title and upload both drawing images.');
+        return;
+    }
+
+    if (!_db) { alert('Supabase not connected.'); return; }
+
+    const payload = {
+        project_title: title,
+        un_audited_image_url: unAudited,
+        audited_image_url: audited,
+        circulation_improvement: circulation,
+        ventilation_gain: ventilation,
+        structural_cost_savings: savings
+    };
+
+    const { error } = await _db.from('audit_showcase').insert([payload]);
+
+    if (error) {
+        alert('Error publishing case study: ' + error.message);
+    } else {
+        alert('✓ Case study published cleanly to live audit feed!');
+        setVal('auditCaseTitle', '');
+        setVal('auditUnAuditedUrl', '');
+        setVal('auditAuditedUrl', '');
+        setVal('auditMetricCirculation', '');
+        setVal('auditMetricVentilation', '');
+        setVal('auditMetricSavings', '');
+        loadAuditCaseStudies();
+    }
+}
+
+// 3. Load Active Case Studies List
+async function loadAuditCaseStudies() {
+    const container = document.getElementById('auditCaseStudiesList');
+    if (!container || !_db) return;
+
+    const { data, error } = await _db
+        .from('audit_showcase')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+        container.innerHTML = '<p style="font-size:0.75rem; color:#444;">No case studies published yet.</p>';
+        return;
+    }
+
+    container.innerHTML = data.map(item => `
+        <div style="background:rgba(0,0,0,0.3); border:1px solid #1a1a1a; padding:16px; display:flex; justify-content:space-between; align-items:center; gap:20px;">
+            <div>
+                <div style="font-size:0.85rem; color:var(--gold); font-weight:600; margin-bottom:4px;">${item.project_title}</div>
+                <div style="font-size:0.68rem; color:#888;">
+                    Circulation: <span style="color:#fff;">${item.circulation_improvement}</span> | 
+                    Ventilation: <span style="color:#fff;">${item.ventilation_gain}</span> | 
+                    Savings: <span style="color:#fff;">${item.structural_cost_savings}</span>
+                </div>
+            </div>
+            <button class="btn-small btn-remove" onclick="deleteAuditCaseStudy('${item.id}')">Remove</button>
+        </div>
+    `).join('');
+}
+
+// 4. Delete Case Study Record
+async function deleteAuditCaseStudy(id) {
+    if (!confirm('Permanently remove this audit case study?')) return;
+    if (!_db) return;
+
+    const { error } = await _db.from('audit_showcase').delete().eq('id', id);
+    if (error) alert('Delete Error: ' + error.message);
+    else loadAuditCaseStudies();
+}
+    
 // ─── JOURNAL BLOGGING SYSTEM OPERATIONAL MATRIX ──────────────────────────────
 function updateBlogMediaPlaceholder(mode) {
     const label = document.getElementById('lblBlogMediaUrl');
@@ -2356,6 +2553,7 @@ window.addEventListener('DOMContentLoaded', () => {
     attachTimelineAutoSave();
     loadEstimatorDefaultConstants();
     loadReceiptInvoiceSelectors();
+    loadAuditCaseStudies();
 
     const newCurrencyDropdown = document.getElementById('newCurrencyMode');
     if (newCurrencyDropdown) {
