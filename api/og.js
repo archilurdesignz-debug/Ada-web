@@ -7,7 +7,7 @@ export default async function handler(req) {
   const slug = url.searchParams.get('slug');
   const userAgent = req.headers.get('user-agent') || '';
 
-  // Check if the request is coming from a known social media crawler bot
+  // Detect social media crawlers
   const isCrawler = /LinkedInBot|facebookexternalhit|WhatsApp|Twitterbot|Pinterest|TelegramBot|Slackbot|Discordbot/i.test(userAgent);
 
   let title = "ADA Insights & Architecture Blog";
@@ -69,16 +69,18 @@ export default async function handler(req) {
     }
   }
 
-  // Only attach meta-refresh if the visitor is a human browser, not a social bot
-  const redirectMeta = isCrawler ? '' : `<meta http-equiv="refresh" content="0;url=/blog?slug=${encodeURIComponent(slug || '')}">`;
+  // If a human opens the link directly in a browser, redirect them to /blog
+  if (!isCrawler) {
+    return Response.redirect(`https://www.archilurdesignz.com/blog?slug=${encodeURIComponent(slug || '')}`, 302);
+  }
 
+  // If a crawler hits the link, return ONLY clean static HTML with populated Open Graph tags
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>${title}</title>
   <meta name="description" content="${description}">
-  ${redirectMeta}
   
   <!-- Open Graph / LinkedIn / Facebook / WhatsApp -->
   <meta property="og:type" content="article" />
@@ -87,9 +89,9 @@ export default async function handler(req) {
   <meta property="og:description" content="${description}" />
   <meta property="og:image" content="${image}" />
   <meta property="og:image:secure_url" content="${image}" />
-  <meta property="og:image:type" content="image/jpeg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
+  <meta property="og:url" content="${req.url}" />
   
   <!-- Twitter Cards -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -98,129 +100,14 @@ export default async function handler(req) {
   <meta name="twitter:image" content="${image}" />
 </head>
 <body>
-  <p>Redirecting to ADA Journal...</p>
+  <h1>${title}</h1>
+  <p>${description}</p>
+  <img src="${image}" alt="Cover Image" />
 </body>
 </html>`;
 
   return new Response(html, {
-    headers: { 
-      'content-type': 'text/html; charset=utf-8',
-      'cache-control': 'public, max-age=3600, s-maxage=3600'
-    },
-  });
-}
-        }
-      }
-    } catch (e) {
-      console.error("OG Metadata Edge Error:", e);
-    }
-  }
-
-  // Only attach meta-refresh if the visitor is a human browser, not a social bot
-  const redirectMeta = isCrawler ? '' : `<meta http-equiv="refresh" content="0;url=/blog?slug=${encodeURIComponent(slug || '')}">`;
-
-  const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>${title}</title>
-  <meta name="description" content="${description}">
-  ${redirectMeta}
-  
-  <!-- Open Graph / LinkedIn / Facebook / WhatsApp -->
-  <meta property="og:type" content="article" />
-  <meta property="og:site_name" content="Archilurdesignz" />
-  <meta property="og:title" content="${title}" />
-  <meta property="og:description" content="${description}" />
-  <meta property="og:image" content="${image}" />
-  <meta property="og:image:secure_url" content="${image}" />
-  <meta property="og:image:type" content="image/jpeg" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  
-  <!-- Twitter Cards -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="${title}" />
-  <meta name="twitter:description" content="${description}" />
-  <meta name="twitter:image" content="${image}" />
-</head>
-<body>
-  <p>Redirecting to ADA Journal...</p>
-</body>
-</html>`;
-
-  return new Response(html, {
-    headers: { 
-      'content-type': 'text/html; charset=utf-8',
-      'cache-control': 'public, max-age=3600, s-maxage=3600'
-    },
-  });
-}
-          // Process Thumbnail Image
-          if (post.hero_media_url) {
-            let mediaUrl = post.hero_media_url.trim();
-
-            // Convert YouTube Embeds or Watch URLs to HD Image Thumbnails
-            if (post.media_type === 'video' || mediaUrl.includes('youtube.com') || mediaUrl.includes('youtu.be')) {
-              const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-              const match = mediaUrl.match(regExp);
-              if (match && match[2].length === 11) {
-                mediaUrl = `https://img.youtube.com/vi/${match[2]}/hqdefault.jpg`;
-              }
-            }
-
-            // Ensure absolute HTTPS URL formatting
-            if (!mediaUrl.startsWith('http://') && !mediaUrl.startsWith('https://')) {
-              mediaUrl = `https://www.archilurdesignz.com${mediaUrl.startsWith('/') ? '' : '/'}${mediaUrl}`;
-            }
-
-            image = mediaUrl;
-          }
-
-          // Strip HTML tags for clean description excerpt
-          if (post.content) {
-            description = post.content
-              .replace(/<[^>]*>?/gm, '')
-              .replace(/\n/g, ' ')
-              .trim()
-              .substring(0, 160) + '...';
-          }
-        }
-      }
-    } catch (e) {
-      console.error("OG Metadata Edge Error:", e);
-    }
-  }
-
-  const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>${title}</title>
-  <meta name="description" content="${description}">
-  
-  <!-- Open Graph / Facebook / WhatsApp -->
-  <meta property="og:type" content="article" />
-  <meta property="og:site_name" content="Archilurdesignz" />
-  <meta property="og:title" content="${title}" />
-  <meta property="og:description" content="${description}" />
-  <meta property="og:image" content="${image}" />
-  <meta property="og:image:secure_url" content="${image}" />
-  
-  <!-- Twitter Cards (Wide Preview) -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="${title}" />
-  <meta name="twitter:description" content="${description}" />
-  <meta name="twitter:image" content="${image}" />
-
-  <meta http-equiv="refresh" content="0;url=/blog?slug=${encodeURIComponent(slug || '')}">
-</head>
-<body>
-  <p>Redirecting to ADA Journal...</p>
-</body>
-</html>`;
-
-  return new Response(html, {
+    status: 200,
     headers: { 
       'content-type': 'text/html; charset=utf-8',
       'cache-control': 'public, max-age=3600, s-maxage=3600'
