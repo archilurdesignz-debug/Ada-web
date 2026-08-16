@@ -5,6 +5,10 @@ export const config = {
 export default async function handler(req) {
   const url = new URL(req.url);
   const slug = url.searchParams.get('slug');
+  const userAgent = req.headers.get('user-agent') || '';
+
+  // Check if the request is coming from a known social media crawler bot
+  const isCrawler = /LinkedInBot|facebookexternalhit|WhatsApp|Twitterbot|Pinterest|TelegramBot|Slackbot|Discordbot/i.test(userAgent);
 
   let title = "ADA Insights & Architecture Blog";
   let image = "https://www.archilurdesignz.com/apple-touch-icon.png";
@@ -15,7 +19,6 @@ export default async function handler(req) {
       const supabaseUrl = "https://ofaxbduvnhscxvoakeax.supabase.co";
       const supabaseAnonKey = "sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK";
       
-      // Clean and sanitize slug parameter
       const cleanSlug = slug.trim();
       const endpoint = `${supabaseUrl}/rest/v1/posts?slug=eq.${encodeURIComponent(cleanSlug)}&select=title,hero_media_url,media_type,content`;
       
@@ -34,6 +37,125 @@ export default async function handler(req) {
           const post = data[0];
           title = `${post.title} | ADA Journal`;
 
+          if (post.hero_media_url) {
+            let mediaUrl = post.hero_media_url.trim();
+
+            if (post.media_type === 'video' || mediaUrl.includes('youtube.com') || mediaUrl.includes('youtu.be')) {
+              const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+              const match = mediaUrl.match(regExp);
+              if (match && match[2].length === 11) {
+                mediaUrl = `https://img.youtube.com/vi/${match[2]}/hqdefault.jpg`;
+              }
+            }
+
+            if (!mediaUrl.startsWith('http://') && !mediaUrl.startsWith('https://')) {
+              mediaUrl = `https://www.archilurdesignz.com${mediaUrl.startsWith('/') ? '' : '/'}${mediaUrl}`;
+            }
+
+            image = mediaUrl;
+          }
+
+          if (post.content) {
+            description = post.content
+              .replace(/<[^>]*>?/gm, '')
+              .replace(/\n/g, ' ')
+              .trim()
+              .substring(0, 160) + '...';
+          }
+        }
+      }
+    } catch (e) {
+      console.error("OG Metadata Edge Error:", e);
+    }
+  }
+
+  // Only attach meta-refresh if the visitor is a human browser, not a social bot
+  const redirectMeta = isCrawler ? '' : `<meta http-equiv="refresh" content="0;url=/blog?slug=${encodeURIComponent(slug || '')}">`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>${title}</title>
+  <meta name="description" content="${description}">
+  ${redirectMeta}
+  
+  <!-- Open Graph / LinkedIn / Facebook / WhatsApp -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Archilurdesignz" />
+  <meta property="og:title" content="${title}" />
+  <meta property="og:description" content="${description}" />
+  <meta property="og:image" content="${image}" />
+  <meta property="og:image:secure_url" content="${image}" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${title}" />
+  <meta name="twitter:description" content="${description}" />
+  <meta name="twitter:image" content="${image}" />
+</head>
+<body>
+  <p>Redirecting to ADA Journal...</p>
+</body>
+</html>`;
+
+  return new Response(html, {
+    headers: { 
+      'content-type': 'text/html; charset=utf-8',
+      'cache-control': 'public, max-age=3600, s-maxage=3600'
+    },
+  });
+}
+        }
+      }
+    } catch (e) {
+      console.error("OG Metadata Edge Error:", e);
+    }
+  }
+
+  // Only attach meta-refresh if the visitor is a human browser, not a social bot
+  const redirectMeta = isCrawler ? '' : `<meta http-equiv="refresh" content="0;url=/blog?slug=${encodeURIComponent(slug || '')}">`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>${title}</title>
+  <meta name="description" content="${description}">
+  ${redirectMeta}
+  
+  <!-- Open Graph / LinkedIn / Facebook / WhatsApp -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Archilurdesignz" />
+  <meta property="og:title" content="${title}" />
+  <meta property="og:description" content="${description}" />
+  <meta property="og:image" content="${image}" />
+  <meta property="og:image:secure_url" content="${image}" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${title}" />
+  <meta name="twitter:description" content="${description}" />
+  <meta name="twitter:image" content="${image}" />
+</head>
+<body>
+  <p>Redirecting to ADA Journal...</p>
+</body>
+</html>`;
+
+  return new Response(html, {
+    headers: { 
+      'content-type': 'text/html; charset=utf-8',
+      'cache-control': 'public, max-age=3600, s-maxage=3600'
+    },
+  });
+}
           // Process Thumbnail Image
           if (post.hero_media_url) {
             let mediaUrl = post.hero_media_url.trim();
