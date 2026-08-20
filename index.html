@@ -836,6 +836,14 @@ nav:hover .nav-logomark { border-color: var(--gold); }
         text-align: center;
     }
 }
+        .review-date {
+    color: var(--mist);
+    font-size: 0.55rem;
+    font-weight: 300;
+    text-transform: none;
+    letter-spacing: 0.5px;
+    margin-left: 4px;
+}
 /* ── FOOTER ──────────────────────────────────────────────────────────── */
 footer {
     background:var(--ink2); padding:64px 5% 28px;
@@ -1190,26 +1198,7 @@ footer {
     </div>
     <div class="reviews-wrapper">
         <div class="reviews-track" id="reviews-display">
-            <div class="review-card">
-                <div class="review-stars">★★★★★</div>
-                <p class="review-quote">Best Experience I have had working online. If you need a service, I recommend this guy. He's got the skills and professionalism. Top notch delivery</p>
-                <p class="review-author">Mark Gregory · Lagos</p>
-            </div>
-            <div class="review-card">
-                <div class="review-stars">★★★★★</div>
-                <p class="review-quote">I am absolutely satisfied by his delivery. Great experience, will place another order as soon as possible.</p>
-                <p class="review-author">Aliirajput · Pakistan</p>
-            </div>
-            <div class="review-card">
-                <div class="review-stars">★★★★★</div>
-                <p class="review-quote">Archilurd is an easy to work with, extremely committed and persevering contractor who is willing to go over and beyond. I recommend him.</p>
-                <p class="review-author">Robert Ponta · Austria</p>
-            </div>
-            <div class="review-card">
-                <div class="review-stars">★★★★★</div>
-                <p class="review-quote">Ibukunoluwa did an amazing job with our house plans. He was very helpful and great with assisting us in figuring out how we wanted our house plan to be.</p>
-                <p class="review-author">Zhanesmith · United States</p>
-            </div>
+            <p style="color: var(--mist); font-size: 0.8rem; padding: 20px;">Loading verified reviews...</p>
         </div>
     </div>
 </section>
@@ -1455,30 +1444,73 @@ function shiftCarousel(direction) {
         }
     }, 2000);
 }
-/* ── REVIEWS ────────────────────────────────────────────────────────── */
-async function loadReviews() {
-    const container = document.getElementById('reviews-display');
-    const defaultHTML = container.innerHTML;
-
-    try {
-        if (!_db) throw new Error('no db');
-        const { data, error } = await _db.from('reviews').select('*').eq('status','approved');
-        if (error || !data || !data.length) throw new Error('no data');
-
-        const dynHTML = data.map(r => `
-            <div class="review-card">
-                <div class="review-stars">${'★'.repeat(r.rating)}</div>
-                <p class="review-quote">${r.comment}</p>
-                <p class="review-author">${r.client_name} · ${r.location||'Nigeria'}</p>
-            </div>`).join('');
-
-        const combined = defaultHTML + dynHTML;
-        container.innerHTML = combined + combined;
-    } catch(_) {
-        container.innerHTML = defaultHTML + defaultHTML;
-    }
+/* ── RELATIVE DATE FORMATTER HELPER ──────────────────────────────────── */
+function formatTimeAgo(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    
+    const seconds = Math.floor((new Date() - date) / 1000);
+    
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1) return `${interval} year${interval === 1 ? '' : 's'} ago`;
+    
+    interval = Math.floor(seconds / 2592000);
+    if (interval >= 1) return `${interval} month${interval === 1 ? '' : 's'} ago`;
+    
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1) return `${interval} day${interval === 1 ? '' : 's'} ago`;
+    
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1) return `${interval} hour${interval === 1 ? '' : 's'} ago`;
+    
+    interval = Math.floor(seconds / 60);
+    if (interval >= 1) return `${interval} minute${interval === 1 ? '' : 's'} ago`;
+    
+    return 'Just now';
 }
 
+/* ── REVIEWS LOADER ENGINE ───────────────────────────────────────────── */
+async function loadReviews() {
+    const container = document.getElementById('reviews-display');
+    if (!container) return;
+
+    try {
+        if (!_db) throw new Error('Database connection uninitialized');
+
+        // Fetch all approved reviews ordered by newest first
+        const { data, error } = await _db
+            .from('reviews')
+            .select('*')
+            .eq('status', 'approved')
+            .order('created_at', { ascending: false });
+
+        if (error || !data || !data.length) {
+            container.innerHTML = '<p style="color: var(--mist); font-size: 0.8rem; padding: 20px;">No client reviews available at this time.</p>';
+            return;
+        }
+
+        const dynHTML = data.map(r => {
+            const timeAgo = r.created_at ? formatTimeAgo(r.created_at) : '';
+            const dateSpan = timeAgo ? `<span class="review-date">· ${timeAgo}</span>` : '';
+            
+            return `
+                <div class="review-card">
+                    <div class="review-stars">${'★'.repeat(r.rating || 5)}</div>
+                    <p class="review-quote">${r.comment}</p>
+                    <p class="review-author">${r.client_name || 'Client'} · ${r.location || 'Nigeria'} ${dateSpan}</p>
+                </div>
+            `;
+        }).join('');
+
+        // Duplicate track array to maintain infinite seamless marquee scrolling
+        container.innerHTML = dynHTML + dynHTML;
+
+    } catch (err) {
+        console.warn('Reviews fetch error:', err);
+        container.innerHTML = '<p style="color: var(--mist); font-size: 0.8rem; padding: 20px;">Unable to load reviews right now.</p>';
+    }
+}
 /* ── NAV SCROLL ─────────────────────────────────────────────────────── */
 window.addEventListener('scroll', () => {
     document.getElementById('navbar').classList.toggle('solid', window.scrollY > 60);
