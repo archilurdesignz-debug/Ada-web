@@ -1211,16 +1211,30 @@ async function submitReview() {
     if (!comment) { alert('Please write a comment before submitting.'); return; }
     if (!_db) { alert('Database disconnected.'); return; }
 
-    const { error } = await _db.from('reviews').insert([{
+    const nowIso = new Date().toISOString();
+    const currentRevCount = (projectData?.revision_count || 0);
+
+    // 1. Insert into reviews table
+    const { error: revErr } = await _db.from('reviews').insert([{
         project_token: projectToken,
         client_name:   projectData?.client_name || 'Anonymous',
         rating:        selectedRating,
-        comment,
+        comment:       comment,
         location:      'NIGERIA',
-        status:        'pending'
+        status:        'pending',
+        created_at:    nowIso
     }]);
 
-    if (error) {
+    // 2. Log revision event timestamp to timeline history
+    await _db.from('project_revisions').insert([{
+        project_token:   projectToken,
+        revision_number: currentRevCount,
+        feedback_notes:  comment,
+        rating:          selectedRating,
+        created_at:      nowIso
+    }]);
+
+    if (revErr) {
         alert('Submission failed. Please try again.');
     } else {
         sessionStorage.setItem(`submitted_review_${projectToken}`, 'true');
@@ -1233,10 +1247,14 @@ async function submitReview() {
 
         const revUnlock = document.getElementById('reviewUnlockedContent');
         if (revUnlock) {
+            const formattedDate = new Date().toLocaleDateString('en-GB', {
+                day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+
             revUnlock.innerHTML = `
                 <h3 style="color:var(--gold);">Thank You</h3>
                 <p style="margin-top:15px; font-size:0.95rem; color:var(--mist); line-height: 1.8;">
-                    Your experience review has been recorded. Revisions and feedback channels are locked for completed phases.
+                    Your experience review has been recorded on <strong>${formattedDate}</strong>. Revisions and feedback channels are locked for completed phases.
                 </p>`;
         }
         
@@ -1247,6 +1265,9 @@ async function submitReview() {
             triggerBox.style.opacity = '0.6';
             triggerBox.style.cursor = 'not-allowed';
         }
+
+        // Refresh dynamic revision history display
+        loadRevisionTimelineHistory();
     }
 }
 
@@ -1395,32 +1416,83 @@ async function submitLockedReview() {
     }, 2000);
 }
 
-// ─── REVISION NOTICE CONTROL ──────────────────────────────────────────────────
-function toggleRevisionNotice() {
+// ─── REVISION HISTORY & TIMELINE ENGINE ──────────────────────────────────────
+async function loadRevisionTimelineHistory() {
     const noticeBox = document.getElementById('revisionNoticeContent');
-    const revCounterEl = document.getElementById('clientRevisionCounter');
-    const currentCount = projectData?.revision_count || 0; 
-    
-    if (!noticeBox) return;
-    
+    if (!noticeBox || !_db || !projectToken) return;
+
+    const { data: revList } = await _db
+        .from('project_revisions')
+        .select('*')
+        .eq('project_token', projectToken)
+        .order('created_at', { ascending: true }); // Timeline order
+
+    const currentCount = projectData?.revision_count || 0;
     const reviewAlreadySubmitted = sessionStorage.getItem(`submitted_review_${projectToken}`) || projectData?.review_approved;
     const isProtocolLocked = projectData && (projectData.overall_percent >= 100 && reviewAlreadySubmitted);
-    
-    if (noticeBox.style.display === 'none') {
-        if (isProtocolLocked) {
-            if (revCounterEl) revCounterEl.innerText = "PROTOCOL LOCKED";
-            noticeBox.innerHTML = `
-                <div style="text-align: center; padding: 10px 0; color: var(--accent);">
-                    <strong>Protocol Locked:</strong> You have already left a review. The revision box and architectural modifications are now permanently locked.
-                </div>`;
-        } else {
-            if (revCounterEl) revCounterEl.innerText = `REVISION COUNT (${currentCount}/3)`;
-            noticeBox.innerHTML = `
-                <strong>Revision Policy Notice:</strong> You have currently utilized 
-                <span style="color: var(--ink); font-weight: bold;">${currentCount}</span> 
-                of 3 complimentary revision phases assigned to this project. Please note that upon reaching the maximum allocation of 3/3 revisions, any subsequent modification requests will require a formal project scope adjustment, incurring a 10% increment on the initial aggregate project sum. Furthermore, each approved revision extension request will automatically extend the contract delivery timeline by an additional three (3) business days.
+
+    if (isProtocolLocked) {
+        let historyHtml = '';
+        if (revList && revList.length > 0) {
+            historyHtml = `
+                <div style="margin-top: 15px; border-top: 1px solid var(--rule); padding-top: 10px;">
+                    <strong style="color: var(--gold); display: block; margin-bottom: 8px;">Logged Revisions Timeline:</strong>
+                    <ul style="list-style: none; padding-left: 0; font-size: 0.8rem;">
             `;
+            revList.forEach(item => {
+                const dateStr = new Date(item.created_at).toLocaleDateString('en-GB', {
+                    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+                historyHtml += `
+                    <li style="margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.1);">
+                        <span style="color: var(--gold2); font-weight: 600;">Revision #${item.revision_number}</span> — 
+                        <span style="color: var(--mist);">${dateStr}</span>
+                        ${item.feedback_notes ? `<br><i style="color: #ddd;">"${item.feedback_notes}"</i>` : ''}
+                    </li>`;
+            });
+            historyHtml += `</ul></div>`;
         }
+
+        noticeBox.innerHTML = `
+            <div style="text-align: left; padding: 5px 0;">
+                <strong style="color: var(--gold);">Protocol Locked:</strong> You have left feedback for this phase. Further architectural modifications are now permanently locked.
+                ${historyHtml}
+            </div>`;
+    } else {
+        let historyHtml = '';
+        if (revList && revList.length > 0) {
+            historyHtml = `
+                <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                    <strong style="color: var(--gold); display: block; margin-bottom: 8px;">Revision Timeline Log:</strong>
+                    <ul style="list-style: none; padding-left: 0; font-size: 0.8rem;">
+            `;
+            revList.forEach(item => {
+                const dateStr = new Date(item.created_at).toLocaleDateString('en-GB', {
+                    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+                historyHtml += `
+                    <li style="margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.1);">
+                        <span style="color: var(--gold2); font-weight: 600;">Stage Revision #${item.revision_number}</span> — 
+                        <span style="color: var(--mist);">${dateStr}</span>
+                    </li>`;
+            });
+            historyHtml += `</ul></div>`;
+        }
+
+        noticeBox.innerHTML = `
+            <strong>Revision Policy Notice:</strong> You have currently utilized 
+            <span style="color: #fff; font-weight: bold;">${currentCount}</span> of 3 complimentary revision phases assigned to this project. Please note that upon reaching the maximum allocation of 3/3 revisions, any subsequent modification requests will require a formal project scope adjustment, incurring a 10% increment on the initial aggregate project sum. Furthermore, each approved revision extension request will automatically extend the contract delivery timeline by an additional three (3) business days.
+            ${historyHtml}
+        `;
+    }
+}
+
+function toggleRevisionNotice() {
+    const noticeBox = document.getElementById('revisionNoticeContent');
+    if (!noticeBox) return;
+
+    if (noticeBox.style.display === 'none' || !noticeBox.style.display) {
+        loadRevisionTimelineHistory();
         noticeBox.style.display = 'block';
     } else {
         noticeBox.style.display = 'none';
