@@ -2087,16 +2087,34 @@ async function loadPendingReviews() {
         return;
     }
 
-    inbox.innerHTML = data.map(rev => `
-        <div class="review-card">
-            <p style="font-size:0.65rem; color:var(--gold); letter-spacing:1px;">${rev.client_name} · ${rev.project_token} · ${'★'.repeat(rev.rating)}</p>
-            <p style="margin:10px 0; font-style:italic; font-size:0.9rem;">"${rev.comment}"</p>
-            <div class="mod-btns">
-                <button class="btn-mod" style="background:var(--success);" onclick="moderateReview('${rev.id}','approved')">Approve</button>
-                <button class="btn-mod" style="background:var(--danger);"  onclick="moderateReview('${rev.id}','rejected')">Reject</button>
+    inbox.innerHTML = data.map(rev => {
+        // Format creation timestamp
+        const formattedDate = rev.created_at 
+            ? new Date(rev.created_at).toLocaleDateString('en-GB', { 
+                day: 'numeric', 
+                month: 'short', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              })
+            : 'Date unknown';
+
+        return `
+            <div class="review-card">
+                <div style="display:flex; justify-style:space-between; align-items:center; margin-bottom:6px;">
+                    <p style="font-size:0.65rem; color:var(--gold); letter-spacing:1px; margin:0;">
+                        ${rev.client_name} · ${rev.project_token || 'Direct'} · ${'★'.repeat(rev.rating)}
+                    </p>
+                    <span style="font-size:0.6rem; color:#888;">${formattedDate}</span>
+                </div>
+                <p style="margin:10px 0; font-style:italic; font-size:0.9rem;">"${rev.comment}"</p>
+                <div class="mod-btns">
+                    <button class="btn-mod" style="background:var(--success);" onclick="moderateReview('${rev.id}','approved')">Approve</button>
+                    <button class="btn-mod" style="background:var(--danger);"  onclick="moderateReview('${rev.id}','rejected')">Reject</button>
+                </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 async function moderateReview(id, status) {
