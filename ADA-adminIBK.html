@@ -1502,12 +1502,13 @@ async function loadProjectFiles() {
 }
 
 // 2. Release New File to Submission Hub with Client Alerts
+// 2. Release New File to Submission Hub with Client Alerts
 async function uploadHubFile() {
     const projectToken = getVal('fileProjectSelector');
-    const fileName     = getVal('hubFileName');
-    const fileTag      = getVal('hubFileTag');
-    const driveUrl     = getVal('hubDriveUrl');
-    const stageLabel   = getVal('hubStageLabel');
+    const fileName      = getVal('hubFileName');
+    const fileTag       = getVal('hubFileTag');
+    const driveUrl      = getVal('hubDriveUrl');
+    const stageLabel    = getVal('hubStageLabel');
 
     if (!projectToken || !fileName || !driveUrl) {
         alert('Please select a project and fill in all required file details.');
@@ -1517,15 +1518,15 @@ async function uploadHubFile() {
     if (!_db) { alert('Supabase not connected.'); return; }
 
     try {
-        // Fetch client contact details
+        // Fetch client contact details using corrected column name: client_email
         const { data: project, error: projErr } = await _db
             .from('projects')
-            .select('client_name, email, phone')
+            .select('client_name, client_email, phone')
             .eq('token', projectToken)
             .maybeSingle();
 
         if (projErr || !project) {
-            alert('Error fetching client details for this project token.');
+            alert('Error fetching client details for this project token: ' + (projErr ? projErr.message : 'Project not found'));
             return;
         }
 
@@ -1552,10 +1553,10 @@ async function uploadHubFile() {
         // Refresh existing file list display
         loadProjectFiles();
 
-        // Trigger Notification Pipeline
-triggerClientHubAlert({
+        // Trigger Notification Pipeline (maps project.client_email cleanly)
+        triggerClientHubAlert({
             clientName:   project.client_name || 'Valued Client',
-            clientEmail:  project.email,
+            clientEmail:  project.client_email,
             clientPhone:  project.phone,
             fileName:     fileName,
             stageLabel:   stageLabel || 'General',
@@ -1569,7 +1570,7 @@ triggerClientHubAlert({
 
     } catch (err) {
         console.error('File release error:', err);
-        alert('An unexpected error occurred while releasing the file.');
+        alert('An unexpected error occurred while releasing the file: ' + err.message);
     }
 }
 
