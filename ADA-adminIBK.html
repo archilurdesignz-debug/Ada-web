@@ -2154,18 +2154,28 @@ async function handleAuditImageUpload(fileInputId, targetInputId, statusTextId) 
 
         const data = await response.json();
 
-       if (response.ok && data.url) {
-    // Strip any existing raw or dl parameters
-    let cleanUrl = data.url.replace(/([?&])raw=1/g, '').replace(/([?&])dl=[01][^#]*/g, '');
-    
-    // Choose the correct separator
-    let separator = cleanUrl.includes('?') ? '&' : '?';
-    let rawUrl = `${cleanUrl}${separator}raw=1`;
+        if (response.ok && data.url) {
+            // Strip any existing raw or dl parameters
+            let cleanUrl = data.url.replace(/([?&])raw=1/g, '').replace(/([?&])dl=[01][^#]*/g, '');
+            
+            // Choose the correct separator
+            let separator = cleanUrl.includes('?') ? '&' : '?';
+            let rawUrl = `${cleanUrl}${separator}raw=1`;
 
-    targetInput.value = rawUrl; 
-    statusText.innerText = "✅ Uploaded successfully and raw link attached!";
-    statusText.style.color = "#2ecc71";
+            targetInput.value = rawUrl; 
+            statusText.innerText = "✅ Uploaded successfully and raw link attached!";
+            statusText.style.color = "#2ecc71";
+        } else {
+            throw new Error(data.error || "Upload failed");
+        }
+    } catch (err) {
+        statusText.innerText = `❌ Error: ${err.message}`;
+        statusText.style.color = "#e74c3c";
+    } finally {
+        fileInput.value = ""; // Clear file buffer channel
+    }
 }
+
 // 2. Publish New Case Study to Supabase
 async function publishAuditCaseStudy() {
     const title       = getVal('auditCaseTitle');
