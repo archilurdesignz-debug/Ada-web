@@ -12,7 +12,11 @@
 <!-- Apple Touch Icon (iOS Safari) -->
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+    // Initialize EmailJS
+    emailjs.init("BxYPs2WHunB4bKb2w");
+</script>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root { --bg: #0c0b09; --gold: #b5a898; --white: #f5f2ec; --glass: rgba(255,255,255,0.05); --success: #2e7d52; --danger: #7d2e2e; }
@@ -560,40 +564,40 @@
             <div id="fileManager" style="display:none;">
                 <h3>Add New File</h3>
                 <div class="file-row">
-                    <div>
-                        <label>Stage Label</label>
-                        <select id="newFileStage"><option value="Submission">Submission</option></select>
-                    </div>
-                    <div>
-                        <label>File Name</label>
-                        <input type="text" id="newFileName" placeholder="e.g. Schematic Floor Plans Rev A">
-                    </div>
-                    <div>
-                        <label>File Type</label>
-                        <select id="newFileTag">
-                            <option value="PDF">PDF</option>
-                            <option value="DWG / PDF">DWG / PDF</option>
-                            <option value="XLSX">XLSX</option>
-                            <option value="ZIP">ZIP</option>
-                            <option value="MP4">MP4</option>
-                            <option value="PNG">PNG</option>
-                            <option value="RAW FILE">RAW FILE</option>
-                            <option value="OTHERS">OTHERS</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Release Status</label>
-                        <select id="newFileLocked">
-                            <option value="true">Locked (hidden)</option>
-                            <option value="false">Released (visible)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Google Drive Link</label>
-                    <input type="url" id="newFileUrl" placeholder="https://drive.google.com/...">
-                </div>
-                <button class="btn-action" style="max-width:300px;" onclick="addProjectFile()">Add File to Hub</button>
+    <div>
+        <label>Stage Label</label>
+        <select id="hubStageLabel"><option value="Submission">Submission</option></select>
+    </div>
+    <div>
+        <label>File Name</label>
+        <input type="text" id="hubFileName" placeholder="e.g. Schematic Floor Plans Rev A">
+    </div>
+    <div>
+        <label>File Type</label>
+        <select id="hubFileTag">
+            <option value="PDF">PDF</option>
+            <option value="DWG / PDF">DWG / PDF</option>
+            <option value="XLSX">XLSX</option>
+            <option value="ZIP">ZIP</option>
+            <option value="MP4">MP4</option>
+            <option value="PNG">PNG</option>
+            <option value="RAW FILE">RAW FILE</option>
+            <option value="OTHERS">OTHERS</option>
+        </select>
+    </div>
+    <div>
+        <label>Release Status</label>
+        <select id="newFileLocked">
+            <option value="true">Locked (hidden)</option>
+            <option value="false">Released (visible)</option>
+        </select>
+    </div>
+</div>
+<div class="form-group">
+    <label>Google Drive Link</label>
+    <input type="url" id="hubDriveUrl" placeholder="https://drive.google.com/...">
+</div>
+<button class="btn-action" style="max-width:300px;" onclick="uploadHubFile()">Add File to Hub</button>
                 <div class="existing-files">
                     <h3>Current Files for This Project</h3>
                     <div id="existingFilesList">
