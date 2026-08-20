@@ -12,10 +12,10 @@
 <!-- Apple Touch Icon (iOS Safari) -->
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
     // Initialize EmailJS
-    emailjs.init("BxYPs2WHunB4bKb2w");
+    emailjs.init({ publicKey: "BxYPs2WHunB4bKb2w" });
 </script>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
@@ -1579,19 +1579,20 @@ function triggerClientHubAlert(details) {
 
     // Automatic Email via EmailJS (if configured)
     if (details.clientEmail && typeof emailjs !== 'undefined') {
-        emailjs.send('service_7dd15om', 'template_hub_release', {
-            to_name:       details.clientName,
-            to_email:      details.clientEmail,
-            file_name:     details.fileName,
-            stage_label:   details.stageLabel,
-            tracker_link:  trackerUrl,
-            download_link: details.driveUrl
-        }).then(() => {
-            console.log('✓ Email notification sent to client.');
-        }).catch(err => {
-            console.warn('EmailJS alert error:', err);
-        });
-    }
+    emailjs.send('service_7dd15om', 'template_hub_release', {
+        to_name:       details.clientName,
+        to_email:      details.clientEmail,
+        file_name:     details.fileName,
+        stage_label:   details.stageLabel,
+        tracker_link:  trackerUrl,
+        download_link: details.driveUrl
+    }).then(() => {
+        console.log('✓ Email notification sent to client.');
+    }).catch(err => {
+        console.warn('EmailJS alert error:', err);
+        alert('⚠ Heads up: the automatic email to the client failed to send. You may want to notify them manually.');
+    });
+}
 
     // WhatsApp Message Body
     const waMessage = `*NEW FILE RELEASED — ADA ARCHILURDESIGNZ*\n\n` +
