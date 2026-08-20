@@ -400,6 +400,8 @@
                 <div class="form-group"><label>Client Name</label><input type="text" id="newClientName"></div>
                 <div class="form-group"><label>Client Email</label><input type="email" id="newClientEmail"></div>
                 <div class="form-group"><label>Project Title</label><input type="text" id="newProjTitle"></div>
+                <div class="field"><label>CLIENT PHONE / WHATSAPP</label><input type="tel" id="initClientPhone" placeholder="e.g. 08138580315 or +234..." required>
+</div>
             </div>
             <div class="form-group"><label>Lead Architect</label><input type="text" id="newLeadArch" value="Arc. Ibukunoluwa"></div>
             <div class="form-group">
@@ -1325,6 +1327,7 @@ async function createNewProject() {
         token,
         client_name:    getVal('newClientName'),
         client_email:   getVal('newClientEmail'),
+        phone:       getVal('initClientPhone'),
         project_title:  getVal('newProjTitle'),
         lead_architect: getVal('newLeadArch'),
         deposit_paid:   depositPaid,
@@ -1544,7 +1547,7 @@ async function uploadHubFile() {
         loadProjectFiles();
 
         // Trigger Notification Pipeline
-        triggerClientHubAlert({
+triggerClientHubAlert({
             clientName:   project.client_name || 'Valued Client',
             clientEmail:  project.email,
             clientPhone:  project.phone,
@@ -1564,29 +1567,9 @@ async function uploadHubFile() {
     }
 }
 
-// 3. Client Alert Engine (EmailJS + WhatsApp Prompt)
+// 3. Client Alert Engine (EmailJS + WhatsApp Dual-Option Prompt)
 function triggerClientHubAlert(details) {
     const trackerUrl = `https://archilurdesignz.com/tracker?token=${details.projectToken}`;
-
-    // WhatsApp Message Body
-    const waMessage = `*NEW FILE RELEASED — ADA ARCHILURDESIGNZ*\n\n` +
-                      `Hello *${details.clientName}*,\n\n` +
-                      `A new document/drawing has been uploaded to your project Submission Hub:\n\n` +
-                      `📄 *File Name:* ${details.fileName}\n` +
-                      `📌 *Stage:* ${details.stageLabel}\n\n` +
-                      `🔗 *Access Your Dashboard:* ${trackerUrl}\n` +
-                      `📁 *Direct Link:* ${details.driveUrl}\n\n` +
-                      `Thank you for working with ADA!`;
-
-    // Phone Sanitizer
-    let cleanPhone = (details.clientPhone || '').replace(/[^0-9]/g, '');
-    if (cleanPhone.startsWith('0')) {
-        cleanPhone = '234' + cleanPhone.substring(1);
-    }
-
-    const waUrl = cleanPhone 
-        ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waMessage)}`
-        : `https://wa.me/?text=${encodeURIComponent(waMessage)}`;
 
     // Automatic Email via EmailJS (if configured)
     if (details.clientEmail && typeof emailjs !== 'undefined') {
@@ -1604,12 +1587,40 @@ function triggerClientHubAlert(details) {
         });
     }
 
-    // Prompt Admin for WhatsApp Notification
-    if (confirm(`Send WhatsApp alert to ${details.clientName} (${cleanPhone || 'No Phone'})?`)) {
-        window.open(waUrl, '_blank');
+    // WhatsApp Message Body
+    const waMessage = `*NEW FILE RELEASED — ADA ARCHILURDESIGNZ*\n\n` +
+                      `Hello *${details.clientName}*,\n\n` +
+                      `A new document/drawing has been uploaded to your project Submission Hub:\n\n` +
+                      `📄 *File Name:* ${details.fileName}\n` +
+                      `📌 *Stage:* ${details.stageLabel}\n\n` +
+                      `🔗 *Access Your Dashboard:* ${trackerUrl}\n` +
+                      `📁 *Direct Link:* ${details.driveUrl}\n\n` +
+                      `Thank you for working with ADA!`;
+
+    // Dual-Option Phone Resolver (Database Number + Manual Override)
+    let rawPhone = details.clientPhone ? String(details.clientPhone).trim() : '';
+
+    const useStoredPhone = rawPhone && confirm(`Client registered phone is: ${rawPhone}\nClick OK to send WhatsApp alert to this number, or Cancel to enter a different number.`);
+
+    if (!useStoredPhone) {
+        const customPhone = prompt(`Enter alternative WhatsApp number for ${details.clientName}:`, rawPhone);
+        if (customPhone) rawPhone = customPhone.trim();
+    }
+
+    let cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+
+    if (cleanPhone) {
+        if (cleanPhone.startsWith('0')) {
+            cleanPhone = '234' + cleanPhone.substring(1);
+        }
+
+        const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waMessage)}`;
+
+        if (confirm(`Open WhatsApp alert chat for ${details.clientName} (+${cleanPhone})?`)) {
+            window.open(waUrl, '_blank');
+        }
     }
 }
-
 async function addProjectFile() {
     const token = getVal('fileProjectSelector');
     if (!token) { alert('Select a project first.'); return; }
