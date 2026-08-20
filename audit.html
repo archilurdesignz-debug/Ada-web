@@ -422,46 +422,9 @@ footer {
     <h2 class="section-heading">Audit Case Studies</h2>
     <p class="section-sub">Explore real-world examples of issues identified during past reviews</p>
 
-    <!-- Accordion 1 -->
-    <div class="accordion-item active">
-        <div class="accordion-head" onclick="toggleAccordion(this)">
-            <span>Lekki Residential Duplex — Spatial Circulation & Flow</span>
-            <span>+</span>
-        </div>
-        <div class="accordion-body">
-            <div class="compare-panel">
-                <div class="compare-label">Original Submission</div>
-                <div class="compare-plan-box">Un-audited original floor plan</div>
-                <p style="font-size:0.72rem; color:var(--mist);">Overlapping door swings created awkward circulation dead space around the main corridor.</p>
-            </div>
-            <div class="compare-panel">
-                <div class="compare-label">ADA Marked-Up Solution</div>
-                <div class="compare-plan-box" style="border-color:var(--gold);">Annotated vector blueprint</div>
-                <div class="metric-row"><span>Usable Floor Area</span><span>+12% Gain</span></div>
-                <div class="metric-row"><span>Circulation Flow</span><span>Optimized</span></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Accordion 2 -->
-    <div class="accordion-item">
-        <div class="accordion-head" onclick="toggleAccordion(this)">
-            <span>Victoria Island Commercial Office — Ventilation & Daylight</span>
-            <span>+</span>
-        </div>
-        <div class="accordion-body">
-            <div class="compare-panel">
-                <div class="compare-label">Original Submission</div>
-                <div class="compare-plan-box">Inadequate window apertures</div>
-                <p style="font-size:0.72rem; color:var(--mist);">Excessive reliance on artificial cooling and lighting due to deep unventilated core layout.</p>
-            </div>
-            <div class="compare-panel">
-                <div class="compare-label">ADA Marked-Up Solution</div>
-                <div class="compare-plan-box" style="border-color:var(--gold);">Internal light wells overlay</div>
-                <div class="metric-row"><span>Natural Lighting</span><span>+45% Gain</span></div>
-                <div class="metric-row"><span>Cooling Load</span><span>Reduced</span></div>
-            </div>
-        </div>
+    <!-- Dynamic Container for Supabase Data -->
+    <div id="dynamicAuditCaseStudiesContainer">
+        <p style="text-align: center; color: var(--mist); font-size: 0.8rem;">Loading case studies...</p>
     </div>
 </section>
 
@@ -481,6 +444,69 @@ try {
     console.log('Supabase init skipped');
 }
 
+/* ── UTILITY: CLEAN DROPBOX RAW URL ─────────────────────────────────── */
+function cleanDropboxRawUrl(url) {
+    if (!url) return '';
+    // Safely strip duplicate raw parameters and trailing dl tags
+    let clean = url.replace(/([?&])raw=1/g, '').replace(/([?&])dl=[01]/g, '');
+    let separator = clean.includes('?') ? '&' : '?';
+    return `${clean}${separator}raw=1`;
+}
+
+/* ── FETCH & RENDER AUDIT CASE STUDIES ──────────────────────────────── */
+async function loadLiveAuditCaseStudies() {
+    const container = document.getElementById('dynamicAuditCaseStudiesContainer');
+    if (!container || !_db) return;
+
+    try {
+        const { data, error } = await _db
+            .from('audit_showcase')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error || !data || data.length === 0) {
+            container.innerHTML = `<p style="text-align:center; color: var(--mist); font-size: 0.8rem;">No published audit case studies available yet.</p>`;
+            return;
+        }
+
+        container.innerHTML = data.map((item, index) => {
+            const unAuditedUrl = cleanDropboxRawUrl(item.un_audited_image_url);
+            const auditedUrl = cleanDropboxRawUrl(item.audited_image_url);
+            const isActive = index === 0 ? 'active' : '';
+
+            return `
+                <div class="accordion-item ${isActive}">
+                    <div class="accordion-head" onclick="toggleAccordion(this)">
+                        <span>${item.project_title}</span>
+                        <span>${isActive ? '−' : '+'}</span>
+                    </div>
+                    <div class="accordion-body">
+                        <div class="compare-panel">
+                            <div class="compare-label">Original Submission</div>
+                            <div class="compare-plan-box" style="height: 220px; overflow: hidden; background: #000; border: 1px dashed rgba(201,191,176,0.2);">
+                                <img src="${unAuditedUrl}" alt="Original Plan" style="width: 100%; height: 100%; object-fit: contain;">
+                            </div>
+                        </div>
+                        <div class="compare-panel">
+                            <div class="compare-label">ADA Marked-Up Solution</div>
+                            <div class="compare-plan-box" style="height: 220px; overflow: hidden; background: #000; border: 1px solid var(--gold);">
+                                <img src="${auditedUrl}" alt="ADA Audited Plan" style="width: 100%; height: 100%; object-fit: contain;">
+                            </div>
+                            <div class="metric-row"><span>Circulation Improvement</span><span>${item.circulation_improvement || '+0%'}</span></div>
+                            <div class="metric-row"><span>Ventilation Gain</span><span>${item.ventilation_gain || '+0%'}</span></div>
+                            <div class="metric-row"><span>Structural Cost Savings</span><span>${item.structural_cost_savings || '₦0'}</span></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+    } catch (err) {
+        console.error("Error fetching audit case studies:", err);
+        container.innerHTML = `<p style="text-align:center; color: var(--mist); font-size: 0.8rem;">Unable to load case studies at this time.</p>`;
+    }
+}
+
 /* ── TIER SELECTOR FUNCTION ──────────────────────────────────────────── */
 function selectTier(tierName, element) {
     document.querySelectorAll('.tier-card').forEach(card => {
@@ -496,6 +522,12 @@ function selectTier(tierName, element) {
 function toggleAccordion(head) {
     const item = head.parentElement;
     item.classList.toggle('active');
+    
+    // Toggle the +/- icon dynamically
+    const icon = head.querySelector('span:last-child');
+    if (icon) {
+        icon.textContent = item.classList.contains('active') ? '−' : '+';
+    }
 }
 
 /* ── AUDIT SUBMISSION & WHATSAPP REDIRECT ────────────────────────────── */
@@ -510,7 +542,7 @@ async function handleAuditSubmit(e) {
     const driveLink    = document.getElementById('aDriveLink').value.trim();
     const tier         = document.getElementById('selectedTier').value;
 
-    // 1. Save to Supabase (if available)
+    // 1. Save to Supabase
     try {
         if (_db) {
             await _db.from('audit_submissions').insert([{
@@ -545,6 +577,11 @@ async function handleAuditSubmit(e) {
     // 3. Open WhatsApp Direct Link
     window.open(waUrl, '_blank');
 }
+
+/* ── PAGE INITIALIZATION ─────────────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', () => {
+    loadLiveAuditCaseStudies();
+});
 </script>
 </body>
 </html>
