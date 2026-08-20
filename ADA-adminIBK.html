@@ -1239,7 +1239,7 @@ function recalcOverallProgress() {
     setVal('overallProgress', Math.round(sum / rows.length));
 }
     
-    function addTrackRow(label = '', progress = 0) {
+function addTrackRow(label = '', progress = 0) {
     const container = document.getElementById('dynamicTracksContainer');
     if (!container) return;
 
@@ -1255,9 +1255,7 @@ function recalcOverallProgress() {
                 <input type="number" class="track-percent" value="${progress}" min="0" max="100" placeholder="0" oninput="recalcOverallProgress()">
             </div>
             <div>
-                onclick="document.getElementById('${rowId}').remove(); recalcOverallProgress()" style="margin-top: 18px;">
-                    Remove
-                </button>
+                <button type="button" class="btn-small btn-remove" onclick="document.getElementById('${rowId}').remove(); recalcOverallProgress()" style="margin-top: 18px;">Remove</button>
             </div>
         </div>
     `;
