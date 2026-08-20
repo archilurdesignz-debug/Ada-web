@@ -1280,7 +1280,7 @@ async function createNewProject() {
     const token = generateToken();
     const depositPaid = parseFloat(getVal('newDepositPaid')) || 0;
     const totalSum    = parseFloat(getVal('newTotalSum'))    || 0;
-    const dashboardUrl = `${window.location.origin}/ada-tracker.html?token=${token}`;
+    const dashboardUrl = `https://www.archilurdesignz.com/ada-tracker?token=${token}`;
     const currencySelected = getVal('newCurrencyMode');
 
     const dollarServiceTermsTemplate = {
@@ -1575,7 +1575,7 @@ triggerClientHubAlert({
 
 // 3. Client Alert Engine (EmailJS + WhatsApp Dual-Option Prompt)
 function triggerClientHubAlert(details) {
-    const trackerUrl = `https://archilurdesignz.com/tracker?token=${details.projectToken}`;
+    const trackerUrl = `https://www.archilurdesignz.com/ada-tracker?token=${details.projectToken}`;
 
     // Automatic Email via EmailJS (if configured)
     if (details.clientEmail && typeof emailjs !== 'undefined') {
@@ -3066,7 +3066,7 @@ function generateReceiptShareLink() {
         return;
     }
     
-    const receiptUrl = window.location.origin + '/receipt.html?id=' + activelySelectedInvoiceRow.id;
+    const receiptUrl = `https://www.archilurdesignz.com/receipt?id=${activelySelectedInvoiceRow.id}`;
     
     document.getElementById('lblGeneratedReceiptUrl').value = receiptUrl;
     document.getElementById('receiptOutputUrlWrapper').style.display = 'block';
