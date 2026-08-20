@@ -464,7 +464,7 @@
 
                 <div class="form-group">
                     <label>Overall Project Progress (%)</label>
-                    <input type="number" id="overallProgress" min="0" max="100" placeholder="0">
+                    <input type="number" id="overallProgress" min="0" max="100" placeholder="0" readonly style="color:#666; cursor:not-allowed;">
                     <p style="font-size:0.6rem; color:#555; margin-top:4px; letter-spacing:1px;">Master completion percentage for client dashboard.</p>
                 </div>
 
@@ -1229,7 +1229,17 @@ async function handleStoreGalleryUpload() {
 }
 
 // ─── TRACK MODULE PARAMETERS GENERATION ───────────────────────────────────────
-function addTrackRow(label = '', progress = 0) {
+function recalcOverallProgress() {
+    const rows = document.querySelectorAll('#dynamicTracksContainer > div');
+    if (!rows.length) { setVal('overallProgress', 0); return; }
+    let sum = 0;
+    rows.forEach(row => {
+        sum += parseInt(row.querySelector('.track-percent')?.value) || 0;
+    });
+    setVal('overallProgress', Math.round(sum / rows.length));
+}
+    
+    function addTrackRow(label = '', progress = 0) {
     const container = document.getElementById('dynamicTracksContainer');
     if (!container) return;
 
@@ -1242,10 +1252,10 @@ function addTrackRow(label = '', progress = 0) {
             </div>
             <div>
                 <label>Progress (%)</label>
-                <input type="number" class="track-percent" value="${progress}" min="0" max="100" placeholder="0">
+                <input type="number" class="track-percent" value="${progress}" min="0" max="100" placeholder="0" oninput="recalcOverallProgress()">
             </div>
             <div>
-                <button type="button" class="btn-small btn-remove" onclick="document.getElementById('${rowId}').remove()" style="margin-top: 18px;">
+                onclick="document.getElementById('${rowId}').remove(); recalcOverallProgress()" style="margin-top: 18px;">
                     Remove
                 </button>
             </div>
@@ -1419,6 +1429,7 @@ async function loadProjectDetails() {
             tracks.forEach(t => { addTrackRow(t.heading, t.percent); });
         }
     }
+    recalcOverallProgress();
     loadProjectTerms(data);
 }
 
