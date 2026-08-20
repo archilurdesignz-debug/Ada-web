@@ -13,6 +13,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
     // Initialize EmailJS
     emailjs.init({ publicKey: "BxYPs2WHunB4bKb2w" });
@@ -1578,24 +1579,27 @@ async function uploadHubFile() {
 function triggerClientHubAlert(details) {
     const trackerUrl = `https://www.archilurdesignz.com/ada-tracker?token=${details.projectToken}`;
 
-    // Automatic Email via EmailJS (if configured)
+    // Automatic Email via EmailJS
     if (details.clientEmail && typeof emailjs !== 'undefined') {
-    emailjs.send('service_7dd15om', 'template_hub_release', {
-        to_name:       details.clientName,
-        to_email:      details.clientEmail,
-        file_name:     details.fileName,
-        stage_label:   details.stageLabel,
-        tracker_link:  trackerUrl,
-        download_link: details.driveUrl
-    }).then(() => {
-        console.log('✓ Email notification sent to client.');
-    }).catch(err => {
-        console.warn('EmailJS alert error:', err);
-        alert('⚠ Heads up: the automatic email to the client failed to send. You may want to notify them manually.');
-    });
-}
+        emailjs.send('service_7dd15om', 'template_hub_release', {
+            to_name:       details.clientName,
+            to_email:      details.clientEmail,
+            file_name:     details.fileName,
+            stage_label:   details.stageLabel,
+            tracker_link:  trackerUrl,
+            download_link: details.driveUrl
+        }).then(() => {
+            console.log('✓ Email notification sent to client.');
+            alert('✓ Direct email notification sent to ' + details.clientEmail);
+        }).catch(err => {
+            console.warn('EmailJS alert error:', err);
+            alert('⚠ Heads up: Automatic email failed. Please check EmailJS template/service keys.');
+        });
+    } else if (!details.clientEmail) {
+        console.warn('No client email provided for this project.');
+    }
 
-    // WhatsApp Message Body
+    // WhatsApp Message Execution
     const waMessage = `*NEW FILE RELEASED — ADA ARCHILURDESIGNZ*\n\n` +
                       `Hello *${details.clientName}*,\n\n` +
                       `A new document/drawing has been uploaded to your project Submission Hub:\n\n` +
@@ -1605,9 +1609,7 @@ function triggerClientHubAlert(details) {
                       `📁 *Direct Link:* ${details.driveUrl}\n\n` +
                       `Thank you for working with ADA!`;
 
-    // Dual-Option Phone Resolver (Database Number + Manual Override)
     let rawPhone = details.clientPhone ? String(details.clientPhone).trim() : '';
-
     const useStoredPhone = rawPhone && confirm(`Client registered phone is: ${rawPhone}\nClick OK to send WhatsApp alert to this number, or Cancel to enter a different number.`);
 
     if (!useStoredPhone) {
