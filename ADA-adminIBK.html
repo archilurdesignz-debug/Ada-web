@@ -1453,6 +1453,8 @@ async function updateProject() {
 }
 
 // ─── SUBMISSION HUB FILE MANAGEMENT ───────────────────────────────────────────
+
+// 1. Load Files for Selected Project
 async function loadProjectFiles() {
     const token = getVal('fileProjectSelector');
     document.getElementById('fileManager').style.display = token ? 'block' : 'none';
@@ -1488,6 +1490,124 @@ async function loadProjectFiles() {
             </div>
         </div>
     `).join('');
+}
+
+// 2. Release New File to Submission Hub with Client Alerts
+async function uploadHubFile() {
+    const projectToken = getVal('fileProjectSelector');
+    const fileName     = getVal('hubFileName');
+    const fileTag      = getVal('hubFileTag');
+    const driveUrl     = getVal('hubDriveUrl');
+    const stageLabel   = getVal('hubStageLabel');
+
+    if (!projectToken || !fileName || !driveUrl) {
+        alert('Please select a project and fill in all required file details.');
+        return;
+    }
+
+    if (!_db) { alert('Supabase not connected.'); return; }
+
+    try {
+        // Fetch client contact details
+        const { data: project, error: projErr } = await _db
+            .from('projects')
+            .select('client_name, email, phone')
+            .eq('token', projectToken)
+            .maybeSingle();
+
+        if (projErr || !project) {
+            alert('Error fetching client details for this project token.');
+            return;
+        }
+
+        const payload = {
+            project_token: projectToken,
+            file_name:     fileName,
+            file_tag:      fileTag || 'DOCUMENT',
+            drive_url:     driveUrl,
+            stage_label:   stageLabel || 'General',
+            released_date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+            created_at:    new Date().toISOString(),
+            locked:        false
+        };
+
+        const { error: insertErr } = await _db.from('project_files').insert([payload]);
+
+        if (insertErr) {
+            alert('Error releasing file: ' + insertErr.message);
+            return;
+        }
+
+        alert('✓ File successfully released to Submission Hub!');
+
+        // Refresh existing file list display
+        loadProjectFiles();
+
+        // Trigger Notification Pipeline
+        triggerClientHubAlert({
+            clientName:   project.client_name || 'Valued Client',
+            clientEmail:  project.email,
+            clientPhone:  project.phone,
+            fileName:     fileName,
+            stageLabel:   stageLabel || 'General',
+            driveUrl:     driveUrl,
+            projectToken: projectToken
+        });
+
+        // Clear Form Input Fields
+        setVal('hubFileName', '');
+        setVal('hubDriveUrl', '');
+
+    } catch (err) {
+        console.error('File release error:', err);
+        alert('An unexpected error occurred while releasing the file.');
+    }
+}
+
+// 3. Client Alert Engine (EmailJS + WhatsApp Prompt)
+function triggerClientHubAlert(details) {
+    const trackerUrl = `https://archilurdesignz.com/tracker?token=${details.projectToken}`;
+
+    // WhatsApp Message Body
+    const waMessage = `*NEW FILE RELEASED — ADA ARCHILURDESIGNZ*\n\n` +
+                      `Hello *${details.clientName}*,\n\n` +
+                      `A new document/drawing has been uploaded to your project Submission Hub:\n\n` +
+                      `📄 *File Name:* ${details.fileName}\n` +
+                      `📌 *Stage:* ${details.stageLabel}\n\n` +
+                      `🔗 *Access Your Dashboard:* ${trackerUrl}\n` +
+                      `📁 *Direct Link:* ${details.driveUrl}\n\n` +
+                      `Thank you for working with ADA!`;
+
+    // Phone Sanitizer
+    let cleanPhone = (details.clientPhone || '').replace(/[^0-9]/g, '');
+    if (cleanPhone.startsWith('0')) {
+        cleanPhone = '234' + cleanPhone.substring(1);
+    }
+
+    const waUrl = cleanPhone 
+        ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waMessage)}`
+        : `https://wa.me/?text=${encodeURIComponent(waMessage)}`;
+
+    // Automatic Email via EmailJS (if configured)
+    if (details.clientEmail && typeof emailjs !== 'undefined') {
+        emailjs.send('service_7dd15om', 'template_hub_release', {
+            to_name:       details.clientName,
+            to_email:      details.clientEmail,
+            file_name:     details.fileName,
+            stage_label:   details.stageLabel,
+            tracker_link:  trackerUrl,
+            download_link: details.driveUrl
+        }).then(() => {
+            console.log('✓ Email notification sent to client.');
+        }).catch(err => {
+            console.warn('EmailJS alert error:', err);
+        });
+    }
+
+    // Prompt Admin for WhatsApp Notification
+    if (confirm(`Send WhatsApp alert to ${details.clientName} (${cleanPhone || 'No Phone'})?`)) {
+        window.open(waUrl, '_blank');
+    }
 }
 
 async function addProjectFile() {
