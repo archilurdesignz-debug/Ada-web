@@ -1073,15 +1073,42 @@ function populateDashboard(d) {
     }
 
     // Countdown Logic Initialization
-    const finalDeadline = d.deadline || d.proj_deadline;
-    const cDownBar = document.getElementById('countdownBar');
+  const finalDeadline = d.deadline || d.proj_deadline;
+const countdownStatus = d.countdown_status || 'active';
+const cDownBar = document.getElementById('countdownBar');
 
-    if (finalDeadline) {
-        if (cDownBar) cDownBar.style.display = 'grid';
-        startCountdown(finalDeadline);
-    } else {
-        if (cDownBar) cDownBar.style.display = 'none';
+if (finalDeadline && countdownStatus === 'active') {
+    if (cDownBar) cDownBar.style.display = 'grid';
+    startCountdown(finalDeadline);
+} else if (finalDeadline && countdownStatus === 'paused') {
+    if (cDownBar) cDownBar.style.display = 'grid';
+    // Show frozen state — display remaining time without ticking
+    const diff = new Date(finalDeadline).getTime() - Date.now();
+    if (diff > 0) {
+        const d2 = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        const el = id => document.getElementById(id);
+        if (el('cdDays'))  el('cdDays').textContent  = String(d2).padStart(2, '0');
+        if (el('cdHours')) el('cdHours').textContent = String(h).padStart(2, '0');
+        if (el('cdMins'))  el('cdMins').textContent  = String(m).padStart(2, '0');
+        if (el('cdSecs'))  el('cdSecs').textContent  = String(s).padStart(2, '0');
     }
+    // Add a visual "PAUSED" indicator
+    const label = document.querySelector('.countdown-label');
+    if (label) label.textContent = 'Project Deadline — Paused';
+} else if (finalDeadline && countdownStatus === 'completed') {
+    if (cDownBar) cDownBar.style.display = 'grid';
+    ['cdDays','cdHours','cdMins','cdSecs'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '00';
+    });
+    const units = document.querySelector('.countdown-units');
+    if (units) units.innerHTML = '<span class="countdown-expired">PROJECT COMPLETED</span>';
+} else {
+    if (cDownBar) cDownBar.style.display = 'none';
+}
 
     const loadScreen = document.getElementById('loadingScreen');
     const dashMain   = document.getElementById('dashboardMain');
