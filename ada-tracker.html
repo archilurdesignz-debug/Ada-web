@@ -812,6 +812,16 @@ let projectData  = null;
 let selectedRating = 5;
 let hubFiles = [];
 
+async function hasClientReviewed(token) {
+    if (!_db || !token) return false;
+    const { data } = await _db
+        .from('reviews')
+        .select('id')
+        .eq('project_token', token)
+        .limit(1);
+    return data && data.length > 0;
+}
+    
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 async function initDashboard() {
     const params = new URLSearchParams(window.location.search);
@@ -940,7 +950,7 @@ function setStageEl(id, status) {
 }
 
 // ─── POPULATE DASHBOARD ───────────────────────────────────────────────────────
-function populateDashboard(d) {
+async function populateDashboard(d) {
     if (!d) return;
     document.title = `${d.project_title || 'Project'} | ADA Tracker`;
 
@@ -1018,6 +1028,7 @@ function populateDashboard(d) {
     }
 
     // Interactive Completion Reviews Block
+        // Interactive Completion Reviews Block
     if (d.overall_percent >= 100) {
         const revArea   = document.getElementById('reviewArea');
         const revLock   = document.getElementById('reviewLockedContent');
@@ -1027,7 +1038,7 @@ function populateDashboard(d) {
         if (revLock) revLock.style.display = 'none';
 
         if (revUnlock) {
-            const reviewAlreadySubmitted = sessionStorage.getItem(`submitted_review_${d.token}`) || d.review_approved;
+            const reviewAlreadySubmitted = await hasClientReviewed(d.token);
 
             if (reviewAlreadySubmitted) {
                 revUnlock.innerHTML = `
@@ -1054,14 +1065,13 @@ function populateDashboard(d) {
             revUnlock.style.display = 'block';
         }
     }
-
     // Revision Protocols
     const activeRevisions = d.revision_count || 0;
     const revCounterEl = document.getElementById('clientRevisionCounter');
     const triggerBox   = document.getElementById('revisionDropdownTrigger');
 
     if (revCounterEl) {
-        const reviewAlreadySubmitted = sessionStorage.getItem(`submitted_review_${d.token}`) || d.review_approved;
+        const reviewAlreadySubmitted = await hasClientReviewed(d.token);
 
         if (d.overall_percent >= 100 && reviewAlreadySubmitted) {
             revCounterEl.innerText = 'PROTOCOL LOCKED';
@@ -1455,7 +1465,7 @@ async function loadRevisionTimelineHistory() {
         .order('created_at', { ascending: true }); // Timeline order
 
     const currentCount = projectData?.revision_count || 0;
-    const reviewAlreadySubmitted = sessionStorage.getItem(`submitted_review_${projectToken}`) || projectData?.review_approved;
+    const reviewAlreadySubmitted = await hasClientReviewed(d.token);
     const isProtocolLocked = projectData && (projectData.overall_percent >= 100 && reviewAlreadySubmitted);
 
     if (isProtocolLocked) {
