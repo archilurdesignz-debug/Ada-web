@@ -1457,6 +1457,39 @@ async function updateProject() {
         custom_tracks: customTracksCompiledArray
     };
 
+    async function autoSaveTimeline() {
+    const token = getVal('projectSelector');
+    if (!token || !_db) return;
+
+    const status = document.getElementById('countdownStatus')?.value || 'active';
+    const deadlineISO = getDeadlineISO();
+
+    const payload = {
+        deadline: deadlineISO,
+        countdown_status: status
+    };
+
+    // When pausing: save how many ms were left
+    if (status === 'paused' && deadlineISO) {
+        const remaining = new Date(deadlineISO).getTime() - Date.now();
+        if (remaining > 0) payload.paused_remaining_ms = remaining;
+    }
+
+    // When resuming from pause: shift deadline forward
+    if (status === 'active') {
+        const { data: proj } = await _db.from('projects').select('countdown_status, paused_remaining_ms').eq('token', token).maybeSingle();
+        if (proj && proj.countdown_status === 'paused' && proj.paused_remaining_ms > 0) {
+            const newDeadline = new Date(Date.now() + proj.paused_remaining_ms);
+            payload.deadline = newDeadline.toISOString();
+            payload.paused_remaining_ms = null;
+            setVal('projectDeadline', newDeadline.toISOString().slice(0, 16));
+        }
+    }
+
+    const { error } = await _db.from('projects').update(payload).eq('token', token);
+    if (error) console.error("Timeline save failed:", error.message);
+}
+
     if (!_db) { alert('Supabase not connected.'); return; }
 
     const { error } = await _db
