@@ -29,6 +29,12 @@ const RSS_FEEDS = [
   { name: 'IJNIA (NIA Journal)', url: 'https://ijnia.org/index.php/journal/gateway/plugin/RssGatewayPlugin/rss', region: 'nigeria' },
   { name: 'ARCON', url: 'https://arconigeria.gov.ng/feed/', region: 'nigeria' },
   { name: 'ARCON Announcements', url: 'https://arconigeria.gov.ng/announcements/feed/', region: 'nigeria' },
+  { name: 'Vanguard Homes & Property', url: 'https://www.vanguardngr.com/category/homes-property/feed/', region: 'nigeria' },
+  // Google News RSS needs no API key and aggregates across dozens of outlets —
+  // this tends to surface far more Nigerian coverage day-to-day than the
+  // smaller institutional feeds above manage on their own.
+  { name: 'Google News (Nigeria architecture)', url: 'https://news.google.com/rss/search?q=architecture%20Nigeria%20when:2d&hl=en-NG&gl=NG&ceid=NG:en', region: 'nigeria' },
+  { name: 'Google News (Africa architecture)', url: 'https://news.google.com/rss/search?q=architecture%20Africa%20when:2d&hl=en-NG&gl=NG&ceid=NG:en', region: 'africa' },
 ];
 
 // Two NewsAPI queries: one broad, one focused on Nigeria/Africa so those
@@ -45,16 +51,18 @@ function buildNewsApiUrl(query) {
 }
 
 const MAX_ITEMS_PER_SECTION = 15;
-const MAX_AGE_HOURS = 30; // widen slightly beyond 24h to tolerate cron drift / slow feeds
+const MAX_AGE_HOURS_GLOBAL = 30; // widen slightly beyond 24h to tolerate cron drift / slow feeds
+const MAX_AGE_HOURS_LOCAL = 96; // Nigeria/Africa sources post far less often, so a 30h window
+                                 // often leaves that section empty — widen to ~4 days instead.
 
 // --- Helpers ----------------------------------------------------------------
 
-function isRecent(dateStr) {
+function isRecent(dateStr, maxAgeHours) {
   if (!dateStr) return false;
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return false;
   const hoursAgo = (Date.now() - date.getTime()) / (1000 * 60 * 60);
-  return hoursAgo <= MAX_AGE_HOURS;
+  return hoursAgo <= maxAgeHours;
 }
 
 function normalizeTitle(title) {
@@ -129,9 +137,11 @@ async function fetchNewsApiItems() {
 }
 
 function mergeAndDedupe(rssItems, newsApiItems) {
-  const all = [...rssItems, ...newsApiItems].filter(
-    (item) => item.title && item.url && isRecent(item.publishedAt)
-  );
+  const all = [...rssItems, ...newsApiItems].filter((item) => {
+    if (!item.title || !item.url) return false;
+    const isLocal = item.region === 'africa' || item.region === 'nigeria';
+    return isRecent(item.publishedAt, isLocal ? MAX_AGE_HOURS_LOCAL : MAX_AGE_HOURS_GLOBAL);
+  });
 
   const seen = new Set();
   const deduped = [];
