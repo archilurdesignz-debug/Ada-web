@@ -8,6 +8,8 @@
     "@supabase/supabase-js": "^2.43.0",
     "dropbox": "^10.30.0",
     "node-fetch": "^3.3.2"
+    "rss-parser": "^3.13.0",
+  "resend": "^6.22.1"
   },
   "devDependencies": {},
   "scripts": {
