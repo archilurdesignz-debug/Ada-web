@@ -9,7 +9,7 @@
   "crons": [
     {
       "path": "/api/news-digest",
-      "schedule": "0 7 * * *"
+      "schedule": "0 7,15* * *"
     }
   ]
 }
