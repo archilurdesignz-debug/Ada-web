@@ -9,7 +9,8 @@
     "dropbox": "^10.30.0",
     "node-fetch": "^3.3.2",
     "rss-parser": "^3.13.0",
-    "resend": "^6.22.1"
+    "resend": "^6.22.1",
+    "cheerio": "^1.0.0"
   },
   "devDependencies": {},
   "scripts": {
