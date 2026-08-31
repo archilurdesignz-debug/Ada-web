@@ -7,11 +7,18 @@
 
 import Parser from 'rss-parser';
 import { Resend } from 'resend';
+import * as cheerio from 'cheerio';
+import { createClient } from '@supabase/supabase-js';
 
 const parser = new Parser({
   timeout: 8000,
   headers: { 'User-Agent': 'Mozilla/5.0 (ADA News Digest Bot)' },
 });
+
+const supabase =
+  process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
+    ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+    : null;
 
 // --- Config ---------------------------------------------------------------
 
@@ -27,14 +34,23 @@ const RSS_FEEDS = [
   { name: 'Architect Africa', url: 'https://architectafrica.com/aarss/', region: 'africa' },
   { name: 'Livin Spaces (Nigeria)', url: 'https://livinspaces.net/category/projects/feed/', region: 'nigeria' },
   { name: 'IJNIA (NIA Journal)', url: 'https://ijnia.org/index.php/journal/gateway/plugin/RssGatewayPlugin/rss', region: 'nigeria' },
-  { name: 'ARCON', url: 'https://arconigeria.gov.ng/feed/', region: 'nigeria' },
-  { name: 'ARCON Announcements', url: 'https://arconigeria.gov.ng/announcements/feed/', region: 'nigeria' },
+  { name: 'NIA (Nigerian Institute of Architects)', url: 'https://www.nia.ng/feed/', region: 'nigeria' },
+  { name: 'ARCON (Architecture category)', url: 'https://arconigeria.gov.ng/category/architecture/feed/', region: 'nigeria' },
+  { name: 'ARCON (Journal category)', url: 'https://arconigeria.gov.ng/category/journal/feed/', region: 'nigeria' },
   { name: 'Vanguard Homes & Property', url: 'https://www.vanguardngr.com/category/homes-property/feed/', region: 'nigeria' },
   // Google News RSS needs no API key and aggregates across dozens of outlets —
   // this tends to surface far more Nigerian coverage day-to-day than the
   // smaller institutional feeds above manage on their own.
   { name: 'Google News (Nigeria architecture)', url: 'https://news.google.com/rss/search?q=architecture%20Nigeria%20when:2d&hl=en-NG&gl=NG&ceid=NG:en', region: 'nigeria' },
   { name: 'Google News (Africa architecture)', url: 'https://news.google.com/rss/search?q=architecture%20Africa%20when:2d&hl=en-NG&gl=NG&ceid=NG:en', region: 'africa' },
+  // Broader/higher-volume sources — safe to add now that LOCAL_TOPIC_KEYWORDS
+  // filters out anything that isn't actually about architecture/building/urban topics.
+  { name: 'AllAfrica (Construction)', url: 'https://allafrica.com/tools/headlines/rdf/construction/headlines.rdf', region: 'africa' },
+  { name: 'AllAfrica (Nigeria)', url: 'https://allafrica.com/tools/headlines/rdf/nigeria/headlines.rdf', region: 'nigeria' },
+  { name: 'ConstructAfrica', url: 'https://constructafrica.com/rss-feed', region: 'africa' },
+  { name: 'Guardian Nigeria (Property)', url: 'https://guardian.ng/category/property/feed/', region: 'nigeria' },
+  { name: 'BusinessDay Nigeria', url: 'https://businessday.ng/feed/', region: 'nigeria' },
+  { name: 'Nairametrics', url: 'https://nairametrics.com/feed/', region: 'nigeria' },
 ];
 
 // Two NewsAPI queries: one broad, one focused on Nigeria/Africa so those
@@ -50,10 +66,187 @@ function buildNewsApiUrl(query) {
   )}&language=en&sortBy=publishedAt&pageSize=20`;
 }
 
+// --- Scraping fallback (for sites with no reliable RSS) --------------------
+//
+// NIA and ARCON are WordPress sites, so their /feed/ and /category/*/feed/
+// URLs *should* work — but both sites block automated crawling, so we can't
+// pre-verify the exact feed path resolves. Rather than wait to find out in
+// production, each of these has a scrape fallback: if its RSS attempt above
+// comes back with zero items, we fetch the actual news page HTML and pull
+// article titles/links directly out of the markup instead.
+//
+// These listing pages don't expose a reliable publish date, so scraped
+// items skip the normal recency filter — instead we track which URLs have
+// already been sent in a Supabase table, so the same headline doesn't keep
+// reappearing every day just because it's still at the top of the page.
+const SCRAPE_FALLBACKS = [
+  {
+    // Matches any RSS_FEEDS entries whose `name` starts with this prefix —
+    // if none of them yielded items, this scrape fallback kicks in.
+    sourcePrefix: 'NIA',
+    name: 'NIA (scraped)',
+    url: 'https://www.nia.ng/news/',
+    region: 'nigeria',
+  },
+  {
+    sourcePrefix: 'ARCON',
+    name: 'ARCON (scraped)',
+    url: 'https://arconigeria.gov.ng/news-journals/',
+    region: 'nigeria',
+  },
+];
+
+// Common WordPress/Elementor title-link patterns, tried in order. The first
+// selector that yields at least 3 matches is used. If the site's theme
+// changes, this may need a new selector added — see README.
+const SCRAPE_SELECTOR_CANDIDATES = [
+  '.elementor-post__title a',
+  'article h2 a',
+  'article h3 a',
+  '.entry-title a',
+  'h2.entry-title a',
+  '.post-title a',
+];
+
+async function scrapeSite_(url) {
+  const res = await fetch(url, {
+    headers: { 'User-Agent': 'Mozilla/5.0 (ADA News Digest Bot)' },
+  });
+  if (!res.ok) {
+    throw new Error(`Scrape fetch failed (${res.status}) for ${url}`);
+  }
+  const html = await res.text();
+  const $ = cheerio.load(html);
+
+  let picked = [];
+  for (const selector of SCRAPE_SELECTOR_CANDIDATES) {
+    const found = $(selector)
+      .map((_, el) => ({
+        title: $(el).text().trim(),
+        href: $(el).attr('href'),
+      }))
+      .get()
+      .filter((item) => item.title && item.href && item.title.length > 8);
+
+    if (found.length >= 3) {
+      picked = found;
+      break;
+    }
+  }
+
+  const seenUrls = new Set();
+  const items = [];
+  for (const item of picked) {
+    let absoluteUrl;
+    try {
+      absoluteUrl = new URL(item.href, url).toString();
+    } catch {
+      continue;
+    }
+    if (seenUrls.has(absoluteUrl)) continue;
+    seenUrls.add(absoluteUrl);
+    items.push({ title: item.title, url: absoluteUrl });
+    if (items.length >= 10) break;
+  }
+  return items;
+}
+
+async function getUnseenScrapedUrls_(urls) {
+  if (!supabase || urls.length === 0) return urls;
+  const { data, error } = await supabase
+    .from('digest_seen_articles')
+    .select('url')
+    .in('url', urls);
+
+  if (error) {
+    console.error('Supabase seen-articles lookup failed:', error.message);
+    return urls; // fail open — better a possible repeat than a silently empty section
+  }
+  const seen = new Set((data || []).map((row) => row.url));
+  return urls.filter((u) => !seen.has(u));
+}
+
+async function markScrapedUrlsSeen_(urls) {
+  if (!supabase || urls.length === 0) return;
+  const { error } = await supabase
+    .from('digest_seen_articles')
+    .upsert(urls.map((url) => ({ url })), { onConflict: 'url' });
+
+  if (error) {
+    console.error('Supabase seen-articles insert failed:', error.message);
+  }
+}
+
+async function fetchScrapeFallbacks_(rssItemsBySource) {
+  const results = [];
+  for (const fallback of SCRAPE_FALLBACKS) {
+    const alreadyHasItems = rssItemsBySource.some((item) =>
+      item.source.startsWith(fallback.sourcePrefix)
+    );
+    if (alreadyHasItems) continue; // RSS worked for this source, no fallback needed
+
+    try {
+      const scraped = await scrapeSite_(fallback.url);
+      const urls = scraped.map((s) => s.url);
+      const unseenUrls = await getUnseenScrapedUrls_(urls);
+      const unseen = scraped.filter((s) => unseenUrls.includes(s.url));
+
+      if (unseen.length === 0) continue;
+
+      results.push(
+        ...unseen.map((s) => ({
+          title: s.title,
+          url: s.url,
+          source: fallback.name,
+          region: fallback.region,
+          // No reliable date from a listing page — treat as fresh now and
+          // rely on the Supabase "seen" table (not the age filter) to stop
+          // repeats.
+          publishedAt: new Date().toISOString(),
+          summary: '',
+        }))
+      );
+
+      // Mark these seen now, before send — if the email fails downstream,
+      // we'd rather skip a repeat than spam a duplicate on the retry.
+      await markScrapedUrlsSeen_(unseen.map((s) => s.url));
+    } catch (err) {
+      console.error(`Scrape fallback failed for ${fallback.name}:`, err.message);
+    }
+  }
+  return results;
+}
+
 const MAX_ITEMS_PER_SECTION = 15;
 const MAX_AGE_HOURS_GLOBAL = 30; // widen slightly beyond 24h to tolerate cron drift / slow feeds
 const MAX_AGE_HOURS_LOCAL = 96; // Nigeria/Africa sources post far less often, so a 30h window
                                  // often leaves that section empty — widen to ~4 days instead.
+
+// The global sources (ArchDaily, Dezeen, etc.) are dedicated architecture
+// outlets end-to-end, so everything they publish is already on-topic.
+// The Nigeria/Africa sources are broader (general Africa news tags, a
+// property section, Google News) and pull in off-topic items — so those
+// get filtered down to ones that actually mention architecture/building
+// topics before they're included.
+const LOCAL_TOPIC_KEYWORDS = [
+  'architect',
+  'architecture',
+  'building',
+  'urban',
+  'construction',
+  'design competition',
+  'design',
+  'professional exam',
+  'development',
+  'developer',
+  'ARCON',
+  'NIA', // Nigerian Institute of Architects
+];
+
+function matchesLocalTopic_(item) {
+  const haystack = `${item.title || ''} ${item.summary || ''}`.toLowerCase();
+  return LOCAL_TOPIC_KEYWORDS.some((kw) => haystack.includes(kw.toLowerCase()));
+}
 
 // --- Helpers ----------------------------------------------------------------
 
@@ -140,7 +333,16 @@ function mergeAndDedupe(rssItems, newsApiItems) {
   const all = [...rssItems, ...newsApiItems].filter((item) => {
     if (!item.title || !item.url) return false;
     const isLocal = item.region === 'africa' || item.region === 'nigeria';
-    return isRecent(item.publishedAt, isLocal ? MAX_AGE_HOURS_LOCAL : MAX_AGE_HOURS_GLOBAL);
+    if (!isRecent(item.publishedAt, isLocal ? MAX_AGE_HOURS_LOCAL : MAX_AGE_HOURS_GLOBAL)) {
+      return false;
+    }
+    // Global sources are dedicated architecture outlets already — no
+    // extra filtering needed. Local sources are broader, so only keep
+    // items that actually mention an architecture/building topic.
+    if (isLocal && !matchesLocalTopic_(item)) {
+      return false;
+    }
+    return true;
   });
 
   const seen = new Set();
@@ -255,7 +457,9 @@ export default async function handler(req, res) {
       fetchNewsApiItems(),
     ]);
 
-    const { africa, global } = mergeAndDedupe(rssItems, newsApiItems);
+    const scrapedItems = await fetchScrapeFallbacks_(rssItems);
+
+    const { africa, global } = mergeAndDedupe([...rssItems, ...scrapedItems], newsApiItems);
     const totalCount = africa.length + global.length;
     const html = buildEmailHtml({ africa, global });
 
