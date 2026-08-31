@@ -303,9 +303,13 @@
                     </div>
 </div>
                     <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-top:15px; margin-bottom:15px;">
-                    <input type="checkbox" id="invApplyVat" style="width:16px; height:16px; accent-color:var(--gold); cursor:pointer;">
-                    <label for="invApplyVat" style="margin-bottom:0; cursor:pointer;">Apply 7.5% VAT to this Invoice</label>
-                    </div>
+<input type="checkbox" id="invApplyVat" style="width:16px; height:16px; accent-color:var(--gold); cursor:pointer;" onchange="document.getElementById('vatNumberInputWrapper').style.display = this.checked ? 'block' : 'none'">
+<label for="invApplyVat" style="margin-bottom:0; cursor:pointer;">Apply 7.5% VAT to this Invoice</label>
+</div>
+<div id="vatNumberInputWrapper" style="display:none; margin-left:26px; margin-top:-5px; margin-bottom:15px;">
+    <label style="font-size:0.75rem; color:#ccc; display:block; margin-bottom:4px;">Firm VAT Registration Number</label>
+    <input type="text" id="invVatNumber" value="2623227869499" style="width:220px; padding:6px; background:#1c1a17; border:1px solid rgba(201,191,176,0.3); color:#fff; font-family:inherit;">
+</div>
                     <div class="form-group">
                         <label>Naira Account Routing Note (Override)</label>
                         <textarea id="invNairaAccount" rows="2" placeholder="Bank Name, Account Number, Account Name..."></textarea>
@@ -2813,6 +2817,9 @@ async function submitInvoiceToSupabaseEngine() {
         apply_discount: document.getElementById('invApplyDiscount').checked,
         discount_percentage: parseFloat(document.getElementById('invDiscountPct').value) || 0,
         apply_vat: document.getElementById('invApplyVat').checked,
+        vat_number: document.getElementById('invApplyVat').checked
+    ? (document.getElementById('invVatNumber').value.trim() || undefined)
+    : undefined,
         issue_date: formatDateString(today),
         due_date: formatDateString(dueDate),
         items: compiledItems,
