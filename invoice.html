@@ -109,13 +109,14 @@ body { background: #faf8f4; color: #0d0c0a; font-family: 'Outfit', sans-serif; l
                 <span class="w2">Archilurdesignz</span>
             </div>
         </div>
-        <div class="studio-meta">
-            <p style="font-weight: 500; color: #1c1a17;">Archilurdesignz and Architecture</p>
-            <p id="lblFirmAddress"></p>
-            <p id="lblFirmPhone"></p>
-            <p>RC Number: 9176834</p>
-            <p>www.archilurdesignz.com</p>
-        </div>
+       <div class="studio-meta">
+    <p style="font-weight: 500; color: #1c1a17;">Archilurdesignz and Architecture</p>
+    <p id="lblFirmAddress"></p>
+    <p id="lblFirmPhone"></p>
+    <p>RC Number: 9176834</p>
+    <p id="lblVatNumberDisplay" style="display:none;">VAT Reg. No: <span id="lblVatNumberValue"></span></p>
+    <p>www.archilurdesignz.com</p>
+</div>
     </header>
 
     <section class="invoice-meta-grid">
@@ -317,15 +318,20 @@ async function assembleInvoiceInvoiceEngine() {
         }
 
         let grandTotalFinal = runningBalance;
-        if (invoice.apply_vat === true) {
-            const vatAmountCalculated = runningBalance * 0.075;
-            grandTotalFinal = runningBalance + vatAmountCalculated;
-            
-            document.getElementById('lblVatAmount').innerText = formatCurrency(vatAmountCalculated, curr);
-            document.getElementById('vatRowWrapper').style.display = 'flex';
-        } else {
-            document.getElementById('vatRowWrapper').style.display = 'none';
-        }
+if (invoice.apply_vat === true) {
+    const vatAmountCalculated = runningBalance * 0.075;
+    grandTotalFinal = runningBalance + vatAmountCalculated;
+    
+    document.getElementById('lblVatAmount').innerText = formatCurrency(vatAmountCalculated, curr);
+    document.getElementById('vatRowWrapper').style.display = 'flex';
+
+    if (invoice.vat_number) {
+        document.getElementById('lblVatNumberValue').innerText = invoice.vat_number;
+        document.getElementById('lblVatNumberDisplay').style.display = 'block';
+    }
+} else {
+    document.getElementById('vatRowWrapper').style.display = 'none';
+}
 
         document.getElementById('lblGrandTotal').innerText = formatCurrency(grandTotalFinal, curr);
 
