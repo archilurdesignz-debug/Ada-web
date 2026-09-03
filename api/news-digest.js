@@ -1,8 +1,12 @@
 // /api/news-digest.js
-// Fetches recent architecture news from RSS feeds + NewsAPI,
-// merges + dedupes them, and emails a digest via Resend.
+// Fetches recent architecture/built-environment news from RSS feeds +
+// NewsAPI, categorizes it into a topical taxonomy, publishes a
+// "zero-scroll" accordion webpage to the ADA site (via a GitHub commit,
+// which Vercel auto-deploys), and emails a short notification with a
+// "View Digest" link and a "Share to WhatsApp" link.
 //
-// Triggered daily by Vercel Cron (see vercel.json).
+// Triggered twice daily (see your external cron scheduler, since Vercel's
+// free plan only allows once-daily native cron).
 // Can also be hit manually: GET /api/news-digest?manual=1
 
 import Parser from 'rss-parser';
@@ -23,7 +27,9 @@ const supabase =
 // --- Config ---------------------------------------------------------------
 
 // Add or remove feeds freely. Each just needs a working RSS URL.
-// Sources are tagged with a region so you can filter/style the digest by it if you want later.
+// `region` is still used as a fast-path: anything region 'africa'/'nigeria'
+// is routed straight into the "Nigeria & Africa" taxonomy category below,
+// regardless of topic — see categorizeItem_().
 const RSS_FEEDS = [
   { name: 'ArchDaily', url: 'https://www.archdaily.com/rss/', region: 'global' },
   { name: 'Dezeen', url: 'https://www.dezeen.com/architecture/feed/', region: 'global' },
@@ -38,19 +44,26 @@ const RSS_FEEDS = [
   { name: 'ARCON (Architecture category)', url: 'https://arconigeria.gov.ng/category/architecture/feed/', region: 'nigeria' },
   { name: 'ARCON (Journal category)', url: 'https://arconigeria.gov.ng/category/journal/feed/', region: 'nigeria' },
   { name: 'Vanguard Homes & Property', url: 'https://www.vanguardngr.com/category/homes-property/feed/', region: 'nigeria' },
-  // Google News RSS needs no API key and aggregates across dozens of outlets —
-  // this tends to surface far more Nigerian coverage day-to-day than the
-  // smaller institutional feeds above manage on their own.
   { name: 'Google News (Nigeria architecture)', url: 'https://news.google.com/rss/search?q=architecture%20Nigeria%20when:2d&hl=en-NG&gl=NG&ceid=NG:en', region: 'nigeria' },
   { name: 'Google News (Africa architecture)', url: 'https://news.google.com/rss/search?q=architecture%20Africa%20when:2d&hl=en-NG&gl=NG&ceid=NG:en', region: 'africa' },
-  // Broader/higher-volume sources — safe to add now that LOCAL_TOPIC_KEYWORDS
-  // filters out anything that isn't actually about architecture/building/urban topics.
   { name: 'AllAfrica (Construction)', url: 'https://allafrica.com/tools/headlines/rdf/construction/headlines.rdf', region: 'africa' },
   { name: 'AllAfrica (Nigeria)', url: 'https://allafrica.com/tools/headlines/rdf/nigeria/headlines.rdf', region: 'nigeria' },
   { name: 'ConstructAfrica', url: 'https://constructafrica.com/rss-feed', region: 'africa' },
   { name: 'Guardian Nigeria (Property)', url: 'https://guardian.ng/category/property/feed/', region: 'nigeria' },
   { name: 'BusinessDay Nigeria', url: 'https://businessday.ng/feed/', region: 'nigeria' },
   { name: 'Nairametrics', url: 'https://nairametrics.com/feed/', region: 'nigeria' },
+  { name: 'ENR (Engineering News-Record)', url: 'https://www.enr.com/rss/articles', region: 'global' },
+  { name: 'Construction Dive', url: 'https://www.constructiondive.com/feeds/news/', region: 'global' },
+  { name: 'PropertyPro.ng', url: 'https://www.propertypro.ng/blog/feed/', region: 'nigeria' },
+  { name: 'NIQS (Nigerian Institute of Quantity Surveyors)', url: 'https://niqs.org.ng/feed/', region: 'nigeria' },
+  { name: 'World Architecture Community', url: 'https://worldarchitecture.org/feed', region: 'global' },
+  { name: 'Global Cement (Africa)', url: 'https://www.globalcement.com/rss', region: 'africa' },
+  { name: 'FMHUD (Federal Ministry of Housing)', url: 'https://fmhud.gov.ng/feed/', region: 'nigeria' },
+  { name: 'Lagos MPPUD', url: 'https://mppud.lagosstate.gov.ng/feed/', region: 'nigeria' },
+  { name: 'NITP (Nigerian Institute of Town Planners)', url: 'https://nitpng.org/feed/', region: 'nigeria' },
+  { name: 'Design Indaba', url: 'https://www.designindaba.com/feed', region: 'africa' },
+  { name: 'Punch Nigeria', url: 'https://punchng.com/feed/', region: 'nigeria' },
+  { name: 'Channels TV', url: 'https://www.channelstv.com/feed/', region: 'nigeria' },
 ];
 
 // Two NewsAPI queries: one broad, one focused on Nigeria/Africa so those
@@ -67,38 +80,17 @@ function buildNewsApiUrl(query) {
 }
 
 // --- Scraping fallback (for sites with no reliable RSS) --------------------
-//
-// NIA and ARCON are WordPress sites, so their /feed/ and /category/*/feed/
-// URLs *should* work — but both sites block automated crawling, so we can't
-// pre-verify the exact feed path resolves. Rather than wait to find out in
-// production, each of these has a scrape fallback: if its RSS attempt above
-// comes back with zero items, we fetch the actual news page HTML and pull
-// article titles/links directly out of the markup instead.
-//
-// These listing pages don't expose a reliable publish date, so scraped
-// items skip the normal recency filter — instead we track which URLs have
-// already been sent in a Supabase table, so the same headline doesn't keep
-// reappearing every day just because it's still at the top of the page.
 const SCRAPE_FALLBACKS = [
-  {
-    // Matches any RSS_FEEDS entries whose `name` starts with this prefix —
-    // if none of them yielded items, this scrape fallback kicks in.
-    sourcePrefix: 'NIA',
-    name: 'NIA (scraped)',
-    url: 'https://www.nia.ng/news/',
-    region: 'nigeria',
-  },
-  {
-    sourcePrefix: 'ARCON',
-    name: 'ARCON (scraped)',
-    url: 'https://arconigeria.gov.ng/news-journals/',
-    region: 'nigeria',
-  },
+  { sourcePrefix: 'NIA', name: 'NIA (scraped)', url: 'https://www.nia.ng/news/', region: 'nigeria' },
+  { sourcePrefix: 'ARCON', name: 'ARCON (scraped)', url: 'https://arconigeria.gov.ng/news-journals/', region: 'nigeria' },
+  { sourcePrefix: 'NIQS', name: 'NIQS (scraped)', url: 'https://niqs.org.ng/news/', region: 'nigeria' },
+  { sourcePrefix: 'FMHUD', name: 'FMHUD (scraped)', url: 'https://fmhud.gov.ng/', region: 'nigeria' },
+  { sourcePrefix: 'Lagos MPPUD', name: 'Lagos MPPUD (scraped)', url: 'https://mppud.lagosstate.gov.ng/news/', region: 'nigeria' },
+  { sourcePrefix: 'NITP', name: 'NITP (scraped)', url: 'https://nitpng.org/category/news/', region: 'nigeria' },
+  { sourcePrefix: 'Design Indaba', name: 'Design Indaba (scraped)', url: 'https://www.designindaba.com/articles', region: 'africa' },
+  { sourcePrefix: 'Channels TV', name: 'Channels TV (scraped)', url: 'https://www.channelstv.com/category/headlines/', region: 'nigeria' },
 ];
 
-// Common WordPress/Elementor title-link patterns, tried in order. The first
-// selector that yields at least 3 matches is used. If the site's theme
-// changes, this may need a new selector added — see README.
 const SCRAPE_SELECTOR_CANDIDATES = [
   '.elementor-post__title a',
   'article h2 a',
@@ -160,7 +152,7 @@ async function getUnseenScrapedUrls_(urls) {
 
   if (error) {
     console.error('Supabase seen-articles lookup failed:', error.message);
-    return urls; // fail open — better a possible repeat than a silently empty section
+    return urls;
   }
   const seen = new Set((data || []).map((row) => row.url));
   return urls.filter((u) => !seen.has(u));
@@ -183,7 +175,7 @@ async function fetchScrapeFallbacks_(rssItemsBySource) {
     const alreadyHasItems = rssItemsBySource.some((item) =>
       item.source.startsWith(fallback.sourcePrefix)
     );
-    if (alreadyHasItems) continue; // RSS worked for this source, no fallback needed
+    if (alreadyHasItems) continue;
 
     try {
       const scraped = await scrapeSite_(fallback.url);
@@ -199,16 +191,11 @@ async function fetchScrapeFallbacks_(rssItemsBySource) {
           url: s.url,
           source: fallback.name,
           region: fallback.region,
-          // No reliable date from a listing page — treat as fresh now and
-          // rely on the Supabase "seen" table (not the age filter) to stop
-          // repeats.
           publishedAt: new Date().toISOString(),
           summary: '',
         }))
       );
 
-      // Mark these seen now, before send — if the email fails downstream,
-      // we'd rather skip a repeat than spam a duplicate on the retry.
       await markScrapedUrlsSeen_(unseen.map((s) => s.url));
     } catch (err) {
       console.error(`Scrape fallback failed for ${fallback.name}:`, err.message);
@@ -217,35 +204,95 @@ async function fetchScrapeFallbacks_(rssItemsBySource) {
   return results;
 }
 
-const MAX_ITEMS_PER_SECTION = 15;
-const MAX_AGE_HOURS_GLOBAL = 30; // widen slightly beyond 24h to tolerate cron drift / slow feeds
-const MAX_AGE_HOURS_LOCAL = 96; // Nigeria/Africa sources post far less often, so a 30h window
-                                 // often leaves that section empty — widen to ~4 days instead.
+const MAX_ITEMS_PER_CATEGORY = 15;
+const MAX_AGE_HOURS_GLOBAL = 30;
+const MAX_AGE_HOURS_LOCAL = 96;
 
-// The global sources (ArchDaily, Dezeen, etc.) are dedicated architecture
-// outlets end-to-end, so everything they publish is already on-topic.
-// The Nigeria/Africa sources are broader (general Africa news tags, a
-// property section, Google News) and pull in off-topic items — so those
-// get filtered down to ones that actually mention architecture/building
-// topics before they're included.
-const LOCAL_TOPIC_KEYWORDS = [
-  'architect',
-  'architecture',
-  'building',
-  'urban',
-  'construction',
-  'design competition',
-  'design',
-  'professional exam',
-  'development',
-  'developer',
-  'ARCON',
-  'NIA', // Nigerian Institute of Architects
+// --- Contextual topic filtering ---------------------------------------------
+//
+// Some keywords are unambiguous — if "quantity surveyor" or "ARCON"
+// appears, the story is relevant, full stop. Others are generic enough
+// that they show up constantly in unrelated news: "building trust,"
+// "capacity building," "personal development," "sustainable development
+// goals," "policy design," "by design." A bare geographic mention
+// ("Lagos," "Nigeria") is even less useful as a signal, since virtually
+// every article from a Nigerian outlet mentions one of these — that's
+// not a topic signal at all, just a byline.
+//
+// STRONG keywords pass the filter on their own. AMBIGUOUS keywords only
+// pass if the surrounding text doesn't match one of the known
+// non-architectural collocations in NEGATIVE_PHRASES.
+
+const STRONG_TOPIC_KEYWORDS = [
+  'architect', 'architecture', 'ARCON', 'NIA', 'NIQS', 'NITP', 'IJNIA',
+  'coren', 'nse', 'niob', 'corbon', 'toprec', 'qsrb',
+  'quantity survey', 'quantity surveyor', 'bill of quantities', 'boq',
+  'town planning', 'town planner', 'spatial planning', 'zoning',
+  'cost management', 'procurement', 'professional exam', 'design competition',
+  'afdb', 'renewed hope housing', 'federal ministry of housing', 'shelter afrique',
+  'fidic', 'epc contract', 'groundbreaking', 'topping out',
+];
+
+// Generic enough to need a negative-phrase check before counting.
+// Note: bare geographic terms (Lagos, Nigeria, Abuja, Africa...) are
+// deliberately NOT in this list — region-tagging already establishes
+// geography, and since virtually every article from a Nigerian outlet
+// mentions one of these place names, treating them as a topic signal
+// would defeat the filter entirely for general news sources.
+const AMBIGUOUS_TOPIC_KEYWORDS = [
+  'building', 'design', 'development', 'developer', 'construction',
+  'urban', 'engineer', 'housing',
+];
+
+// If one of these phrases is present, the ambiguous keyword it contains
+// doesn't count as a topic match — these are the common non-architectural
+// uses that would otherwise slip through.
+const NEGATIVE_PHRASES = [
+  // "building" used idiomatically, not about physical buildings
+  'capacity building', 'building trust', 'building consensus', 'building momentum',
+  'building a career', 'building bridges', 'building a brand', 'building relationships',
+  // "development" used for people/policy/aid, not real estate or construction
+  'personal development', 'child development', 'career development',
+  'software development', 'skill development', 'capacity development',
+  'human development', 'professional development', 'development partner',
+  'developing country', 'developing nations', 'sustainable development goals',
+  'developed and developing',
+  // "design" used for non-architectural design
+  'game design', 'policy design', 'by design', 'design flaw', 'curriculum design',
 ];
 
 function matchesLocalTopic_(item) {
+  const haystack = textOf_(item);
+
+  if (STRONG_TOPIC_KEYWORDS.some((kw) => haystack.includes(kw.toLowerCase()))) {
+    return true;
+  }
+
+  // Ambiguous keywords are checked against the already-cleaned text —
+  // if a keyword only appeared inside a negative phrase (e.g. "building"
+  // inside "capacity building"), that exact occurrence was already
+  // stripped out by textOf_(). If "building" still appears here, it's a
+  // genuine standalone mention elsewhere in the text.
+  return AMBIGUOUS_TOPIC_KEYWORDS.some((kw) => haystack.includes(kw.toLowerCase()));
+}
+
+// Real-estate listing/advert spam — general Nigerian news outlets and
+// property-adjacent feeds sometimes mix in classified-ad-style content
+// alongside genuine news. Anything matching one of these gets dropped
+// regardless of which other filters it would otherwise pass.
+const EXCLUDE_KEYWORDS = [
+  'for sale', 'for rent', 'for lease', 'to let', 'short let', 'shortlet',
+  'bedroom flat', 'bedroom duplex', 'self contain', 'mini flat', 'boys quarters',
+  'distressed sale', 'cheap land', 'plots of land', 'buy land', 'property for sale',
+  'contact agent', 'whatsapp', 'call agent', 'realtor', 'real estate agent',
+  'fully detached', 'semi detached', 'terrace duplex', 'title: c of o',
+  'gated estate', 'inspect today', 'initial deposit', 'payment plan',
+  'mortgage calculator', 'discounted price', 'promo price', 'book inspection',
+];
+
+function matchesExcludeKeywords_(item) {
   const haystack = `${item.title || ''} ${item.summary || ''}`.toLowerCase();
-  return LOCAL_TOPIC_KEYWORDS.some((kw) => haystack.includes(kw.toLowerCase()));
+  return EXCLUDE_KEYWORDS.some((kw) => haystack.includes(kw.toLowerCase()));
 }
 
 // --- Helpers ----------------------------------------------------------------
@@ -263,6 +310,14 @@ function normalizeTitle(title) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
+}
+
+function escapeHtml(str) {
+  return (str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 async function fetchRssItems() {
@@ -329,164 +384,75 @@ async function fetchNewsApiItems() {
   return items;
 }
 
-function mergeAndDedupe(rssItems, newsApiItems) {
-  const all = [...rssItems, ...newsApiItems].filter((item) => {
-    if (!item.title || !item.url) return false;
-    const isLocal = item.region === 'africa' || item.region === 'nigeria';
-    if (!isRecent(item.publishedAt, isLocal ? MAX_AGE_HOURS_LOCAL : MAX_AGE_HOURS_GLOBAL)) {
-      return false;
+const INSTITUTIONAL_SOURCE_PREFIXES = [
+  'NIA', 'IJNIA', 'ARCON', 'NIQS', 'FMHUD', 'Lagos MPPUD', 'NITP',
+  'Design Indaba', 'PropertyPro',
+];
+
+function isInstitutionalSource_(item) {
+  return INSTITUTIONAL_SOURCE_PREFIXES.some((prefix) => item.source?.startsWith(prefix));
+}
+
+// --- Source authority ranking -----------------------------------------------
+//
+// When multiple outlets cover the same event with different headlines,
+// we keep the item from the most authoritative source and note how many
+// others also covered it, rather than showing near-duplicate stories
+// side by side. Lower number = higher priority. Anything not listed
+// falls into the default tier.
+const SOURCE_PRIORITY_TIERS = [
+  // Tier 0: official/regulatory bodies — the primary source for their own news
+  { prefixes: ['ARCON', 'NIA', 'NIQS', 'NITP', 'IJNIA', 'FMHUD', 'Lagos MPPUD'], tier: 0 },
+  // Tier 1: dedicated global architecture/construction trade press
+  { prefixes: ['ArchDaily', 'Dezeen', 'Designboom', 'e-architect', 'World Architecture Community', 'ENR', 'Construction Dive', 'Global Cement'], tier: 1 },
+  // Tier 2: established Nigerian/African news organizations and specialist outlets
+  { prefixes: ['Guardian Nigeria', 'Vanguard', 'BusinessDay', 'Punch', 'Nairametrics', 'ConstructAfrica', 'Architect Africa', 'Livin Spaces', 'PropertyPro', 'Design Indaba'], tier: 2 },
+  // Tier 3: general broadcast news and syndicators/aggregators (lower confidence)
+  { prefixes: ['Channels TV', 'AllAfrica'], tier: 3 },
+  // Tier 4: search-based aggregators (Google News, NewsAPI) — lowest priority,
+  // since these surface the same stories the sources above already cover
+  { prefixes: ['NewsAPI', 'Google News'], tier: 4 },
+];
+const DEFAULT_SOURCE_TIER = 5;
+
+function getSourcePriority_(item) {
+  for (const { prefixes, tier } of SOURCE_PRIORITY_TIERS) {
+    if (prefixes.some((prefix) => item.source?.startsWith(prefix))) {
+      return tier;
     }
-    // Global sources are dedicated architecture outlets already — no
-    // extra filtering needed. Local sources are broader, so only keep
-    // items that actually mention an architecture/building topic.
-    if (isLocal && !matchesLocalTopic_(item)) {
-      return false;
-    }
-    return true;
-  });
-
-  const seen = new Set();
-  const deduped = [];
-  for (const item of all) {
-    const key = normalizeTitle(item.title);
-    if (seen.has(key)) continue;
-    seen.add(key);
-    deduped.push(item);
   }
-
-  deduped.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
-
-  // Split into Nigeria/Africa vs. global so local stories get their own
-  // section instead of being buried under higher-volume global sources.
-  const africa = deduped.filter((i) => i.region === 'africa' || i.region === 'nigeria');
-  const global = deduped.filter((i) => i.region === 'global');
-
-  return {
-    africa: africa.slice(0, MAX_ITEMS_PER_SECTION),
-    global: global.slice(0, MAX_ITEMS_PER_SECTION),
-  };
+  return DEFAULT_SOURCE_TIER;
 }
 
-function buildItemRows(items) {
-  return items
-    .map(
-      (item) => `
-      <tr>
-        <td style="padding:16px 0;border-bottom:1px solid #e5e0d8;">
-          <div style="font-family:'Georgia',serif;font-size:17px;color:#1a1a1a;margin-bottom:4px;">
-            <a href="${item.url}" style="color:#1a1a1a;text-decoration:none;">${escapeHtml(
-        item.title
-      )}</a>
-          </div>
-          <div style="font-family:sans-serif;font-size:12px;color:#8a8378;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">
-            ${escapeHtml(item.source)}
-          </div>
-          ${
-            item.summary
-              ? `<div style="font-family:sans-serif;font-size:14px;color:#4a4a4a;line-height:1.5;">${escapeHtml(
-                  item.summary
-                )}...</div>`
-              : ''
-          }
-        </td>
-      </tr>`
-    )
-    .join('');
-}
+// --- Fuzzy duplicate consolidation ------------------------------------------
+//
+// Exact-title dedup (below) catches syndicated copies of the same
+// headline. This catches DIFFERENT headlines about the SAME event —
+// e.g. "Dangote Cement Expands Kogi Plant" vs "Kogi Welcomes New Dangote
+// Facility" — by comparing the significant (non-stopword) words in each
+// title. Above SIMILARITY_THRESHOLD word-overlap, two items are treated
+// as the same story; only the highest-priority source's version is kept,
+// tagged with how many other outlets also reported it.
 
-function buildSection(title, items) {
-  if (!items.length) return '';
-  return `
-    <div style="margin-top:28px;">
-      <h2 style="font-family:'Georgia',serif;font-size:15px;text-transform:uppercase;letter-spacing:0.08em;color:#8a6d3b;border-bottom:1px solid #e5e0d8;padding-bottom:8px;">
-        ${escapeHtml(title)}
-      </h2>
-      <table width="100%" cellpadding="0" cellspacing="0">
-        ${buildItemRows(items)}
-      </table>
-    </div>`;
-}
+const STOPWORDS = new Set([
+  'the', 'a', 'an', 'of', 'in', 'on', 'at', 'to', 'for', 'and', 'or', 'with',
+  'by', 'from', 'as', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+  'this', 'that', 'these', 'those', 'it', 'its', 'after', 'over', 'amid',
+  'amidst', 'into', 'out', 'up', 'down', 'about', 'than', 'their', 'his',
+  'her', 'has', 'have', 'had', 'will', 'would', 'can', 'could', 'should',
+  'not', 'no', 'yes', 'you', 'your', 'we', 'our', 'they', 'them', 'he',
+  'she', 'i', 'but', 'if', 'then', 'so', 'more', 'most', 'less', 'least',
+  'via', 'per', 'across', 'within', 'between',
+]);
 
-function buildEmailHtml({ africa, global }) {
-  const dateLabel = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+// Below this many significant words, fuzzy matching is skipped entirely —
+// short titles produce unreliable overlap scores (two unrelated 3-word
+// titles can easily share 2 words by coincidence).
+const MIN_SIGNIFICANT_WORDS = 4;
+const SIMILARITY_THRESHOLD = 0.4;
 
-  const sections =
-    buildSection('Nigeria & Africa', africa) + buildSection('Global', global);
-
-  return `
-  <div style="max-width:600px;margin:0 auto;font-family:sans-serif;">
-    <div style="padding:24px 0;border-bottom:2px solid #1a1a1a;">
-      <h1 style="font-family:'Georgia',serif;font-size:22px;margin:0;color:#1a1a1a;">Architecture Digest</h1>
-      <div style="font-size:13px;color:#8a8378;margin-top:4px;">${dateLabel}</div>
-    </div>
-    ${sections || '<div style="padding:24px 0;">No new articles in the last day.</div>'}
-    <div style="padding:20px 0;font-size:12px;color:#a3a3a3;">
-      Sent automatically for Archilurdesignz and Architecture.
-    </div>
-  </div>`;
-}
-
-function escapeHtml(str) {
-  return (str || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-// --- Handler ----------------------------------------------------------------
-
-export default async function handler(req, res) {
-  // Basic protection: only Vercel Cron or a manual request with the secret can trigger this
-  const isCron = req.headers['x-vercel-cron'] === '1' || req.headers['x-vercel-cron'] === 'true';
-  const manualSecretOk =
-    req.query?.manual === '1' && req.query?.key === process.env.DIGEST_MANUAL_KEY;
-
-  if (!isCron && !manualSecretOk) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  try {
-    const [rssItems, newsApiItems] = await Promise.all([
-      fetchRssItems(),
-      fetchNewsApiItems(),
-    ]);
-
-    const scrapedItems = await fetchScrapeFallbacks_(rssItems);
-
-    const { africa, global } = mergeAndDedupe([...rssItems, ...scrapedItems], newsApiItems);
-    const totalCount = africa.length + global.length;
-    const html = buildEmailHtml({ africa, global });
-
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    const { data, error } = await resend.emails.send({
-      from: process.env.DIGEST_FROM_EMAIL, // e.g. 'ADA Digest <digest@archilurdesignz.com>'
-      to: process.env.DIGEST_TO_EMAIL, // your inbox
-      subject: `Architecture News Digest — ${totalCount} new article${
-        totalCount === 1 ? '' : 's'
-      } (${africa.length} Nigeria/Africa)`,
-      html,
-    });
-
-    if (error) {
-      console.error('Resend send error:', error);
-      return res.status(500).json({ error: 'Email send failed', details: error });
-    }
-
-    return res.status(200).json({
-      ok: true,
-      totalCount,
-      africaCount: africa.length,
-      globalCount: global.length,
-      emailId: data?.id,
-    });
-  } catch (err) {
-    console.error('Digest handler error:', err);
-    return res.status(500).json({ error: 'Digest generation failed', details: err.message });
-  }
-};
+function significantWords_(title) {
+  return new Set(
+    (title || '')
+      .toLowerCase()
+      .replace(/[^a-z
