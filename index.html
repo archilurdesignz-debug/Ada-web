@@ -144,24 +144,27 @@ nav {
     padding: 0 4%;
     transition: background 0.5s var(--ease-out), backdrop-filter 0.5s;
 }
+/* Nav is fixed chrome that floats over the hero photo before the page is
+   scrolled, so — like the hero itself — it keeps its original warm gold/tan
+   palette always, regardless of the day/night toggle. */
 nav.solid {
-    background: rgba(var(--ink-rgb),0.94);
+    background: rgba(13,12,10,0.94);
     backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(var(--line-rgb),0.08);
+    border-bottom: 1px solid rgba(201,191,176,0.08);
 }
 .nav-left { display:flex; gap:28px; align-items:center; }
 .nav-left a {
     font-family: var(--f-body); font-size:0.62rem; font-weight:400;
-    letter-spacing:2.5px; text-transform:uppercase; color: var(--sand);
+    letter-spacing:2.5px; text-transform:uppercase; color: #c9bfb0;
     text-decoration:none; transition: color 0.3s;
     position:relative;
 }
 .nav-left a::after {
     content:''; position:absolute; bottom:-3px; left:0;
-    width:0; height:1px; background:var(--accent);
+    width:0; height:1px; background:#c8a87a;
     transition: width 0.35s var(--ease-out);
 }
-.nav-left a:hover { color:var(--paper); }
+.nav-left a:hover { color:#f3ede4; }
 .nav-left a:hover::after { width:100%; }
 
 .nav-center {
@@ -170,45 +173,45 @@ nav.solid {
     display:flex; align-items:center; gap:10px;
 }
 .nav-logomark {
-    width:38px; height:38px; border:1px solid rgba(var(--line-rgb),0.3);
+    width:38px; height:38px; border:1px solid rgba(201,191,176,0.3);
     display:flex; align-items:center; justify-content:center;
     font-family: var(--f-display); font-size:1.1rem;
-    color: var(--gold2); letter-spacing:1px;
+    color: #d4b896; letter-spacing:1px;
     transition: border-color 0.3s;
 }
-nav:hover .nav-logomark { border-color: var(--gold); }
+nav:hover .nav-logomark { border-color: #b09070; }
 .nav-wordmark { line-height:1; }
 .nav-wordmark .w1 {
     font-family: var(--f-display); font-size:1rem; font-weight:500;
-    letter-spacing:5px; text-transform:uppercase; color:var(--paper);
+    letter-spacing:5px; text-transform:uppercase; color:#f3ede4;
     display:block;
 }
 .nav-wordmark .w2 {
     font-family: var(--f-body); font-size:0.75rem; font-weight:300;
-    letter-spacing:2px; color:var(--gold); display:block; margin-top:2px;
+    letter-spacing:2px; color:#b09070; display:block; margin-top:2px;
 }
 
 .nav-right { display:flex; gap:14px; align-items:center; }
 .nav-rc {
-    font-size:0.55rem; letter-spacing:2px; color:var(--mist);
-    border:1px solid rgba(var(--mist-rgb),0.3); padding:5px 10px;
+    font-size:0.55rem; letter-spacing:2px; color:#7a7570;
+    border:1px solid rgba(122,117,112,0.3); padding:5px 10px;
 }
 .theme-toggle {
     display:flex; align-items:center; justify-content:center;
     width:36px; height:36px; flex-shrink:0;
-    background:transparent; border:1px solid rgba(var(--line-rgb),0.25);
-    color:var(--sand); font-size:0.95rem; line-height:1;
+    background:transparent; border:1px solid rgba(201,191,176,0.25);
+    color:#c9bfb0; font-size:0.95rem; line-height:1;
     cursor:pointer; transition:all 0.3s;
 }
-.theme-toggle:hover { border-color:var(--gold); color:var(--gold2); }
+.theme-toggle:hover { border-color:#b09070; color:#d4b896; }
 .nav-cta-btn {
     font-family:var(--f-body); font-size:0.6rem; font-weight:400;
     letter-spacing:2px; text-transform:uppercase;
     padding:10px 22px; background:transparent;
-    border:1px solid var(--sand); color:var(--paper);
+    border:1px solid #c9bfb0; color:#f3ede4;
     cursor:pointer; transition:all 0.3s;
 }
-.nav-cta-btn:hover { background:var(--paper); color:var(--ink); }
+.nav-cta-btn:hover { background:#f3ede4; color:#0d0c0a; }
 
 /* ── HERO ────────────────────────────────────────────────────────────── */
 .hero {
