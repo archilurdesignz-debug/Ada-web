@@ -231,9 +231,9 @@ nav:hover .nav-logomark { border-color: var(--gold); }
     content:''; position:absolute; inset:0;
     background: linear-gradient(
         125deg,
-        rgba(var(--ink-rgb),0.15) 0%,
-        rgba(var(--ink-rgb),0.45) 50%,
-        rgba(var(--ink-rgb),0.92) 100%
+        rgba(13,12,10,0.15) 0%,
+        rgba(13,12,10,0.45) 50%,
+        rgba(13,12,10,0.92) 100%
     );
 }
 
@@ -246,22 +246,22 @@ nav:hover .nav-logomark { border-color: var(--gold); }
     content:'';
     position:absolute; top:0; left:38%;
     width:1px; height:100%;
-    background:linear-gradient(to bottom, transparent 0%, rgba(var(--line-rgb),0.15) 30%, rgba(var(--line-rgb),0.08) 70%, transparent 100%);
+    background:linear-gradient(to bottom, transparent 0%, rgba(201,191,176,0.15) 30%, rgba(201,191,176,0.08) 70%, transparent 100%);
 }
 .hero-lines::after {
     content:'';
     position:absolute; bottom:0; left:0; right:0;
     height:1px;
-    background:linear-gradient(to right, transparent 0%, rgba(var(--line-rgb),0.2) 38%, transparent 100%);
+    background:linear-gradient(to right, transparent 0%, rgba(201,191,176,0.2) 38%, transparent 100%);
 }
 @keyframes heroUp {
     from { opacity:0; transform:translateY(40px); }
     to   { opacity:1; transform:translateY(0); }
 }
-.hero-tag-line { width:32px; height:1px; background:var(--accent); }
+.hero-tag-line { width:32px; height:1px; background:#c8a87a; }
 .hero-tag span {
     font-family:var(--f-body); font-size:0.58rem; font-weight:400;
-    letter-spacing:4px; text-transform:uppercase; color:var(--gold2);
+    letter-spacing:4px; text-transform:uppercase; color:#d4b896;
 }
 .hero-content {
     position: relative; z-index: 2;
@@ -281,7 +281,7 @@ nav:hover .nav-logomark { border-color: var(--gold); }
     font-family: var(--f-display);
     font-size: clamp(2.6rem, 5.5vw, 5.2rem);
     font-weight: 400; line-height: 1.1;
-    letter-spacing: -0.5px; color: var(--white);
+    letter-spacing: -0.5px; color: #faf8f4;
     margin-bottom: 28px;
     display: flex;
     flex-direction: column;
@@ -294,13 +294,13 @@ nav:hover .nav-logomark { border-color: var(--gold); }
 }
 
 .hero-title em {
-    font-style: italic; color: var(--gold2);
+    font-style: italic; color: #d4b896;
     display: block;
     margin-top: 5px; /* Comfortable gap on desktop screens */
 }
 
 .hero-sub {
-    font-size: 0.85rem; font-weight: 200; color: var(--sand);
+    font-size: 0.85rem; font-weight: 200; color: #c9bfb0;
     max-width: 700px; /* Increased from 420px to spread under the entire span of the text above */
     line-height: 1.8; margin: 0 auto 40px; /* Centers the text box itself */
     letter-spacing: 0.3px;
@@ -338,25 +338,25 @@ nav:hover .nav-logomark { border-color: var(--gold); }
 
 .btn-fill {
     padding:14px 36px;
-    background:var(--paper); color:var(--ink);
+    background:#f3ede4; color:#0d0c0a;
     font-family:var(--f-body); font-size:0.62rem; font-weight:500;
     letter-spacing:2.5px; text-transform:uppercase;
     text-decoration:none; border:none; cursor:pointer;
     transition:all 0.35s var(--ease-out);
     display:inline-block;
 }
-.btn-fill:hover { background:var(--accent); color:var(--white); transform:translateY(-3px); }
+.btn-fill:hover { background:#c8a87a; color:#faf8f4; transform:translateY(-3px); }
 
 .btn-ghost {
     padding:14px 36px;
-    background:transparent; color:var(--paper);
+    background:transparent; color:#f3ede4;
     font-family:var(--f-body); font-size:0.62rem; font-weight:400;
     letter-spacing:2.5px; text-transform:uppercase;
-    border:1px solid rgba(var(--line-rgb),0.4); cursor:pointer;
+    border:1px solid rgba(201,191,176,0.4); cursor:pointer;
     transition:all 0.35s var(--ease-out);
     display:inline-block;
 }
-.btn-ghost:hover { border-color:var(--paper); background:rgba(var(--overlay-rgb),0.08); transform:translateY(-3px); }
+.btn-ghost:hover { border-color:#f3ede4; background:rgba(255,255,255,0.08); transform:translateY(-3px); }
 
 /* Scroll indicator */
 .hero-scroll {
@@ -366,11 +366,11 @@ nav:hover .nav-logomark { border-color: var(--gold); }
 }
 .hero-scroll span {
     font: size 0.75em;rem; letter-spacing:3px; text-transform:uppercase;
-    color:var(--mist); writing-mode:vertical-rl;
+    color:#7a7570; writing-mode:vertical-rl;
 }
 .hero-scroll-line {
     width:1px; height:60px;
-    background:linear-gradient(to bottom, var(--accent), transparent);
+    background:linear-gradient(to bottom, #c8a87a, transparent);
     animation: scrollPulse 2s ease-in-out infinite;
 }
 @keyframes scrollPulse {
