@@ -4,6 +4,18 @@
     {
       "source": "/blog",
       "destination": "/blog.html"
+    },
+    {
+      "source": "/store",
+      "has": [
+        { "type": "query", "key": "plan" },
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|WhatsApp|Twitterbot|LinkedInBot|TelegramBot|Slackbot|Discordbot|Googlebot|bingbot|Pinterest|redditbot|SkypeUriPreview|YandexBot).*"
+        }
+      ],
+      "destination": "/api/plan-og"
     }
   ]
 }
