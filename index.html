@@ -3,18 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
-    <title>ADA ArchilurDesignz | Architectural Design, House Plans & Construction Solutions</title>
+    <title>ADA ArchilurDesignz | Architectural Design, Ready-Made House Plans & Construction Solutions</title>
     <meta name="description" content="Explore innovative architectural designs, house plans, Ready to Build concepts, 3D visualizations, construction solutions, and custom design services by ADA ArchilurDesignz.">
     <meta name="keywords" content="architectural design Nigeria, Luxury Homes, house plans Nigeria, modern home designs, permit approval, building plans, architectural drawings, residential architecture, building Construction, commercial architecture, 3D visualization, Animation, custom house plans, Landscaping, site plans, fiverr, Registered Architects">
-</head>
-    <title>ADA ArchilurDesignz | Architectural Design, Ready-Made House Plans & Construction Solutions</title>
     <!-- Standard Favicons -->
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <!-- Apple Touch Icon (iOS Safari) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
-<!-- Apple Touch Icon (iOS Safari) -->
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <!-- Set theme before first paint to avoid a flash of the wrong theme -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('ada-site-theme');
+                document.documentElement.setAttribute('data-theme', saved || 'light');
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
     <style>
@@ -26,8 +36,14 @@ html, body {
 }
 img, svg, video { max-width:100%; height:auto; display:block; }
 
-/* ── TOKENS ─────────────────────────────────────────────────────────── */
-:root {
+/* ── TOKENS ─────────────────────────────────────────────────────────── 
+   Same variable names drive both themes — most of the stylesheet below
+   already reads colors through var(--x), so redefining these repaints
+   the whole page. Two exceptions are intentionally locked to the dark
+   palette regardless of theme: the hero (sits over a photo with a dark
+   scrim) and the inquiry modal (a full-screen dark takeover) — see the
+   .hero and .modal-overlay variable locks further down. */
+:root, [data-theme="dark"] {
     --ink:     #0d0c0a;
     --ink2:    #1c1a17;
     --ink3:    #2e2b26;
@@ -43,12 +59,59 @@ img, svg, video { max-width:100%; height:auto; display:block; }
     --wa:      #25D366;
     --shadow:  0 8px 40px rgba(26,23,20,0.12);
 
+    --line-rgb:    201,191,176;
+    --overlay-rgb: 255,255,255;
+    --mist-rgb:    122,117,112;
+    --ink-rgb:     13,12,10;
+    --gold-rgb:    176,144,112;
+
     --f-display: 'Playfair Display', Georgia, serif;
     --f-body:    'Outfit', sans-serif;
 
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
 }
+
+[data-theme="light"] {
+    --ink:     #f5f1ea;
+    --ink2:    #ffffff;
+    --ink3:    #ece5d8;
+    --mist:    #5f5346;
+    --sand:    #55493c;
+    --paper:   #1c1712;
+    --paper2:  #241f18;
+    --gold:    #8a6a45;
+    --gold2:   #9c6b2e;
+    --accent:  #a97c4a;
+    --white:   #0d0c0a;
+    --glass:   rgba(13,12,10,0.035);
+    --wa:      #25D366;
+    --shadow:  0 8px 30px rgba(26,23,20,0.08);
+
+    --line-rgb:    13,12,10;
+    --overlay-rgb: 13,12,10;
+    --mist-rgb:    95,83,70;
+    --ink-rgb:     245,241,234;
+    --gold-rgb:    138,106,69;
+}
+
+/* Hero sits over a photo with its own dark scrim — keep its palette
+   fixed to the dark theme regardless of the site-wide toggle. */
+.hero {
+    --ink:#0d0c0a; --ink2:#1c1a17; --ink3:#2e2b26; --mist:#7a7570; --sand:#c9bfb0;
+    --paper:#f3ede4; --paper2:#ede5d8; --gold:#b09070; --gold2:#d4b896; --accent:#c8a87a;
+    --white:#faf8f4; --line-rgb:201,191,176; --overlay-rgb:255,255,255;
+    --mist-rgb:122,117,112; --ink-rgb:13,12,10; --gold-rgb:176,144,112;
+}
+/* Inquiry modal is a full-screen dark takeover in both themes — same lock. */
+.modal-overlay {
+    --ink:#0d0c0a; --ink2:#1c1a17; --ink3:#2e2b26; --mist:#7a7570; --sand:#c9bfb0;
+    --paper:#f3ede4; --paper2:#ede5d8; --gold:#b09070; --gold2:#d4b896; --accent:#c8a87a;
+    --white:#faf8f4; --line-rgb:201,191,176; --overlay-rgb:255,255,255;
+    --mist-rgb:122,117,112; --ink-rgb:13,12,10; --gold-rgb:176,144,112;
+}
+
+* { transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease; }
 
 body {
     background: var(--ink);
@@ -82,9 +145,9 @@ nav {
     transition: background 0.5s var(--ease-out), backdrop-filter 0.5s;
 }
 nav.solid {
-    background: rgba(13,12,10,0.94);
+    background: rgba(var(--ink-rgb),0.94);
     backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(201,191,176,0.08);
+    border-bottom: 1px solid rgba(var(--line-rgb),0.08);
 }
 .nav-left { display:flex; gap:28px; align-items:center; }
 .nav-left a {
@@ -107,7 +170,7 @@ nav.solid {
     display:flex; align-items:center; gap:10px;
 }
 .nav-logomark {
-    width:38px; height:38px; border:1px solid rgba(201,191,176,0.3);
+    width:38px; height:38px; border:1px solid rgba(var(--line-rgb),0.3);
     display:flex; align-items:center; justify-content:center;
     font-family: var(--f-display); font-size:1.1rem;
     color: var(--gold2); letter-spacing:1px;
@@ -128,8 +191,16 @@ nav:hover .nav-logomark { border-color: var(--gold); }
 .nav-right { display:flex; gap:14px; align-items:center; }
 .nav-rc {
     font-size:0.55rem; letter-spacing:2px; color:var(--mist);
-    border:1px solid rgba(122,117,112,0.3); padding:5px 10px;
+    border:1px solid rgba(var(--mist-rgb),0.3); padding:5px 10px;
 }
+.theme-toggle {
+    display:flex; align-items:center; justify-content:center;
+    width:36px; height:36px; flex-shrink:0;
+    background:transparent; border:1px solid rgba(var(--line-rgb),0.25);
+    color:var(--sand); font-size:0.95rem; line-height:1;
+    cursor:pointer; transition:all 0.3s;
+}
+.theme-toggle:hover { border-color:var(--gold); color:var(--gold2); }
 .nav-cta-btn {
     font-family:var(--f-body); font-size:0.6rem; font-weight:400;
     letter-spacing:2px; text-transform:uppercase;
@@ -160,9 +231,9 @@ nav:hover .nav-logomark { border-color: var(--gold); }
     content:''; position:absolute; inset:0;
     background: linear-gradient(
         125deg,
-        rgba(13,12,10,0.15) 0%,
-        rgba(13,12,10,0.45) 50%,
-        rgba(13,12,10,0.92) 100%
+        rgba(var(--ink-rgb),0.15) 0%,
+        rgba(var(--ink-rgb),0.45) 50%,
+        rgba(var(--ink-rgb),0.92) 100%
     );
 }
 
@@ -175,13 +246,13 @@ nav:hover .nav-logomark { border-color: var(--gold); }
     content:'';
     position:absolute; top:0; left:38%;
     width:1px; height:100%;
-    background:linear-gradient(to bottom, transparent 0%, rgba(201,191,176,0.15) 30%, rgba(201,191,176,0.08) 70%, transparent 100%);
+    background:linear-gradient(to bottom, transparent 0%, rgba(var(--line-rgb),0.15) 30%, rgba(var(--line-rgb),0.08) 70%, transparent 100%);
 }
 .hero-lines::after {
     content:'';
     position:absolute; bottom:0; left:0; right:0;
     height:1px;
-    background:linear-gradient(to right, transparent 0%, rgba(201,191,176,0.2) 38%, transparent 100%);
+    background:linear-gradient(to right, transparent 0%, rgba(var(--line-rgb),0.2) 38%, transparent 100%);
 }
 @keyframes heroUp {
     from { opacity:0; transform:translateY(40px); }
@@ -281,11 +352,11 @@ nav:hover .nav-logomark { border-color: var(--gold); }
     background:transparent; color:var(--paper);
     font-family:var(--f-body); font-size:0.62rem; font-weight:400;
     letter-spacing:2.5px; text-transform:uppercase;
-    border:1px solid rgba(201,191,176,0.4); cursor:pointer;
+    border:1px solid rgba(var(--line-rgb),0.4); cursor:pointer;
     transition:all 0.35s var(--ease-out);
     display:inline-block;
 }
-.btn-ghost:hover { border-color:var(--paper); background:rgba(250,248,244,0.08); transform:translateY(-3px); }
+.btn-ghost:hover { border-color:var(--paper); background:rgba(var(--overlay-rgb),0.08); transform:translateY(-3px); }
 
 /* Scroll indicator */
 .hero-scroll {
@@ -310,8 +381,8 @@ nav:hover .nav-logomark { border-color: var(--gold); }
 /* ── MARQUEE STRIP ───────────────────────────────────────────────────── */
 .marquee-strip {
     background: var(--ink2);
-    border-top:1px solid rgba(201,191,176,0.06);
-    border-bottom:1px solid rgba(201,191,176,0.06);
+    border-top:1px solid rgba(var(--line-rgb),0.06);
+    border-bottom:1px solid rgba(var(--line-rgb),0.06);
     padding:14px 0; overflow:hidden;
 }
 .marquee-track {
@@ -372,7 +443,7 @@ nav:hover .nav-logomark { border-color: var(--gold); }
 .plans-link {
     font-size:0.58rem; letter-spacing:2.5px; text-transform:uppercase;
     color:var(--gold); text-decoration:none;
-    border-bottom:1px solid rgba(176,144,112,0.3); padding-bottom:2px;
+    border-bottom:1px solid rgba(var(--gold-rgb),0.3); padding-bottom:2px;
     transition:color 0.3s, border-color 0.3s;
 }
 .plans-link:hover { color:var(--gold2); border-color:var(--gold2); }
@@ -394,14 +465,14 @@ nav:hover .nav-logomark { border-color: var(--gold); }
     scroll-snap-align:start;
     margin-right:20px;
     background:var(--ink2);
-    border:1px solid rgba(201,191,176,0.07);
+    border:1px solid rgba(var(--line-rgb),0.07);
     overflow:hidden;
     transition: transform 0.45s var(--ease-out), border-color 0.4s, box-shadow 0.4s;
     cursor:pointer;
 }
 .plan-card:hover {
     transform:translateY(-8px);
-    border-color:rgba(201,191,176,0.2);
+    border-color:rgba(var(--line-rgb),0.2);
     box-shadow: 0 24px 60px rgba(0,0,0,0.5);
 }
 .plan-img-wrap { position:relative; height:210px; overflow:hidden; }
@@ -418,7 +489,7 @@ nav:hover .nav-logomark { border-color: var(--gold); }
     background:var(--ink); color:var(--gold2);
     font-family:var(--f-body); font-size:0.65rem; font-weight:500;
     letter-spacing:1px; padding:5px 12px;
-    border:1px solid rgba(201,191,176,0.15);
+    border:1px solid rgba(var(--line-rgb),0.15);
 }
 .plan-info { padding:20px 22px 22px; }
 .plan-title {
@@ -468,7 +539,7 @@ nav:hover .nav-logomark { border-color: var(--gold); }
     position:absolute; top:40px; right:-20px;
     font-family:var(--f-display); font-size:clamp(5rem,12vw,11rem);
     font-weight:700; letter-spacing:-4px;
-    color:rgba(255,255,255,0.02);
+    color:rgba(var(--overlay-rgb),0.02);
     white-space:nowrap; pointer-events:none; user-select:none;
 }
 
@@ -485,7 +556,7 @@ nav:hover .nav-logomark { border-color: var(--gold); }
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:1px;
-    background:rgba(201,191,176,0.06);
+    background:rgba(var(--line-rgb),0.06);
 }
 
 .svc-item {
@@ -507,7 +578,7 @@ nav:hover .nav-logomark { border-color: var(--gold); }
 
 .svc-num {
     font-family:var(--f-display); font-size:0.7rem; font-style:italic;
-    color:rgba(201,191,176,0.2); letter-spacing:1px;
+    color:rgba(var(--line-rgb),0.2); letter-spacing:1px;
     margin-bottom:24px; display:block;
     transition:color 0.4s;
 }
@@ -528,12 +599,12 @@ nav:hover .nav-logomark { border-color: var(--gold); }
 /* ── STAT BAND ───────────────────────────────────────────────────────── */
 .stat-band {
     background:var(--ink); padding:60px 5%;
-    border-top:1px solid rgba(201,191,176,0.06);
-    border-bottom:1px solid rgba(201,191,176,0.06);
+    border-top:1px solid rgba(var(--line-rgb),0.06);
+    border-bottom:1px solid rgba(var(--line-rgb),0.06);
 }
 .stat-grid {
     display:grid; grid-template-columns:repeat(4,1fr);
-    gap:1px; background:rgba(201,191,176,0.06);
+    gap:1px; background:rgba(var(--line-rgb),0.06);
 }
 .stat-item {
     background:var(--ink); padding:36px 28px;
@@ -573,12 +644,12 @@ nav:hover .nav-logomark { border-color: var(--gold); }
 .review-card {
     flex:0 0 360px; min-width:360px;
     background:var(--ink2);
-    border:1px solid rgba(201,191,176,0.07);
+    border:1px solid rgba(var(--line-rgb),0.07);
     padding:32px 28px;
     transition:border-color 0.4s, transform 0.4s;
 }
 .review-card:hover {
-    border-color:rgba(201,191,176,0.18);
+    border-color:rgba(var(--line-rgb),0.18);
     transform:translateY(-4px);
 }
 .review-stars { color:var(--accent); font-size:0.75rem; letter-spacing:3px; margin-bottom:18px; }
@@ -631,14 +702,14 @@ nav:hover .nav-logomark { border-color: var(--gold); }
     color:var(--gold); font-weight:400;
 }
 .field input, .field select, .field textarea {
-    background:rgba(255,255,255,0.04); border:1px solid rgba(201,191,176,0.12);
+    background:rgba(var(--overlay-rgb),0.04); border:1px solid rgba(var(--line-rgb),0.12);
     color:var(--white); padding:13px 15px;
     font-family:var(--f-body); font-size:0.8rem; font-weight:200;
     outline:none; width:100%;
     transition:border-color 0.3s, background 0.3s;
 }
 .field input:focus, .field select:focus, .field textarea:focus {
-    border-color:rgba(201,191,176,0.4); background:rgba(255,255,255,0.06);
+    border-color:rgba(var(--line-rgb),0.4); background:rgba(var(--overlay-rgb),0.06);
 }
 .field textarea { min-height:110px; resize:vertical; }
 .field select option { background:var(--ink2); }
@@ -691,7 +762,7 @@ nav:hover .nav-logomark { border-color: var(--gold); }
 .audit-section {
     padding: 100px 5%;
     background: var(--ink);
-    border-top: 1px solid rgba(201,191,176,0.06);
+    border-top: 1px solid rgba(var(--line-rgb),0.06);
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 60px;
@@ -760,7 +831,7 @@ nav:hover .nav-logomark { border-color: var(--gold); }
 /* Panel Box Right */
 .audit-panel {
     background: var(--ink2);
-    border: 1px solid rgba(201,191,176,0.08);
+    border: 1px solid rgba(var(--line-rgb),0.08);
     padding: 44px 40px;
     display: flex;
     flex-direction: column;
@@ -770,7 +841,7 @@ nav:hover .nav-logomark { border-color: var(--gold); }
     display: flex;
     gap: 28px;
     padding: 24px 0;
-    border-bottom: 1px solid rgba(201,191,176,0.06);
+    border-bottom: 1px solid rgba(var(--line-rgb),0.06);
 }
 
 .audit-point:first-child { padding-top: 0; }
@@ -847,12 +918,12 @@ nav:hover .nav-logomark { border-color: var(--gold); }
 /* ── FOOTER ──────────────────────────────────────────────────────────── */
 footer {
     background:var(--ink2); padding:64px 5% 28px;
-    border-top:1px solid rgba(201,191,176,0.06);
+    border-top:1px solid rgba(var(--line-rgb),0.06);
 }
 .footer-top {
     display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr;
     gap:40px; padding-bottom:50px;
-    border-bottom:1px solid rgba(201,191,176,0.06);
+    border-bottom:1px solid rgba(var(--line-rgb),0.06);
     margin-bottom:28px;
 }
 .footer-brand .fb-name {
@@ -882,7 +953,7 @@ footer {
     display:flex; align-items:center; justify-content:space-between;
     flex-wrap:wrap; gap:12px;
 }
-.footer-copy { font-size:0.58rem; color:rgba(122,117,112,0.5); letter-spacing:1px; }
+.footer-copy { font-size:0.58rem; color:rgba(var(--mist-rgb),0.5); letter-spacing:1px; }
         .footer-ig {
     display: inline-flex;
     align-items: center;
@@ -967,6 +1038,7 @@ footer {
     </div>
     <div class="nav-right">
         <span class="nav-rc">RC: 9176834</span>
+        <button class="theme-toggle" id="siteThemeToggle" onclick="toggleSiteTheme()" aria-label="Toggle day and night mode">☾</button>
         <button class="nav-cta-btn" onclick="toggleInquiry(true)">Enquire</button>
     </div>
 </nav>
@@ -1260,6 +1332,22 @@ footer {
 <script>
     // Initialize EmailJS
     emailjs.init("BxYPs2WHunB4bKb2w");
+
+/* ── THEME TOGGLE ───────────────────────────────────────────────────── */
+function syncSiteThemeToggleIcon(theme) {
+    const btn = document.getElementById('siteThemeToggle');
+    if (!btn) return;
+    btn.textContent = theme === 'light' ? '☀' : '☾';
+    btn.setAttribute('aria-label', theme === 'light' ? 'Switch to night mode' : 'Switch to day mode');
+}
+function toggleSiteTheme() {
+    const root = document.documentElement;
+    const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('ada-site-theme', next); } catch (e) {}
+    syncSiteThemeToggleIcon(next);
+}
 
 /* ── CURSOR ─────────────────────────────────────────────────────────── */
 const cur = document.getElementById('cursor');
@@ -1604,6 +1692,7 @@ window.addEventListener('DOMContentLoaded', () => {
     loadPlans();
     loadReviews();
     observeReveal();
+    syncSiteThemeToggleIcon(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
 });
 </script>
 </body>
