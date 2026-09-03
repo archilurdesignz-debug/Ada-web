@@ -11,7 +11,20 @@
 
 <!-- Apple Touch Icon (iOS Safari) -->
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    
+
+    <!-- Set theme before first paint to avoid a flash of the wrong theme -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('ada-admin-theme');
+                var theme = saved || 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
@@ -20,43 +33,219 @@
 </script>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #0c0b09; --gold: #b5a898; --white: #f5f2ec; --glass: rgba(255,255,255,0.05); --success: #2e7d52; --danger: #7d2e2e; }
+        /* ── THEME VARIABLES ─────────────────────────────────────────────────
+           Same variable names drive both themes. The [data-theme="light"]
+           block below simply redefines them, and anything already written
+           with var(--x) repaints automatically. */
+        :root,
+        [data-theme="dark"] {
+            --bg: #0c0b09;
+            --gold: #b5a898;
+            --white: #f5f2ec;
+            --glass: rgba(255,255,255,0.05);
+            --success: #2e7d52;
+            --danger: #7d2e2e;
+
+            /* extended tokens used by the theme-override layer below */
+            --text-primary: #f5f2ec;
+            --text-dim: #888888;
+            --text-dimmer: #666666;
+            --text-faint: #555555;
+            --border-soft: #333333;
+            --border-softer: #222222;
+            --border-softest: #1a1a1a;
+            --card-bg: #1c1a17;
+            --card-bg-deep: #13110e;
+            --input-bg: #000000;
+            --overlay-black-1: rgba(0,0,0,0.2);
+            --overlay-black-2: rgba(0,0,0,0.3);
+            --overlay-black-3: rgba(0,0,0,0.4);
+            --overlay-black-4: rgba(0,0,0,0.5);
+            --overlay-white-1: rgba(255,255,255,0.01);
+            --overlay-white-2: rgba(255,255,255,0.02);
+            --overlay-white-3: rgba(255,255,255,0.05);
+            --overlay-white-4: rgba(255,255,255,0.06);
+            --overlay-white-5: rgba(255,255,255,0.08);
+            --overlay-white-6: rgba(255,255,255,0.1);
+            --overlay-white-7: rgba(255,255,255,0.15);
+        }
+
+        [data-theme="light"] {
+            --bg: #f5f2ec;
+            --gold: #9c8563;
+            --white: #16140f;
+            --glass: rgba(12,11,9,0.04);
+            --success: #1e7a45;
+            --danger: #a13a3a;
+
+            --text-primary: #16140f;
+            --text-dim: #6b6558;
+            --text-dimmer: #7d7768;
+            --text-faint: #948e7e;
+            --border-soft: #ddd6c8;
+            --border-softer: #e5e0d3;
+            --border-softest: #e9e4d8;
+            --card-bg: #fbf9f4;
+            --card-bg-deep: #f0ece1;
+            --input-bg: #ffffff;
+            --overlay-black-1: rgba(12,11,9,0.05);
+            --overlay-black-2: rgba(12,11,9,0.06);
+            --overlay-black-3: rgba(12,11,9,0.08);
+            --overlay-black-4: rgba(12,11,9,0.1);
+            --overlay-white-1: rgba(12,11,9,0.02);
+            --overlay-white-2: rgba(12,11,9,0.03);
+            --overlay-white-3: rgba(12,11,9,0.05);
+            --overlay-white-4: rgba(12,11,9,0.06);
+            --overlay-white-5: rgba(12,11,9,0.07);
+            --overlay-white-6: rgba(12,11,9,0.08);
+            --overlay-white-7: rgba(12,11,9,0.1);
+        }
+
+        * { transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease; }
+
         body { background: var(--bg); color: var(--white); font-family: 'Inter', sans-serif; padding: 40px; line-height: 1.6; }
         .admin-container { max-width: 1100px; margin: 0 auto; }
         h1, h2, h3 { font-family: 'Cormorant Garamond'; color: var(--gold); text-transform: uppercase; letter-spacing: 4px; }
-        h1 { margin-bottom: 40px; border-bottom: 1px solid var(--glass); padding-bottom: 20px; }
-        .section-card { background: var(--glass); border: 1px solid #222; padding: 30px; margin-bottom: 40px; border-top: 3px solid #333; }
+        h1 { margin-bottom: 40px; border-bottom: 1px solid var(--glass); padding-bottom: 20px; display:flex; align-items:center; justify-content:space-between; gap: 20px; flex-wrap: wrap; }
+        .section-card { background: var(--glass); border: 1px solid var(--border-softer); padding: 30px; margin-bottom: 40px; border-top: 3px solid var(--border-soft); }
         h3 { font-size: 0.9rem; margin-top: 25px; margin-bottom: 15px; border-left: 2px solid var(--gold); padding-left: 15px; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         .stage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
-        .stage-item { background: rgba(0,0,0,0.3); padding: 12px; border: 1px solid #1a1a1a; }
+        .stage-item { background: var(--overlay-black-2); padding: 12px; border: 1px solid var(--border-softest); }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-size: 0.65rem; color: var(--gold); text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px; }
-        input, select, textarea { width: 100%; background: #000; border: 1px solid #333; color: white; padding: 10px; font-family: 'Inter'; outline: none; }
+        input, select, textarea { width: 100%; background: var(--input-bg); border: 1px solid var(--border-soft); color: var(--text-primary); padding: 10px; font-family: 'Inter'; outline: none; }
         input:focus, select:focus, textarea:focus { border-color: var(--gold); }
         .btn-action { background: var(--gold); color: #000; border: none; padding: 15px; cursor: pointer; text-transform: uppercase; font-weight: 600; width: 100%; margin-top: 15px; transition: 0.3s; letter-spacing: 1px; }
-        .btn-action:hover { background: var(--white); }
+        [data-theme="light"] .btn-action { color: #fff; }
+        .btn-action:hover { background: var(--white); color: var(--bg); }
         .btn-danger { background: var(--danger); color: white; }
         .btn-success { background: var(--success); color: white; }
         #creationResult { margin-top: 20px; padding: 15px; background: rgba(46,125,82,0.1); border: 1px solid var(--success); display: none; }
-        code { background: #000; padding: 5px 10px; color: var(--gold); font-size: 0.9rem; }
-        .review-card { background: rgba(255,255,255,0.02); padding: 20px; border: 1px solid #222; margin-bottom: 15px; }
+        code { background: var(--input-bg); padding: 5px 10px; color: var(--gold); font-size: 0.9rem; }
+        .review-card { background: var(--overlay-white-2); padding: 20px; border: 1px solid var(--border-softer); margin-bottom: 15px; }
         .mod-btns { display: flex; gap: 10px; margin-top: 15px; }
         .btn-mod { padding: 8px 20px; font-size: 0.7rem; cursor: pointer; border: none; text-transform: uppercase; font-weight: 600; color: white; }
 
+        /* Theme toggle switch */
+        .theme-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--glass);
+            border: 1px solid var(--border-soft);
+            color: var(--text-primary);
+            padding: 10px 16px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        .theme-toggle-btn:hover { border-color: var(--gold); color: var(--gold); }
+        .theme-toggle-btn .icon { font-size: 0.95rem; line-height: 1; }
+
         /* File Manager */
-        .file-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 10px; padding: 15px; background: rgba(0,0,0,0.3); border: 1px solid #1a1a1a; }
+        .file-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 10px; padding: 15px; background: var(--overlay-black-2); border: 1px solid var(--border-softest); }
         .file-row label { font-size: 0.6rem; }
         .btn-small { padding: 8px 15px; font-size: 0.65rem; cursor: pointer; border: none; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; background: var(--gold); color: #000; white-space: nowrap; }
-        .btn-small:hover { background: var(--white); }
+        [data-theme="light"] .btn-small:not(.btn-remove) { color: #fff; }
+        .btn-small:hover { background: var(--white); color: var(--bg); }
         .btn-remove { background: var(--danger); color: white; }
+        .btn-remove:hover { background: var(--danger); color: white; opacity: 0.85; }
         .existing-files { margin-top: 20px; }
-        .existing-file-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: rgba(0,0,0,0.2); border: 1px solid #1a1a1a; margin-bottom: 8px; font-size: 0.75rem; }
+        .existing-file-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: var(--overlay-black-1); border: 1px solid var(--border-softest); margin-bottom: 8px; font-size: 0.75rem; }
         .file-status-badge { font-size: 0.55rem; padding: 3px 8px; letter-spacing: 1px; text-transform: uppercase; }
         .badge-released { background: var(--success); color: white; }
-        .badge-locked { background: #333; color: #888; }
+        .badge-locked { background: var(--border-soft); color: var(--text-dim); }
         .file-actions { display: flex; gap: 8px; }
+
+        /* ── LIGHT THEME OVERRIDES FOR HARDCODED INLINE STYLES ──────────────────
+           Large parts of this panel use one-off inline styles instead of
+           classes. Rather than rewrite every inline attribute, this layer
+           catches the recurring literal values with attribute selectors and
+           repaints them for light mode. !important is required since inline
+           styles otherwise win over any external stylesheet rule. */
+        [data-theme="light"] [style*="background:#000"],
+        [data-theme="light"] [style*="background: #000"],
+        [data-theme="light"] [style*="background:#1c1a17"],
+        [data-theme="light"] [style*="background: #1c1a17"],
+        [data-theme="light"] [style*="background:#13110e"],
+        [data-theme="light"] [style*="background: #13110e"],
+        [data-theme="light"] [style*="background:#0d0c0a"] {
+            background: var(--card-bg) !important;
+        }
+        [data-theme="light"] [style*="background:rgba(0,0,0,0.2)"],
+        [data-theme="light"] [style*="background: rgba(0,0,0,0.2)"],
+        [data-theme="light"] [style*="background:rgba(0,0,0,0.3)"],
+        [data-theme="light"] [style*="background: rgba(0,0,0,0.3)"],
+        [data-theme="light"] [style*="background:rgba(0,0,0,0.4)"],
+        [data-theme="light"] [style*="background: rgba(0,0,0,0.4)"],
+        [data-theme="light"] [style*="background:rgba(0,0,0,0.5)"],
+        [data-theme="light"] [style*="background: rgba(0,0,0,0.5)"] {
+            background: var(--overlay-black-2) !important;
+        }
+        [data-theme="light"] [style*="background:rgba(255,255,255,0.01)"],
+        [data-theme="light"] [style*="background: rgba(255,255,255,0.01)"],
+        [data-theme="light"] [style*="background:rgba(255,255,255,0.02)"],
+        [data-theme="light"] [style*="background: rgba(255,255,255,0.02)"],
+        [data-theme="light"] [style*="background:rgba(255,255,255,0.05)"],
+        [data-theme="light"] [style*="background: rgba(255,255,255,0.05)"],
+        [data-theme="light"] [style*="background:rgba(255,255,255,0.06)"],
+        [data-theme="light"] [style*="background:#ffffff05"],
+        [data-theme="light"] [style*="background:#ffffff08"],
+        [data-theme="light"] [style*="background:#ffffff10"],
+        [data-theme="light"] [style*="background:rgba(155,89,182,0.06)"] {
+            background: var(--overlay-white-3) !important;
+        }
+        [data-theme="light"] [style*="border:1px solid #333"],
+        [data-theme="light"] [style*="border: 1px solid #333"],
+        [data-theme="light"] [style*="border:1px solid #222"],
+        [data-theme="light"] [style*="border: 1px solid #222"],
+        [data-theme="light"] [style*="border:1px solid #1a1a1a"],
+        [data-theme="light"] [style*="border: 1px solid #1a1a1a"],
+        [data-theme="light"] [style*="border:1px solid rgba(255,255,255,0.1)"],
+        [data-theme="light"] [style*="border:1px solid rgba(255,255,255,0.15)"],
+        [data-theme="light"] [style*="border:1px solid #ffffff08"],
+        [data-theme="light"] [style*="border:1px solid #ffffff10"],
+        [data-theme="light"] [style*="border:1px solid #ffffff15"],
+        [data-theme="light"] [style*="border-bottom:1px solid #ffffff10"] {
+            border-color: var(--border-soft) !important;
+        }
+        [data-theme="light"] [style*="color:#fff"],
+        [data-theme="light"] [style*="color: #fff"],
+        [data-theme="light"] [style*="color:white"],
+        [data-theme="light"] [style*="color: white"],
+        [data-theme="light"] [style*="color:#f3ede4"],
+        [data-theme="light"] [style*="color:#f5f2ec"] {
+            color: var(--text-primary) !important;
+        }
+        [data-theme="light"] [style*="color:#888"],
+        [data-theme="light"] [style*="color:#666"],
+        [data-theme="light"] [style*="color:#555"],
+        [data-theme="light"] [style*="color:#444"],
+        [data-theme="light"] [style*="color:#777"],
+        [data-theme="light"] [style*="color:#7f8c8d"],
+        [data-theme="light"] [style*="color:#7a7570"],
+        [data-theme="light"] [style*="color:#c9bfb0"] {
+            color: var(--text-dim) !important;
+        }
+        [data-theme="light"] input[style*="background:#1c1a17"],
+        [data-theme="light"] textarea[style*="background:#1c1a17"],
+        [data-theme="light"] select[style*="background:#1c1a17"] {
+            color: var(--text-primary) !important;
+        }
+        /* Upload buttons keep their solid brand color in both themes, only the
+           default admin-dashboard-panel wrapper and FAQ card need repainting */
+        [data-theme="light"] .admin-dashboard-panel {
+            background: var(--card-bg-deep) !important;
+            border-color: var(--border-softer) !important;
+            color: var(--text-primary) !important;
+        }
+
         /* ── MOBILE RESPONSIVE ───────────────────────────────────────────────── */
 @media (max-width: 768px) {
     body { padding: 16px; }
@@ -132,6 +321,8 @@
 
     /* Small helper text */
     p[style*="font-size:0.6rem"] { font-size: 0.65rem !important; }
+
+    h1 { flex-direction: column; align-items: flex-start; gap: 14px; }
 }
 
 @media (max-width: 480px) {
@@ -209,7 +400,13 @@
 </head>
 <body>
 <div class="admin-container">
-    <h1>ADA Universal Control Panel</h1>
+    <h1>
+        <span>ADA Universal Control Panel</span>
+        <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleAdaTheme()">
+            <span class="icon" id="themeToggleIcon">☾</span>
+            <span id="themeToggleLabel">Night Mode</span>
+        </button>
+    </h1>
 
      <!-- ── GENERATE INVOICE ─────────────────────────────── -->
 <div class="section-card" style="border-top-color: #b09070;">
@@ -1070,6 +1267,35 @@
 </div>
 
 <script>
+// ─── THEME TOGGLE ──────────────────────────────────────────────────────────
+function syncThemeToggleUI(theme) {
+    const icon = document.getElementById('themeToggleIcon');
+    const label = document.getElementById('themeToggleLabel');
+    if (!icon || !label) return;
+    if (theme === 'light') {
+        icon.textContent = '☀';
+        label.textContent = 'Day Mode';
+    } else {
+        icon.textContent = '☾';
+        label.textContent = 'Night Mode';
+    }
+}
+
+function toggleAdaTheme() {
+    const root = document.documentElement;
+    const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('ada-admin-theme', next); } catch (e) {}
+    syncThemeToggleUI(next);
+}
+
+// Sync the button label/icon with whatever the pre-paint script already set
+document.addEventListener('DOMContentLoaded', () => {
+    const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    syncThemeToggleUI(current);
+});
+
 // ─── SUPABASE CLIENT INITIALIZATION ───────────────────────────────────────────
 const SUPABASE_URL   = 'https://ofaxbduvnhscxvoakeax.supabase.co';   
 const SUPABASE_KEY   = 'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK'; 
