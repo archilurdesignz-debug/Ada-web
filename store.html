@@ -5,6 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <title>Plan Store | ADA Archilurdesignz</title>
+<meta name="description" content="Ready-to-build architectural plans and custom design concepts from ADA Archilurdesignz.">
+<!-- Default Open Graph / Twitter Card tags for generic /store shares.
+     Deep links to a specific plan (?plan=id) get plan-specific tags
+     instead, served to crawlers only by /api/plan-og — see vercel.json. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ADA Archilurdesignz">
+<meta property="og:title" content="Plan Store | ADA Archilurdesignz">
+<meta property="og:description" content="Ready-to-build architectural plans and custom design concepts from ADA Archilurdesignz.">
+<meta property="og:image" content="https://www.archilurdesignz.com/og-default.jpg">
+<meta property="og:url" content="https://www.archilurdesignz.com/store">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Plan Store | ADA Archilurdesignz">
+<meta name="twitter:description" content="Ready-to-build architectural plans and custom design concepts from ADA Archilurdesignz.">
+<meta name="twitter:image" content="https://www.archilurdesignz.com/og-default.jpg">
     <!-- Standard Favicons -->
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -12,40 +26,93 @@
 
 <!-- Apple Touch Icon (iOS Safari) -->
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<!-- Set theme before first paint. Shares the same storage key as the rest
+     of the site, so a visitor's choice carries over across pages. -->
+<script>
+    (function () {
+        try {
+            var saved = localStorage.getItem('ada-site-theme');
+            document.documentElement.setAttribute('data-theme', saved || 'light');
+        } catch (e) {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    })();
+</script>
+
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%;}
 img,svg,video{max-width:100%;height:auto;display:block;}
-:root{
+
+/* ── TOKENS ─────────────────────────────────────────────────────────
+   Same variable names for both themes. Locked always-dark regardless of
+   theme: nav (matches every other page's fixed chrome), the plan-card
+   photo overlay, the plan-detail modal's photo gallery/carousel, and the
+   watermark — all of which sit directly on top of project photos. The
+   cost estimator popup below is already fully hardcoded with no
+   variables, so it stays dark always by construction, untouched here. */
+:root, [data-theme="dark"] {
     --ink:#0d0c0a;--ink2:#1c1a17;--ink3:#2e2b26;
     --mist:#7a7570;--sand:#c9bfb0;--paper:#f3ede4;
     --gold:#b09070;--gold2:#d4b896;--accent:#c8a87a;
     --white:#faf8f4;--glass:rgba(255,255,255,0.04);--wa:#25D366;
+
+    --line-rgb:    201,191,176;
+    --overlay-rgb: 255,255,255;
+    --mist-rgb:    122,117,112;
+    --ink-rgb:     13,12,10;
+
     --f-display:'Playfair Display',Georgia,serif;
     --f-body:'Outfit',sans-serif;
     --ease-out:cubic-bezier(0.16,1,0.3,1);
 }
+
+[data-theme="light"] {
+    --ink:#f5f1ea;--ink2:#ffffff;--ink3:#ece5d8;
+    --mist:#5f5346;--sand:#55493c;--paper:#1c1712;
+    --gold:#8a6a45;--gold2:#9c6b2e;--accent:#a97c4a;
+    --white:#0d0c0a;--glass:rgba(13,12,10,0.035);--wa:#25D366;
+
+    --line-rgb:    13,12,10;
+    --overlay-rgb: 13,12,10;
+    --mist-rgb:    95,83,70;
+    --ink-rgb:     245,241,234;
+}
+
+* { transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease; }
+
 body{background:var(--ink);color:var(--paper);font-family:var(--f-body);line-height:1.65;}
 h1,h2,h3,h4{font-family:var(--f-display);font-weight:400;}
 a{text-decoration:none;color:inherit;transition:0.3s;}
 
-/* NAV */
+/* NAV — fixed chrome, kept in the original warm gold/tan-on-dark palette
+   always, matching the homepage and portfolio page. */
 nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 4%;transition:background 0.5s var(--ease-out);}
 nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-bottom:1px solid rgba(201,191,176,0.08);}
 .nav-left{display:flex;gap:28px;align-items:center;}
-.nav-left a{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--sand);position:relative;}
-.nav-left a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--accent);transition:width 0.35s var(--ease-out);}
-.nav-left a:hover{color:var(--paper);}
+.nav-left a{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:#c9bfb0;position:relative;}
+.nav-left a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:#c8a87a;transition:width 0.35s var(--ease-out);}
+.nav-left a:hover{color:#f3ede4;}
 .nav-left a:hover::after{width:100%;}
 .nav-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;}
-.nav-logomark{width:38px;height:38px;border:1px solid rgba(201,191,176,0.3);display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-size:1.1rem;color:var(--gold2);}
-.nav-wordmark .w1{font-family:var(--f-display);font-size:1rem;font-weight:500;letter-spacing:5px;text-transform:uppercase;color:var(--paper);display:block;}
-.nav-wordmark .w2{font-family:var(--f-body);font-size:0.5rem;letter-spacing:2px;color:var(--gold);display:block;margin-top:2px;}
+.nav-logomark{width:38px;height:38px;border:1px solid rgba(201,191,176,0.3);display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-size:1.1rem;color:#d4b896;}
+.nav-wordmark .w1{font-family:var(--f-display);font-size:1rem;font-weight:500;letter-spacing:5px;text-transform:uppercase;color:#f3ede4;display:block;}
+.nav-wordmark .w2{font-family:var(--f-body);font-size:0.5rem;letter-spacing:2px;color:#b09070;display:block;margin-top:2px;}
 .nav-right{display:flex;gap:14px;align-items:center;}
-.nav-rc{font-size:0.55rem;letter-spacing:2px;color:var(--mist);border:1px solid rgba(122,117,112,0.3);padding:5px 10px;}
+.nav-rc{font-size:0.55rem;letter-spacing:2px;color:#7a7570;border:1px solid rgba(122,117,112,0.3);padding:5px 10px;}
+.theme-toggle{
+    display:flex;align-items:center;justify-content:center;
+    width:36px;height:36px;flex-shrink:0;
+    background:transparent;border:1px solid rgba(201,191,176,0.25);
+    color:#c9bfb0;font-size:0.95rem;line-height:1;
+    cursor:pointer;transition:all 0.3s;
+}
+.theme-toggle:hover{border-color:#b09070;color:#d4b896;}
 
-/* PAGE HEADER */
+/* PAGE HEADER — plain page background, no photo, so this follows the
+   theme normally. */
 .store-header-section{padding:140px 5% 30px;text-align:center;}
 .store-header-section .eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;}
 .store-header-section .eyebrow::before{content:'';width:24px;height:1px;background:var(--gold);}
@@ -56,36 +123,39 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 .search-wrap{display:flex;justify-content:center;width:100%;}
 .search-box{position:relative;width:100%;max-width:580px;}
 .search-box svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);pointer-events:none;width:16px;opacity:0.4;stroke:var(--sand);fill:none;stroke-width:2;}
-.search-box input{width:100%;padding:15px 44px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,191,176,0.15);color:var(--white);font-family:var(--f-body);font-size:0.85rem;letter-spacing:0.5px;outline:none;transition:border-color 0.3s,background 0.3s;}
+.search-box input{width:100%;padding:15px 44px;background:rgba(var(--overlay-rgb),0.04);border:1px solid rgba(var(--line-rgb),0.15);color:var(--white);font-family:var(--f-body);font-size:0.85rem;letter-spacing:0.5px;outline:none;transition:border-color 0.3s,background 0.3s;}
 .search-box input::placeholder{color:var(--mist);}
-.search-box input:focus{border-color:var(--accent);background:rgba(255,255,255,0.06);}
+.search-box input:focus{border-color:var(--accent);background:rgba(var(--overlay-rgb),0.06);}
 #searchClear{position:absolute;right:16px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--gold);display:none;font-size:1rem;line-height:1;background:none;border:none;}
 
 /* FILTER STRIP */
 .filter-scroll-wrapper{width:100%;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;-ms-overflow-style:none;}
 .filter-scroll-wrapper::-webkit-scrollbar{display:none;}
 .filter-strip{display:flex;gap:10px;justify-content:flex-start;min-width:max-content;padding:2px 4px;}
-.filter-btn{background:transparent;border:1px solid rgba(201,191,176,0.12);color:var(--sand);padding:8px 16px;font-family:var(--f-body);font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.3s var(--ease-out);border-radius:2px;}
+.filter-btn{background:transparent;border:1px solid rgba(var(--line-rgb),0.12);color:var(--sand);padding:8px 16px;font-family:var(--f-body);font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.3s var(--ease-out);border-radius:2px;}
 .filter-btn:hover{border-color:var(--gold);color:var(--white);}
 .filter-btn.active{background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:500;}
 
 /* CATALOG GRID */
 .catalog-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;padding:0 5% 100px;max-width:1600px;margin:0 auto;}
-.plan-card{background:var(--ink2);border:1px solid rgba(201,191,176,0.07);cursor:pointer;transition:transform 0.45s var(--ease-out),border-color 0.4s,box-shadow 0.4s;overflow:hidden;}
-.plan-card:hover{border-color:rgba(201,191,176,0.2);transform:translateY(-6px);box-shadow:0 24px 60px rgba(0,0,0,0.5);}
+.plan-card{background:var(--ink2);border:1px solid rgba(var(--line-rgb),0.07);cursor:pointer;transition:transform 0.45s var(--ease-out),border-color 0.4s,box-shadow 0.4s;overflow:hidden;}
+.plan-card:hover{border-color:rgba(var(--line-rgb),0.2);transform:translateY(-6px);box-shadow:0 24px 60px rgba(0,0,0,0.5);}
 .plan-img-container{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;}
 .plan-img{width:100%;height:100%;background-size:cover;background-position:center;filter:brightness(0.75);transition:transform 0.6s var(--ease-out),filter 0.5s;}
 .plan-card:hover .plan-img{transform:scale(1.06);filter:brightness(1);}
+/* Overlay sits on top of the plan photo — locked dark scrim + light text
+   regardless of theme, same reasoning as the portfolio gallery captions. */
 .plan-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(13,12,10,0.88),transparent);display:flex;flex-direction:column;justify-content:flex-end;padding:28px;}
-.plan-overlay h3{font-family:var(--f-display);font-size:1.1rem;letter-spacing:2px;text-transform:uppercase;color:var(--white);margin-bottom:4px;}
-.plan-overlay p{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);}
+.plan-overlay h3{font-family:var(--f-display);font-size:1.1rem;letter-spacing:2px;text-transform:uppercase;color:#faf8f4;margin-bottom:4px;}
+.plan-overlay p{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;color:#b09070;}
 
-/* ─── NEW MODAL ARCHITECTURE ─── */
+/* ─── PLAN DETAIL MODAL ─── follows the page theme (it's a detail panel,
+   not a dramatic dark takeover) except the photo gallery, which is locked. */
 .modal{position:fixed;inset:0;background:var(--ink);z-index:2000;display:none;overflow-y:auto;padding:70px 5% 90px;-webkit-overflow-scrolling:touch;}
 .modal.open{display:block;}
 .modal-grid{display:flex;flex-direction:column;max-width:1400px;margin:0 auto;gap:30px;}
 
-/* Hero Gallery */
+/* Hero Gallery — a self-contained photo viewer, locked dark always. */
 .hero-container{width:100%;margin-bottom:10px;position:relative;}
 #modalGallery{position:relative;width:100%;height:75vh;background:#000;border:1px solid rgba(201,191,176,0.12);overflow:hidden;border-radius:4px;}
 #heroDisplayArea{width:100%;height:100%;}
@@ -98,34 +168,34 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
   background: rgba(13, 12, 10, 0.1); 
   backdrop-filter: blur(3px);
   padding: 24px 30px;
-  border-left: 2px solid var(--gold);
+  border-left: 2px solid #b09070;
   border-radius: 0 4px 4px 0;
 }
-#modalTitle{font-family:var(--f-display);font-size:1.5rem;color:var(--white);margin-bottom:6px;line-height:1.1;}
-#modalMeta{font-size:0.65rem;letter-spacing:3px;color:var(--gold2);text-transform:uppercase;display:block;}
-#modalPrice{font-size:1.2rem;color:var(--accent);font-weight:500;margin-top:6px;display:block;font-family:var(--f-body);}
+#modalTitle{font-family:var(--f-display);font-size:1.5rem;color:#faf8f4;margin-bottom:6px;line-height:1.1;}
+#modalMeta{font-size:0.65rem;letter-spacing:3px;color:#d4b896;text-transform:uppercase;display:block;}
+#modalPrice{font-size:1.2rem;color:#c8a87a;font-weight:500;margin-top:6px;display:block;font-family:var(--f-body);}
 
-/* Carousel Nav */
-.carousel-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(13,12,10,0.6);color:var(--sand);border:1px solid rgba(201,191,176,0.2);width:54px;height:54px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;z-index:20;transition:all 0.3s;border-radius:50%;backdrop-filter:blur(4px);}
-.carousel-arrow:hover{background:var(--gold);color:var(--ink);border-color:var(--gold);}
+/* Carousel Nav — sits over the photo, locked dark. */
+.carousel-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(13,12,10,0.6);color:#c9bfb0;border:1px solid rgba(201,191,176,0.2);width:54px;height:54px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;z-index:20;transition:all 0.3s;border-radius:50%;backdrop-filter:blur(4px);}
+.carousel-arrow:hover{background:#b09070;color:#0d0c0a;border-color:#b09070;}
 .carousel-arrow.left{left:24px;}
 .carousel-arrow.right{right:24px;}
 
-/* Thumbnails */
-.thumbnail-strip{display:flex;gap:12px;margin-top:16px;overflow-x:auto;padding-bottom:10px;scrollbar-width:thin;scrollbar-color:var(--gold) var(--ink);}
+/* Thumbnails — part of the locked photo viewer. */
+.thumbnail-strip{display:flex;gap:12px;margin-top:16px;overflow-x:auto;padding-bottom:10px;scrollbar-width:thin;scrollbar-color:#b09070 #0d0c0a;}
 .thumbnail-strip::-webkit-scrollbar {height:6px;}
-.thumbnail-strip::-webkit-scrollbar-thumb {background:var(--gold);border-radius:3px;}
+.thumbnail-strip::-webkit-scrollbar-thumb {background:#b09070;border-radius:3px;}
 .thumbnail-item{width:100px;height:65px;object-fit:cover;cursor:pointer;border:2px solid transparent;border-radius:2px;transition:all 0.3s;flex-shrink:0;opacity:0.5;}
-.thumbnail-item:hover, .thumbnail-item.active{border-color:var(--accent);opacity:1;}
-.video-thumb{display:flex;align-items:center;justify-content:center;background:rgba(201,191,176,0.05);color:var(--gold2);font-size:1.4rem;border:2px solid transparent;opacity:0.7;}
-.video-thumb.active { border-color:var(--gold2); opacity:1;}
+.thumbnail-item:hover, .thumbnail-item.active{border-color:#c8a87a;opacity:1;}
+.video-thumb{display:flex;align-items:center;justify-content:center;background:rgba(201,191,176,0.05);color:#d4b896;font-size:1.4rem;border:2px solid transparent;opacity:0.7;}
+.video-thumb.active { border-color:#d4b896; opacity:1;}
 
 /* Two Column Layout */
 .content-section{display:grid;grid-template-columns:1fr 1fr;gap:50px; margin-bottom: 20px;}
 
-/* Packages & Forms */
-.tabbed-package-box {background: rgba(255, 255, 255, 0.02);border: 1px solid rgba(201, 191, 176, 0.12);padding: 32px 28px;margin-bottom: 28px;border-radius: 4px;}
-.package-tabs {display: flex;border-bottom: 1px solid rgba(201, 191, 176, 0.15);margin-bottom: 24px;gap: 8px;}
+/* Packages & Forms — page content, follows theme */
+.tabbed-package-box {background: rgba(var(--overlay-rgb), 0.02);border: 1px solid rgba(var(--line-rgb), 0.12);padding: 32px 28px;margin-bottom: 28px;border-radius: 4px;}
+.package-tabs {display: flex;border-bottom: 1px solid rgba(var(--line-rgb), 0.15);margin-bottom: 24px;gap: 8px;}
 .package-tab {flex: 1;background: transparent;border: none;color: var(--mist);font-family: var(--f-display);font-size: 1.05rem;letter-spacing: 1.5px;text-transform: uppercase;padding: 14px 8px;cursor: pointer;text-align: center;border-bottom: 2px solid transparent;transition: all 0.3s var(--ease-out);}
 .package-tab:hover { color: var(--sand); }
 .package-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
@@ -133,20 +203,20 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 .tab-content-pane.active { display: block; }
 .tier-title-desc { font-size: 1.1rem; color: var(--white); font-weight: 500; margin-bottom: 10px; letter-spacing: 0.3px; }
 .tier-body-desc { font-size: 0.9rem; color: var(--sand); line-height: 1.65; margin-bottom: 20px; }
-.tier-specs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 16px; border-top: 1px solid rgba(201, 191, 176, 0.08); padding-top: 18px; font-size: 0.85rem; color: var(--sand); }
+.tier-specs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 16px; border-top: 1px solid rgba(var(--line-rgb), 0.08); padding-top: 18px; font-size: 0.85rem; color: var(--sand); }
 .tier-spec-item { display: flex; align-items: center; gap: 8px; }
 .tier-spec-item .icon-check { color: var(--wa); font-weight: bold; }
 .tier-spec-item .icon-cross { color: #ff4d4d; font-weight: bold; }
 @keyframes fadeInTab { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
 
 /* 3 COLUMN FAQ SECTION */
-.faq-bottom-section {display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; border-top: 1px solid rgba(201, 191, 176, 0.08); padding-top: 40px;}
-.faq-trigger-card {background: rgba(255, 255, 255, 0.02);border: 1px solid rgba(201, 191, 176, 0.12);padding: 24px;cursor: pointer;text-align: left;transition: all 0.3s var(--ease-out);display: flex;flex-direction: column;justify-content: center;}
+.faq-bottom-section {display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; border-top: 1px solid rgba(var(--line-rgb), 0.08); padding-top: 40px;}
+.faq-trigger-card {background: rgba(var(--overlay-rgb), 0.02);border: 1px solid rgba(var(--line-rgb), 0.12);padding: 24px;cursor: pointer;text-align: left;transition: all 0.3s var(--ease-out);display: flex;flex-direction: column;justify-content: center;}
 .faq-trigger-card:hover {border-color: var(--accent);background: rgba(200, 168, 122, 0.04);}
 .faq-trigger-title {font-family: var(--f-display);font-size: 1.2rem;color: var(--gold2);text-transform: uppercase;letter-spacing: 0.5px;margin-bottom: 8px;}
 .faq-trigger-desc {font-size: 0.85rem;color: var(--mist);line-height: 1.5;}
 
-.store-faq-link-block {background: rgba(255, 255, 255, 0.01); border: 1px dashed rgba(201, 191, 176, 0.2); padding: 24px; font-size: 0.9rem; color: var(--sand); line-height: 1.6; display: flex; align-items: center; justify-content: center; text-align: center;}
+.store-faq-link-block {background: rgba(var(--overlay-rgb), 0.01); border: 1px dashed rgba(var(--line-rgb), 0.2); padding: 24px; font-size: 0.9rem; color: var(--sand); line-height: 1.6; display: flex; align-items: center; justify-content: center; text-align: center;}
 .store-faq-hyperlink {color: var(--gold2);font-weight: 500;position: relative;white-space: nowrap;display: inline-block;transition: color 0.35s var(--ease-out);}
 .store-faq-hyperlink::after {content: '';position: absolute;bottom: -1px;left: 0;width: 100%;height: 1px;background: var(--accent);transform: scaleX(0);transform-origin: right;transition: transform 0.35s var(--ease-out);}
 .store-faq-hyperlink:hover {color: var(--white);}
@@ -156,17 +226,18 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 .notice-box-full {margin-top: 24px; padding: 20px 24px; border-left: 3px solid var(--gold); background: rgba(176,144,112,0.05); display: flex; align-items: center; gap: 10px;}
 .notice-box-full p {font-size: 0.85rem; color: var(--mist); line-height: 1.6; font-style: italic; margin: 0;}
 
-/* FIXED POSITION CENTERED SUB-MODAL CARD */
-.sub-modal-layer {position: fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);width: calc(100% - 30px);max-width: 480px;max-height: calc(100vh - 40px);background: rgba(13, 12, 10, 0.88);backdrop-filter: blur(25px);-webkit-backdrop-filter: blur(25px);border: 1px solid rgba(201, 191, 176, 0.16);z-index: 2500;display: none;padding: 32px 28px;overflow-y: auto;border-radius: 4px;box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);animation: subModalSlide 0.4s var(--ease-out);}
+/* FAQ SUB-MODAL — frosted glass card, follows theme so the blur reads
+   correctly against whichever background is behind it. */
+.sub-modal-layer {position: fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);width: calc(100% - 30px);max-width: 480px;max-height: calc(100vh - 40px);background: rgba(var(--ink-rgb), 0.88);backdrop-filter: blur(25px);-webkit-backdrop-filter: blur(25px);border: 1px solid rgba(var(--line-rgb), 0.16);z-index: 2500;display: none;padding: 32px 28px;overflow-y: auto;border-radius: 4px;box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);animation: subModalSlide 0.4s var(--ease-out);}
 .sub-modal-layer.open { display: block; }
-.sub-modal-header {display: flex;justify-content: space-between;align-items: center;border-bottom: 1px solid rgba(201, 191, 176, 0.12);padding-bottom: 14px;margin-bottom: 22px;}
+.sub-modal-header {display: flex;justify-content: space-between;align-items: center;border-bottom: 1px solid rgba(var(--line-rgb), 0.12);padding-bottom: 14px;margin-bottom: 22px;}
 .sub-modal-title {font-family: var(--f-display);font-size: 1.25rem;color: var(--gold2);text-transform: uppercase;letter-spacing: 1px;}
 .sub-modal-back-btn {background: none;border: none;color: var(--sand);font-family: var(--f-body);font-size: 0.7rem;letter-spacing: 1.5px;text-transform: uppercase;cursor: pointer;transition: color 0.3s;}
 .sub-modal-back-btn:hover { color: var(--white); }
 
 /* ACCORDIONS */
 .accordion-wrapper { display: flex; flex-direction: column; gap: 12px; }
-.accordion-item { background: rgba(255,255,255,0.02); border: 1px solid rgba(201,191,176,0.08); overflow: hidden; transition: 0.3s; }
+.accordion-item { background: rgba(var(--overlay-rgb),0.02); border: 1px solid rgba(var(--line-rgb),0.08); overflow: hidden; transition: 0.3s; }
 .accordion-trigger-header { width: 100%; background: none; border: none; display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; cursor: pointer; text-align: left; gap: 12px; }
 .accordion-question-text { font-family: var(--f-display); font-size: 1rem; color: var(--white); line-height: 1.4; }
 .accordion-body-pane { max-height: 0px; overflow: hidden; transition: max-height 0.35s var(--ease-out); }
@@ -180,10 +251,12 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 /* INTERACTIVE PIECES & FORM */
 .btn-modal-primary{width:100%;padding:16px;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:0.68rem;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;border:none;cursor:pointer;transition:all 0.3s;margin-bottom:10px;}
 .btn-modal-primary:hover{background:var(--accent);color:var(--white);}
-.input-field{width:100%;padding:13px 15px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,191,176,0.12);color:var(--white);font-family:var(--f-body);font-size:0.8rem;outline:none;margin-bottom:12px;transition:border-color 0.3s;}
-.input-field:focus{border-color:rgba(201,191,176,0.4);}
-.modal-close{position:fixed;right:40px;top:30px;cursor:pointer;color:var(--sand);font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;z-index:2100;transition:color 0.3s;background:none;border:none;font-family:var(--f-body);}
-.modal-close:hover{color:var(--paper);}
+.input-field{width:100%;padding:13px 15px;background:rgba(var(--overlay-rgb),0.04);border:1px solid rgba(var(--line-rgb),0.12);color:var(--white);font-family:var(--f-body);font-size:0.8rem;outline:none;margin-bottom:12px;transition:border-color 0.3s;}
+.input-field:focus{border-color:rgba(var(--line-rgb),0.4);}
+.modal-top-actions{position:fixed;right:40px;top:30px;z-index:2100;display:flex;align-items:center;gap:22px;}
+.modal-close, .modal-share-btn{cursor:pointer;color:var(--sand);font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;transition:color 0.3s;background:none;border:none;font-family:var(--f-body);white-space:nowrap;}
+.modal-close:hover, .modal-share-btn:hover{color:var(--paper);}
+@media(max-width:768px){.modal-top-actions{right:20px;top:18px;gap:14px;}}
 .back-link{background:none;border:none;color:var(--mist);font-family:var(--f-body);font-size:0.62rem;letter-spacing:1px;cursor:pointer;padding:0;margin-top:8px;transition:color 0.3s;}
 .back-link:hover{color:var(--paper);}
 .form-section-title{font-family:var(--f-display);font-size:1.4rem;color:var(--gold2);margin-bottom:20px;letter-spacing:1px;}
@@ -195,8 +268,8 @@ nav.solid{background:rgba(13,12,10,0.94);backdrop-filter:blur(16px);border-botto
 #waDraggable svg{width:28px;height:28px;fill:#fff;pointer-events:none;}
 
 /* FOOTER */
-footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201,191,176,0.06);}
-.footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding-bottom:50px;border-bottom:1px solid rgba(201,191,176,0.06);margin-bottom:28px;}
+footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(var(--line-rgb),0.06);}
+.footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding-bottom:50px;border-bottom:1px solid rgba(var(--line-rgb),0.06);margin-bottom:28px;}
 .footer-brand .fb-name{font-family:var(--f-display);font-size:1.5rem;letter-spacing:5px;text-transform:uppercase;color:var(--paper);display:block;margin-bottom:6px;}
 .footer-brand .fb-rc{font-size:0.55rem;letter-spacing:2px;color:var(--gold);display:block;margin-bottom:18px;}
 .footer-brand p{font-size:0.75rem;color:var(--mist);font-weight:200;line-height:1.8;max-width:240px;}
@@ -204,12 +277,12 @@ footer{background:var(--ink2);padding:64px 5% 28px;border-top:1px solid rgba(201
 .footer-col a{display:block;font-size:0.72rem;color:var(--mist);margin-bottom:10px;}
 .footer-col a:hover{color:var(--paper);}
 .footer-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
-.footer-copy{font-size:0.58rem;color:rgba(122,117,112,0.5);letter-spacing:1px;}
+.footer-copy{font-size:0.58rem;color:rgba(var(--mist-rgb),0.5);letter-spacing:1px;}
 .footer-ig {display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; font-size: 0.68rem; font-weight: 300; letter-spacing: 1.5px; color: var(--mist); transition: color 0.3s;}
 .footer-ig svg {width: 16px; height: 16px; flex-shrink: 0;}
 .footer-ig:hover {color: var(--gold2);}
 
-/* PROTECTIONS AND WATERMARKING (FIXED POINTER EVENTS) */
+/* PROTECTIONS AND WATERMARKING — sits on top of photos, locked always. */
 img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-select: none; pointer-events: none;}
 .p-item, .plan-card, .plan-img-wrap, .thumbnail-item, .carousel-arrow {pointer-events: auto;}
 .p-item::after, .plan-img-wrap::after {
@@ -265,6 +338,7 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
     </div>
     <div class="nav-right">
         <span class="nav-rc">RC: 9176834</span>
+        <button class="theme-toggle" id="siteThemeToggle" onclick="toggleSiteTheme()" aria-label="Toggle day and night mode">☾</button>
     </div>
 </nav>
 
@@ -304,7 +378,10 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
 <main class="catalog-grid" id="storeGrid"></main>
 
 <div id="planModal" class="modal">
-    <button class="modal-close" onclick="closePlan()">Close ✕</button>
+    <div class="modal-top-actions">
+        <button class="modal-share-btn" onclick="copyPlanLink()">Copy Link 🔗</button>
+        <button class="modal-close" onclick="closePlan()">Close ✕</button>
+    </div>
     <div class="modal-grid">
         
         <div class="hero-container">
@@ -563,6 +640,22 @@ img {-webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-s
     </div>
 </footer>
 <script>
+    // ── THEME TOGGLE ───────────────────────────────────────────────────
+function syncSiteThemeToggleIcon(theme) {
+    const btn = document.getElementById('siteThemeToggle');
+    if (!btn) return;
+    btn.textContent = theme === 'light' ? '☀' : '☾';
+    btn.setAttribute('aria-label', theme === 'light' ? 'Switch to night mode' : 'Switch to day mode');
+}
+function toggleSiteTheme() {
+    const root = document.documentElement;
+    const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('ada-site-theme', next); } catch (e) {}
+    syncSiteThemeToggleIcon(next);
+}
+
     // ── SUPABASE CLIENT ─────────────────────────────────────────────────
 const { createClient } = window.supabase || {};
 let _db = null;
@@ -608,7 +701,7 @@ const defaultPlans = [
     }
 ];
 
-let dynamicData = {}, currentAction = '', currentPlan = '',
+let dynamicData = {}, currentAction = '', currentPlan = '', currentPlanId = '',
     page = 1, isLoading = false, hasMore = true,
     searchTimeout = null, isFilterActive = false,
     activeCategoryFilter = 'all';
@@ -812,12 +905,14 @@ function renderCard(item, container) {
     const c = document.createElement('div');
     c.className = 'plan-card';
     c.addEventListener('click', () => fillModal(
+        item.id || '',
         item.title || 'Untitled Plan',
         item.meta  || '',
         item.price || 'Contact for Price',
         getGalleryImages(item.image_urls || item.images),
         item.features,
-        item.video_url || null
+        item.video_url || null,
+        true
     ));
     c.innerHTML = `
         <div class="plan-img-container">
@@ -863,7 +958,8 @@ function renderHeroItem(index) {
 function navigateHero(dir) { renderHeroItem(currentHeroIndex + dir); }
 
 /* ── FILL MODAL ──────────────────────────────────────────────────────── */
-function fillModal(title, meta, price, images, features, videoUrl = null) {
+function fillModal(id, title, meta, price, images, features, videoUrl = null, updateUrl = true) {
+    currentPlanId = id || '';
     currentPlan = title;
     
     // Safely update DOM text
@@ -949,9 +1045,64 @@ function fillModal(title, meta, price, images, features, videoUrl = null) {
     
     closeFaqSubModal();
     hideRequestForm();
+
+    if (updateUrl) pushPlanUrl(currentPlanId);
+}
+
+/* ── DEEP-LINK URL SYNC ────────────────────────────────────────────────
+   Keeps the address bar in sync with whichever plan is open, so every
+   plan card has its own shareable/bookmarkable link. */
+function pushPlanUrl(id) {
+    if (!id) return;
+    try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('plan') === String(id)) return;
+        url.searchParams.set('plan', id);
+        history.pushState({ planId: id }, '', url.toString());
+    } catch (e) { console.warn('URL update failed:', e); }
+}
+
+function clearPlanUrl() {
+    try {
+        const url = new URL(window.location.href);
+        if (!url.searchParams.has('plan')) return;
+        url.searchParams.delete('plan');
+        history.pushState({}, '', url.toString());
+    } catch (e) { console.warn('URL update failed:', e); }
+}
+
+function copyPlanLink() {
+    if (!currentPlanId) return;
+    let link;
+    try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('plan', currentPlanId);
+        link = url.toString();
+    } catch (e) { return; }
+
+    const btn = document.querySelector('.modal-share-btn');
+    const showCopied = () => {
+        if (!btn) return;
+        const original = btn.innerText;
+        btn.innerText = 'Link Copied ✓';
+        setTimeout(() => { btn.innerText = original; }, 1800);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(showCopied).catch(() => window.prompt('Copy this link:', link));
+    } else {
+        window.prompt('Copy this link:', link);
+    }
 }
 
 function closePlan() {
+    closePlanUiOnly();
+    clearPlanUrl();
+}
+
+// Closes the modal UI without touching the URL/history — used when the
+// browser back/forward buttons already changed the URL for us.
+function closePlanUiOnly() {
     const modalWindow = document.getElementById('planModal');
     if (modalWindow) modalWindow.classList.remove('open');
     document.body.style.overflow = '';
@@ -1101,18 +1252,21 @@ function toggleSubModalFaqAccordion(btn) {
 }
 
 /* ── URL PLAN DEEP-LINK ──────────────────────────────────────────────── */
-async function checkUrlForPlan() {
-    const id = new URLSearchParams(window.location.search).get('plan');
+// Looks up a plan by id (local defaults, already-fetched dynamic data, or
+// the API) and opens it. updateUrl=false is used when we're just reflecting
+// a URL that already exists (initial load, or a back/forward navigation) —
+// updateUrl=true is used for a fresh click that should add a history entry.
+async function resolveAndOpenPlan(id, updateUrl = true) {
     if (!id) return;
 
     const local = defaultPlans.find(p => p.id === id);
     if (local) {
-        fillModal(local.title, local.meta, local.price, getGalleryImages(local.image_urls), local.features, local.video_url);
+        fillModal(local.id, local.title, local.meta, local.price, getGalleryImages(local.image_urls), local.features, local.video_url, updateUrl);
         return;
     }
     if (dynamicData[id]) {
         const p = dynamicData[id];
-        fillModal(p.title, p.meta, p.price, getGalleryImages(p.image_urls), p.features, p.video_url);
+        fillModal(p.id, p.title, p.meta, p.price, getGalleryImages(p.image_urls), p.features, p.video_url, updateUrl);
         return;
     }
     try {
@@ -1122,11 +1276,28 @@ async function checkUrlForPlan() {
             const plan = Array.isArray(data) ? data[0] : data;
             if (plan) {
                 dynamicData[plan.id] = plan;
-                fillModal(plan.title, plan.meta, plan.price, getGalleryImages(plan.image_urls), plan.features, plan.video_url);
+                fillModal(plan.id, plan.title, plan.meta, plan.price, getGalleryImages(plan.image_urls), plan.features, plan.video_url, updateUrl);
             }
         }
     } catch(e) { console.error('Plan lookup failed:', e); }
 }
+
+async function checkUrlForPlan() {
+    const id = new URLSearchParams(window.location.search).get('plan');
+    if (!id) return;
+    await resolveAndOpenPlan(id, false);
+}
+
+// Browser back/forward: reopen the plan in the URL, or close the modal if
+// there isn't one — without pushing another history entry either way.
+window.addEventListener('popstate', () => {
+    const id = new URLSearchParams(window.location.search).get('plan');
+    if (id) {
+        resolveAndOpenPlan(id, false);
+    } else {
+        closePlanUiOnly();
+    }
+});
 
 /* ── NAV / WA DRAG ───────────────────────────────────────────────────── */
 window.addEventListener('scroll', () => {
@@ -1269,6 +1440,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
     await checkUrlForPlan();
     await loadEstimatorStates();
+    syncSiteThemeToggleIcon(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
 });
 </script>
 </body>
