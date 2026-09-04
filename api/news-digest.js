@@ -455,4 +455,582 @@ function significantWords_(title) {
   return new Set(
     (title || '')
       .toLowerCase()
-      .replace(/[^a-z
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter((w) => w.length > 2 && !STOPWORDS.has(w))
+  );
+}
+
+function jaccardSimilarity_(setA, setB) {
+  if (setA.size === 0 || setB.size === 0) return 0;
+  let intersection = 0;
+  for (const word of setA) {
+    if (setB.has(word)) intersection++;
+  }
+  const union = setA.size + setB.size - intersection;
+  return union === 0 ? 0 : intersection / union;
+}
+
+function consolidateFuzzyDuplicates_(items) {
+  // Process highest-priority sources first, so a cluster's "kept" item
+  // is always the most authoritative one encountered, not just the first
+  // in feed order.
+  const ordered = [...items].sort((a, b) => getSourcePriority_(a) - getSourcePriority_(b));
+
+  const clusters = []; // { kept: item, wordSet: Set, alsoReportedBy: [source,...] }
+
+  for (const item of ordered) {
+    const words = significantWords_(item.title);
+
+    if (words.size < MIN_SIGNIFICANT_WORDS) {
+      clusters.push({ kept: item, wordSet: words, alsoReportedBy: [] });
+      continue;
+    }
+
+    let matchedCluster = null;
+    for (const cluster of clusters) {
+      if (cluster.wordSet.size < MIN_SIGNIFICANT_WORDS) continue;
+      if (jaccardSimilarity_(words, cluster.wordSet) >= SIMILARITY_THRESHOLD) {
+        matchedCluster = cluster;
+        break;
+      }
+    }
+
+    if (matchedCluster) {
+      matchedCluster.alsoReportedBy.push(item.source);
+    } else {
+      clusters.push({ kept: item, wordSet: words, alsoReportedBy: [] });
+    }
+  }
+
+  return clusters.map((c) =>
+    c.alsoReportedBy.length > 0
+      ? { ...c.kept, alsoReportedBy: c.alsoReportedBy }
+      : c.kept
+  );
+}
+
+function mergeAndDedupe(rssItems, newsApiItems) {
+  const all = [...rssItems, ...newsApiItems].filter((item) => {
+    if (!item.title || !item.url) return false;
+    if (matchesExcludeKeywords_(item)) return false;
+    const isLocal = item.region === 'africa' || item.region === 'nigeria';
+    if (!isRecent(item.publishedAt, isLocal ? MAX_AGE_HOURS_LOCAL : MAX_AGE_HOURS_GLOBAL)) {
+      return false;
+    }
+    if (isLocal && !isInstitutionalSource_(item) && !matchesLocalTopic_(item)) {
+      return false;
+    }
+    return true;
+  });
+
+  const seen = new Set();
+  const deduped = [];
+  for (const item of all) {
+    const key = normalizeTitle(item.title);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(item);
+  }
+
+  const consolidated = consolidateFuzzyDuplicates_(deduped);
+
+  consolidated.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+  return consolidated;
+}
+
+// --- Taxonomy / categorization engine ---------------------------------------
+//
+// Every item is routed into exactly ONE of these top-level categories,
+// checked in this priority order:
+//   1. Policy & Regulation   — routed by source identity (FMHUD, Lagos
+//      MPPUD, NITP) ahead of everything else, since a housing-ministry
+//      press release is policy content regardless of what words it uses
+//   2. Design & Culture      — routed by source identity (Design Indaba,
+//      World Architecture Community's award/competition coverage still
+//      flows through Competitions & Exams below, not here — this bucket
+//      is for cultural/theory content specifically)
+//   3. Nigeria & Africa      — anything else already tagged region
+//      'africa'/'nigeria'
+//   4. Competitions & Exams
+//   5. Professional Practice (further split into 5 sub-categories)
+//   6. Development & Real Estate — routed by source identity (PropertyPro.ng)
+//   7. Building Materials
+//   8. Construction
+//   9. Global News           — catch-all for anything else global
+
+const COMPETITIONS_EXAMS_KEYWORDS = [
+  'competition', 'design competition', 'professional exam', 'licensure',
+  'licensing exam', 'design award', 'award shortlist', 'shortlisted',
+  'award winner', 'call for entries', 'ideas competition',
+  'call for proposals', 'student competition', 'arcon ppe',
+  'architecture award', 'biennale', 'fellowship',
+];
+
+const PROFESSIONAL_PRACTICE_SUBCATEGORIES = [
+  { key: 'architects', label: 'Architects', emoji: '👷', keywords: [
+    'architect', 'architecture firm', 'architectural practice', 'arcon', 'nia',
+    'pritzker', 'architects registration council', 'professional practice exam',
+    'ppe', 'design fee scale', 'riba', 'aia', 'bim', 'parametric',
+  ] },
+  { key: 'engineers', label: 'Engineers', emoji: '🛠️', keywords: [
+    'engineer', 'engineering firm', 'structural engineer', 'civil engineer', 'mep engineer',
+    'coren', 'nse', 'mep engineering', 'civil engineering', 'building services',
+    'structural failure', 'eurocodes', 'nse conference',
+  ] },
+  { key: 'quantitySurveyors', label: 'Quantity Surveyors', emoji: '📐', keywords: [
+    'quantity surveyor', 'quantity surveying', 'cost consultant', 'niqs', 'qsrb',
+    'bill of quantities', 'boq', 'cost estimation', 'material takeoff',
+    'value engineering', 'construction cost index',
+  ] },
+  { key: 'townPlanning', label: 'Town Planning', emoji: '🗺️', keywords: [
+    'town planning', 'town planner', 'urban planning', 'urban planner', 'zoning', 'master plan',
+    'nitp', 'toprec', 'zoning regulations', 'spatial planning', 'laspppa',
+    'environmental impact assessment', 'eia',
+  ] },
+  { key: 'builders', label: 'Builders', emoji: '🧰', keywords: [
+    'builder', 'building contractor', 'building firm', 'niob', 'corbon',
+    'registered builder', 'building production management', 'site safety',
+    'quality control', 'construction methodology', 'lasbca',
+  ] },
+];
+
+const MATERIALS_KEYWORDS = [
+  'cement', 'steel price', 'timber', 'concrete', 'brick', 'glass facade',
+  'insulation', 'building material', 'supply chain', 'material cost',
+  'prefab material', 'construction material',
+  'cement price', 'dangote cement', 'buacement', 'lafarge', 'rebar cost',
+  'steel prices', 'aggregates', 'granite', 'bitumen', 'fenestration',
+  'composite cladding', 'import duty', 'building materials market',
+  'mass timber', 'net zero building', 'embodied carbon',
+];
+
+const DEVELOPMENT_REAL_ESTATE_KEYWORDS = ['proptech', 'real estate development', 'property development'];
+
+const CONSTRUCTION_KEYWORDS = [
+  'construction', 'groundbreaking', 'building site', 'infrastructure project',
+  'completion', 'contractor', 'modular construction', 'prefab',
+  'construction methodology', 'site work',
+  'topping out', 'epc contract', 'fidic', 'dredging', 'heavy equipment',
+  'concrete casting', 'precast', 'post-tensioning', 'site execution',
+];
+
+function textOf_(item) {
+  let text = `${item.title || ''} ${item.summary || ''}`.toLowerCase();
+  // Strip known non-architectural collocations before any keyword
+  // matching runs, so e.g. "capacity building" can't cause a story to
+  // land in Construction just because it contains the word "building".
+  for (const phrase of NEGATIVE_PHRASES) {
+    text = text.split(phrase).join(' ');
+  }
+  return text;
+}
+
+function matchesAny_(haystack, keywords) {
+  return keywords.some((kw) => haystack.includes(kw.toLowerCase()));
+}
+
+function categorizeItem_(item) {
+  const isLocal = item.region === 'africa' || item.region === 'nigeria';
+
+  // Policy & Regulation — municipal/federal government sources are
+  // unambiguous; a Lagos MPPUD press release is policy content no matter
+  // what specific words it uses.
+  if (
+    item.source?.startsWith('FMHUD') ||
+    item.source?.startsWith('Lagos MPPUD') ||
+    item.source?.startsWith('NITP')
+  ) {
+    return { category: 'policyRegulation' };
+  }
+
+  // Design & Culture — cultural/theory platforms, routed by identity.
+  if (item.source?.startsWith('Design Indaba')) {
+    return { category: 'designCulture' };
+  }
+
+  // Development & Real Estate — market-intelligence sources, routed by
+  // identity rather than keyword (a property listing rarely says
+  // "development" or "real estate" explicitly).
+  if (item.source?.startsWith('PropertyPro')) {
+    return { category: 'developmentRealEstate' };
+  }
+
+  // Professional-body sources are explicitly called out in the strategy
+  // doc as Professional Practice content ("ARCON and NIA developments"),
+  // so they're routed there ahead of the geographic bucket. Every other
+  // Nigeria/Africa source keeps the original behavior: straight into the
+  // regional bucket regardless of topic.
+  if (item.source?.startsWith('NIQS')) {
+    return { category: 'professionalPractice', subcategory: 'quantitySurveyors' };
+  }
+  if (item.source?.startsWith('NIA') || item.source?.startsWith('IJNIA') || item.source?.startsWith('ARCON')) {
+    return { category: 'professionalPractice', subcategory: 'architects' };
+  }
+
+  if (isLocal) {
+    return { category: 'nigeriaAfrica' };
+  }
+
+  const haystack = textOf_(item);
+
+  if (matchesAny_(haystack, COMPETITIONS_EXAMS_KEYWORDS)) {
+    return { category: 'competitionsExams' };
+  }
+
+  for (const sub of PROFESSIONAL_PRACTICE_SUBCATEGORIES) {
+    if (matchesAny_(haystack, sub.keywords)) {
+      return { category: 'professionalPractice', subcategory: sub.key };
+    }
+  }
+
+  if (matchesAny_(haystack, MATERIALS_KEYWORDS)) {
+    return { category: 'materials' };
+  }
+
+  if (matchesAny_(haystack, DEVELOPMENT_REAL_ESTATE_KEYWORDS)) {
+    return { category: 'developmentRealEstate' };
+  }
+
+  if (matchesAny_(haystack, CONSTRUCTION_KEYWORDS)) {
+    return { category: 'construction' };
+  }
+
+  return { category: 'globalNews' };
+}
+
+function buildTaxonomy_(items) {
+  const taxonomy = {
+    policyRegulation: [],
+    designCulture: [],
+    nigeriaAfrica: [],
+    professionalPractice: {
+      architects: [], engineers: [], quantitySurveyors: [], townPlanning: [], builders: [],
+    },
+    developmentRealEstate: [],
+    materials: [],
+    construction: [],
+    competitionsExams: [],
+    globalNews: [],
+  };
+
+  for (const item of items) {
+    const { category, subcategory } = categorizeItem_(item);
+    if (category === 'professionalPractice') {
+      taxonomy.professionalPractice[subcategory].push(item);
+    } else {
+      taxonomy[category].push(item);
+    }
+  }
+
+  // Cap each bucket so no single category runs away with the whole digest.
+  taxonomy.policyRegulation = taxonomy.policyRegulation.slice(0, MAX_ITEMS_PER_CATEGORY);
+  taxonomy.designCulture = taxonomy.designCulture.slice(0, MAX_ITEMS_PER_CATEGORY);
+  taxonomy.nigeriaAfrica = taxonomy.nigeriaAfrica.slice(0, MAX_ITEMS_PER_CATEGORY);
+  taxonomy.developmentRealEstate = taxonomy.developmentRealEstate.slice(0, MAX_ITEMS_PER_CATEGORY);
+  taxonomy.materials = taxonomy.materials.slice(0, MAX_ITEMS_PER_CATEGORY);
+  taxonomy.construction = taxonomy.construction.slice(0, MAX_ITEMS_PER_CATEGORY);
+  taxonomy.competitionsExams = taxonomy.competitionsExams.slice(0, MAX_ITEMS_PER_CATEGORY);
+  taxonomy.globalNews = taxonomy.globalNews.slice(0, MAX_ITEMS_PER_CATEGORY);
+  for (const key of Object.keys(taxonomy.professionalPractice)) {
+    taxonomy.professionalPractice[key] = taxonomy.professionalPractice[key].slice(0, MAX_ITEMS_PER_CATEGORY);
+  }
+
+  return taxonomy;
+}
+
+function taxonomyCounts_(taxonomy) {
+  const professionalPractice = Object.values(taxonomy.professionalPractice).reduce(
+    (sum, arr) => sum + arr.length,
+    0
+  );
+  const counts = {
+    policyRegulation: taxonomy.policyRegulation.length,
+    designCulture: taxonomy.designCulture.length,
+    nigeriaAfrica: taxonomy.nigeriaAfrica.length,
+    professionalPractice,
+    developmentRealEstate: taxonomy.developmentRealEstate.length,
+    materials: taxonomy.materials.length,
+    construction: taxonomy.construction.length,
+    competitionsExams: taxonomy.competitionsExams.length,
+    globalNews: taxonomy.globalNews.length,
+  };
+  counts.total = Object.values(counts).reduce((a, b) => a + b, 0);
+  return counts;
+}
+
+// --- Digest page HTML (the "zero-scroll" accordion webpage) ----------------
+
+function itemLi_(item) {
+  const alsoReported =
+    item.alsoReportedBy && item.alsoReportedBy.length > 0
+      ? `<span class="also-reported">+${item.alsoReportedBy.length} more source${
+          item.alsoReportedBy.length === 1 ? '' : 's'
+        }</span>`
+      : '';
+  return `<li><a href="${item.url}" target="_blank" rel="noopener">${escapeHtml(
+    item.title
+  )}</a><span class="src">${escapeHtml(item.source)}${alsoReported}</span></li>`;
+}
+
+function accordionSection_(emoji, label, items) {
+  if (!items.length) return '';
+  return `
+    <details>
+      <summary><span>${emoji} ${escapeHtml(label)}</span><span class="count">${items.length}</span></summary>
+      <ul>${items.map(itemLi_).join('')}</ul>
+    </details>`;
+}
+
+function professionalPracticeSection_(taxonomy, counts) {
+  if (!counts.professionalPractice) return '';
+  const nested = PROFESSIONAL_PRACTICE_SUBCATEGORIES.filter(
+    (sub) => taxonomy.professionalPractice[sub.key].length
+  )
+    .map(
+      (sub) => `
+        <details class="nested">
+          <summary><span>${sub.emoji} ${escapeHtml(sub.label)}</span><span class="count">${
+        taxonomy.professionalPractice[sub.key].length
+      }</span></summary>
+          <ul>${taxonomy.professionalPractice[sub.key].map(itemLi_).join('')}</ul>
+        </details>`
+    )
+    .join('');
+
+  return `
+    <details>
+      <summary><span>🧑‍💼 Professional Practice</span><span class="count">${counts.professionalPractice}</span></summary>
+      ${nested}
+    </details>`;
+}
+
+function buildDigestPageHtml_(taxonomy, counts, { dateLabel, digestUrl }) {
+  const ogDescription = `${counts.total} new architecture & built-environment stories — Policy & Regulation, Nigeria & Africa, Professional Practice, Development & Real Estate, Materials, Construction, Competitions & Exams, Design & Culture, and Global News.`;
+  const ogImage = process.env.DIGEST_OG_IMAGE_URL || 'https://archilurdesignz.com/assets/og-digest-cover.jpg';
+
+  const sections = [
+    accordionSection_('🏛️', 'Policy & Regulation', taxonomy.policyRegulation),
+    accordionSection_('🌍', 'Nigeria & Africa', taxonomy.nigeriaAfrica),
+    professionalPracticeSection_(taxonomy, counts),
+    accordionSection_('🏘️', 'Development & Real Estate', taxonomy.developmentRealEstate),
+    accordionSection_('🧱', 'Building Materials', taxonomy.materials),
+    accordionSection_('🏗️', 'Construction', taxonomy.construction),
+    accordionSection_('🏆', 'Competitions & Exams', taxonomy.competitionsExams),
+    accordionSection_('🎨', 'Design & Culture', taxonomy.designCulture),
+    accordionSection_('📰', 'Global News', taxonomy.globalNews),
+  ].join('');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADA Architecture Digest — ${dateLabel}</title>
+
+<meta property="og:title" content="ADA Architecture Digest — ${dateLabel}">
+<meta property="og:description" content="${escapeHtml(ogDescription)}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="${digestUrl}">
+<meta property="og:image" content="${ogImage}">
+<meta property="og:site_name" content="Archilurdesignz and Architecture">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ADA Architecture Digest — ${dateLabel}">
+<meta name="twitter:description" content="${escapeHtml(ogDescription)}">
+<meta name="twitter:image" content="${ogImage}">
+
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    max-width: 720px; margin: 0 auto; padding: 32px 20px 60px;
+    background: #faf8f4; color: #1a1a1a;
+  }
+  h1 { font-family: Georgia, serif; font-size: 26px; margin: 0 0 4px; }
+  .date { color: #8a8378; font-size: 14px; margin-bottom: 28px; }
+  details {
+    background: #fff; border: 1px solid #e5e0d8; border-radius: 12px;
+    margin-bottom: 12px; overflow: hidden;
+  }
+  details[open] { border-color: #c9a876; }
+  summary {
+    cursor: pointer; padding: 16px 20px; font-size: 16px; font-weight: 600;
+    list-style: none; display: flex; justify-content: space-between; align-items: center;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; font-size: 20px; color: #8a8378; margin-left: 12px; }
+  details[open] > summary::after { content: '−'; }
+  .count {
+    background: #f0ece2; color: #8a6d3b; font-size: 12px; font-weight: 700;
+    padding: 3px 11px; border-radius: 12px; margin-left: auto; margin-right: 8px;
+  }
+  ul { list-style: none; margin: 0; padding: 0 20px 16px; }
+  li {
+    padding: 12px 0; border-top: 1px solid #f0ece2; font-size: 14px; line-height: 1.5;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  li:first-child { border-top: none; }
+  a { color: #1a1a1a; text-decoration: none; font-weight: 500; }
+  a:hover { text-decoration: underline; }
+  .src { color: #a3a3a3; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .also-reported { color: #c9a876; font-weight: 700; margin-left: 6px; text-transform: none; letter-spacing: normal; }
+  details.nested {
+    border: none; background: #faf8f4; margin: 0 16px 12px; border-left: 3px solid #e5e0d8;
+    border-radius: 0 8px 8px 0;
+  }
+  details.nested summary { padding: 10px 16px; font-size: 14px; font-weight: 500; }
+  footer { text-align: center; color: #a3a3a3; font-size: 12px; margin-top: 32px; }
+</style>
+</head>
+<body>
+  <h1>ADA Architecture Digest</h1>
+  <div class="date">${dateLabel} · ${counts.total} stories</div>
+  ${sections || '<p>No new stories this run.</p>'}
+  <footer>Archilurdesignz and Architecture</footer>
+</body>
+</html>`;
+}
+
+// --- Publish the digest page to GitHub (Vercel auto-deploys on push) -------
+
+async function publishDigestToGitHub_(htmlContent) {
+  const owner = process.env.GITHUB_REPO_OWNER;
+  const repo = process.env.GITHUB_REPO_NAME;
+  const token = process.env.GITHUB_TOKEN;
+  const branch = process.env.GITHUB_BRANCH || 'main';
+  const path = process.env.GITHUB_DIGEST_PATH || 'digest.html';
+
+  if (!owner || !repo || !token) {
+    throw new Error(
+      'GitHub publish config missing — set GITHUB_REPO_OWNER, GITHUB_REPO_NAME, GITHUB_TOKEN'
+    );
+  }
+
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    Accept: 'application/vnd.github+json',
+  };
+
+  // Fetch the current file's SHA if it exists, so we update instead of
+  // creating a duplicate (GitHub's Contents API requires this for updates).
+  let sha;
+  const getRes = await fetch(`${apiUrl}?ref=${branch}`, { headers });
+  if (getRes.ok) {
+    const getData = await getRes.json();
+    sha = getData.sha;
+  } else if (getRes.status !== 404) {
+    throw new Error(`GitHub GET failed (${getRes.status}): ${await getRes.text()}`);
+  }
+
+  const putRes = await fetch(apiUrl, {
+    method: 'PUT',
+    headers: { ...headers, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: `Update architecture digest — ${new Date().toISOString()}`,
+      content: Buffer.from(htmlContent, 'utf-8').toString('base64'),
+      branch,
+      ...(sha ? { sha } : {}),
+    }),
+  });
+
+  if (!putRes.ok) {
+    throw new Error(`GitHub PUT failed (${putRes.status}): ${await putRes.text()}`);
+  }
+  return putRes.json();
+}
+
+// --- Notification email (short, with View + Share buttons) -----------------
+
+function buildNotificationEmailHtml_(counts, { dateLabel, digestUrl }) {
+  const shareText = encodeURIComponent(
+    `📐 ADA Architecture Digest — ${dateLabel}\n` +
+      `${counts.total} new stories: Policy & Regulation (${counts.policyRegulation}), ` +
+      `Nigeria & Africa (${counts.nigeriaAfrica}), ` +
+      `Professional Practice (${counts.professionalPractice}), ` +
+      `Development & Real Estate (${counts.developmentRealEstate}), Materials (${counts.materials}), ` +
+      `Construction (${counts.construction}), Competitions & Exams (${counts.competitionsExams}), ` +
+      `Design & Culture (${counts.designCulture}), Global (${counts.globalNews})\n\n${digestUrl}`
+  );
+  const whatsappShareUrl = `https://wa.me/?text=${shareText}`;
+
+  return `
+  <div style="max-width:480px;margin:0 auto;font-family:sans-serif;text-align:center;padding:32px 20px;">
+    <h1 style="font-family:'Georgia',serif;font-size:20px;color:#1a1a1a;margin-bottom:4px;">Your Architecture Digest is ready</h1>
+    <div style="font-size:13px;color:#8a8378;margin-bottom:24px;">${dateLabel}</div>
+    <div style="font-size:14px;color:#4a4a4a;line-height:2;text-align:left;background:#f7f5f0;border-radius:10px;padding:18px 22px;margin-bottom:24px;">
+      🏛️ Policy &amp; Regulation — <b>${counts.policyRegulation}</b><br>
+      🌍 Nigeria &amp; Africa — <b>${counts.nigeriaAfrica}</b><br>
+      🧑‍💼 Professional Practice — <b>${counts.professionalPractice}</b><br>
+      🏘️ Development &amp; Real Estate — <b>${counts.developmentRealEstate}</b><br>
+      🧱 Building Materials — <b>${counts.materials}</b><br>
+      🏗️ Construction — <b>${counts.construction}</b><br>
+      🏆 Competitions &amp; Exams — <b>${counts.competitionsExams}</b><br>
+      🎨 Design &amp; Culture — <b>${counts.designCulture}</b><br>
+      📰 Global News — <b>${counts.globalNews}</b>
+    </div>
+    <a href="${digestUrl}" style="display:inline-block;background:#1a1a1a;color:#fff;text-decoration:none;padding:13px 32px;border-radius:8px;font-size:14px;font-weight:600;margin-bottom:14px;">View Digest</a>
+    <br>
+    <a href="${whatsappShareUrl}" style="display:inline-block;background:#25D366;color:#fff;text-decoration:none;padding:13px 32px;border-radius:8px;font-size:14px;font-weight:600;margin-top:6px;">Share to WhatsApp</a>
+    <div style="font-size:11px;color:#a3a3a3;margin-top:28px;">Sent automatically for Archilurdesignz and Architecture.</div>
+  </div>`;
+}
+
+// --- Handler ----------------------------------------------------------------
+
+export default async function handler(req, res) {
+  const isCron = req.headers['x-vercel-cron'] === '1' || req.headers['x-vercel-cron'] === 'true';
+  const manualSecretOk =
+    req.query?.manual === '1' && req.query?.key === process.env.DIGEST_MANUAL_KEY;
+
+  if (!isCron && !manualSecretOk) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const [rssItems, newsApiItems] = await Promise.all([
+      fetchRssItems(),
+      fetchNewsApiItems(),
+    ]);
+
+    const scrapedItems = await fetchScrapeFallbacks_(rssItems);
+    const items = mergeAndDedupe([...rssItems, ...scrapedItems], newsApiItems);
+
+    const taxonomy = buildTaxonomy_(items);
+    const counts = taxonomyCounts_(taxonomy);
+
+    const dateLabel = new Date().toLocaleDateString('en-US', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    });
+    const digestUrl = process.env.DIGEST_PAGE_URL || 'https://archilurdesignz.com/digest';
+
+    const pageHtml = buildDigestPageHtml_(taxonomy, counts, { dateLabel, digestUrl });
+    await publishDigestToGitHub_(pageHtml);
+
+    const emailHtml = buildNotificationEmailHtml_(counts, { dateLabel, digestUrl });
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const { data, error } = await resend.emails.send({
+      from: process.env.DIGEST_FROM_EMAIL,
+      to: process.env.DIGEST_TO_EMAIL,
+      subject: `Architecture Digest ready — ${counts.total} new stor${counts.total === 1 ? 'y' : 'ies'}`,
+      html: emailHtml,
+    });
+
+    if (error) {
+      console.error('Resend send error:', error);
+      return res.status(500).json({ error: 'Email send failed', details: error });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      counts,
+      digestUrl,
+      emailId: data?.id,
+    });
+  } catch (err) {
+    console.error('Digest handler error:', err);
+    return res.status(500).json({ error: 'Digest generation failed', details: err.message });
+  }
+}
