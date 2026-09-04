@@ -30,47 +30,61 @@ const supabase =
 // `region` is still used as a fast-path: anything region 'africa'/'nigeria'
 // is routed straight into the "Nigeria & Africa" taxonomy category below,
 // regardless of topic — see categorizeItem_().
+// `dedicated: true` means every article this source publishes is
+// inherently architecture/construction/property content by definition
+// of the outlet — these skip topic-keyword filtering entirely,
+// regardless of region. `dedicated: false` means the source is
+// general-purpose or search-based (a news search query, a general
+// headlines feed) and needs keyword filtering to stay relevant — this
+// now applies uniformly across ALL regions, not just Nigeria/Africa
+// (see mergeAndDedupe): a broad NewsAPI "architecture" search can match
+// a totally unrelated politics story that uses "architecture" as a
+// throwaway metaphor somewhere in its body text, and that's just as
+// true whether the item ends up tagged nigeria/africa/global.
 const RSS_FEEDS = [
-  { name: 'ArchDaily', url: 'https://www.archdaily.com/rss/', region: 'global' },
-  { name: 'Dezeen', url: 'https://www.dezeen.com/architecture/feed/', region: 'global' },
-  { name: 'Designboom', url: 'https://www.designboom.com/architecture/feed/', region: 'global' },
-  { name: 'e-architect', url: 'https://www.e-architect.com/feed', region: 'global' },
-  { name: 'Dezeen Africa', url: 'https://www.dezeen.com/tag/africa/feed/', region: 'africa' },
-  { name: 'ArchDaily Africa', url: 'https://www.archdaily.com/tag/africa/rss/', region: 'africa' },
-  { name: 'Architect Africa', url: 'https://architectafrica.com/aarss/', region: 'africa' },
-  { name: 'Livin Spaces (Nigeria)', url: 'https://livinspaces.net/category/projects/feed/', region: 'nigeria' },
-  { name: 'IJNIA (NIA Journal)', url: 'https://ijnia.org/index.php/journal/gateway/plugin/RssGatewayPlugin/rss', region: 'nigeria' },
-  { name: 'NIA (Nigerian Institute of Architects)', url: 'https://www.nia.ng/feed/', region: 'nigeria' },
-  { name: 'ARCON (Architecture category)', url: 'https://arconigeria.gov.ng/category/architecture/feed/', region: 'nigeria' },
-  { name: 'ARCON (Journal category)', url: 'https://arconigeria.gov.ng/category/journal/feed/', region: 'nigeria' },
-  { name: 'Vanguard Homes & Property', url: 'https://www.vanguardngr.com/category/homes-property/feed/', region: 'nigeria' },
-  { name: 'Google News (Nigeria architecture)', url: 'https://news.google.com/rss/search?q=architecture%20Nigeria%20when:2d&hl=en-NG&gl=NG&ceid=NG:en', region: 'nigeria' },
-  { name: 'Google News (Africa architecture)', url: 'https://news.google.com/rss/search?q=architecture%20Africa%20when:2d&hl=en-NG&gl=NG&ceid=NG:en', region: 'africa' },
-  { name: 'AllAfrica (Construction)', url: 'https://allafrica.com/tools/headlines/rdf/construction/headlines.rdf', region: 'africa' },
-  { name: 'AllAfrica (Nigeria)', url: 'https://allafrica.com/tools/headlines/rdf/nigeria/headlines.rdf', region: 'nigeria' },
-  { name: 'ConstructAfrica', url: 'https://constructafrica.com/rss-feed', region: 'africa' },
-  { name: 'Guardian Nigeria (Property)', url: 'https://guardian.ng/category/property/feed/', region: 'nigeria' },
-  { name: 'BusinessDay Nigeria', url: 'https://businessday.ng/feed/', region: 'nigeria' },
-  { name: 'Nairametrics', url: 'https://nairametrics.com/feed/', region: 'nigeria' },
-  { name: 'ENR (Engineering News-Record)', url: 'https://www.enr.com/rss/articles', region: 'global' },
-  { name: 'Construction Dive', url: 'https://www.constructiondive.com/feeds/news/', region: 'global' },
-  { name: 'PropertyPro.ng', url: 'https://www.propertypro.ng/blog/feed/', region: 'nigeria' },
-  { name: 'NIQS (Nigerian Institute of Quantity Surveyors)', url: 'https://niqs.org.ng/feed/', region: 'nigeria' },
-  { name: 'World Architecture Community', url: 'https://worldarchitecture.org/feed', region: 'global' },
-  { name: 'Global Cement (Africa)', url: 'https://www.globalcement.com/rss', region: 'africa' },
-  { name: 'FMHUD (Federal Ministry of Housing)', url: 'https://fmhud.gov.ng/feed/', region: 'nigeria' },
-  { name: 'Lagos MPPUD', url: 'https://mppud.lagosstate.gov.ng/feed/', region: 'nigeria' },
-  { name: 'NITP (Nigerian Institute of Town Planners)', url: 'https://nitpng.org/feed/', region: 'nigeria' },
-  { name: 'Design Indaba', url: 'https://www.designindaba.com/feed', region: 'africa' },
-  { name: 'Punch Nigeria', url: 'https://punchng.com/feed/', region: 'nigeria' },
-  { name: 'Channels TV', url: 'https://www.channelstv.com/feed/', region: 'nigeria' },
+  { name: 'ArchDaily', url: 'https://www.archdaily.com/rss/', region: 'global', dedicated: true },
+  { name: 'Dezeen', url: 'https://www.dezeen.com/architecture/feed/', region: 'global', dedicated: true },
+  { name: 'Designboom', url: 'https://www.designboom.com/architecture/feed/', region: 'global', dedicated: true },
+  { name: 'e-architect', url: 'https://www.e-architect.com/feed', region: 'global', dedicated: true },
+  { name: 'Dezeen Africa', url: 'https://www.dezeen.com/tag/africa/feed/', region: 'africa', dedicated: true },
+  { name: 'ArchDaily Africa', url: 'https://www.archdaily.com/tag/africa/rss/', region: 'africa', dedicated: true },
+  { name: 'Architect Africa', url: 'https://architectafrica.com/aarss/', region: 'africa', dedicated: true },
+  { name: 'Livin Spaces (Nigeria)', url: 'https://livinspaces.net/category/projects/feed/', region: 'nigeria', dedicated: true },
+  { name: 'IJNIA (NIA Journal)', url: 'https://ijnia.org/index.php/journal/gateway/plugin/RssGatewayPlugin/rss', region: 'nigeria', dedicated: true },
+  { name: 'NIA (Nigerian Institute of Architects)', url: 'https://www.nia.ng/feed/', region: 'nigeria', dedicated: true },
+  { name: 'ARCON (Architecture category)', url: 'https://arconigeria.gov.ng/category/architecture/feed/', region: 'nigeria', dedicated: true },
+  { name: 'ARCON (Journal category)', url: 'https://arconigeria.gov.ng/category/journal/feed/', region: 'nigeria', dedicated: true },
+  { name: 'Vanguard Homes & Property', url: 'https://www.vanguardngr.com/category/homes-property/feed/', region: 'nigeria', dedicated: true },
+  { name: 'Google News (Nigeria architecture)', url: 'https://news.google.com/rss/search?q=architecture%20Nigeria%20when:2d&hl=en-NG&gl=NG&ceid=NG:en', region: 'nigeria', dedicated: false },
+  { name: 'Google News (Africa architecture)', url: 'https://news.google.com/rss/search?q=architecture%20Africa%20when:2d&hl=en-NG&gl=NG&ceid=NG:en', region: 'africa', dedicated: false },
+  { name: 'AllAfrica (Construction)', url: 'https://allafrica.com/tools/headlines/rdf/construction/headlines.rdf', region: 'africa', dedicated: true },
+  { name: 'AllAfrica (Nigeria)', url: 'https://allafrica.com/tools/headlines/rdf/nigeria/headlines.rdf', region: 'nigeria', dedicated: false },
+  { name: 'ConstructAfrica', url: 'https://constructafrica.com/rss-feed', region: 'africa', dedicated: true },
+  { name: 'Guardian Nigeria (Property)', url: 'https://guardian.ng/category/property/feed/', region: 'nigeria', dedicated: true },
+  { name: 'BusinessDay Nigeria', url: 'https://businessday.ng/feed/', region: 'nigeria', dedicated: false },
+  { name: 'Nairametrics', url: 'https://nairametrics.com/feed/', region: 'nigeria', dedicated: false },
+  { name: 'ENR (Engineering News-Record)', url: 'https://www.enr.com/rss/articles', region: 'global', dedicated: true },
+  { name: 'Construction Dive', url: 'https://www.constructiondive.com/feeds/news/', region: 'global', dedicated: true },
+  { name: 'PropertyPro.ng', url: 'https://www.propertypro.ng/blog/feed/', region: 'nigeria', dedicated: true },
+  { name: 'NIQS (Nigerian Institute of Quantity Surveyors)', url: 'https://niqs.org.ng/feed/', region: 'nigeria', dedicated: true },
+  { name: 'World Architecture Community', url: 'https://worldarchitecture.org/feed', region: 'global', dedicated: true },
+  { name: 'Global Cement (Africa)', url: 'https://www.globalcement.com/rss', region: 'africa', dedicated: true },
+  { name: 'FMHUD (Federal Ministry of Housing)', url: 'https://fmhud.gov.ng/feed/', region: 'nigeria', dedicated: true },
+  { name: 'Lagos MPPUD', url: 'https://mppud.lagosstate.gov.ng/feed/', region: 'nigeria', dedicated: true },
+  { name: 'NITP (Nigerian Institute of Town Planners)', url: 'https://nitpng.org/feed/', region: 'nigeria', dedicated: true },
+  { name: 'Design Indaba', url: 'https://www.designindaba.com/feed', region: 'africa', dedicated: true },
+  { name: 'Punch Nigeria', url: 'https://punchng.com/feed/', region: 'nigeria', dedicated: false },
+  { name: 'Channels TV', url: 'https://www.channelstv.com/feed/', region: 'nigeria', dedicated: false },
 ];
 
 // Two NewsAPI queries: one broad, one focused on Nigeria/Africa so those
-// stories don't get drowned out by higher-volume global sources.
+// stories don't get drowned out by higher-volume global sources. Both are
+// search-based (not a dedicated publication), so both need topic filtering
+// — a broad keyword search can match a story that only uses "architecture"
+// as a throwaway metaphor somewhere in its full body text.
 const NEWSAPI_QUERIES = [
-  { query: 'architecture', region: 'global' },
-  { query: 'architecture AND (Nigeria OR Lagos OR Abuja OR Africa OR African)', region: 'africa' },
+  { query: 'architecture', region: 'global', dedicated: false },
+  { query: 'architecture AND (Nigeria OR Lagos OR Abuja OR Africa OR African)', region: 'africa', dedicated: false },
 ];
 
 function buildNewsApiUrl(query) {
@@ -80,15 +94,17 @@ function buildNewsApiUrl(query) {
 }
 
 // --- Scraping fallback (for sites with no reliable RSS) --------------------
+// All institutional/dedicated sources — same reasoning as `dedicated: true`
+// above (Channels TV is the one exception, matching its RSS entry).
 const SCRAPE_FALLBACKS = [
-  { sourcePrefix: 'NIA', name: 'NIA (scraped)', url: 'https://www.nia.ng/news/', region: 'nigeria' },
-  { sourcePrefix: 'ARCON', name: 'ARCON (scraped)', url: 'https://arconigeria.gov.ng/news-journals/', region: 'nigeria' },
-  { sourcePrefix: 'NIQS', name: 'NIQS (scraped)', url: 'https://niqs.org.ng/news/', region: 'nigeria' },
-  { sourcePrefix: 'FMHUD', name: 'FMHUD (scraped)', url: 'https://fmhud.gov.ng/', region: 'nigeria' },
-  { sourcePrefix: 'Lagos MPPUD', name: 'Lagos MPPUD (scraped)', url: 'https://mppud.lagosstate.gov.ng/news/', region: 'nigeria' },
-  { sourcePrefix: 'NITP', name: 'NITP (scraped)', url: 'https://nitpng.org/category/news/', region: 'nigeria' },
-  { sourcePrefix: 'Design Indaba', name: 'Design Indaba (scraped)', url: 'https://www.designindaba.com/articles', region: 'africa' },
-  { sourcePrefix: 'Channels TV', name: 'Channels TV (scraped)', url: 'https://www.channelstv.com/category/headlines/', region: 'nigeria' },
+  { sourcePrefix: 'NIA', name: 'NIA (scraped)', url: 'https://www.nia.ng/news/', region: 'nigeria', dedicated: true },
+  { sourcePrefix: 'ARCON', name: 'ARCON (scraped)', url: 'https://arconigeria.gov.ng/news-journals/', region: 'nigeria', dedicated: true },
+  { sourcePrefix: 'NIQS', name: 'NIQS (scraped)', url: 'https://niqs.org.ng/news/', region: 'nigeria', dedicated: true },
+  { sourcePrefix: 'FMHUD', name: 'FMHUD (scraped)', url: 'https://fmhud.gov.ng/', region: 'nigeria', dedicated: true },
+  { sourcePrefix: 'Lagos MPPUD', name: 'Lagos MPPUD (scraped)', url: 'https://mppud.lagosstate.gov.ng/news/', region: 'nigeria', dedicated: true },
+  { sourcePrefix: 'NITP', name: 'NITP (scraped)', url: 'https://nitpng.org/category/news/', region: 'nigeria', dedicated: true },
+  { sourcePrefix: 'Design Indaba', name: 'Design Indaba (scraped)', url: 'https://www.designindaba.com/articles', region: 'africa', dedicated: true },
+  { sourcePrefix: 'Channels TV', name: 'Channels TV (scraped)', url: 'https://www.channelstv.com/category/headlines/', region: 'nigeria', dedicated: false },
 ];
 
 const SCRAPE_SELECTOR_CANDIDATES = [
@@ -143,7 +159,14 @@ async function scrapeSite_(url) {
   return items;
 }
 
-async function getUnseenScrapedUrls_(urls) {
+// Generic Supabase-backed "already shown" tracking — used for every item
+// in the digest now, not just the scraped institutional sources. RSS
+// feeds and NewsAPI have real publishedAt dates, so age alone used to be
+// the only thing stopping a repeat — but a global item stays inside its
+// 30-hour window across two consecutive 12-hour runs, and a Nigeria/Africa
+// item stays inside its 96-hour window across up to eight runs, so a
+// story could resurface on the digest for days without this.
+async function getUnseenUrls_(urls) {
   if (!supabase || urls.length === 0) return urls;
   const { data, error } = await supabase
     .from('digest_seen_articles')
@@ -158,7 +181,7 @@ async function getUnseenScrapedUrls_(urls) {
   return urls.filter((u) => !seen.has(u));
 }
 
-async function markScrapedUrlsSeen_(urls) {
+async function markUrlsSeen_(urls) {
   if (!supabase || urls.length === 0) return;
   const { error } = await supabase
     .from('digest_seen_articles')
@@ -179,24 +202,23 @@ async function fetchScrapeFallbacks_(rssItemsBySource) {
 
     try {
       const scraped = await scrapeSite_(fallback.url);
-      const urls = scraped.map((s) => s.url);
-      const unseenUrls = await getUnseenScrapedUrls_(urls);
-      const unseen = scraped.filter((s) => unseenUrls.includes(s.url));
-
-      if (unseen.length === 0) continue;
-
+      // No per-source seen-check here anymore — scraped items get a fake
+      // publishedAt of "now" (the source page has no real per-item date),
+      // so they'd otherwise pass the recency filter on every run forever.
+      // The universal seen-check in the handler (after the full
+      // filter/dedup pipeline) now covers this instead, in one place,
+      // for every source type.
       results.push(
-        ...unseen.map((s) => ({
+        ...scraped.map((s) => ({
           title: s.title,
           url: s.url,
           source: fallback.name,
           region: fallback.region,
+          dedicated: fallback.dedicated,
           publishedAt: new Date().toISOString(),
           summary: '',
         }))
       );
-
-      await markScrapedUrlsSeen_(unseen.map((s) => s.url));
     } catch (err) {
       console.error(`Scrape fallback failed for ${fallback.name}:`, err.message);
     }
@@ -293,6 +315,16 @@ const NEGATIVE_PHRASES = [
   'tax architecture', 'trade architecture', 'monetary architecture',
 ];
 
+// Same idea as the negative phrases above, but for the mirror-image
+// phrasing: "architecture OF X" (architecture of governance, architecture
+// of global growth) instead of "X architecture" (governance architecture).
+// This needs a regex rather than a plain phrase list because real headlines
+// insert adjectives between "of" and the noun ("architecture of global
+// governance", "architecture of African growth") — a fixed substring list
+// would miss those. Matches up to 2 words between "of" and the noun.
+const ARCHITECTURE_OF_METAPHOR_PATTERN =
+  /\barchitecture of(?:\s+\w+){0,2}\s+(governance|growth|peace|security|defence|defense|finance|the economy|economic\s+\w+|power|democracy|diplomacy|trade|cooperation|regulation|policy|institutions?|the state|international relations)\b/gi;
+
 // General-purpose news feeds (broad national/broadcast coverage, not
 // dedicated to architecture/construction/property) sometimes carry
 // syndication boilerplate or unrelated teaser text in their RSS
@@ -310,11 +342,25 @@ function isGeneralNewsSource_(item) {
   return GENERAL_NEWS_SOURCE_PREFIXES.some((prefix) => item.source?.startsWith(prefix));
 }
 
-function matchesLocalTopic_(item) {
+// Shared keyword-matching primitive. Plain substring matching (`.includes`)
+// has a real collision problem for short acronyms: 'nse' (Nigerian Society
+// of Engineers) matches inside "inSEcurity", "expENSE", "respONSE" —
+// none of which have anything to do with engineering. Word-boundary regex
+// matching fixes this for every keyword list, not just the one acronym
+// that happened to get caught.
+function escapeRegExp_(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+function includesKeyword_(haystack, keyword) {
+  const pattern = new RegExp(`\\b${escapeRegExp_(keyword.toLowerCase())}\\b`, 'i');
+  return pattern.test(haystack);
+}
+
+function matchesTopic_(item) {
   const scopedItem = isGeneralNewsSource_(item) ? { title: item.title, summary: '' } : item;
   const haystack = textOf_(scopedItem);
 
-  if (STRONG_TOPIC_KEYWORDS.some((kw) => haystack.includes(kw.toLowerCase()))) {
+  if (STRONG_TOPIC_KEYWORDS.some((kw) => includesKeyword_(haystack, kw))) {
     return true;
   }
 
@@ -323,7 +369,7 @@ function matchesLocalTopic_(item) {
   // inside "capacity building"), that exact occurrence was already
   // stripped out by textOf_(). If "building" still appears here, it's a
   // genuine standalone mention elsewhere in the text.
-  return AMBIGUOUS_TOPIC_KEYWORDS.some((kw) => haystack.includes(kw.toLowerCase()));
+  return AMBIGUOUS_TOPIC_KEYWORDS.some((kw) => includesKeyword_(haystack, kw));
 }
 
 // Real-estate listing/advert spam — general Nigerian news outlets and
@@ -342,7 +388,7 @@ const EXCLUDE_KEYWORDS = [
 
 function matchesExcludeKeywords_(item) {
   const haystack = `${item.title || ''} ${item.summary || ''}`.toLowerCase();
-  return EXCLUDE_KEYWORDS.some((kw) => haystack.includes(kw.toLowerCase()));
+  return EXCLUDE_KEYWORDS.some((kw) => includesKeyword_(haystack, kw));
 }
 
 // --- Helpers ----------------------------------------------------------------
@@ -379,6 +425,7 @@ async function fetchRssItems() {
         url: item.link,
         source: feed.name,
         region: feed.region,
+        dedicated: feed.dedicated,
         publishedAt: item.isoDate || item.pubDate,
         summary: (item.contentSnippet || '').slice(0, 220),
       }));
@@ -404,7 +451,7 @@ async function fetchNewsApiItems() {
   }
 
   const results = await Promise.allSettled(
-    NEWSAPI_QUERIES.map(async ({ query, region }) => {
+    NEWSAPI_QUERIES.map(async ({ query, region, dedicated }) => {
       const res = await fetch(buildNewsApiUrl(query), {
         headers: { 'X-Api-Key': apiKey },
       });
@@ -417,6 +464,7 @@ async function fetchNewsApiItems() {
         url: a.url,
         source: a.source?.name || 'NewsAPI',
         region,
+        dedicated,
         publishedAt: a.publishedAt,
         summary: (a.description || '').slice(0, 220),
       }));
@@ -432,15 +480,6 @@ async function fetchNewsApiItems() {
     }
   });
   return items;
-}
-
-const INSTITUTIONAL_SOURCE_PREFIXES = [
-  'NIA', 'IJNIA', 'ARCON', 'NIQS', 'FMHUD', 'Lagos MPPUD', 'NITP',
-  'Design Indaba', 'PropertyPro',
-];
-
-function isInstitutionalSource_(item) {
-  return INSTITUTIONAL_SOURCE_PREFIXES.some((prefix) => item.source?.startsWith(prefix));
 }
 
 // --- Source authority ranking -----------------------------------------------
@@ -560,19 +599,76 @@ function consolidateFuzzyDuplicates_(items) {
   );
 }
 
+// --- Regional-tag reconciliation ---------------------------------------
+//
+// Region normally just comes from which feed/query fetched an item — but
+// some "regional" feeds are really just a tag or search filter layered on
+// top of a GLOBAL platform (ArchDaily's own "Africa" tag page, a Google
+// News search for "architecture Africa"), and those tags/searches can
+// occasionally mistag or cross-post content that has nothing to do with
+// the region at all — e.g. an ArchDaily "Africa" tag entry that turns out
+// to be a project in Thailand. Genuinely region-exclusive outlets (NIA,
+// ConstructAfrica, Architect Africa...) can't have this problem — they
+// simply don't publish anything else — so this check only applies to the
+// tag/search-based sources below.
+const REGION_TAG_SOURCE_PREFIXES = [
+  'ArchDaily Africa', 'Dezeen Africa',
+  'Google News (Africa architecture)', 'Google News (Nigeria architecture)',
+];
+
+// Deliberately not exhaustive — major countries, capitals, and a few
+// architecturally-prominent cities. The goal is to catch "this mentions
+// nothing African at all," not to geocode precisely.
+const AFRICA_SIGNAL_KEYWORDS = [
+  'africa', 'african', 'nigeria', 'nigerian', 'ghana', 'ghanaian', 'kenya', 'kenyan',
+  'south africa', 'egypt', 'egyptian', 'morocco', 'moroccan', 'ethiopia', 'ethiopian',
+  'senegal', 'senegalese', 'rwanda', 'rwandan', 'tanzania', 'tanzanian', 'uganda', 'ugandan',
+  'zimbabwe', 'zambia', 'botswana', 'namibia', 'ivory coast', "cote d'ivoire", 'cameroon',
+  'tunisia', 'tunisian', 'algeria', 'algerian', 'sub-saharan',
+  'lagos', 'abuja', 'kano', 'ibadan', 'port harcourt', 'accra', 'nairobi', 'cairo',
+  'johannesburg', 'cape town', 'kigali', 'dakar', 'addis ababa', 'lome', 'abidjan',
+  'kampala', 'lusaka', 'harare', 'gaborone',
+];
+
+function hasRegionalSignal_(item) {
+  const haystack = textOf_(item);
+  return AFRICA_SIGNAL_KEYWORDS.some((kw) => includesKeyword_(haystack, kw));
+}
+
+function reconcileRegionTag_(item) {
+  const isTagBasedSource = REGION_TAG_SOURCE_PREFIXES.some((prefix) => item.source?.startsWith(prefix));
+  if (!isTagBasedSource || hasRegionalSignal_(item)) return item;
+  // Tagged Africa/Nigeria by the feed, but nothing in the title or summary
+  // mentions Africa or any African country/city — file it under Globe
+  // instead of trusting a tag the content itself doesn't support. Still
+  // kept (not dropped) since it's legitimate architecture content, just
+  // misfiled by the upstream platform.
+  return { ...item, region: 'global' };
+}
+
 function mergeAndDedupe(rssItems, newsApiItems) {
-  const all = [...rssItems, ...newsApiItems].filter((item) => {
-    if (!item.title || !item.url) return false;
-    if (matchesExcludeKeywords_(item)) return false;
-    const isLocal = item.region === 'africa' || item.region === 'nigeria';
-    if (!isRecent(item.publishedAt, isLocal ? MAX_AGE_HOURS_LOCAL : MAX_AGE_HOURS_GLOBAL)) {
-      return false;
-    }
-    if (isLocal && !isInstitutionalSource_(item) && !matchesLocalTopic_(item)) {
-      return false;
-    }
-    return true;
-  });
+  const all = [...rssItems, ...newsApiItems]
+    .map(reconcileRegionTag_)
+    .filter((item) => {
+      if (!item.title || !item.url) return false;
+      if (matchesExcludeKeywords_(item)) return false;
+      const isLocal = item.region === 'africa' || item.region === 'nigeria';
+      if (!isRecent(item.publishedAt, isLocal ? MAX_AGE_HOURS_LOCAL : MAX_AGE_HOURS_GLOBAL)) {
+        return false;
+      }
+      // Dedicated architecture/construction publications are trusted as-is,
+      // in every region — everything they publish is on-topic by definition
+      // of the outlet. Everything else (general news feeds, and critically
+      // the broad NewsAPI/Google News search queries) needs the topic filter
+      // regardless of region — a keyword search can match a story that only
+      // uses "architecture" as a metaphor somewhere in its full body text,
+      // and that risk doesn't go away just because the item got tagged
+      // 'global' instead of 'nigeria'/'africa'.
+      if (!item.dedicated && !matchesTopic_(item)) {
+        return false;
+      }
+      return true;
+    });
 
   const seen = new Set();
   const deduped = [];
@@ -686,11 +782,12 @@ function textOf_(item) {
   for (const phrase of NEGATIVE_PHRASES) {
     text = text.split(phrase).join(' ');
   }
+  text = text.replace(ARCHITECTURE_OF_METAPHOR_PATTERN, ' ');
   return text;
 }
 
 function matchesAny_(haystack, keywords) {
-  return keywords.some((kw) => haystack.includes(kw.toLowerCase()));
+  return keywords.some((kw) => includesKeyword_(haystack, kw));
 }
 
 // Every item gets a CATEGORY here (region is handled separately — see
@@ -1088,20 +1185,25 @@ function buildDigestPageHtml_(taxonomy, counts, { dateLabel, digestUrl }) {
   (function () {
     var API = '/api/digest-interactions';
     var LIKED_KEY = 'ada_digest_liked_urls';
+    var VIEWED_KEY = 'ada_digest_viewed_urls';
 
-    function getLikedSet() {
+    function getStoredSet(key) {
       try {
-        var raw = localStorage.getItem(LIKED_KEY);
+        var raw = localStorage.getItem(key);
         return raw ? new Set(JSON.parse(raw)) : new Set();
       } catch (e) {
         return new Set();
       }
     }
-    function saveLikedSet(set) {
+    function saveStoredSet(key, set) {
       try {
-        localStorage.setItem(LIKED_KEY, JSON.stringify(Array.from(set)));
+        localStorage.setItem(key, JSON.stringify(Array.from(set)));
       } catch (e) {}
     }
+    function getLikedSet() { return getStoredSet(LIKED_KEY); }
+    function saveLikedSet(set) { saveStoredSet(LIKED_KEY, set); }
+    function getViewedSet() { return getStoredSet(VIEWED_KEY); }
+    function saveViewedSet(set) { saveStoredSet(VIEWED_KEY, set); }
     function formatDate(iso) {
       try {
         return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -1228,14 +1330,21 @@ function buildDigestPageHtml_(taxonomy, counts, { dateLabel, digestUrl }) {
         var linkLi = link.closest('li[data-url]');
         var linkUrl = linkLi ? linkLi.getAttribute('data-url') : null;
         if (linkUrl) {
-          try {
-            fetch(API, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ action: 'view', url: linkUrl }),
-              keepalive: true,
-            }).catch(function () {});
-          } catch (e2) {}
+          var viewed = getViewedSet();
+          if (!viewed.has(linkUrl)) {
+            try {
+              fetch(API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'view', url: linkUrl }),
+                keepalive: true,
+              }).catch(function () {});
+            } catch (e2) {}
+            viewed.add(linkUrl);
+            saveViewedSet(viewed);
+            var viewNumEl = linkLi.querySelector('.view-num');
+            if (viewNumEl) viewNumEl.textContent = (parseInt(viewNumEl.textContent, 10) || 0) + 1;
+          }
         }
         return;
       }
@@ -1436,7 +1545,17 @@ export default async function handler(req, res) {
     ]);
 
     const scrapedItems = await fetchScrapeFallbacks_(rssItems);
-    const items = mergeAndDedupe([...rssItems, ...scrapedItems], newsApiItems);
+    const merged = mergeAndDedupe([...rssItems, ...scrapedItems], newsApiItems);
+
+    // Cross-run "already shown" filter — covers every source now, not just
+    // the scraped ones. Deliberately filtered here (before publish) but
+    // only MARKED as seen after publish succeeds below — if the GitHub
+    // publish step fails, these stories haven't actually appeared
+    // anywhere yet, so a retry should still be able to show them, not
+    // silently treat them as already-covered.
+    const unseenUrls = await getUnseenUrls_(merged.map((item) => item.url));
+    const unseenUrlSet = new Set(unseenUrls);
+    const items = merged.filter((item) => unseenUrlSet.has(item.url));
 
     const taxonomy = buildTaxonomy_(items);
     const counts = taxonomyCounts_(taxonomy);
@@ -1448,6 +1567,10 @@ export default async function handler(req, res) {
 
     const pageHtml = buildDigestPageHtml_(taxonomy, counts, { dateLabel, digestUrl });
     await publishDigestToGitHub_(pageHtml);
+
+    // Only now that publish has actually succeeded — mark these URLs so
+    // they won't resurface in a future run.
+    await markUrlsSeen_(items.map((item) => item.url));
 
     const emailHtml = buildNotificationEmailHtml_(counts, { dateLabel, digestUrl });
 
