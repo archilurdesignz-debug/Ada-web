@@ -246,7 +246,7 @@ const MAX_AGE_HOURS_LOCAL = 96;
 // non-architectural collocations in NEGATIVE_PHRASES.
 
 const STRONG_TOPIC_KEYWORDS = [
-  'architect', 'architecture', 'ARCON', 'NIA', 'NIQS', 'NITP', 'IJNIA',
+  'architect', 'architecture', 'ARCON', 'NIQS', 'NITP', 'IJNIA',
   'coren', 'nse', 'niob', 'corbon', 'toprec', 'qsrb',
   'quantity survey', 'quantity surveyor', 'bill of quantities', 'boq',
   'town planning', 'town planner', 'spatial planning', 'zoning',
@@ -261,6 +261,21 @@ const STRONG_TOPIC_KEYWORDS = [
   'commercial development', 'mixed-use development', 'infrastructure development',
   'real estate developer', 'property developer', 'land developer',
 ];
+
+// 'NIA' (Nigerian Institute of Architects) is NOT in the case-insensitive
+// list above — word-boundary matching alone doesn't help here, because
+// "Nia" is also a genuine whole word: a product name ("LLM Nia 1.0"), a
+// person's name, a Swahili/Kwanzaa term. Case-insensitive \bnia\b matches
+// all of those equally. A real institutional acronym is almost always
+// written in full caps in running text, unlike a title-case product or
+// person name, so this one keyword is checked case-SENSITIVELY instead —
+// see CASE_SENSITIVE_STRONG_KEYWORDS / includesCaseSensitiveKeyword_.
+const CASE_SENSITIVE_STRONG_KEYWORDS = ['NIA'];
+
+function includesCaseSensitiveKeyword_(rawText, keyword) {
+  const pattern = new RegExp(`\\b${escapeRegExp_(keyword)}\\b`); // no 'i' flag — case matters
+  return pattern.test(rawText);
+}
 
 // Generic enough to need a negative-phrase check before counting.
 // Note: bare geographic terms (Lagos, Nigeria, Abuja, Africa...) are
@@ -359,8 +374,23 @@ function includesKeyword_(haystack, keyword) {
 function matchesTopic_(item) {
   const scopedItem = isGeneralNewsSource_(item) ? { title: item.title, summary: '' } : item;
   const haystack = textOf_(scopedItem);
+  const rawText = `${scopedItem.title || ''} ${scopedItem.summary || ''}`;
+
+  if (CASE_SENSITIVE_STRONG_KEYWORDS.some((kw) => includesCaseSensitiveKeyword_(rawText, kw))) {
+    return true;
+  }
 
   if (STRONG_TOPIC_KEYWORDS.some((kw) => includesKeyword_(haystack, kw))) {
+    return true;
+  }
+
+  // AI-in-the-built-environment phrases are specific/compound enough to
+  // count as a strong signal on their own (same reasoning as
+  // STRONG_TOPIC_KEYWORDS) — this lets a genuine "digital twin for
+  // infrastructure" or "construction robotics" story pass the topic
+  // filter even if it doesn't also happen to say "architect" or
+  // "building" somewhere.
+  if (ARTIFICIAL_INTELLIGENCE_KEYWORDS.some((kw) => includesKeyword_(haystack, kw))) {
     return true;
   }
 
@@ -723,7 +753,12 @@ const EXHIBITIONS_KEYWORDS = [
 
 const PROFESSIONAL_PRACTICE_SUBCATEGORIES = [
   { key: 'architects', label: 'Architects', emoji: '👷', keywords: [
-    'architect', 'architecture firm', 'architectural practice', 'arcon', 'nia',
+    // Note: bare 'nia' deliberately excluded — same collision risk as
+    // the topic filter's CASE_SENSITIVE_STRONG_KEYWORDS entry ("Nia" the
+    // product/person name vs "NIA" the institute). Genuine NIA-sourced
+    // items are already routed here via the source-identity check in
+    // categorizeItem_(), before any keyword matching runs.
+    'architect', 'architecture firm', 'architectural practice', 'arcon',
     'pritzker', 'architects registration council', 'professional practice exam',
     'ppe', 'design fee scale', 'riba', 'aia', 'bim', 'parametric',
   ] },
@@ -772,6 +807,26 @@ const CONSTRUCTION_KEYWORDS = [
   'construction methodology', 'site work',
   'topping out', 'epc contract', 'fidic', 'dredging', 'heavy equipment',
   'concrete casting', 'precast', 'post-tensioning', 'site execution',
+];
+
+// Deliberately compound/specific phrases, NOT bare 'ai' or 'artificial
+// intelligence' — those would match any generic tech-industry story
+// (an LLM launch, a chatbot funding round) with zero connection to the
+// built environment, exactly the kind of noise the rest of this filter
+// exists to keep out. Every phrase here ties AI specifically to
+// architecture, construction, planning, or property.
+const ARTIFICIAL_INTELLIGENCE_KEYWORDS = [
+  'ai in architecture', 'ai-powered design', 'ai architecture', 'architectural ai',
+  'ai architect', 'architecture ai tool', 'ai design tool',
+  'generative design', 'generative ai design', 'ai-generated design',
+  'ai in construction', 'construction ai', 'construction robotics',
+  'autonomous construction', 'robotic construction', '3d-printed building',
+  '3d-printed house', 'ai in real estate', 'proptech ai', 'ai proptech',
+  'ai-powered proptech', 'smart building ai', 'ai building management',
+  'predictive maintenance ai', 'ai urban planning', 'ai in urban planning',
+  'ai in planning', 'computational design', 'digital twin', 'bim ai',
+  'ai in bim', 'machine learning architecture', 'ai in real estate valuation',
+  'ai floor plan', 'ai site analysis',
 ];
 
 function textOf_(item) {
@@ -839,6 +894,10 @@ function categorizeItem_(item) {
     return { category: 'exhibitions' };
   }
 
+  if (matchesAny_(haystack, ARTIFICIAL_INTELLIGENCE_KEYWORDS)) {
+    return { category: 'artificialIntelligence' };
+  }
+
   for (const sub of PROFESSIONAL_PRACTICE_SUBCATEGORIES) {
     if (matchesAny_(haystack, sub.keywords)) {
       return { category: 'professionalPractice', subcategory: sub.key };
@@ -881,6 +940,7 @@ function emptyRegionTaxonomy_() {
     construction: [],
     competitionsExams: [],
     exhibitions: [],
+    artificialIntelligence: [],
     designCulture: [],
     generalNews: [],
   };
@@ -912,6 +972,7 @@ function buildTaxonomy_(items) {
     t.construction = t.construction.slice(0, MAX_ITEMS_PER_CATEGORY);
     t.competitionsExams = t.competitionsExams.slice(0, MAX_ITEMS_PER_CATEGORY);
     t.exhibitions = t.exhibitions.slice(0, MAX_ITEMS_PER_CATEGORY);
+    t.artificialIntelligence = t.artificialIntelligence.slice(0, MAX_ITEMS_PER_CATEGORY);
     t.designCulture = t.designCulture.slice(0, MAX_ITEMS_PER_CATEGORY);
     t.generalNews = t.generalNews.slice(0, MAX_ITEMS_PER_CATEGORY);
     for (const key of Object.keys(t.professionalPractice)) {
@@ -935,6 +996,7 @@ function regionCounts_(regionTaxonomy) {
     construction: regionTaxonomy.construction.length,
     competitionsExams: regionTaxonomy.competitionsExams.length,
     exhibitions: regionTaxonomy.exhibitions.length,
+    artificialIntelligence: regionTaxonomy.artificialIntelligence.length,
     designCulture: regionTaxonomy.designCulture.length,
     generalNews: regionTaxonomy.generalNews.length,
   };
@@ -1026,6 +1088,7 @@ function regionCategorySections_(regionTaxonomy, regionCounts, regionLabel) {
     accordionSection_('🏗️', 'Construction', regionTaxonomy.construction, 'nested'),
     accordionSection_('🏆', 'Competitions & Exams', regionTaxonomy.competitionsExams, 'nested'),
     accordionSection_('🖼️', 'Exhibitions', regionTaxonomy.exhibitions, 'nested'),
+    accordionSection_('🤖', 'Artificial Intelligence', regionTaxonomy.artificialIntelligence, 'nested'),
     accordionSection_('🎨', 'Design & Culture', regionTaxonomy.designCulture, 'nested'),
     accordionSection_('📰', `${regionLabel} News`, regionTaxonomy.generalNews, 'nested'),
   ].join('');
@@ -1041,7 +1104,7 @@ function regionSection_(emoji, label, regionTaxonomy, regionCounts) {
 }
 
 function buildDigestPageHtml_(taxonomy, counts, { dateLabel, digestUrl }) {
-  const ogDescription = `${counts.total} new architecture & built-environment stories, organized by Nigeria, Africa, and Globe — each covering Policy & Regulation, Professional Practice, Development & Real Estate, Materials, Construction, Competitions & Exams, Exhibitions, and Design & Culture.`;
+  const ogDescription = `${counts.total} new architecture & built-environment stories, organized by Nigeria, Africa, and Globe — each covering Policy & Regulation, Professional Practice, Development & Real Estate, Materials, Construction, Competitions & Exams, Exhibitions, Artificial Intelligence, and Design & Culture.`;
   const ogImage = process.env.DIGEST_OG_IMAGE_URL || 'https://archilurdesignz.com/assets/og-digest-cover.jpg';
   // Public site key — safe to embed in the page (this is how Turnstile is
   // designed to work; only the SECRET key, used server-side in
