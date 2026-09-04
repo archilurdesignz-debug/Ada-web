@@ -5,7 +5,8 @@
 // which Vercel auto-deploys), and emails a short notification with a
 // "View Digest" link and a "Share to WhatsApp" link.
 //
-// Triggered twice daily (see your external cron scheduler, since Vercel's
+// Triggered on your external cron schedule (currently 3x/day: 7am, noon,
+// 3pm), since Vercel's
 // free plan only allows once-daily native cron).
 // Can also be hit manually: GET /api/news-digest?manual=1
 
@@ -1103,7 +1104,7 @@ function regionSection_(emoji, label, regionTaxonomy, regionCounts) {
     </details>`;
 }
 
-function buildDigestPageHtml_(taxonomy, counts, { dateLabel, digestUrl }) {
+function buildDigestPageHtml_(taxonomy, counts, { dateLabel, timeLabel, digestUrl }) {
   const ogDescription = `${counts.total} new architecture & built-environment stories, organized by Nigeria, Africa, and Globe — each covering Policy & Regulation, Professional Practice, Development & Real Estate, Materials, Construction, Competitions & Exams, Exhibitions, Artificial Intelligence, and Design & Culture.`;
   const ogImage = process.env.DIGEST_OG_IMAGE_URL || 'https://archilurdesignz.com/assets/og-digest-cover.jpg';
   // Public site key — safe to embed in the page (this is how Turnstile is
@@ -1165,6 +1166,7 @@ function buildDigestPageHtml_(taxonomy, counts, { dateLabel, digestUrl }) {
     background: #faf8f4; color: #1a1a1a;
   }
   h1 { font-family: Georgia, serif; font-size: 26px; margin: 0 0 4px; }
+  .tagline { color: #4a4a4a; font-size: 14px; line-height: 1.5; margin: 0 0 12px; max-width: 60ch; }
   .date { color: #8a8378; font-size: 14px; margin-bottom: 28px; }
   details {
     background: #fff; border: 1px solid #e5e0d8; border-radius: 12px;
@@ -1241,7 +1243,8 @@ function buildDigestPageHtml_(taxonomy, counts, { dateLabel, digestUrl }) {
 </head>
 <body>
   <h1>ADA Architecture Digest</h1>
-  <div class="date">${dateLabel} · ${counts.total} stories</div>
+  <p class="tagline">Architecture, construction, and property news from Nigeria, Africa, and around the world — sorted by region and topic, refreshed several times a day by Archilurdesignz and Architecture.</p>
+  <div class="date">${dateLabel} · ${timeLabel} · ${counts.total} stories</div>
   ${sections || '<p>No new stories this run.</p>'}
   <footer>Archilurdesignz and Architecture</footer>
   <script>
@@ -1566,9 +1569,9 @@ async function publishDigestToGitHub_(htmlContent) {
 
 // --- Notification email (short, with View + Share buttons) -----------------
 
-function buildNotificationEmailHtml_(counts, { dateLabel, digestUrl }) {
+function buildNotificationEmailHtml_(counts, { dateLabel, timeLabel, digestUrl }) {
   const shareText = encodeURIComponent(
-    `📐 ADA Architecture Digest — ${dateLabel}\n` +
+    `📐 ADA Architecture Digest — ${dateLabel} · ${timeLabel}\n` +
       `${counts.total} new stories: 🇳🇬 Nigeria (${counts.nigeria.total}), ` +
       `🌍 Africa (${counts.africa.total}), 🌐 Globe (${counts.global.total})\n\n${digestUrl}`
   );
@@ -1577,7 +1580,7 @@ function buildNotificationEmailHtml_(counts, { dateLabel, digestUrl }) {
   return `
   <div style="max-width:480px;margin:0 auto;font-family:sans-serif;text-align:center;padding:32px 20px;">
     <h1 style="font-family:'Georgia',serif;font-size:20px;color:#1a1a1a;margin-bottom:4px;">Your Architecture Digest is ready</h1>
-    <div style="font-size:13px;color:#8a8378;margin-bottom:24px;">${dateLabel}</div>
+    <div style="font-size:13px;color:#8a8378;margin-bottom:24px;">${dateLabel} · ${timeLabel}</div>
     <div style="font-size:14px;color:#4a4a4a;line-height:2;text-align:left;background:#f7f5f0;border-radius:10px;padding:18px 22px;margin-bottom:24px;">
       🇳🇬 Nigeria — <b>${counts.nigeria.total}</b><br>
       🌍 Africa — <b>${counts.africa.total}</b><br>
@@ -1623,19 +1626,23 @@ export default async function handler(req, res) {
     const taxonomy = buildTaxonomy_(items);
     const counts = taxonomyCounts_(taxonomy);
 
-    const dateLabel = new Date().toLocaleDateString('en-US', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    const now = new Date();
+    const dateLabel = now.toLocaleDateString('en-US', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Africa/Lagos',
+    });
+    const timeLabel = now.toLocaleTimeString('en-US', {
+      hour: 'numeric', minute: '2-digit', timeZone: 'Africa/Lagos',
     });
     const digestUrl = process.env.DIGEST_PAGE_URL || 'https://archilurdesignz.com/digest';
 
-    const pageHtml = buildDigestPageHtml_(taxonomy, counts, { dateLabel, digestUrl });
+    const pageHtml = buildDigestPageHtml_(taxonomy, counts, { dateLabel, timeLabel, digestUrl });
     await publishDigestToGitHub_(pageHtml);
 
     // Only now that publish has actually succeeded — mark these URLs so
     // they won't resurface in a future run.
     await markUrlsSeen_(items.map((item) => item.url));
 
-    const emailHtml = buildNotificationEmailHtml_(counts, { dateLabel, digestUrl });
+    const emailHtml = buildNotificationEmailHtml_(counts, { dateLabel, timeLabel, digestUrl });
 
     const resend = new Resend(process.env.RESEND_API_KEY);
     const { data, error } = await resend.emails.send({
