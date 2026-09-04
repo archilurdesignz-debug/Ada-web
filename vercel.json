@@ -17,5 +17,10 @@
       ],
       "destination": "/api/plan-og"
     }
-  ]
+  ],
+  "functions": {
+    "api/news-digest.js": {
+      "maxDuration": 60
+    }
+  }
 }
