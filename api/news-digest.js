@@ -231,6 +231,13 @@ const STRONG_TOPIC_KEYWORDS = [
   'cost management', 'procurement', 'professional exam', 'design competition',
   'afdb', 'renewed hope housing', 'federal ministry of housing', 'shelter afrique',
   'fidic', 'epc contract', 'groundbreaking', 'topping out',
+  // Compound "development" phrases — specific enough to be unambiguous,
+  // unlike the bare word (see note below on why 'development' isn't in
+  // AMBIGUOUS_TOPIC_KEYWORDS).
+  'real estate development', 'property development', 'housing development',
+  'urban development', 'estate development', 'residential development',
+  'commercial development', 'mixed-use development', 'infrastructure development',
+  'real estate developer', 'property developer', 'land developer',
 ];
 
 // Generic enough to need a negative-phrase check before counting.
@@ -239,9 +246,20 @@ const STRONG_TOPIC_KEYWORDS = [
 // geography, and since virtually every article from a Nigerian outlet
 // mentions one of these place names, treating them as a topic signal
 // would defeat the filter entirely for general news sources.
+//
+// 'development' and 'developer' are ALSO deliberately not in this list,
+// even generic-with-a-check. Nigerian ministries and agencies routinely
+// have "Development" in their official name with zero architectural
+// connection (Ministry of Solid Minerals Development, Niger Delta
+// Development Commission, Ministry of Youth Development, Rural
+// Development, Human Capital Development...) — there are too many
+// non-architectural collocations to list as negative phrases, so the
+// bare word isn't a usable signal at all. The specific compound phrases
+// that DO mean something ("real estate development", "housing
+// development"...) are covered as exact phrases in
+// STRONG_TOPIC_KEYWORDS instead.
 const AMBIGUOUS_TOPIC_KEYWORDS = [
-  'building', 'design', 'development', 'developer', 'construction',
-  'urban', 'engineer', 'housing',
+  'building', 'design', 'construction', 'urban', 'engineer', 'housing',
 ];
 
 // If one of these phrases is present, the ambiguous keyword it contains
@@ -259,10 +277,42 @@ const NEGATIVE_PHRASES = [
   'developed and developing',
   // "design" used for non-architectural design
   'game design', 'policy design', 'by design', 'design flaw', 'curriculum design',
+  // "architecture" used as a metaphor for a system/structure of institutions
+  // or policy, not a building — extremely common in Nigerian policy and
+  // defence journalism ("defence architecture", "security architecture"),
+  // and 'architecture' is otherwise the single strongest unconditional
+  // keyword, so this class of false positive needs explicit stripping.
+  'defence architecture', 'defense architecture', 'security architecture',
+  'financial architecture', 'economic architecture', 'institutional architecture',
+  'governance architecture', 'policy architecture', 'network architecture',
+  'software architecture', 'system architecture', 'systems architecture',
+  'cyber architecture', 'cybersecurity architecture', 'it architecture',
+  'data architecture', 'global financial architecture', 'peace architecture',
+  'health architecture', 'social architecture', 'political architecture',
+  'diplomatic architecture', 'legal architecture', 'regulatory architecture',
+  'tax architecture', 'trade architecture', 'monetary architecture',
 ];
 
+// General-purpose news feeds (broad national/broadcast coverage, not
+// dedicated to architecture/construction/property) sometimes carry
+// syndication boilerplate or unrelated teaser text in their RSS
+// description/summary field that can coincidentally contain a keyword
+// match, even when the actual headline has nothing to do with the built
+// environment — e.g. an AllAfrica "Nigeria" general-headlines item whose
+// description field happens to contain a stray match. For these sources,
+// only the title itself is checked — the one field guaranteed to
+// reflect what the story is actually about.
+const GENERAL_NEWS_SOURCE_PREFIXES = [
+  'Punch', 'Channels TV', 'AllAfrica', 'BusinessDay', 'Nairametrics', 'Google News',
+];
+
+function isGeneralNewsSource_(item) {
+  return GENERAL_NEWS_SOURCE_PREFIXES.some((prefix) => item.source?.startsWith(prefix));
+}
+
 function matchesLocalTopic_(item) {
-  const haystack = textOf_(item);
+  const scopedItem = isGeneralNewsSource_(item) ? { title: item.title, summary: '' } : item;
+  const haystack = textOf_(scopedItem);
 
   if (STRONG_TOPIC_KEYWORDS.some((kw) => haystack.includes(kw.toLowerCase()))) {
     return true;
@@ -564,7 +614,15 @@ const COMPETITIONS_EXAMS_KEYWORDS = [
   'licensing exam', 'design award', 'award shortlist', 'shortlisted',
   'award winner', 'call for entries', 'ideas competition',
   'call for proposals', 'student competition', 'arcon ppe',
-  'architecture award', 'biennale', 'fellowship',
+  'architecture award', 'fellowship',
+];
+
+const EXHIBITIONS_KEYWORDS = [
+  'exhibition', 'expo', 'trade show', 'trade fair', 'showcase',
+  'gallery show', 'design exhibition', 'architecture exhibition',
+  'building expo', 'construction expo', 'art exhibition', 'biennale',
+  'triennial', 'building fair', 'housing fair', 'materials expo',
+  'building and construction expo', 'open house architecture',
 ];
 
 const PROFESSIONAL_PRACTICE_SUBCATEGORIES = [
@@ -605,7 +663,12 @@ const MATERIALS_KEYWORDS = [
   'mass timber', 'net zero building', 'embodied carbon',
 ];
 
-const DEVELOPMENT_REAL_ESTATE_KEYWORDS = ['proptech', 'real estate development', 'property development'];
+const DEVELOPMENT_REAL_ESTATE_KEYWORDS = [
+  'proptech', 'real estate development', 'property development', 'housing development',
+  'urban development', 'estate development', 'residential development',
+  'commercial development', 'mixed-use development', 'infrastructure development',
+  'real estate developer', 'property developer', 'land developer',
+];
 
 const CONSTRUCTION_KEYWORDS = [
   'construction', 'groundbreaking', 'building site', 'infrastructure project',
@@ -630,9 +693,13 @@ function matchesAny_(haystack, keywords) {
   return keywords.some((kw) => haystack.includes(kw.toLowerCase()));
 }
 
+// Every item gets a CATEGORY here (region is handled separately — see
+// buildTaxonomy_ — since region is just item.region already tagged on
+// the feed/query config). The same category logic now applies uniformly
+// regardless of region: a Nigeria item, an Africa item, and a Globe item
+// all run through the identical rules below, so "Architects" news is
+// Architects news whether it's Nigerian, African, or global.
 function categorizeItem_(item) {
-  const isLocal = item.region === 'africa' || item.region === 'nigeria';
-
   // Policy & Regulation — municipal/federal government sources are
   // unambiguous; a Lagos MPPUD press release is policy content no matter
   // what specific words it uses.
@@ -656,11 +723,8 @@ function categorizeItem_(item) {
     return { category: 'developmentRealEstate' };
   }
 
-  // Professional-body sources are explicitly called out in the strategy
-  // doc as Professional Practice content ("ARCON and NIA developments"),
-  // so they're routed there ahead of the geographic bucket. Every other
-  // Nigeria/Africa source keeps the original behavior: straight into the
-  // regional bucket regardless of topic.
+  // Professional-body sources are explicitly Professional Practice
+  // content regardless of what words a given press release uses.
   if (item.source?.startsWith('NIQS')) {
     return { category: 'professionalPractice', subcategory: 'quantitySurveyors' };
   }
@@ -668,14 +732,14 @@ function categorizeItem_(item) {
     return { category: 'professionalPractice', subcategory: 'architects' };
   }
 
-  if (isLocal) {
-    return { category: 'nigeriaAfrica' };
-  }
-
   const haystack = textOf_(item);
 
   if (matchesAny_(haystack, COMPETITIONS_EXAMS_KEYWORDS)) {
     return { category: 'competitionsExams' };
+  }
+
+  if (matchesAny_(haystack, EXHIBITIONS_KEYWORDS)) {
+    return { category: 'exhibitions' };
   }
 
   for (const sub of PROFESSIONAL_PRACTICE_SUBCATEGORIES) {
@@ -696,14 +760,22 @@ function categorizeItem_(item) {
     return { category: 'construction' };
   }
 
-  return { category: 'globalNews' };
+  // Catch-all — on-topic (it passed the topic filter or came from an
+  // architecture-focused feed) but doesn't fit a specific category.
+  return { category: 'generalNews' };
 }
 
-function buildTaxonomy_(items) {
-  const taxonomy = {
+// Region is the top-level grouping now. Every region gets the SAME
+// category shape underneath it (Policy & Regulation, Professional
+// Practice w/ 5 sub-categories, Development & Real Estate, Materials,
+// Construction, Competitions & Exams, Design & Culture, plus a
+// catch-all "News" bucket) — so "Architects" news, "Materials" news
+// etc. are each split three ways: Nigeria, Africa, Globe.
+const REGION_KEYS = ['nigeria', 'africa', 'global'];
+
+function emptyRegionTaxonomy_() {
+  return {
     policyRegulation: [],
-    designCulture: [],
-    nigeriaAfrica: [],
     professionalPractice: {
       architects: [], engineers: [], quantitySurveyors: [], townPlanning: [], builders: [],
     },
@@ -711,52 +783,78 @@ function buildTaxonomy_(items) {
     materials: [],
     construction: [],
     competitionsExams: [],
-    globalNews: [],
+    exhibitions: [],
+    designCulture: [],
+    generalNews: [],
+  };
+}
+
+function buildTaxonomy_(items) {
+  const taxonomy = {
+    nigeria: emptyRegionTaxonomy_(),
+    africa: emptyRegionTaxonomy_(),
+    global: emptyRegionTaxonomy_(),
   };
 
   for (const item of items) {
+    const region = REGION_KEYS.includes(item.region) ? item.region : 'global';
     const { category, subcategory } = categorizeItem_(item);
     if (category === 'professionalPractice') {
-      taxonomy.professionalPractice[subcategory].push(item);
+      taxonomy[region].professionalPractice[subcategory].push(item);
     } else {
-      taxonomy[category].push(item);
+      taxonomy[region][category].push(item);
     }
   }
 
-  // Cap each bucket so no single category runs away with the whole digest.
-  taxonomy.policyRegulation = taxonomy.policyRegulation.slice(0, MAX_ITEMS_PER_CATEGORY);
-  taxonomy.designCulture = taxonomy.designCulture.slice(0, MAX_ITEMS_PER_CATEGORY);
-  taxonomy.nigeriaAfrica = taxonomy.nigeriaAfrica.slice(0, MAX_ITEMS_PER_CATEGORY);
-  taxonomy.developmentRealEstate = taxonomy.developmentRealEstate.slice(0, MAX_ITEMS_PER_CATEGORY);
-  taxonomy.materials = taxonomy.materials.slice(0, MAX_ITEMS_PER_CATEGORY);
-  taxonomy.construction = taxonomy.construction.slice(0, MAX_ITEMS_PER_CATEGORY);
-  taxonomy.competitionsExams = taxonomy.competitionsExams.slice(0, MAX_ITEMS_PER_CATEGORY);
-  taxonomy.globalNews = taxonomy.globalNews.slice(0, MAX_ITEMS_PER_CATEGORY);
-  for (const key of Object.keys(taxonomy.professionalPractice)) {
-    taxonomy.professionalPractice[key] = taxonomy.professionalPractice[key].slice(0, MAX_ITEMS_PER_CATEGORY);
+  // Cap each bucket so no single category runs away with the digest.
+  for (const region of REGION_KEYS) {
+    const t = taxonomy[region];
+    t.policyRegulation = t.policyRegulation.slice(0, MAX_ITEMS_PER_CATEGORY);
+    t.developmentRealEstate = t.developmentRealEstate.slice(0, MAX_ITEMS_PER_CATEGORY);
+    t.materials = t.materials.slice(0, MAX_ITEMS_PER_CATEGORY);
+    t.construction = t.construction.slice(0, MAX_ITEMS_PER_CATEGORY);
+    t.competitionsExams = t.competitionsExams.slice(0, MAX_ITEMS_PER_CATEGORY);
+    t.exhibitions = t.exhibitions.slice(0, MAX_ITEMS_PER_CATEGORY);
+    t.designCulture = t.designCulture.slice(0, MAX_ITEMS_PER_CATEGORY);
+    t.generalNews = t.generalNews.slice(0, MAX_ITEMS_PER_CATEGORY);
+    for (const key of Object.keys(t.professionalPractice)) {
+      t.professionalPractice[key] = t.professionalPractice[key].slice(0, MAX_ITEMS_PER_CATEGORY);
+    }
   }
 
   return taxonomy;
 }
 
-function taxonomyCounts_(taxonomy) {
-  const professionalPractice = Object.values(taxonomy.professionalPractice).reduce(
+function regionCounts_(regionTaxonomy) {
+  const professionalPractice = Object.values(regionTaxonomy.professionalPractice).reduce(
     (sum, arr) => sum + arr.length,
     0
   );
   const counts = {
-    policyRegulation: taxonomy.policyRegulation.length,
-    designCulture: taxonomy.designCulture.length,
-    nigeriaAfrica: taxonomy.nigeriaAfrica.length,
+    policyRegulation: regionTaxonomy.policyRegulation.length,
     professionalPractice,
-    developmentRealEstate: taxonomy.developmentRealEstate.length,
-    materials: taxonomy.materials.length,
-    construction: taxonomy.construction.length,
-    competitionsExams: taxonomy.competitionsExams.length,
-    globalNews: taxonomy.globalNews.length,
+    developmentRealEstate: regionTaxonomy.developmentRealEstate.length,
+    materials: regionTaxonomy.materials.length,
+    construction: regionTaxonomy.construction.length,
+    competitionsExams: regionTaxonomy.competitionsExams.length,
+    exhibitions: regionTaxonomy.exhibitions.length,
+    designCulture: regionTaxonomy.designCulture.length,
+    generalNews: regionTaxonomy.generalNews.length,
   };
   counts.total = Object.values(counts).reduce((a, b) => a + b, 0);
   return counts;
+}
+
+function taxonomyCounts_(taxonomy) {
+  const nigeria = regionCounts_(taxonomy.nigeria);
+  const africa = regionCounts_(taxonomy.africa);
+  const global = regionCounts_(taxonomy.global);
+  return {
+    nigeria,
+    africa,
+    global,
+    total: nigeria.total + africa.total + global.total,
+  };
 }
 
 // --- Digest page HTML (the "zero-scroll" accordion webpage) ----------------
@@ -768,57 +866,116 @@ function itemLi_(item) {
           item.alsoReportedBy.length === 1 ? '' : 's'
         }</span>`
       : '';
-  return `<li><a href="${item.url}" target="_blank" rel="noopener">${escapeHtml(
-    item.title
-  )}</a><span class="src">${escapeHtml(item.source)}${alsoReported}</span></li>`;
+  const safeUrl = escapeHtml(item.url);
+  return `<li data-url="${safeUrl}">
+    <a class="item-link" href="${safeUrl}" target="_blank" rel="noopener">${escapeHtml(item.title)}</a>
+    <span class="src">${escapeHtml(item.source)}${alsoReported}</span>
+    <div class="item-actions">
+      <button type="button" class="like-btn" aria-label="Like this story">
+        <span class="like-icon">♡</span><span class="like-count">0</span>
+      </button>
+      <span class="view-count" title="Views"><span class="view-icon">👁</span> <span class="view-num">0</span></span>
+      <button type="button" class="comments-toggle" aria-label="Show comments">
+        💬 <span class="comment-count">0</span>
+      </button>
+    </div>
+    <div class="comment-box" hidden>
+      <div class="comment-list"></div>
+      <form class="comment-form">
+        <input type="text" class="comment-name" maxlength="60" placeholder="Name (optional)">
+        <textarea class="comment-text" maxlength="500" placeholder="Add a comment…" required></textarea>
+        <div class="cf-turnstile-slot"></div>
+        <p class="turnstile-msg" hidden></p>
+        <button type="submit">Post</button>
+      </form>
+    </div>
+  </li>`;
 }
 
-function accordionSection_(emoji, label, items) {
+function accordionSection_(emoji, label, items, cls) {
   if (!items.length) return '';
+  const clsAttr = cls ? ` class="${cls}"` : '';
   return `
-    <details>
+    <details${clsAttr}>
       <summary><span>${emoji} ${escapeHtml(label)}</span><span class="count">${items.length}</span></summary>
       <ul>${items.map(itemLi_).join('')}</ul>
     </details>`;
 }
 
-function professionalPracticeSection_(taxonomy, counts) {
-  if (!counts.professionalPractice) return '';
-  const nested = PROFESSIONAL_PRACTICE_SUBCATEGORIES.filter(
-    (sub) => taxonomy.professionalPractice[sub.key].length
-  )
-    .map(
-      (sub) => `
-        <details class="nested">
-          <summary><span>${sub.emoji} ${escapeHtml(sub.label)}</span><span class="count">${
-        taxonomy.professionalPractice[sub.key].length
-      }</span></summary>
-          <ul>${taxonomy.professionalPractice[sub.key].map(itemLi_).join('')}</ul>
-        </details>`
-    )
-    .join('');
+// Professional Practice sub-categories render one level deeper than the
+// other categories (region > Professional Practice > Architects/Engineers/...),
+// so they get their own slightly-more-indented style (.nested2).
+function professionalPracticeSection_(regionTaxonomy, regionCounts) {
+  if (!regionCounts.professionalPractice) return '';
+  const nested = PROFESSIONAL_PRACTICE_SUBCATEGORIES.map((sub) =>
+    accordionSection_(sub.emoji, sub.label, regionTaxonomy.professionalPractice[sub.key], 'nested2')
+  ).join('');
 
   return `
-    <details>
-      <summary><span>🧑‍💼 Professional Practice</span><span class="count">${counts.professionalPractice}</span></summary>
+    <details class="nested">
+      <summary><span>🧑‍💼 Professional Practice</span><span class="count">${regionCounts.professionalPractice}</span></summary>
       ${nested}
     </details>`;
 }
 
+// The full category breakdown for one region — same shape every time,
+// just fed a different region's taxonomy/counts/label.
+function regionCategorySections_(regionTaxonomy, regionCounts, regionLabel) {
+  return [
+    accordionSection_('🏛️', 'Policy & Regulation', regionTaxonomy.policyRegulation, 'nested'),
+    professionalPracticeSection_(regionTaxonomy, regionCounts),
+    accordionSection_('🏘️', 'Development & Real Estate', regionTaxonomy.developmentRealEstate, 'nested'),
+    accordionSection_('🧱', 'Building Materials', regionTaxonomy.materials, 'nested'),
+    accordionSection_('🏗️', 'Construction', regionTaxonomy.construction, 'nested'),
+    accordionSection_('🏆', 'Competitions & Exams', regionTaxonomy.competitionsExams, 'nested'),
+    accordionSection_('🖼️', 'Exhibitions', regionTaxonomy.exhibitions, 'nested'),
+    accordionSection_('🎨', 'Design & Culture', regionTaxonomy.designCulture, 'nested'),
+    accordionSection_('📰', `${regionLabel} News`, regionTaxonomy.generalNews, 'nested'),
+  ].join('');
+}
+
+function regionSection_(emoji, label, regionTaxonomy, regionCounts) {
+  if (!regionCounts.total) return '';
+  return `
+    <details>
+      <summary><span>${emoji} ${escapeHtml(label)}</span><span class="count">${regionCounts.total}</span></summary>
+      ${regionCategorySections_(regionTaxonomy, regionCounts, label)}
+    </details>`;
+}
+
 function buildDigestPageHtml_(taxonomy, counts, { dateLabel, digestUrl }) {
-  const ogDescription = `${counts.total} new architecture & built-environment stories — Policy & Regulation, Nigeria & Africa, Professional Practice, Development & Real Estate, Materials, Construction, Competitions & Exams, Design & Culture, and Global News.`;
+  const ogDescription = `${counts.total} new architecture & built-environment stories, organized by Nigeria, Africa, and Globe — each covering Policy & Regulation, Professional Practice, Development & Real Estate, Materials, Construction, Competitions & Exams, Exhibitions, and Design & Culture.`;
   const ogImage = process.env.DIGEST_OG_IMAGE_URL || 'https://archilurdesignz.com/assets/og-digest-cover.jpg';
+  // Public site key — safe to embed in the page (this is how Turnstile is
+  // designed to work; only the SECRET key, used server-side in
+  // api/digest-interactions.js, must stay private). If this isn't set yet,
+  // the comment form renders without a verification widget and the server
+  // skips verification too — see README for setup steps.
+  const turnstileSiteKey = process.env.TURNSTILE_SITE_KEY || '';
+  // Widgets are rendered lazily (one per comment box, only once that box
+  // is actually opened) rather than all up front, so a digest with
+  // hundreds of items doesn't initialize hundreds of Turnstile widgets on
+  // load. This queue/onload pattern handles the case where a box is
+  // opened before the (async) Turnstile script has finished loading.
+  const turnstileHead = turnstileSiteKey
+    ? `
+<script>
+  window.__TURNSTILE_SITE_KEY__ = ${JSON.stringify(turnstileSiteKey)};
+  window.__turnstileQueue = [];
+  window.onTurnstileLoad = function () {
+    window.__turnstileReady = true;
+    var q = window.__turnstileQueue;
+    window.__turnstileQueue = [];
+    q.forEach(function (fn) { fn(); });
+  };
+</script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit" async defer></script>`
+    : '';
 
   const sections = [
-    accordionSection_('🏛️', 'Policy & Regulation', taxonomy.policyRegulation),
-    accordionSection_('🌍', 'Nigeria & Africa', taxonomy.nigeriaAfrica),
-    professionalPracticeSection_(taxonomy, counts),
-    accordionSection_('🏘️', 'Development & Real Estate', taxonomy.developmentRealEstate),
-    accordionSection_('🧱', 'Building Materials', taxonomy.materials),
-    accordionSection_('🏗️', 'Construction', taxonomy.construction),
-    accordionSection_('🏆', 'Competitions & Exams', taxonomy.competitionsExams),
-    accordionSection_('🎨', 'Design & Culture', taxonomy.designCulture),
-    accordionSection_('📰', 'Global News', taxonomy.globalNews),
+    regionSection_('🇳🇬', 'Nigeria', taxonomy.nigeria, counts.nigeria),
+    regionSection_('🌍', 'Africa', taxonomy.africa, counts.africa),
+    regionSection_('🌐', 'Globe', taxonomy.global, counts.global),
   ].join('');
 
   return `<!DOCTYPE html>
@@ -875,19 +1032,313 @@ function buildDigestPageHtml_(taxonomy, counts, { dateLabel, digestUrl }) {
   a:hover { text-decoration: underline; }
   .src { color: #a3a3a3; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
   .also-reported { color: #c9a876; font-weight: 700; margin-left: 6px; text-transform: none; letter-spacing: normal; }
+  .item-actions { display: flex; align-items: center; gap: 14px; margin-top: 4px; }
+  .like-btn, .comments-toggle {
+    display: inline-flex; align-items: center; gap: 4px; background: none; border: none;
+    color: #8a8378; font-size: 12px; cursor: pointer; padding: 3px 8px; border-radius: 6px;
+    font-family: inherit;
+  }
+  .like-btn:hover, .comments-toggle:hover { background: #f0ece2; color: #1a1a1a; }
+  .like-btn.liked { color: #c0392b; }
+  .like-btn:disabled { cursor: default; }
+  .view-count { display: inline-flex; align-items: center; gap: 4px; color: #a3a3a3; font-size: 12px; }
+  .comment-box {
+    margin-top: 8px; padding: 12px 14px; background: #faf8f4; border-radius: 8px;
+    border: 1px solid #f0ece2;
+  }
+  .comment-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+  .comment-item { border-bottom: 1px solid #f0ece2; padding-bottom: 8px; }
+  .comment-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .comment-head { display: flex; justify-content: space-between; font-size: 11px; color: #8a8378; margin-bottom: 2px; }
+  .comment-name { font-weight: 600; color: #1a1a1a; }
+  .comment-text { margin: 0; font-size: 13px; color: #4a4a4a; line-height: 1.4; }
+  .comment-empty { font-size: 12px; color: #a3a3a3; font-style: italic; margin: 0; }
+  .comment-form { display: flex; flex-direction: column; gap: 6px; }
+  .comment-form input, .comment-form textarea {
+    font-family: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid #e5e0d8;
+    border-radius: 6px; background: #fff; color: #1a1a1a;
+  }
+  .comment-form textarea { resize: vertical; min-height: 50px; }
+  .comment-form button {
+    align-self: flex-end; background: #1a1a1a; color: #fff; border: none; padding: 7px 18px;
+    border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .comment-form button:disabled { opacity: 0.6; cursor: default; }
   details.nested {
     border: none; background: #faf8f4; margin: 0 16px 12px; border-left: 3px solid #e5e0d8;
     border-radius: 0 8px 8px 0;
   }
   details.nested summary { padding: 10px 16px; font-size: 14px; font-weight: 500; }
+  details.nested2 {
+    border: none; background: #fff; margin: 0 14px 10px 26px; border-left: 3px dotted #e5e0d8;
+    border-radius: 0 8px 8px 0;
+  }
+  details.nested2 summary { padding: 8px 14px; font-size: 13px; font-weight: 500; }
   footer { text-align: center; color: #a3a3a3; font-size: 12px; margin-top: 32px; }
-</style>
+  .cf-turnstile-slot { margin: 2px 0; }
+  .turnstile-msg { margin: 0; font-size: 12px; color: #c0392b; }
+</style>${turnstileHead}
 </head>
 <body>
   <h1>ADA Architecture Digest</h1>
   <div class="date">${dateLabel} · ${counts.total} stories</div>
   ${sections || '<p>No new stories this run.</p>'}
   <footer>Archilurdesignz and Architecture</footer>
+  <script>
+  (function () {
+    var API = '/api/digest-interactions';
+    var LIKED_KEY = 'ada_digest_liked_urls';
+
+    function getLikedSet() {
+      try {
+        var raw = localStorage.getItem(LIKED_KEY);
+        return raw ? new Set(JSON.parse(raw)) : new Set();
+      } catch (e) {
+        return new Set();
+      }
+    }
+    function saveLikedSet(set) {
+      try {
+        localStorage.setItem(LIKED_KEY, JSON.stringify(Array.from(set)));
+      } catch (e) {}
+    }
+    function formatDate(iso) {
+      try {
+        return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      } catch (e) {
+        return '';
+      }
+    }
+    function renderComment(list, c) {
+      var item = document.createElement('div');
+      item.className = 'comment-item';
+      var head = document.createElement('div');
+      head.className = 'comment-head';
+      var name = document.createElement('span');
+      name.className = 'comment-name';
+      name.textContent = c.name || 'Anonymous';
+      var date = document.createElement('span');
+      date.className = 'comment-date';
+      date.textContent = formatDate(c.created_at);
+      head.appendChild(name);
+      head.appendChild(date);
+      var text = document.createElement('p');
+      text.className = 'comment-text';
+      text.textContent = c.comment || '';
+      item.appendChild(head);
+      item.appendChild(text);
+      list.prepend(item);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var items = Array.prototype.slice.call(document.querySelectorAll('li[data-url]'));
+      var urls = items.map(function (li) { return li.getAttribute('data-url'); });
+      if (urls.length === 0) return;
+
+      var liked = getLikedSet();
+      items.forEach(function (li) {
+        var url = li.getAttribute('data-url');
+        if (liked.has(url)) {
+          var btn = li.querySelector('.like-btn');
+          if (btn) {
+            btn.classList.add('liked');
+            btn.disabled = true;
+            var icon = btn.querySelector('.like-icon');
+            if (icon) icon.textContent = '♥';
+          }
+        }
+      });
+
+      fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'stats', urls: urls }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var stats = data.stats || {};
+          items.forEach(function (li) {
+            var url = li.getAttribute('data-url');
+            var s = stats[url] || { likes: 0, views: 0, comments: 0 };
+            var likeCount = li.querySelector('.like-count');
+            var viewNum = li.querySelector('.view-num');
+            var commentCount = li.querySelector('.comment-count');
+            if (likeCount) likeCount.textContent = s.likes;
+            if (viewNum) viewNum.textContent = s.views;
+            if (commentCount) commentCount.textContent = s.comments;
+          });
+        })
+        .catch(function () {});
+    });
+
+    function ensureTurnstileReady(cb) {
+      if (window.__turnstileReady && window.turnstile) {
+        cb();
+      } else {
+        window.__turnstileQueue = window.__turnstileQueue || [];
+        window.__turnstileQueue.push(cb);
+      }
+    }
+
+    function renderTurnstileForBox(box) {
+      if (!window.__TURNSTILE_SITE_KEY__) return; // not configured — form works without verification
+      var slot = box.querySelector('.cf-turnstile-slot');
+      if (!slot || slot.getAttribute('data-rendered')) return;
+      slot.setAttribute('data-rendered', '1');
+      ensureTurnstileReady(function () {
+        var widgetId = turnstile.render(slot, {
+          sitekey: window.__TURNSTILE_SITE_KEY__,
+          callback: function (token) { box.setAttribute('data-turnstile-token', token); },
+          'expired-callback': function () { box.removeAttribute('data-turnstile-token'); },
+          'error-callback': function () { box.removeAttribute('data-turnstile-token'); },
+        });
+        slot.setAttribute('data-widget-id', widgetId);
+      });
+    }
+
+    document.addEventListener('click', function (e) {
+      var likeBtn = e.target.closest('.like-btn');
+      if (likeBtn) {
+        if (likeBtn.disabled) return;
+        var likeLi = likeBtn.closest('li[data-url]');
+        var likeUrl = likeLi.getAttribute('data-url');
+        likeBtn.disabled = true;
+        fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'like', url: likeUrl }),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var countEl = likeBtn.querySelector('.like-count');
+            if (countEl && typeof data.likes === 'number') countEl.textContent = data.likes;
+            likeBtn.classList.add('liked');
+            var iconEl = likeBtn.querySelector('.like-icon');
+            if (iconEl) iconEl.textContent = '♥';
+            var liked = getLikedSet();
+            liked.add(likeUrl);
+            saveLikedSet(liked);
+          })
+          .catch(function () { likeBtn.disabled = false; });
+        return;
+      }
+
+      var link = e.target.closest('.item-link');
+      if (link) {
+        var linkLi = link.closest('li[data-url]');
+        var linkUrl = linkLi ? linkLi.getAttribute('data-url') : null;
+        if (linkUrl) {
+          try {
+            fetch(API, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'view', url: linkUrl }),
+              keepalive: true,
+            }).catch(function () {});
+          } catch (e2) {}
+        }
+        return;
+      }
+
+      var toggle = e.target.closest('.comments-toggle');
+      if (toggle) {
+        var toggleLi = toggle.closest('li[data-url]');
+        var toggleUrl = toggleLi.getAttribute('data-url');
+        var box = toggleLi.querySelector('.comment-box');
+        var opening = box.hasAttribute('hidden');
+        if (opening) {
+          box.removeAttribute('hidden');
+        } else {
+          box.setAttribute('hidden', '');
+        }
+        if (opening) {
+          renderTurnstileForBox(box);
+        }
+        if (opening && !box.getAttribute('data-loaded')) {
+          var list = box.querySelector('.comment-list');
+          list.textContent = 'Loading…';
+          fetch(API + '?action=comments&url=' + encodeURIComponent(toggleUrl))
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              list.textContent = '';
+              var comments = data.comments || [];
+              if (comments.length === 0) {
+                var empty = document.createElement('p');
+                empty.className = 'comment-empty';
+                empty.textContent = 'No comments yet — be the first.';
+                list.appendChild(empty);
+              } else {
+                comments.slice().reverse().forEach(function (c) { renderComment(list, c); });
+              }
+              box.setAttribute('data-loaded', '1');
+            })
+            .catch(function () { list.textContent = 'Could not load comments.'; });
+        }
+        return;
+      }
+    });
+
+    document.addEventListener('submit', function (e) {
+      var form = e.target.closest('.comment-form');
+      if (!form) return;
+      e.preventDefault();
+      var box = form.closest('.comment-box');
+      var li = form.closest('li[data-url]');
+      var url = li.getAttribute('data-url');
+      var nameInput = form.querySelector('.comment-name');
+      var textInput = form.querySelector('.comment-text');
+      var msgEl = form.querySelector('.turnstile-msg');
+      var text = textInput.value.trim();
+      if (!text) return;
+
+      var turnstileToken = box.getAttribute('data-turnstile-token') || '';
+      if (window.__TURNSTILE_SITE_KEY__ && !turnstileToken) {
+        if (msgEl) { msgEl.textContent = 'Please complete the verification above.'; msgEl.removeAttribute('hidden'); }
+        return;
+      }
+      if (msgEl) msgEl.setAttribute('hidden', '');
+
+      var submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'comment', url: url, name: nameInput.value.trim(), comment: text,
+          turnstileToken: turnstileToken,
+        }),
+      })
+        .then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }); })
+        .then(function (result) {
+          var data = result.data;
+          if (result.ok && data.comment) {
+            var list = box.querySelector('.comment-list');
+            var emptyMsg = list.querySelector('.comment-empty');
+            if (emptyMsg) emptyMsg.remove();
+            renderComment(list, data.comment);
+            textInput.value = '';
+            var countEl = li.querySelector('.comment-count');
+            if (countEl) countEl.textContent = (parseInt(countEl.textContent, 10) || 0) + 1;
+            var slot = box.querySelector('.cf-turnstile-slot');
+            var widgetId = slot ? slot.getAttribute('data-widget-id') : null;
+            if (widgetId && window.turnstile) turnstile.reset(widgetId);
+            box.removeAttribute('data-turnstile-token');
+          } else if (msgEl) {
+            msgEl.textContent = data.error === 'verification_failed'
+              ? 'Verification failed — please try again.'
+              : 'Could not post your comment — please try again.';
+            msgEl.removeAttribute('hidden');
+            var slot2 = box.querySelector('.cf-turnstile-slot');
+            var widgetId2 = slot2 ? slot2.getAttribute('data-widget-id') : null;
+            if (widgetId2 && window.turnstile) turnstile.reset(widgetId2);
+            box.removeAttribute('data-turnstile-token');
+          }
+        })
+        .catch(function () {})
+        .finally(function () { submitBtn.disabled = false; });
+    });
+  })();
+  </script>
 </body>
 </html>`;
 }
@@ -946,12 +1397,8 @@ async function publishDigestToGitHub_(htmlContent) {
 function buildNotificationEmailHtml_(counts, { dateLabel, digestUrl }) {
   const shareText = encodeURIComponent(
     `📐 ADA Architecture Digest — ${dateLabel}\n` +
-      `${counts.total} new stories: Policy & Regulation (${counts.policyRegulation}), ` +
-      `Nigeria & Africa (${counts.nigeriaAfrica}), ` +
-      `Professional Practice (${counts.professionalPractice}), ` +
-      `Development & Real Estate (${counts.developmentRealEstate}), Materials (${counts.materials}), ` +
-      `Construction (${counts.construction}), Competitions & Exams (${counts.competitionsExams}), ` +
-      `Design & Culture (${counts.designCulture}), Global (${counts.globalNews})\n\n${digestUrl}`
+      `${counts.total} new stories: 🇳🇬 Nigeria (${counts.nigeria.total}), ` +
+      `🌍 Africa (${counts.africa.total}), 🌐 Globe (${counts.global.total})\n\n${digestUrl}`
   );
   const whatsappShareUrl = `https://wa.me/?text=${shareText}`;
 
@@ -960,15 +1407,9 @@ function buildNotificationEmailHtml_(counts, { dateLabel, digestUrl }) {
     <h1 style="font-family:'Georgia',serif;font-size:20px;color:#1a1a1a;margin-bottom:4px;">Your Architecture Digest is ready</h1>
     <div style="font-size:13px;color:#8a8378;margin-bottom:24px;">${dateLabel}</div>
     <div style="font-size:14px;color:#4a4a4a;line-height:2;text-align:left;background:#f7f5f0;border-radius:10px;padding:18px 22px;margin-bottom:24px;">
-      🏛️ Policy &amp; Regulation — <b>${counts.policyRegulation}</b><br>
-      🌍 Nigeria &amp; Africa — <b>${counts.nigeriaAfrica}</b><br>
-      🧑‍💼 Professional Practice — <b>${counts.professionalPractice}</b><br>
-      🏘️ Development &amp; Real Estate — <b>${counts.developmentRealEstate}</b><br>
-      🧱 Building Materials — <b>${counts.materials}</b><br>
-      🏗️ Construction — <b>${counts.construction}</b><br>
-      🏆 Competitions &amp; Exams — <b>${counts.competitionsExams}</b><br>
-      🎨 Design &amp; Culture — <b>${counts.designCulture}</b><br>
-      📰 Global News — <b>${counts.globalNews}</b>
+      🇳🇬 Nigeria — <b>${counts.nigeria.total}</b><br>
+      🌍 Africa — <b>${counts.africa.total}</b><br>
+      🌐 Globe — <b>${counts.global.total}</b>
     </div>
     <a href="${digestUrl}" style="display:inline-block;background:#1a1a1a;color:#fff;text-decoration:none;padding:13px 32px;border-radius:8px;font-size:14px;font-weight:600;margin-bottom:14px;">View Digest</a>
     <br>
