@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADA Architecture Digest — Saturday, September 5, 2026</title>
+
+<meta property="og:title" content="ADA Architecture Digest — Saturday, September 5, 2026">
+<meta property="og:description" content="1 new architecture &amp; built-environment stories, organized by Nigeria, Africa, and Globe — each covering Policy &amp; Regulation, Professional Practice, Development &amp; Real Estate, Materials, Construction, Competitions &amp; Exams, Exhibitions, Artificial Intelligence, and Design &amp; Culture.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://archilurdesignz.com/digest">
+<meta property="og:image" content="https://archilurdesignz.com/assets/og-digest-cover.jpg">
+<meta property="og:site_name" content="Archilurdesignz and Architecture">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ADA Architecture Digest — Saturday, September 5, 2026">
+<meta name="twitter:description" content="1 new architecture &amp; built-environment stories, organized by Nigeria, Africa, and Globe — each covering Policy &amp; Regulation, Professional Practice, Development &amp; Real Estate, Materials, Construction, Competitions &amp; Exams, Exhibitions, Artificial Intelligence, and Design &amp; Culture.">
+<meta name="twitter:image" content="https://archilurdesignz.com/assets/og-digest-cover.jpg">
+
+<!-- Favicons -->
+<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    max-width: 720px; margin: 0 auto; padding: 32px 20px 60px;
+    background: #faf8f4; color: #1a1a1a;
+  }
+  h1 { font-family: Georgia, serif; font-size: 26px; margin: 0 0 4px; }
+  .tagline { color: #4a4a4a; font-size: 14px; line-height: 1.5; margin: 0 0 12px; max-width: 60ch; }
+  .date { color: #8a8378; font-size: 14px; margin-bottom: 28px; }
+  .subscribe-box {
+    background: #fff; border: 1px solid #e5e0d8; border-radius: 12px;
+    padding: 18px 20px; margin-bottom: 28px;
+  }
+  .subscribe-title { font-family: Georgia, serif; font-size: 17px; margin-bottom: 4px; }
+  .subscribe-copy { font-size: 13px; color: #4a4a4a; margin: 0 0 12px; }
+  .subscribe-form { display: flex; gap: 8px; flex-wrap: wrap; }
+  .subscribe-email {
+    flex: 1 1 220px; font-family: inherit; font-size: 14px; padding: 9px 12px;
+    border: 1px solid #e5e0d8; border-radius: 6px; background: #faf8f4; color: #1a1a1a;
+  }
+  .subscribe-form button {
+    background: #1a1a1a; color: #fff; border: none; padding: 9px 20px;
+    border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .subscribe-form button:disabled { opacity: 0.6; cursor: default; }
+  .subscribe-msg { font-size: 13px; margin: 10px 0 0; }
+  .subscribe-msg.success { color: #1e7d32; }
+  .subscribe-msg.error { color: #c0392b; }
+  details {
+    background: #fff; border: 1px solid #e5e0d8; border-radius: 12px;
+    margin-bottom: 12px; overflow: hidden;
+  }
+  details[open] { border-color: #c9a876; }
+  summary {
+    cursor: pointer; padding: 16px 20px; font-size: 16px; font-weight: 600;
+    list-style: none; display: flex; justify-content: space-between; align-items: center;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; font-size: 20px; color: #8a8378; margin-left: 12px; }
+  details[open] > summary::after { content: '−'; }
+  .count {
+    background: #f0ece2; color: #8a6d3b; font-size: 12px; font-weight: 700;
+    padding: 3px 11px; border-radius: 12px; margin-left: auto; margin-right: 8px;
+  }
+  ul { list-style: none; margin: 0; padding: 0 20px 16px; }
+  li {
+    padding: 12px 0; border-top: 1px solid #f0ece2; font-size: 14px; line-height: 1.5;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  li:first-child { border-top: none; }
+  a { color: #1a1a1a; text-decoration: none; font-weight: 500; }
+  a:hover { text-decoration: underline; }
+  .src { color: #a3a3a3; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .also-reported { color: #c9a876; font-weight: 700; margin-left: 6px; text-transform: none; letter-spacing: normal; }
+  .item-actions { display: flex; align-items: center; gap: 14px; margin-top: 4px; }
+  .like-btn, .comments-toggle {
+    display: inline-flex; align-items: center; gap: 4px; background: none; border: none;
+    color: #8a8378; font-size: 12px; cursor: pointer; padding: 3px 8px; border-radius: 6px;
+    font-family: inherit;
+  }
+  .like-btn:hover, .comments-toggle:hover { background: #f0ece2; color: #1a1a1a; }
+  .like-btn.liked { color: #c0392b; }
+  .like-btn:disabled { cursor: default; }
+  .view-count { display: inline-flex; align-items: center; gap: 4px; color: #a3a3a3; font-size: 12px; }
+  .comment-box {
+    margin-top: 8px; padding: 12px 14px; background: #faf8f4; border-radius: 8px;
+    border: 1px solid #f0ece2;
+  }
+  .comment-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+  .comment-item { border-bottom: 1px solid #f0ece2; padding-bottom: 8px; }
+  .comment-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .comment-head { display: flex; justify-content: space-between; font-size: 11px; color: #8a8378; margin-bottom: 2px; }
+  .comment-name { font-weight: 600; color: #1a1a1a; }
+  .comment-text { margin: 0; font-size: 13px; color: #4a4a4a; line-height: 1.4; }
+  .comment-empty { font-size: 12px; color: #a3a3a3; font-style: italic; margin: 0; }
+  .comment-form { display: flex; flex-direction: column; gap: 6px; }
+  .comment-form input, .comment-form textarea {
+    font-family: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid #e5e0d8;
+    border-radius: 6px; background: #fff; color: #1a1a1a;
+  }
+  .comment-form textarea { resize: vertical; min-height: 50px; }
+  .comment-form button {
+    align-self: flex-end; background: #1a1a1a; color: #fff; border: none; padding: 7px 18px;
+    border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .comment-form button:disabled { opacity: 0.6; cursor: default; }
+  details.nested {
+    border: none; background: #faf8f4; margin: 0 16px 12px; border-left: 3px solid #e5e0d8;
+    border-radius: 0 8px 8px 0;
+  }
+  details.nested summary { padding: 10px 16px; font-size: 14px; font-weight: 500; }
+  details.nested2 {
+    border: none; background: #fff; margin: 0 14px 10px 26px; border-left: 3px dotted #e5e0d8;
+    border-radius: 0 8px 8px 0;
+  }
+  details.nested2 summary { padding: 8px 14px; font-size: 13px; font-weight: 500; }
+  footer { text-align: center; color: #a3a3a3; font-size: 12px; margin-top: 32px; }
+  .cf-turnstile-slot { margin: 2px 0; }
+  .turnstile-msg { margin: 0; font-size: 12px; color: #c0392b; }
+</style>
+</head>
+<body>
+  <h1>ADA Architecture Digest</h1>
+  <p class="tagline">Architecture, construction, and property news from Nigeria, Africa, and around the world — sorted by region and topic, refreshed several times a day by Archilurdesignz and Architecture.</p>
+  <div class="date">Saturday, September 5, 2026 · 3:00 PM · 1 stories</div>
+  <div class="subscribe-box">
+    <div class="subscribe-title">📩 Get this digest by email</div>
+    <p class="subscribe-copy">Subscribe once, and every future digest lands straight in your inbox.</p>
+    <form class="subscribe-form">
+      <input type="email" class="subscribe-email" placeholder="you@email.com" maxlength="254" required>
+      <button type="submit">Subscribe</button>
+    </form>
+    <p class="subscribe-msg" hidden></p>
+  </div>
+  
+    <details>
+      <summary><span>🌐 Globe</span><span class="count">1</span></summary>
+      
+    <details class="nested">
+      <summary><span>📰 Globe News</span><span class="count">1</span></summary>
+      <ul><li data-url="https://www.archdaily.com/1183859/the-city-as-a-system-of-health-breaking-feedback-loops-in-planning">
+    <a class="item-link" href="https://www.archdaily.com/1183859/the-city-as-a-system-of-health-breaking-feedback-loops-in-planning" target="_blank" rel="noopener">
+        The City as a System of Health: Breaking Feedback Loops in Planning
+      </a>
+    <span class="src">ArchDaily</span>
+    <div class="item-actions">
+      <button type="button" class="like-btn" aria-label="Like this story">
+        <span class="like-icon">♡</span><span class="like-count">0</span>
+      </button>
+      <span class="view-count" title="Views"><span class="view-icon">👁</span> <span class="view-num">0</span></span>
+      <button type="button" class="comments-toggle" aria-label="Show comments">
+        💬 <span class="comment-count">0</span>
+      </button>
+    </div>
+    <div class="comment-box" hidden>
+      <div class="comment-list"></div>
+      <form class="comment-form">
+        <input type="text" class="comment-name" maxlength="60" placeholder="Name (optional)">
+        <textarea class="comment-text" maxlength="500" placeholder="Add a comment…" required></textarea>
+        <div class="cf-turnstile-slot"></div>
+        <p class="turnstile-msg" hidden></p>
+        <button type="submit">Post</button>
+      </form>
+    </div>
+  </li></ul>
+    </details>
+    </details>
+  <footer>Archilurdesignz and Architecture</footer>
+  <script>
+  (function () {
+    var API = '/api/digest-interactions';
+    var NEWSLETTER_API = '/api/newsletter-subscribe';
+    var LIKED_KEY = 'ada_digest_liked_urls';
+    var VIEWED_KEY = 'ada_digest_viewed_urls';
+
+    function getStoredSet(key) {
+      try {
+        var raw = localStorage.getItem(key);
+        return raw ? new Set(JSON.parse(raw)) : new Set();
+      } catch (e) {
+        return new Set();
+      }
+    }
+    function saveStoredSet(key, set) {
+      try {
+        localStorage.setItem(key, JSON.stringify(Array.from(set)));
+      } catch (e) {}
+    }
+    function getLikedSet() { return getStoredSet(LIKED_KEY); }
+    function saveLikedSet(set) { saveStoredSet(LIKED_KEY, set); }
+    function getViewedSet() { return getStoredSet(VIEWED_KEY); }
+    function saveViewedSet(set) { saveStoredSet(VIEWED_KEY, set); }
+    function formatDate(iso) {
+      try {
+        return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      } catch (e) {
+        return '';
+      }
+    }
+    function renderComment(list, c) {
+      var item = document.createElement('div');
+      item.className = 'comment-item';
+      var head = document.createElement('div');
+      head.className = 'comment-head';
+      var name = document.createElement('span');
+      name.className = 'comment-name';
+      name.textContent = c.name || 'Anonymous';
+      var date = document.createElement('span');
+      date.className = 'comment-date';
+      date.textContent = formatDate(c.created_at);
+      head.appendChild(name);
+      head.appendChild(date);
+      var text = document.createElement('p');
+      text.className = 'comment-text';
+      text.textContent = c.comment || '';
+      item.appendChild(head);
+      item.appendChild(text);
+      list.prepend(item);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var items = Array.prototype.slice.call(document.querySelectorAll('li[data-url]'));
+      var urls = items.map(function (li) { return li.getAttribute('data-url'); });
+      if (urls.length === 0) return;
+
+      var liked = getLikedSet();
+      items.forEach(function (li) {
+        var url = li.getAttribute('data-url');
+        if (liked.has(url)) {
+          var btn = li.querySelector('.like-btn');
+          if (btn) {
+            btn.classList.add('liked');
+            btn.disabled = true;
+            var icon = btn.querySelector('.like-icon');
+            if (icon) icon.textContent = '♥';
+          }
+        }
+      });
+
+      fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'stats', urls: urls }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var stats = data.stats || {};
+          items.forEach(function (li) {
+            var url = li.getAttribute('data-url');
+            var s = stats[url] || { likes: 0, views: 0, comments: 0 };
+            var likeCount = li.querySelector('.like-count');
+            var viewNum = li.querySelector('.view-num');
+            var commentCount = li.querySelector('.comment-count');
+            if (likeCount) likeCount.textContent = s.likes;
+            if (viewNum) viewNum.textContent = s.views;
+            if (commentCount) commentCount.textContent = s.comments;
+          });
+        })
+        .catch(function () {});
+    });
+
+    function ensureTurnstileReady(cb) {
+      if (window.__turnstileReady && window.turnstile) {
+        cb();
+      } else {
+        window.__turnstileQueue = window.__turnstileQueue || [];
+        window.__turnstileQueue.push(cb);
+      }
+    }
+
+    function renderTurnstileForBox(box) {
+      if (!window.__TURNSTILE_SITE_KEY__) return; // not configured — form works without verification
+      var slot = box.querySelector('.cf-turnstile-slot');
+      if (!slot || slot.getAttribute('data-rendered')) return;
+      slot.setAttribute('data-rendered', '1');
+      ensureTurnstileReady(function () {
+        var widgetId = turnstile.render(slot, {
+          sitekey: window.__TURNSTILE_SITE_KEY__,
+          callback: function (token) { box.setAttribute('data-turnstile-token', token); },
+          'expired-callback': function () { box.removeAttribute('data-turnstile-token'); },
+          'error-callback': function () { box.removeAttribute('data-turnstile-token'); },
+        });
+        slot.setAttribute('data-widget-id', widgetId);
+      });
+    }
+
+    document.addEventListener('click', function (e) {
+      var likeBtn = e.target.closest('.like-btn');
+      if (likeBtn) {
+        if (likeBtn.disabled) return;
+        var likeLi = likeBtn.closest('li[data-url]');
+        var likeUrl = likeLi.getAttribute('data-url');
+        likeBtn.disabled = true;
+        fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'like', url: likeUrl }),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var countEl = likeBtn.querySelector('.like-count');
+            if (countEl && typeof data.likes === 'number') countEl.textContent = data.likes;
+            likeBtn.classList.add('liked');
+            var iconEl = likeBtn.querySelector('.like-icon');
+            if (iconEl) iconEl.textContent = '♥';
+            var liked = getLikedSet();
+            liked.add(likeUrl);
+            saveLikedSet(liked);
+          })
+          .catch(function () { likeBtn.disabled = false; });
+        return;
+      }
+
+      var link = e.target.closest('.item-link');
+      if (link) {
+        var linkLi = link.closest('li[data-url]');
+        var linkUrl = linkLi ? linkLi.getAttribute('data-url') : null;
+        if (linkUrl) {
+          var viewed = getViewedSet();
+          if (!viewed.has(linkUrl)) {
+            try {
+              fetch(API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'view', url: linkUrl }),
+                keepalive: true,
+              }).catch(function () {});
+            } catch (e2) {}
+            viewed.add(linkUrl);
+            saveViewedSet(viewed);
+            var viewNumEl = linkLi.querySelector('.view-num');
+            if (viewNumEl) viewNumEl.textContent = (parseInt(viewNumEl.textContent, 10) || 0) + 1;
+          }
+        }
+        return;
+      }
+
+      var toggle = e.target.closest('.comments-toggle');
+      if (toggle) {
+        var toggleLi = toggle.closest('li[data-url]');
+        var toggleUrl = toggleLi.getAttribute('data-url');
+        var box = toggleLi.querySelector('.comment-box');
+        var opening = box.hasAttribute('hidden');
+        if (opening) {
+          box.removeAttribute('hidden');
+        } else {
+          box.setAttribute('hidden', '');
+        }
+        if (opening) {
+          renderTurnstileForBox(box);
+        }
+        if (opening && !box.getAttribute('data-loaded')) {
+          var list = box.querySelector('.comment-list');
+          list.textContent = 'Loading…';
+          fetch(API + '?action=comments&url=' + encodeURIComponent(toggleUrl))
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              list.textContent = '';
+              var comments = data.comments || [];
+              if (comments.length === 0) {
+                var empty = document.createElement('p');
+                empty.className = 'comment-empty';
+                empty.textContent = 'No comments yet — be the first.';
+                list.appendChild(empty);
+              } else {
+                comments.slice().reverse().forEach(function (c) { renderComment(list, c); });
+              }
+              box.setAttribute('data-loaded', '1');
+            })
+            .catch(function () { list.textContent = 'Could not load comments.'; });
+        }
+        return;
+      }
+    });
+
+    document.addEventListener('submit', function (e) {
+      var subscribeForm = e.target.closest('.subscribe-form');
+      if (subscribeForm) {
+        e.preventDefault();
+        var emailInput = subscribeForm.querySelector('.subscribe-email');
+        var msgEl = subscribeForm.parentElement.querySelector('.subscribe-msg');
+        var email = emailInput.value.trim();
+        var subBtn = subscribeForm.querySelector('button[type="submit"]');
+        subBtn.disabled = true;
+        fetch(NEWSLETTER_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'subscribe', email: email }),
+        })
+          .then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }); })
+          .then(function (result) {
+            if (result.ok && result.data.success) {
+              msgEl.textContent = "Subscribed! You'll get the next digest by email.";
+              msgEl.className = 'subscribe-msg success';
+              emailInput.value = '';
+            } else {
+              msgEl.textContent = (result.data && result.data.error) || 'Something went wrong — please try again.';
+              msgEl.className = 'subscribe-msg error';
+            }
+            msgEl.removeAttribute('hidden');
+          })
+          .catch(function () {
+            msgEl.textContent = 'Something went wrong — please try again.';
+            msgEl.className = 'subscribe-msg error';
+            msgEl.removeAttribute('hidden');
+          })
+          .finally(function () { subBtn.disabled = false; });
+        return;
+      }
+
+      var form = e.target.closest('.comment-form');
+      if (!form) return;
+      e.preventDefault();
+      var box = form.closest('.comment-box');
+      var li = form.closest('li[data-url]');
+      var url = li.getAttribute('data-url');
+      var nameInput = form.querySelector('.comment-name');
+      var textInput = form.querySelector('.comment-text');
+      var msgEl = form.querySelector('.turnstile-msg');
+      var text = textInput.value.trim();
+      if (!text) return;
+
+      var turnstileToken = box.getAttribute('data-turnstile-token') || '';
+      if (window.__TURNSTILE_SITE_KEY__ && !turnstileToken) {
+        if (msgEl) { msgEl.textContent = 'Please complete the verification above.'; msgEl.removeAttribute('hidden'); }
+        return;
+      }
+      if (msgEl) msgEl.setAttribute('hidden', '');
+
+      var submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'comment', url: url, name: nameInput.value.trim(), comment: text,
+          turnstileToken: turnstileToken,
+        }),
+      })
+        .then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }); })
+        .then(function (result) {
+          var data = result.data;
+          if (result.ok && data.comment) {
+            var list = box.querySelector('.comment-list');
+            var emptyMsg = list.querySelector('.comment-empty');
+            if (emptyMsg) emptyMsg.remove();
+            renderComment(list, data.comment);
+            textInput.value = '';
+            var countEl = li.querySelector('.comment-count');
+            if (countEl) countEl.textContent = (parseInt(countEl.textContent, 10) || 0) + 1;
+            var slot = box.querySelector('.cf-turnstile-slot');
+            var widgetId = slot ? slot.getAttribute('data-widget-id') : null;
+            if (widgetId && window.turnstile) turnstile.reset(widgetId);
+            box.removeAttribute('data-turnstile-token');
+          } else if (msgEl) {
+            msgEl.textContent = data.error === 'verification_failed'
+              ? 'Verification failed — please try again.'
+              : 'Could not post your comment — please try again.';
+            msgEl.removeAttribute('hidden');
+            var slot2 = box.querySelector('.cf-turnstile-slot');
+            var widgetId2 = slot2 ? slot2.getAttribute('data-widget-id') : null;
+            if (widgetId2 && window.turnstile) turnstile.reset(widgetId2);
+            box.removeAttribute('data-turnstile-token');
+          }
+        })
+        .catch(function () {})
+        .finally(function () { submitBtn.disabled = false; });
+    });
+  })();
+  </script>
+</body>
+</html>
