@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Tracker | ADA Archilurdesignz</title>
+    <!-- Standard Favicons -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+
+<!-- Apple Touch Icon (iOS Safari) -->
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ── TOKENS ──────────────────────────────────────────────── */
+        :root {
+            --bg:        #f5f2ed;
+            --bg2:       #eceae4;
+            --bg3:       #e2ddd6;
+            --ink:       #1a1714;
+            --ink2:      #2e2b26;
+            --ink3:      #4a4540;
+            --mist:      #6b6560;
+            --rule:      rgba(26,23,20,0.1);
+            --gold:      #8a6a3c;
+            --gold2:     #b08a50;
+            --accent:    #c8a87a;
+            --green:     #2d6a4f;
+            --amber:     #b45309;
+            --slate:     #9ca3af;
+            --danger:    #7d2e2e;
+            --wa:        #25D366;
+            --f-display: 'Playfair Display', Georgia, serif;
+            --f-body:    'Outfit', sans-serif;
+            --ease:      cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html, body { width:100%; overflow-x:hidden; }
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: var(--f-body);
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: var(--f-display);
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+
+        /* ── LAYOUT ──────────────────────────────────────────────── */
+        .dashboard-wrapper { display: flex; min-height: 100vh; }
+
+        /* ── SIDEBAR ─────────────────────────────────────────────── */
+        aside {
+            width: 280px; flex-shrink: 0;
+            background: var(--ink2);
+            display: flex; flex-direction: column;
+            padding: 48px 36px;
+            position: sticky; top: 0; height: 100vh;
+            overflow-y: auto;
+        }
+
+        .aside-logo {
+            font-family: var(--f-display);
+            font-size: 1.6rem; letter-spacing: 6px;
+            color: var(--accent); text-transform: uppercase;
+            display: block; margin-bottom: 4px;
+        }
+        .aside-rc {
+            font-family: var(--f-body);
+            font-size: 0.65rem; letter-spacing: 2px;
+            color: rgba(201,191,176,0.4);
+            text-transform: uppercase; display: block;
+            margin-bottom: 56px;
+        }
+
+        .aside-nav { list-style: none; }
+        .aside-nav li {
+            margin-bottom: 6px;
+        }
+        .aside-nav li button {
+            background: none; border: none;
+            width: 100%; text-align: left;
+            font-family: var(--f-body); font-size: 0.8rem;
+            font-weight: 400; letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(201,191,176,0.45);
+            padding: 12px 16px;
+            cursor: pointer; transition: all 0.25s;
+            border-radius: 2px;
+            position: relative;
+        }
+        .aside-nav li button::before {
+            content: '';
+            position: absolute; left: 0; top: 50%;
+            transform: translateY(-50%);
+            width: 2px; height: 0;
+            background: var(--accent);
+            transition: height 0.25s var(--ease);
+        }
+        .aside-nav li button:hover { color: rgba(201,191,176,0.8); }
+        .aside-nav li button.active {
+            color: var(--accent);
+            background: rgba(200,168,122,0.08);
+        }
+        .aside-nav li button.active::before { height: 60%; }
+
+        /* ── MAIN ────────────────────────────────────────────────── */
+        main { flex: 1; padding: 56px 6%; overflow-x: hidden; }
+
+        /* ── PANELS ──────────────────────────────────────────────── */
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        /* ── HEADER BAR ──────────────────────────────────────────── */
+        .header-bar {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 8px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--rule);
+        }
+        .header-left h2 {
+            font-family: var(--f-display);
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            font-weight: 500; color: var(--ink);
+            letter-spacing: 0.5px; margin-bottom: 4px;
+        }
+        .client-name-display {
+            font-family: var(--f-body);
+            font-size: 1rem; font-weight: 400;
+            color: var(--ink3); margin-bottom: 4px;
+        }
+        .ref-tag {
+            font-size: 0.72rem; letter-spacing: 2px;
+            color: var(--gold); text-transform: uppercase;
+        }
+        .completion-display {
+            text-align: right;
+        }
+        .completion-display .pct {
+            font-family: var(--f-display);
+            font-size: 2.8rem; color: var(--gold);
+            line-height: 1; display: block;
+        }
+        .completion-display .pct-label {
+            font-size: 0.65rem; letter-spacing: 2.5px;
+            color: var(--mist); text-transform: uppercase;
+        }
+
+        /* ── PAYMENT SUMMARY BAND ────────────────────────────────── */
+        .payment-band {
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            gap: 1px; background: var(--rule);
+            margin-bottom: 32px;
+            border: 1px solid var(--rule);
+        }
+        .pay-cell {
+            background: var(--bg);
+            padding: 20px 24px;
+        }
+        .pay-cell .pay-label {
+            font-size: 0.65rem; letter-spacing: 2px;
+            color: var(--mist); text-transform: uppercase;
+            display: block; margin-bottom: 6px;
+        }
+        .pay-cell .pay-value {
+            font-family: var(--f-display);
+            font-size: 1.4rem; font-weight: 500;
+            color: var(--ink); letter-spacing: -0.5px;
+        }
+        .pay-cell.deposit .pay-value { color: var(--green); }
+        .pay-cell.balance .pay-value { color: var(--amber); }
+        .pay-cell .pay-sub {
+            font-size: 0.72rem; color: var(--mist);
+            margin-top: 3px; display: block;
+        }
+
+        /* ── ARCHITECT INFO ──────────────────────────────────────── */
+        .architect-info {
+            margin-bottom: 32px; padding: 20px 24px;
+            background: var(--bg2);
+            border-left: 3px solid var(--gold);
+            display: flex; align-items: center; gap: 24px;
+        }
+        .arch-label {
+            font-size: 0.65rem; letter-spacing: 2px;
+            color: var(--mist); text-transform: uppercase;
+            display: block; margin-bottom: 4px;
+        }
+        .arch-name {
+            font-family: var(--f-display);
+            font-size: 1.1rem; color: var(--ink); font-weight: 500;
+        }
+
+        /* ── COUNTDOWN ───────────────────────────────────────────── */
+        .countdown-bar {
+            display: flex; align-items: center; gap: 24px;
+            flex-wrap: wrap; margin-bottom: 36px;
+            padding: 22px 24px;
+            background: var(--ink2);
+            border-radius: 2px;
+        }
+        .countdown-label {
+            font-size: 0.65rem; letter-spacing: 3px;
+            color: rgba(201,191,176,0.5);
+            text-transform: uppercase; white-space: nowrap;
+        }
+        .countdown-units { display: flex; gap: 20px; flex-wrap: wrap; }
+        .countdown-unit { text-align: center; min-width: 60px; }
+        .countdown-unit .num {
+            font-family: var(--f-display);
+            font-size: 2rem; color: var(--accent);
+            line-height: 1; display: block;
+        }
+        .countdown-unit .lbl {
+            font-size: 0.6rem; letter-spacing: 2px;
+            color: rgba(201,191,176,0.4);
+            text-transform: uppercase; display: block; margin-top: 4px;
+        }
+        .countdown-expired {
+            font-size: 0.8rem; letter-spacing: 2px; color: var(--accent);
+        }
+
+        /* ── SERVICE CARDS GRID ──────────────────────────────────── */
+        .tracker-section-label {
+            font-size: 0.7rem; letter-spacing: 3px;
+            color: var(--mist); text-transform: uppercase;
+            margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
+        }
+        .tracker-section-label::after {
+            content: ''; flex: 1; height: 1px; background: var(--rule);
+        }
+
+        .tracker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 16px; margin-bottom: 48px;
+        }
+
+        .service-card {
+            background: var(--bg);
+            border: 1px solid var(--rule);
+            padding: 24px; position: relative;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .service-card:hover { border-color: var(--gold2); box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        .service-card.clickable { cursor: pointer; }
+        .service-card.locked-dependency {
+            opacity: 0.5;
+            background: var(--bg2);
+            cursor: not-allowed;
+        }
+        .service-card.locked-dependency:hover { border-color: var(--rule); box-shadow: none; }
+
+        .lock-overlay {
+            position: absolute; top: 14px; right: 16px;
+            font-size: 0.6rem; color: var(--mist);
+            letter-spacing: 1px; text-transform: uppercase;
+        }
+
+        .service-card h4 {
+            font-family: var(--f-display);
+            font-size: 1rem; font-weight: 500;
+            color: var(--ink); margin-bottom: 16px;
+        }
+
+        .progress-container {
+            width: 100%; height: 5px;
+            background: var(--bg3); margin-bottom: 10px;
+            border-radius: 3px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; background: var(--gold2);
+            width: 0%; transition: width 1.5s var(--ease);
+            border-radius: 3px;
+        }
+        .pkg-status {
+            font-size: 0.75rem; color: var(--mist);
+            letter-spacing: 0.5px;
+        }
+
+        /* ── SUB-MODAL ───────────────────────────────────────────── */
+        .sub-modal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(245,242,237,0.97);
+            backdrop-filter: blur(12px);
+            z-index: 3000; padding: 80px 8%; overflow-y: auto;
+        }
+        .sub-modal.open { display: block; }
+        .close-sub {
+            position: fixed; top: 32px; right: 40px;
+            cursor: pointer; color: var(--mist);
+            font-family: var(--f-body);
+            font-size: 0.7rem; letter-spacing: 2px;
+            text-transform: uppercase; transition: color 0.3s;
+            background: none; border: none;
+        }
+        .close-sub:hover { color: var(--ink); }
+        .sub-modal h2 {
+            font-size: clamp(1.6rem, 3vw, 2.4rem);
+            color: var(--ink); margin-bottom: 40px;
+        }
+        .sub-step {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 22px 0; border-bottom: 1px solid var(--rule);
+        }
+        .step-label {
+            font-size: 1rem; color: var(--ink); font-weight: 400;
+        }
+        .step-status {
+            font-size: 0.65rem; padding: 5px 16px;
+            border-radius: 20px; text-transform: uppercase;
+            letter-spacing: 1px; min-width: 110px; text-align: center;
+            font-weight: 500;
+        }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-started   { background: #fef3c7; color: #92400e; }
+        .status-pending   { background: var(--bg3); color: var(--mist); }
+
+        /* ── SUBMISSION HUB ──────────────────────────────────────── */
+        .hub-header { margin-bottom: 36px; border-bottom: 1px solid var(--rule); padding-bottom: 20px; }
+        .hub-header h2 { font-size: clamp(1.6rem,3vw,2.2rem); color: var(--ink); margin-bottom: 6px; }
+        .hub-header p { font-size: 0.85rem; color: var(--mist); }
+        .hub-empty { text-align: center; padding: 80px 20px; color: var(--mist); font-size: 0.85rem; letter-spacing: 1px; }
+
+        /* ── OUR PROCESS PANEL ───────────────────────────────────── */
+        .process-infographic {
+            width: 100%; display: block;
+            border: 1px solid var(--rule);
+            margin-bottom: 48px;
+        }
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 16px;
+        }
+        .process-card {
+            background: var(--bg);
+            border: 1px solid var(--rule);
+            padding: 24px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            display: flex; flex-direction: column;
+        }
+        .process-card:hover { border-color: var(--gold2); box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        .process-card .process-num {
+            font-family: var(--f-display); font-size: 1.3rem; font-style: italic;
+            color: var(--gold2); margin-bottom: 10px; display: block;
+        }
+        .process-card h4 {
+            font-family: var(--f-display); font-size: 1rem; font-weight: 500;
+            color: var(--ink); margin-bottom: 14px;
+        }
+        .process-card > p {
+            font-size: 0.82rem; color: var(--mist); line-height: 1.7; margin-bottom: 10px;
+        }
+        .process-card ul { list-style: none; }
+        .process-card ul li {
+            position: relative; padding-left: 18px; margin-bottom: 10px;
+            font-size: 0.82rem; color: var(--mist); line-height: 1.7;
+        }
+        .process-card ul li:last-child { margin-bottom: 0; }
+        .process-card ul li::before { content: '—'; position: absolute; left: 0; color: var(--gold); }
+        .process-card ul li strong { color: var(--ink); font-weight: 500; }
+        .process-card ul li em { color: var(--mist); font-style: italic; }
+
+        .file-list { display: flex; flex-direction: column; gap: 10px; }
+        .stage-label {
+            font-size: 0.65rem; letter-spacing: 3px; color: var(--gold);
+            text-transform: uppercase; margin: 24px 0 8px;
+            padding-left: 12px; border-left: 2px solid var(--gold);
+        }
+        .file-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 18px 22px; background: var(--bg);
+            border: 1px solid var(--rule); transition: border-color 0.3s;
+        }
+        .file-item:hover { border-color: var(--gold2); }
+        .file-meta { display: flex; flex-direction: column; gap: 4px; }
+        .file-name { font-size: 0.95rem; font-family: var(--f-display); color: var(--ink); }
+        .file-date { font-size: 0.72rem; color: var(--mist); }
+        .file-tag {
+            font-size: 0.6rem; letter-spacing: 1px;
+            padding: 3px 10px; border: 1px solid var(--gold2);
+            color: var(--gold); text-transform: uppercase;
+            display: inline-block; margin-top: 4px;
+        }
+        .download-btn {
+            padding: 10px 24px;
+            border: 1px solid var(--ink2); background: transparent;
+            color: var(--ink); font-size: 0.72rem;
+            letter-spacing: 1.5px; text-transform: uppercase;
+            cursor: pointer; text-decoration: none; transition: all 0.3s;
+            white-space: nowrap; font-family: var(--f-body);
+        }
+        .download-btn:hover { background: var(--ink2); color: var(--bg); }
+
+        /* ── REVIEW ──────────────────────────────────────────────── */
+        .review-section {
+            padding: 52px; border: 1px solid var(--rule);
+            background: var(--bg2); text-align: center; margin-top: 56px;
+        }
+        .review-section.unlocked { border-color: var(--gold2); }
+        .stars-display { font-size: 2.2rem; color: var(--bg3); margin: 20px 0; }
+        .review-section.unlocked .stars-display { color: var(--gold2); }
+        .star-select { display: flex; justify-content: center; gap: 12px; font-size: 2.2rem; margin: 20px 0; }
+        .star-select span { cursor: pointer; color: var(--bg3); transition: 0.2s; }
+        .star-select span.active { color: var(--gold2); }
+        .review-textarea {
+            width: 100%; max-width: 640px;
+            background: var(--bg); border: 1px solid var(--rule);
+            color: var(--ink); padding: 18px 20px;
+            margin-bottom: 20px; font-family: var(--f-body);
+            font-size: 0.9rem; outline: none; resize: vertical;
+            line-height: 1.7;
+        }
+        .review-textarea:focus { border-color: var(--gold2); }
+        .submit-review-btn {
+            padding: 14px 48px; border: 1px solid var(--rule);
+            background: transparent; color: var(--mist);
+            cursor: not-allowed; text-transform: uppercase;
+            letter-spacing: 2px; font-size: 0.8rem;
+            font-family: var(--f-body); transition: all 0.3s;
+        }
+        .unlocked .submit-review-btn {
+            border-color: var(--ink2); color: var(--ink); cursor: pointer;
+        }
+        .unlocked .submit-review-btn:hover {
+            background: var(--ink2); color: var(--bg);
+        }
+
+        /* ── TERMS ───────────────────────────────────────────────── */
+        .terms-content { max-width: 780px; line-height: 1.85; }
+        .terms-content h3 {
+            font-family: var(--f-display); color: var(--ink);
+            font-size: 1.1rem; margin: 32px 0 12px;
+            padding-bottom: 8px; border-bottom: 1px solid var(--rule);
+        }
+        .terms-content p, .terms-content li {
+            font-size: 0.95rem; color: var(--ink3);
+            margin-bottom: 14px; font-weight: 300;
+        }
+        .terms-content ul { padding-left: 20px; margin-bottom: 20px; }
+        .terms-content strong { font-weight: 600; color: var(--ink); }
+
+        /* ── LOADING / ERROR ─────────────────────────────────────── */
+        .loading-screen {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            height: 100vh; gap: 20px; background: var(--bg);
+        }
+        .loading-screen .logo {
+            font-family: var(--f-display); font-size: 2rem;
+            letter-spacing: 8px; color: var(--ink);
+        }
+        .loading-screen p {
+            font-size: 0.72rem; letter-spacing: 3px;
+            color: var(--mist); text-transform: uppercase;
+        }
+        .spinner {
+            width: 36px; height: 36px;
+            border: 2px solid var(--rule);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .error-screen {
+            text-align: center; padding: 100px 10%;
+            background: var(--bg); min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .error-screen h2 { font-family: var(--f-display); font-size: 2rem; color: var(--ink); margin-bottom: 16px; }
+        .error-screen p { font-size: 0.95rem; color: var(--mist); margin-bottom: 32px; line-height: 1.7; }
+        .error-contact {
+            display: inline-block; padding: 14px 32px;
+            border: 1px solid var(--gold); color: var(--gold);
+            font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase;
+            text-decoration: none; transition: all 0.3s;
+        }
+        .error-contact:hover { background: var(--gold); color: var(--bg); }
+
+        /* ── WA ──────────────────────────────────────────────────── */
+        #waDraggable {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 58px; height: 58px; background: var(--wa);
+            border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
+            z-index: 9999; cursor: move; touch-action: none;
+            box-shadow: 0 8px 24px rgba(37,211,102,0.3);
+            transition: transform 0.3s;
+        }
+        #waDraggable:hover { transform: scale(1.08); }
+        #waDraggable svg { width: 28px; fill: white; pointer-events: none; }
+
+        /* ── RESPONSIVE ──────────────────────────────────────────── */
+        @media (max-width: 900px) {
+            .dashboard-wrapper { flex-direction: column; }
+            aside { width: 100%; height: auto; padding: 24px 20px; position: relative; }
+            .aside-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+            .aside-nav li button { padding: 8px 16px; width: auto; }
+            .aside-rc { margin-bottom: 0; }
+            main { padding: 32px 5%; }
+            .payment-band { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 600px) {
+            .header-bar { flex-direction: column; gap: 16px; }
+            .completion-display { text-align: left; }
+            .payment-band { grid-template-columns: 1fr; }
+            .tracker-grid { grid-template-columns: 1fr; }
+        }
+/* The main container box with a gold border edge */
+.countdown-bar {
+    background-color: #1a1a1a;    /* The black box background */
+    border: 2px solid #d4af37;     /* Gold border edge */
+    padding: 20px 40px;            /* Generous padding for full-width look */
+    border-radius: 4px;
+    box-sizing: border-box;
+    
+    /* Fill the entire grid session / width */
+    width: 100%; 
+    display: grid;
+    /* Allocates space: Left side for label, Right side takes the remaining space */
+    grid-template-columns: 1fr auto; 
+    align-items: center;           /* Vertically centers the text and numbers */
+    gap: 40px;
+}
+
+/* "PROJECT DEADLINE" text styled on the left */
+.countdown-label {
+    color: #ffffff;
+    font-size: 24px;               /* 1.5x scaled size */
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* The wrapper holding the time units, spreading across the right side */
+.countdown-units {
+    display: flex;
+    justify-content: space-between;
+    gap: 50px;                     /* Generous spacing between the columns */
+    min-width: 50%;                /* Ensures it stretches nicely across the right */
+}
+
+/* Column container for each number + label pair */
+.countdown-units > div {
+    display: flex;
+    flex-direction: column;        /* Stacks the digit on top of the text */
+    align-items: center;           /* Centers them relative to each other */
+}
+
+/* Default color for Days, Hours, and Minutes digits */
+#cdDays, #cdHours, #cdMins {
+    display: block;
+    color: #ffffff;                /* White */
+    font-size: 48px;               /* 1.5x scaled size */
+    font-weight: bold;
+    line-height: 1;
+}
+
+/* Specific color for the Seconds digits */
+#cdSecs {
+    display: block;
+    color: #ff3333;                /* Red */
+    font-size: 48px;               /* 1.5x scaled size */
+    font-weight: bold;
+    line-height: 1;
+}
+
+/* Labels positioned perfectly underneath the numbers */
+.countdown-units label {
+    display: block;
+    color: #aaaaaa; 
+    font-size: 18px;               /* 1.5x scaled size */
+    margin-top: 8px;               /* Pushes it right below the digit */
+    font-weight: normal;
+}
+    </style>
+</head>
+<body>
+
+<!-- ── LOADING ─────────────────────────────────────────────────────── -->
+<div id="loadingScreen" class="loading-screen">
+    <span class="logo">ADA</span>
+    <div class="spinner"></div>
+    <p>Loading your project...</p>
+</div>
+
+<!-- ── ERROR ───────────────────────────────────────────────────────── -->
+<div id="errorScreen" class="error-screen" style="display:none;">
+    <h2>Project Not Found</h2>
+    <p>The link you used is invalid or has expired.<br>Please contact ADA for assistance.</p>
+    <a href="https://wa.me/2348138580315" class="error-contact">Contact ADA</a>
+</div>
+
+<!-- ── LOCKED SCREEN (shown when admin locks at 100%) ─── -->
+<div id="lockedScreen" style="display:none; min-height:100vh; background:var(--bg); flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:60px 10%;">
+    <span style="font-family:var(--f-display); font-size:2rem; letter-spacing:8px; color:var(--ink); display:block; margin-bottom:6px;">ADA</span>
+    <span style="font-size:0.65rem; letter-spacing:2px; color:var(--gold); text-transform:uppercase; display:block; margin-bottom:48px;">Archilurdesignz and Architecture</span>
+
+    <div style="max-width:520px; margin:0 auto;">
+        <div style="font-size:2.4rem; margin-bottom:20px;">🏆</div>
+        <h2 style="font-family:var(--f-display); font-size:clamp(1.6rem,3vw,2.2rem); color:var(--ink); margin-bottom:16px; font-weight:500;">
+            Your Project is Complete
+        </h2>
+        <p style="font-size:1rem; color:var(--ink3); line-height:1.8; margin-bottom:12px;">
+            Congratulations, <strong id="lockedClientName" style="color:var(--ink);">—</strong>. Your project has reached 100% completion.
+        </p>
+        <p style="font-size:0.9rem; color:var(--mist); line-height:1.8; margin-bottom:40px;">
+            To re-access your dashboard and download your final documents, please take a moment to share your experience with the ADA team. Your feedback helps us serve future clients better.
+        </p>
+
+        <!-- Review form embedded directly in locked screen -->
+        <div style="background:var(--bg2); border:1px solid var(--rule); padding:36px; text-align:left; margin-bottom:24px;">
+            <h3 style="font-family:var(--f-display); font-size:1.1rem; color:var(--ink); margin-bottom:20px; font-weight:500;">Share Your ADA Experience</h3>
+
+            <div style="margin-bottom:20px;">
+                <label style="font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; color:var(--gold); display:block; margin-bottom:10px;">Your Rating</label>
+                <div id="lockedStarSelect" style="display:flex; gap:12px; font-size:2rem;">
+                    <span onclick="setLockedRating(1)" style="cursor:pointer; color:var(--bg3); transition:0.2s;">★</span>
+                    <span onclick="setLockedRating(2)" style="cursor:pointer; color:var(--bg3); transition:0.2s;">★</span>
+                    <span onclick="setLockedRating(3)" style="cursor:pointer; color:var(--bg3); transition:0.2s;">★</span>
+                    <span onclick="setLockedRating(4)" style="cursor:pointer; color:var(--bg3); transition:0.2s;">★</span>
+                    <span onclick="setLockedRating(5)" style="cursor:pointer; color:var(--bg3); transition:0.2s;">★</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <label style="font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; color:var(--gold); display:block; margin-bottom:10px;">Your Review</label>
+                <textarea id="lockedReviewComment"
+                    style="width:100%; background:var(--bg); border:1px solid var(--rule); color:var(--ink); padding:16px 18px; font-family:var(--f-body); font-size:0.9rem; line-height:1.7; outline:none; resize:vertical; min-height:110px;"
+                    placeholder="Tell us about your design experience with ADA..."></textarea>
+            </div>
+
+            <button onclick="submitLockedReview()"
+                style="width:100%; padding:15px; background:var(--ink2); color:var(--bg); font-family:var(--f-body); font-size:0.72rem; font-weight:500; letter-spacing:2.5px; text-transform:uppercase; border:none; cursor:pointer; transition:all 0.3s;">
+                Submit Review &amp; Access Dashboard →
+            </button>
+        </div>
+
+        <a href="https://wa.me/2348138580315" target="_blank"
+           style="font-size:0.72rem; letter-spacing:2px; text-transform:uppercase; color:var(--gold); text-decoration:none; border-bottom:1px solid rgba(138,106,60,0.3); padding-bottom:2px;">
+            Need help? Contact ADA directly
+        </a>
+    </div>
+</div>
+<!-- ── DASHBOARD ───────────────────────────────────────────────────── -->
+<div id="dashboardMain" style="display:none;">
+    <div class="dashboard-wrapper">
+
+        <!-- SIDEBAR -->
+        <aside>
+            <span class="aside-logo">ADA</span>
+            <span class="aside-rc">RC: 9176834</span>
+            <ul class="aside-nav">
+                <li><button class="active" onclick="showPanel('tracker', this)">Project Tracker</button></li>
+                <li><button onclick="showPanel('process', this)">Our Process</button></li>
+                <li><button onclick="showPanel('hub', this)">Submission Hub</button></li>
+                <li><button onclick="showPanel('consultation', this)">Consultation</button></li>
+                <li><button onclick="showPanel('terms', this)">Service Terms</button></li>
+            </ul>
+        </aside>
+
+        <!-- MAIN -->
+        <main>
+
+            <!-- ── TRACKER PANEL ──────────────────────────────── -->
+            <div class="panel active" id="panel-tracker">
+
+                <!-- Header: project name / client / ref / completion % -->
+                <div class="header-bar">
+                    <div class="header-left">
+                        <h2 id="projTitle">—</h2>
+                        <p class="client-name-display" id="clientNameDisplay">—</p>
+                        <span class="ref-tag" id="projToken"></span>
+                    </div>
+                    <div class="completion-display">
+                        <span class="pct" id="totalPercentText">0%</span>
+                        <span class="pct-label">Overall Completion</span>
+                    </div>
+                </div>
+
+                <!-- Payment Summary Band -->
+                <div class="payment-band" id="paymentBand" style="display:none;">
+                    <div class="pay-cell deposit">
+                        <span class="pay-label">Initial Deposit Paid</span>
+                        <span class="pay-value" id="depositDisplay">—</span>
+                        <span class="pay-sub">Confirmed payment received</span>
+                    </div>
+                    <div class="pay-cell">
+                        <span class="pay-label">Total Agreed Sum</span>
+                        <span class="pay-value" id="totalSumDisplay">—</span>
+                        <span class="pay-sub">Full project package fee</span>
+                    </div>
+                    <div class="pay-cell balance">
+                        <span class="pay-label">Outstanding Balance</span>
+                        <span class="pay-value" id="balanceDisplay">—</span>
+                        <span class="pay-sub">Payable at completion</span>
+                    </div>
+                </div>
+
+                <!-- Architect -->
+                <div class="architect-info">
+                    <div>
+                        <span class="arch-label">Lead Architect</span>
+                        <span class="arch-name" id="leadArch">—</span>
+                    </div>
+                </div>
+
+                <!-- Countdown -->
+                <div class="countdown-bar" id="countdownBar" style="display:none;">
+                    <span class="countdown-label">Project Deadline</span>
+                    <div class="countdown-units">
+        <div><span id="cdDays">00</span><label>Days</label></div>
+        <div><span id="cdHours">00</span><label>Hours</label></div>
+        <div><span id="cdMins">00</span><label>Mins</label></div>
+        <div><span id="cdSecs">00</span><label>Secs</label></div>
+    </div>
+</div>
+
+                <!-- Service Cards -->
+                <p class="tracker-section-label">Service Execution Tracker</p>
+                <div class="tracker-grid" id="customTracksGrid">
+                </div>
+
+                <!-- Revision Protocol -->
+                <div class="revision-status-box" style="margin-bottom: 32px;">
+                    <div id="revisionDropdownTrigger" onclick="toggleRevisionNotice()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--bg2); padding: 15px 20px; border: 1px solid var(--rule);">
+                        <span style="font-family: var(--f-display); color: var(--gold); letter-spacing: 2px; font-weight: 500;">REVISION PROTOCOL</span>
+                        <span id="clientRevisionCounter" style="font-family: var(--f-body); font-weight: 600; color: var(--ink);">REVISION COUNT (0/3)</span>
+                    </div>
+
+                    <div id="revisionNoticeContent" style="display: none; background: rgba(125, 46, 46, 0.06); border: 1px solid var(--danger); border-top: none; padding: 20px; font-size: 0.85rem; line-height: 1.6; color: var(--ink);">
+                    </div>
+                </div>
+
+                <!-- Review -->
+                <div class="review-section" id="reviewArea">
+                    <div id="reviewLockedContent">
+                        <h3 style="color:var(--mist); font-size:1.2rem;">Project Experience Review</h3>
+                        <p style="font-size:0.9rem; color:var(--mist); margin-top:10px;">Unlocks when project reaches 100% completion.</p>
+                        <div class="stars-display">★★★★★</div>
+                        <button class="submit-review-btn" disabled>Review Locked</button>
+                    </div>
+                    <div id="reviewUnlockedContent" style="display:none;">
+                        <h3 style="font-size:1.3rem; color:var(--ink);">Share Your ADA Experience</h3>
+                        <p style="font-size:0.9rem; color:var(--gold); margin-top:10px;">Congratulations on your project completion.</p>
+                        <div class="star-select" id="starSelect">
+                            <span onclick="setRating(1)">★</span>
+                            <span onclick="setRating(2)">★</span>
+                            <span onclick="setRating(3)">★</span>
+                            <span onclick="setRating(4)">★</span>
+                            <span onclick="setRating(5)">★</span>
+                        </div>
+                        <textarea class="review-textarea" id="reviewComment" placeholder="Tell us about your design experience..." rows="5"></textarea><br>
+                        <button class="submit-review-btn" onclick="submitReview()">Submit Verified Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── OUR PROCESS PANEL ──────────────────────────── -->
+            <div class="panel" id="panel-process">
+                <div class="hub-header">
+                    <h2>Our Process</h2>
+                    <p>A clear, transparent, and client-focused experience from start to finish.</p>
+                </div>
+
+                <img src="our-process-infographic.png" class="process-infographic" alt="ADA Our Project Process — six-step overview from initial consultation to final delivery">
+
+                <div class="process-grid">
+                    <div class="process-card">
+                        <span class="process-num">01</span>
+                        <h4>Initial Consultation</h4>
+                        <ul>
+                            <li><strong>What you provide:</strong> Your design brief, site survey plan, and reference photos of styles you love.</li>
+                            <li><strong>Site Visit:</strong> We visit your project location (client covers transport logistics and the site visitation fee).</li>
+                        </ul>
+                    </div>
+                    <div class="process-card">
+                        <span class="process-num">02</span>
+                        <h4>Proposal &amp; Terms</h4>
+                        <ul>
+                            <li><strong>Invoice &amp; Contract:</strong> Within 24 hours of your consultation, we issue your project cost invoice and contract terms.</li>
+                            <li><strong>Deposit:</strong> Work begins once a 60%–70% initial deposit is confirmed (with the remaining balance due upon final delivery).</li>
+                            <li><strong>Receipts:</strong> Official receipts are issued immediately for every transaction.</li>
+                        </ul>
+                    </div>
+                    <div class="process-card">
+                        <span class="process-num">03</span>
+                        <h4>Online Client Portal Access</h4>
+                        <p>Once payment is cleared, you receive a private dashboard link to track your project in real time, including:</p>
+                        <ul>
+                            <li><strong>Progress Tracking:</strong> Live overall completion percentages, project timeline countdowns, and execution stages.</li>
+                            <li><strong>Automatic Alerts:</strong> Real-time email or WhatsApp notifications whenever a new drawing or document is uploaded.</li>
+                            <li><strong>Project History:</strong> Clear records of active revision counts and contract terms.</li>
+                            <li><strong>Post-Delivery Review:</strong> A dedicated feedback tool to rate our service upon project completion.</li>
+                        </ul>
+                    </div>
+                    <div class="process-card">
+                        <span class="process-num">04</span>
+                        <h4>Site Analysis &amp; Conceptual Design</h4>
+                        <ul>
+                            <li>We perform a site analysis to optimize orientation, natural lighting, and airflow.</li>
+                            <li>We draft initial floor plan schemes and conceptual 3D sketches for your feedback. <em>(Initial concept tweaks at this stage do not count against your revision limit.)</em></li>
+                        </ul>
+                    </div>
+                    <div class="process-card">
+                        <span class="process-num">05</span>
+                        <h4>Design Development &amp; Team Coordination</h4>
+                        <ul>
+                            <li>Once you approve the concepts, we refine detailed drawings and coordinate with structural and engineering consultants.</li>
+                            <li>You receive regular progress updates on your portal to review and flag any observations.</li>
+                            <li><strong>Revision Allowance:</strong> Includes up to 3 free revisions during this phase.</li>
+                        </ul>
+                    </div>
+                    <div class="process-card">
+                        <span class="process-num">06</span>
+                        <h4>Final Delivery</h4>
+                        <ul>
+                            <li>We issue the complete, final architectural package (available in digital soft copy or printed hard copy).</li>
+                            <li>The remaining project balance is settled upon final delivery.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── SUBMISSION HUB PANEL ───────────────────────── -->
+            <div class="panel" id="panel-hub">
+                <div class="hub-header">
+                    <h2>Submission Hub</h2>
+                    <p>Files released by ADA at each project stage.</p>
+                </div>
+                <div id="hubContent">
+                    <div class="hub-empty">Loading files...</div>
+                </div>
+            </div>
+
+            <!-- ── CONSULTATION PANEL ─────────────────────────── -->
+            <div class="panel" id="panel-consultation">
+                <div class="hub-header">
+                    <h2>Consultation</h2>
+                    <p>Contact your lead architect directly.</p>
+                </div>
+                <a href="https://wa.me/2348138580315" target="_blank"
+                   style="display:inline-block; margin-top:20px; padding:15px 40px; border:1px solid var(--gold); color:var(--gold); font-size:0.8rem; letter-spacing:2px; text-transform:uppercase; text-decoration:none; transition:0.3s; font-family:var(--f-body);"
+                   onmouseover="this.style.background='var(--gold)';this.style.color='var(--bg)'"
+                   onmouseout="this.style.background='transparent';this.style.color='var(--gold)'">
+                    Open WhatsApp Chat
+                </a>
+            </div>
+            <!-- ── SERVICE TERMS PANEL ───────────────────────── -->
+<div class="panel" id="panel-terms">
+    <div class="hub-header">
+        <h2>ADA Client Service Terms</h2>
+        <p>Legal &amp; Compliance — your project agreement.</p>
+    </div>
+    <div class="terms-content" id="termsDisplay">
+        <!-- Populated dynamically from Supabase -->
+    </div>
+</div>
+<!-- ── ARCHITECTURAL SUB-MODAL ─────────────────────────────────────── -->
+<div id="subModal" class="sub-modal">
+    <button class="close-sub" onclick="toggleSubModal(false)">Close ✕</button>
+    <h2>Architectural Progress</h2>
+    <div class="sub-timeline">
+        <div class="sub-step">
+            <p class="step-label">Full Design Brief</p>
+            <span class="step-status" id="subBrief">—</span>
+        </div>
+        <div class="sub-step">
+            <p class="step-label">Schematics &amp; Conceptual Development</p>
+            <span class="step-status" id="subSchem">—</span>
+        </div>
+        <div class="sub-step">
+            <p class="step-label">Consultants Coordination</p>
+            <span class="step-status" id="subCoord">—</span>
+        </div>
+        <div class="sub-step">
+            <p class="step-label">Design Development</p>
+            <span class="step-status" id="subDev">—</span>
+        </div>
+        <div class="sub-step">
+            <p class="step-label">Working Drawings</p>
+            <span class="step-status" id="subWork">—</span>
+        </div>
+    </div>
+</div>
+
+<!-- ── WHATSAPP ─────────────────────────────────────────────────────── -->
+<div id="waDraggable">
+    <a href="https://wa.me/2348138580315" target="_blank">
+        <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.7 17.7 68.9 27.1 106.1 27.1h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.1 0-65.6-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-5.5-2.8-23.2-8.5-44.2-27.1-16.4-14.6-27.4-32.7-30.6-38.1-3.2-5.5-.3-8.4 2.4-11.2 2.5-2.5 5.5-6.4 8.3-9.6 2.8-3.2 3.7-5.5 5.5-9.3 1.9-3.7 1-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 13.2 5.7 23.5 9.2 31.6 11.8 13.3 4.2 25.4 3.6 35 2.2 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+    </a>
+</div>
+
+<script>
+// ─── SUPABASE ─────────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://ofaxbduvnhscxvoakeax.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Pzx108AGy0iP3HOranEbjg_dStxnuGK';
+
+let _db = null;
+try {
+    const { createClient } = supabase;
+    _db = createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch(e) { console.warn('Supabase not connected'); }
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let projectToken = null;
+let projectData  = null;
+let selectedRating = 5;
+let hubFiles = [];
+
+async function hasClientReviewed(token) {
+    if (!_db || !token) return false;
+    const { data } = await _db
+        .from('reviews')
+        .select('id')
+        .eq('project_token', token)
+        .limit(1);
+    return data && data.length > 0;
+}
+    
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+async function initDashboard() {
+    const params = new URLSearchParams(window.location.search);
+    projectToken = params.get('token');
+
+    if (!projectToken) {
+        if (!_db) { showPreview(); return; }
+        showError(); return;
+    }
+
+    if (!_db) { showPreview(); return; }
+
+    try {
+        // Try searching standard token column first
+        let response = await _db
+            .from('projects')
+            .select('*')
+            .eq('token', projectToken)
+            .maybeSingle();
+
+        // Fallback: Try project_token matching structure if token column returns null
+        if (!response.data) {
+            console.log("Checking project_token fallback column...");
+            const fallbackResponse = await _db
+                .from('projects')
+                .select('*')
+                .eq('project_token', projectToken)
+                .maybeSingle();
+                
+            if (fallbackResponse.data) {
+                response = fallbackResponse;
+            }
+        }
+
+        if (response.error) {
+            console.error("Supabase Error Details:", response.error);
+        }
+
+        if (!response.data) { 
+            showError(); 
+            return; 
+        }
+        
+        projectData = response.data;
+
+        if (projectData.dashboard_locked && projectData.overall_percent >= 100) {
+            showLockedScreen(projectData);
+            return;
+        }
+
+        populateDashboard(projectData);
+        loadHubFiles();
+    } catch(e) { 
+        console.error("Initialization Error Exception:", e);
+        showError(); 
+    }
+}
+
+// ─── PREVIEW ─────────────────────────────────────────────────────────────────
+function showPreview() {
+    populateDashboard({
+        project_title: 'Sample Residence',
+        client_name:   'Emeka Okafor',
+        token:         'ADA-2026-0001',
+        lead_architect:'Arc. Ibukunoluwa',
+        overall_percent: 55,
+        perc_architecture: 70, perc_3d: 40, perc_qs: 20, perc_permit: 0,
+        stage_brief: 'completed', stage_schematics: 'completed',
+        stage_coordination: 'started', stage_dev: 'pending', stage_working: 'pending',
+        deposit_paid: 150000, total_sum: 500000,
+        deadline: '2026-12-31T23:59:59', 
+        service_terms: null
+    });
+}
+
+function showError() {
+    const loadEl = document.getElementById('loadingScreen');
+    const errEl = document.getElementById('errorScreen');
+    const mainEl = document.getElementById('dashboardMain');
+    
+    if (loadEl) loadEl.style.display = 'none';
+    if (errEl) errEl.style.display  = 'flex';
+    if (mainEl) mainEl.style.display = 'none';
+}
+
+// ─── PANEL SWITCHER ───────────────────────────────────────────────────────────
+function showPanel(name, el) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.aside-nav button').forEach(b => b.classList.remove('active'));
+    
+    const panelEl = document.getElementById('panel-' + name);
+    if (panelEl) panelEl.classList.add('active');
+    if (el) el.classList.add('active');
+    if (name === 'hub') renderHub();
+}
+
+// ─── CURRENCY FORMATTER ───────────────────────────────────────────────────────
+function formatCurrency(val, mode) {
+    if (!val && val !== 0) return '—';
+    const amount = Number(val);
+    if (mode === 'USD') {
+        return '$' + amount.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+    return '₦' + amount.toLocaleString('en-NG');
+}
+
+// ─── STAGE HELPERS ────────────────────────────────────────────────────────────
+function stageClass(s) {
+    if (s === 'completed') return 'status-completed';
+    if (s === 'started')   return 'status-started';
+    return 'status-pending';
+}
+function stageLabel(s) {
+    if (s === 'completed') return 'Completed';
+    if (s === 'started')   return 'In Progress';
+    return 'Not Started';
+}
+function setStageEl(id, status) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className  = 'step-status ' + stageClass(status);
+    el.textContent = stageLabel(status);
+}
+
+// ─── POPULATE DASHBOARD ───────────────────────────────────────────────────────
+async function populateDashboard(d) {
+    if (!d) return;
+    document.title = `${d.project_title || 'Project'} | ADA Tracker`;
+
+    const tEl   = document.getElementById('projTitle');
+    const cEl   = document.getElementById('clientNameDisplay');
+    const tkEl  = document.getElementById('projToken');
+    const pctEl = document.getElementById('totalPercentText');
+    const archEl = document.getElementById('leadArch');
+
+    if (tEl)   tEl.textContent  = d.project_title  || '—';
+    if (cEl)   cEl.textContent  = d.client_name    || '—';
+    if (tkEl)  tkEl.textContent = d.token ? `REF: ${d.token}` : '—';
+    if (pctEl) pctEl.textContent = `${d.overall_percent || 0}%`;
+    if (archEl) archEl.textContent = d.lead_architect || '—';
+
+    // Payment Summary Section
+    const deposit  = d.deposit_paid;
+    const total    = d.total_sum;
+    const currency = d.currency_mode || 'NGN';
+
+    if (deposit || total) {
+        const balance = (total || 0) - (deposit || 0);
+        const depDisp = document.getElementById('depositDisplay');
+        const totDisp = document.getElementById('totalSumDisplay');
+        const balDisp = document.getElementById('balanceDisplay');
+        const payBand = document.getElementById('paymentBand');
+
+        if (depDisp) depDisp.textContent = formatCurrency(deposit, currency);
+        if (totDisp) totDisp.textContent = formatCurrency(total, currency);
+        if (balDisp) balDisp.textContent = formatCurrency(balance > 0 ? balance : 0, currency);
+        if (payBand) payBand.style.display = 'grid';
+    }
+
+    renderServiceTerms(d.service_terms);
+
+    // Dynamic Execution Track Grid Rendering
+    const grid = document.getElementById('customTracksGrid');
+    if (grid) {
+        let tracks = [];
+        try {
+            tracks = typeof d.custom_tracks === 'string'
+                ? JSON.parse(d.custom_tracks)
+                : (d.custom_tracks || []);
+        } catch(e) { tracks = []; }
+
+        if (tracks.length === 0) {
+            grid.innerHTML = `<div class="service-card">
+                <h4>No progress tracks set yet</h4>
+                <p style="font-size:0.85rem; color:var(--mist);">Your architect will update progress shortly.</p>
+            </div>`;
+        } else {
+            grid.innerHTML = tracks.map(t => `
+                <div class="service-card">
+                    <h4>${t.heading || t.label || 'Unnamed Track'}</h4>
+                    <div class="progress-container">
+                        <div class="progress-fill" style="width:${t.percent || 0}%"></div>
+                    </div>
+                    <span class="pkg-status">${t.heading || t.label || ''}: ${t.percent || 0}%</span>
+                </div>`).join('');
+        }
+    }
+
+    setStageEl('subBrief', d.stage_brief);
+    setStageEl('subSchem', d.stage_schematics);
+    setStageEl('subCoord', d.stage_coordination);
+    setStageEl('subDev',   d.stage_dev);
+    setStageEl('subWork',   d.stage_working);
+
+    if (d.stage_coordination === 'started' || d.stage_coordination === 'completed') {
+        document.querySelectorAll('.eng-card').forEach(card => {
+            card.classList.remove('locked-dependency');
+            const lock = card.querySelector('.lock-overlay');
+            if (lock) lock.style.display = 'none';
+        });
+    }
+
+    // Interactive Completion Reviews Block
+        // Interactive Completion Reviews Block
+    if (d.overall_percent >= 100) {
+        const revArea   = document.getElementById('reviewArea');
+        const revLock   = document.getElementById('reviewLockedContent');
+        const revUnlock = document.getElementById('reviewUnlockedContent');
+
+        if (revArea) revArea.classList.add('unlocked');
+        if (revLock) revLock.style.display = 'none';
+
+        if (revUnlock) {
+            const reviewAlreadySubmitted = await hasClientReviewed(d.token);
+
+            if (reviewAlreadySubmitted) {
+                revUnlock.innerHTML = `
+                    <h3 style="color:var(--gold);">Thank You</h3>
+                    <p style="margin-top:15px; font-size:0.95rem; color:var(--mist); line-height:1.8;">
+                        Your experience review has been recorded. Revisions and feedback channels are locked for completed phases.
+                    </p>`;
+            } else {
+                revUnlock.innerHTML = `
+                    <h3 style="font-size:1.3rem; color:var(--ink);">Share Your ADA Experience</h3>
+                    <p style="font-size:0.9rem; color:var(--gold); margin-top:10px;">Congratulations on your project completion.</p>
+                    <div class="star-select" id="starSelect">
+                        <span onclick="setRating(1)">★</span>
+                        <span onclick="setRating(2)">★</span>
+                        <span onclick="setRating(3)">★</span>
+                        <span onclick="setRating(4)">★</span>
+                        <span onclick="setRating(5)">★</span>
+                    </div>
+                    <textarea class="review-textarea" id="reviewComment" placeholder="Tell us about your design experience..." rows="5"></textarea><br>
+                    <button class="submit-review-btn" onclick="submitReview()">Submit Verified Review</button>
+                `;
+                setRating(selectedRating);
+            }
+            revUnlock.style.display = 'block';
+        }
+    }
+    // Revision Protocols
+    const activeRevisions = d.revision_count || 0;
+    const revCounterEl = document.getElementById('clientRevisionCounter');
+    const triggerBox   = document.getElementById('revisionDropdownTrigger');
+
+    if (revCounterEl) {
+        const reviewAlreadySubmitted = await hasClientReviewed(d.token);
+
+        if (d.overall_percent >= 100 && reviewAlreadySubmitted) {
+            revCounterEl.innerText = 'PROTOCOL LOCKED';
+            if (triggerBox) { triggerBox.style.opacity = '0.6'; triggerBox.style.cursor = 'not-allowed'; }
+        } else {
+            revCounterEl.innerText = `REVISION COUNT (${activeRevisions}/3)`;
+            if (triggerBox) { triggerBox.style.opacity = '1'; triggerBox.style.cursor = 'pointer'; }
+        }
+    }
+
+    // Countdown Logic Initialization
+  const finalDeadline = d.deadline || d.proj_deadline;
+const countdownStatus = d.countdown_status || 'active';
+const cDownBar = document.getElementById('countdownBar');
+
+if (finalDeadline && countdownStatus === 'active') {
+    if (cDownBar) cDownBar.style.display = 'grid';
+    startCountdown(finalDeadline);
+} else if (finalDeadline && countdownStatus === 'paused') {
+    if (cDownBar) cDownBar.style.display = 'grid';
+    // Show frozen state — display remaining time without ticking
+    const diff = new Date(finalDeadline).getTime() - Date.now();
+    if (diff > 0) {
+        const d2 = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        const el = id => document.getElementById(id);
+        if (el('cdDays'))  el('cdDays').textContent  = String(d2).padStart(2, '0');
+        if (el('cdHours')) el('cdHours').textContent = String(h).padStart(2, '0');
+        if (el('cdMins'))  el('cdMins').textContent  = String(m).padStart(2, '0');
+        if (el('cdSecs'))  el('cdSecs').textContent  = String(s).padStart(2, '0');
+    }
+    // Add a visual "PAUSED" indicator
+    const label = document.querySelector('.countdown-label');
+    if (label) label.textContent = 'Project Deadline — Paused';
+} else if (finalDeadline && countdownStatus === 'completed') {
+    if (cDownBar) cDownBar.style.display = 'grid';
+    ['cdDays','cdHours','cdMins','cdSecs'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '00';
+    });
+    const units = document.querySelector('.countdown-units');
+    if (units) units.innerHTML = '<span class="countdown-expired">PROJECT COMPLETED</span>';
+} else {
+    if (cDownBar) cDownBar.style.display = 'none';
+}
+
+    const loadScreen = document.getElementById('loadingScreen');
+    const dashMain   = document.getElementById('dashboardMain');
+    if (loadScreen) loadScreen.style.display = 'none';
+    if (dashMain)   dashMain.style.display   = 'block';
+}
+
+// ─── HUB ─────────────────────────────────────────────────────────────────────
+async function loadHubFiles() {
+    if (!projectToken || !_db) return;
+    
+    const { data, error } = await _db
+        .from('project_files').select('*')
+        .eq('project_token', projectToken)
+        .order('created_at', { ascending: true });
+        
+    hubFiles = (error || !data) ? [] : data;
+}
+    
+function renderHub() {
+    const container = document.getElementById('hubContent');
+    if (!container) return;
+    
+    const visible = hubFiles.filter(f => !f.locked);
+
+    if (!visible.length) {
+        container.innerHTML = `<div class="hub-empty">No files have been released yet.</div>`;
+        return;
+    }
+
+    const groups = {};
+    visible.forEach(f => {
+        if (!groups[f.stage_label]) groups[f.stage_label] = [];
+        groups[f.stage_label].push(f);
+    });
+
+    let html = '<div class="file-list">';
+    Object.entries(groups).forEach(([stage, files]) => {
+        html += `<div class="stage-label">${stage}</div>`;
+        files.forEach(f => {
+            html += `
+            <div class="file-item">
+                <div class="file-meta">
+                    <span class="file-name">${f.file_name}</span>
+                    <span class="file-date">Released: ${f.release_date || f.released_date || '—'}</span>
+                    <span class="file-tag">${f.file_tag}</span>
+                </div>
+                <a href="${f.drive_url}" target="_blank" class="download-btn">Download ↗</a>
+            </div>`;
+        });
+    });
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// ─── SERVICE TERMS RENDERER ───────────────────────────────────────────────────
+function renderServiceTerms(t) {
+    const display = document.getElementById('termsDisplay');
+    if (!display) return;
+
+    if (!t || !Array.isArray(t.sections) || !t.sections.length) {
+        display.innerHTML = `
+            <h3>Intellectual Licensure</h3>
+            <p>All architectural drawings, specifications, and design documents prepared for this project remain the sole intellectual property of the Architect, who retains all copyright and authorship rights. The Client is granted a non-transferable, non-exclusive, limited license to utilize these documents solely for the execution of this specific project. Any unauthorized reproduction, reuse, modification, or application of these drawings for other projects or purposes is strictly prohibited without prior written consent from the Architect.</p>
+            <h3>Payment Terms and Project Commencement</h3>
+            <p>The project timeline shall officially commence only upon receipt of an initial deposit of 50% or more of the total agreed fee, as specified in the contract agreement. The remaining balance shall be due and payable immediately upon the handover of the final deliverables.</p>
+            <h3>Delivery Timeline and Expedited Services</h3>
+            <p>Following the receipt of the initial deposit, the standard timeline for final delivery is estimated at four weeks for a complete approval package but may vary according to the type of project. However, the agreed timeline is subject to prompt feedback and assuming no client-requested revisions. But should the Client require an expedited delivery ahead of the standard schedule, a "fast-track" premium of an additional 10% of the total contract value shall be required.</p>
+            <h3>Design Workflow and Methodology</h3>
+            <p>Our workflow for this project shall initiate with</p>
+            <ul>
+                <li>Site contextualization and analysis</li>
+                <li>Preparation of conceptual sketches</li>
+                <li>Design development and detailed drawings</li>
+                <li>Consultant coordination</li>
+            </ul>
+            <h3>Site Visitations and Consultation Logistics (if applicable)</h3>
+            <p>All logistics, transportation costs, and associated expenses incurred during site visits to verify dimensions on the provided survey plans shall be borne exclusively by the Client. Furthermore, the agreed consultation fee must be fully remitted to the Architect prior to scheduling any site visitation.</p>
+            <h3>Final Deliverables and Project Submissions</h3>
+            <p>Upon successful completion of the design phase, the final Architectural package delivered to the client and ready for approval shall consist of:</p>
+            <ul>
+                <li>Three sets of printed architectural drawings (including exterior 3D renderings, floor plans, roof plans, building sections, elevations, and construction details)</li>
+                <li>Three sets of printed structural drawings (inclusive of the structural undertaking letter, structural calculations, foundation designs, and column details)</li>
+                <li>Three sets of printed electrical drawings (covering lighting, power sockets, air conditioning provisions, and utilities)</li>
+                <li>Three sets of printed mechanical drawings (detailing plumbing layouts and HVAC systems)</li>
+            </ul>
+            <h3>Revision Policy and Scope Variances</h3>
+            <p>The contract fee covers a maximum of three design revisions prior to the final coordination. Any subsequent revisions, structural modifications, or scope changes requested beyond this limit will be classified as additional services and billed under a separate fee structure.</p>
+            <h3>Post-Design Construction Support</h3>
+            <p>Post-design services, including construction site inspections, project monitoring, and site visitations during the construction phase, are excluded from this standard design agreement. These support services carry an independent fee structure, which must be mutually negotiated and agreed upon under a separate contract.</p>
+            <p style="margin-top:48px; font-size:0.75rem; color:var(--mist); border-top:1px solid var(--rule); padding-top:20px;">
+                Last Updated: May 2026 | Document Ref: ADA-CST-V2
+            </p>`;
+        return;
+    }
+
+    const para = text => text ? `<p>${text.replace(/\n/g, '<br>')}</p>` : '';
+    const bullets = arr => Array.isArray(arr) && arr.length ? `<ul>${arr.map(b => `<li>${b}</li>`).join('')}</ul>` : '';
+
+    const sectionsHTML = t.sections.map(s => `
+        <h3>${s.heading || ''}</h3>
+        ${s.type === 'heading' || s.type === 'both' ? para(s.body) : ''}
+        ${s.type === 'bullets' || s.type === 'both' ? bullets(s.bullets) : ''}
+    `).join('');
+
+    const footerHTML = t.footer ? `<p style="margin-top:48px; font-size:0.75rem; color:var(--mist); border-top:1px solid var(--rule); padding-top:20px;">${t.footer}</p>` : '';
+
+    display.innerHTML = sectionsHTML + footerHTML;
+}
+
+// ─── SUB-MODAL ────────────────────────────────────────────────────────────────
+function toggleSubModal(show) {
+    const subM = document.getElementById('subModal');
+    if (subM) subM.classList.toggle('open', show);
+}
+
+// ─── REVIEW ───────────────────────────────────────────────────────────────────
+function setRating(n) {
+    selectedRating = n;
+    document.querySelectorAll('#starSelect span').forEach((s, i) => {
+        s.classList.toggle('active', i < n);
+    });
+}
+
+async function submitReview() {
+    const comment = document.getElementById('reviewComment').value.trim();
+    if (!comment) { alert('Please write a comment before submitting.'); return; }
+    if (!_db) { alert('Database disconnected.'); return; }
+
+    const nowIso = new Date().toISOString();
+    const currentRevCount = (projectData?.revision_count || 0);
+
+    // 1. Insert into reviews table
+    const { error: revErr } = await _db.from('reviews').insert([{
+        project_token: projectToken,
+        client_name:   projectData?.client_name || 'Anonymous',
+        rating:        selectedRating,
+        comment:       comment,
+        location:      'NIGERIA',
+        status:        'pending',
+        created_at:    nowIso
+    }]);
+
+    // 2. Log revision event timestamp to timeline history
+    await _db.from('project_revisions').insert([{
+        project_token:   projectToken,
+        revision_number: currentRevCount,
+        feedback_notes:  comment,
+        rating:          selectedRating,
+        created_at:      nowIso
+    }]);
+
+    if (revErr) {
+        alert('Submission failed. Please try again.');
+    } else {
+        sessionStorage.setItem(`submitted_review_${projectToken}`, 'true');
+        
+        if (countdownInterval) clearInterval(countdownInterval);
+        ['cdDays', 'cdHours', 'cdMins', 'cdSecs'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '00';
+        });
+
+        const revUnlock = document.getElementById('reviewUnlockedContent');
+        if (revUnlock) {
+            const formattedDate = new Date().toLocaleDateString('en-GB', {
+                day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+
+            revUnlock.innerHTML = `
+                <h3 style="color:var(--gold);">Thank You</h3>
+                <p style="margin-top:15px; font-size:0.95rem; color:var(--mist); line-height: 1.8;">
+                    Your experience review has been recorded on <strong>${formattedDate}</strong>. Revisions and feedback channels are locked for completed phases.
+                </p>`;
+        }
+        
+        const revCounterEl = document.getElementById('clientRevisionCounter');
+        const triggerBox = document.getElementById('revisionDropdownTrigger');
+        if (revCounterEl) revCounterEl.innerText = "PROTOCOL LOCKED";
+        if (triggerBox) {
+            triggerBox.style.opacity = '0.6';
+            triggerBox.style.cursor = 'not-allowed';
+        }
+
+        // Refresh dynamic revision history display
+        loadRevisionTimelineHistory();
+    }
+}
+
+// ─── COUNTDOWN ────────────────────────────────────────────────────────────────
+let countdownInterval = null;
+
+function startCountdown(deadlineStr) {
+    const bar = document.getElementById('countdownBar');
+    if (!deadlineStr) { if (bar) bar.style.display = 'none'; return; }
+    
+    const deadline = new Date(deadlineStr).getTime();
+    if (isNaN(deadline)) { if (bar) bar.style.display = 'none'; return; }
+
+    if (bar) bar.style.display = 'flex';
+    
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+
+    function tick() {
+        const diff = deadline - new Date().getTime();
+        
+        if (diff <= 0) {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            
+            ['cdDays', 'cdHours', 'cdMins', 'cdSecs'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '00';
+            });
+            
+            const units = document.querySelector('.countdown-units');
+            if (units) units.innerHTML = '<span class="countdown-expired">PROJECT DEADLINE REACHED</span>';
+            return;
+        }
+
+        const days  = Math.floor(diff / 86400000);
+        const hours = Math.floor((diff % 86400000) / 3600000);
+        const mins  = Math.floor((diff % 3600000)  / 60000);
+        const secs  = Math.floor((diff % 60000)    / 1000);
+
+        const dEl = document.getElementById('cdDays');
+        const hEl = document.getElementById('cdHours');
+        const mEl = document.getElementById('cdMins');
+        const sEl = document.getElementById('cdSecs');
+
+        if (dEl) dEl.textContent = String(days).padStart(2, '0');
+        if (hEl) hEl.textContent = String(hours).padStart(2, '0');
+        if (mEl) mEl.textContent = String(mins).padStart(2, '0');
+        if (sEl) sEl.textContent = String(secs).padStart(2, '0');
+    }
+
+    countdownInterval = setInterval(tick, 1000);
+    tick(); 
+}
+
+// ─── WA DRAG ──────────────────────────────────────────────────────────────────
+const wa = document.getElementById('waDraggable');
+if (wa) {
+    let dr=false,ox=0,oy=0;
+    wa.addEventListener('mousedown', e=>{
+        dr=true; ox=e.clientX-wa.offsetLeft; oy=e.clientY-wa.offsetTop; wa.style.transition='none';
+    });
+    document.addEventListener('mousemove', e=>{
+        if(dr){ wa.style.left=(e.clientX-ox)+'px'; wa.style.top=(e.clientY-oy)+'px'; wa.style.right=wa.style.bottom='auto'; }
+    });
+    document.addEventListener('mouseup', () => { dr=false; wa.style.transition='transform 0.3s'; });
+}
+
+// ─── LOCKED SCREEN ────────────────────────────────────────────────────────────
+let lockedRating = 5;
+
+function showLockedScreen(d) {
+    const loadEl = document.getElementById('loadingScreen');
+    const mainEl = document.getElementById('dashboardMain');
+    const errEl = document.getElementById('errorScreen');
+    const lockEl = document.getElementById('lockedScreen');
+
+    if (loadEl) loadEl.style.display = 'none';
+    if (mainEl) mainEl.style.display = 'none';
+    if (errEl) errEl.style.display   = 'none';
+    if (lockEl) lockEl.style.display = 'flex';
+
+    const nameEl = document.getElementById('lockedClientName');
+    if (nameEl) nameEl.textContent = d.client_name || 'Valued Client';
+}
+
+function setLockedRating(n) {
+    lockedRating = n;
+    document.querySelectorAll('#lockedStarSelect span').forEach((s, i) => {
+        s.style.color = i < n ? 'var(--gold2)' : 'var(--bg3)';
+    });
+}
+
+async function submitLockedReview() {
+    const comment = document.getElementById('lockedReviewComment').value.trim();
+    if (!comment) { alert('Please write a short review before continuing.'); return; }
+
+    if (_db) {
+        await _db.from('reviews').insert([{
+            project_token: projectToken,
+            client_name:   projectData?.client_name || 'Anonymous',
+            rating:        lockedRating,
+            comment,
+            location:      'NIGERIA',
+            status:        'pending'
+        }]);
+    }
+
+    if (_db) {
+        await _db
+            .from('projects')
+            .update({ dashboard_locked: false })
+            .eq('token', projectToken);
+    }
+    
+    sessionStorage.setItem(`submitted_review_${projectToken}`, 'true');
+    document.getElementById('lockedScreen').innerHTML = `
+        <div style="text-align:center; padding:80px 10%;">
+            <span style="font-family:var(--f-display); font-size:2rem; letter-spacing:8px; color:var(--ink); display:block; margin-bottom:40px;">ADA</span>
+            <div style="font-size:2rem; margin-bottom:20px;">✓</div>
+            <h2 style="font-family:var(--f-display); font-size:1.8rem; color:var(--ink); margin-bottom:16px;">Thank You</h2>
+            <p style="font-size:0.95rem; color:var(--mist); line-height:1.8; margin-bottom:32px;">
+                Your review has been received. Loading your dashboard now...
+            </p>
+        </div>`;
+
+    setTimeout(async () => {
+        try {
+            const { data, error } = await _db
+                .from('projects').select('*')
+                .eq('token', projectToken).single();
+            if (!error && data) {
+                projectData = data;
+                document.getElementById('lockedScreen').style.display = 'none';
+                populateDashboard(data);
+                loadHubFiles();
+            }
+        } catch(e) {
+            document.getElementById('lockedScreen').style.display = 'none';
+            populateDashboard(projectData);
+        }
+    }, 2000);
+}
+
+// ─── REVISION HISTORY & TIMELINE ENGINE ──────────────────────────────────────
+async function loadRevisionTimelineHistory() {
+    const noticeBox = document.getElementById('revisionNoticeContent');
+    if (!noticeBox || !_db || !projectToken) return;
+
+    const { data: revList } = await _db
+        .from('project_revisions')
+        .select('*')
+        .eq('project_token', projectToken)
+        .order('created_at', { ascending: true }); // Timeline order
+
+    const currentCount = projectData?.revision_count || 0;
+    const reviewAlreadySubmitted = await hasClientReviewed(d.token);
+    const isProtocolLocked = projectData && (projectData.overall_percent >= 100 && reviewAlreadySubmitted);
+
+    if (isProtocolLocked) {
+        let historyHtml = '';
+        if (revList && revList.length > 0) {
+            historyHtml = `
+                <div style="margin-top: 15px; border-top: 1px solid var(--rule); padding-top: 10px;">
+                    <strong style="color: var(--gold); display: block; margin-bottom: 8px;">Logged Revisions Timeline:</strong>
+                    <ul style="list-style: none; padding-left: 0; font-size: 0.8rem;">
+            `;
+            revList.forEach(item => {
+                const dateStr = new Date(item.created_at).toLocaleDateString('en-GB', {
+                    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+                historyHtml += `
+                    <li style="margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.1);">
+                        <span style="color: var(--gold2); font-weight: 600;">Revision #${item.revision_number}</span> — 
+                        <span style="color: var(--mist);">${dateStr}</span>
+                        ${item.feedback_notes ? `<br><i style="color: #ddd;">"${item.feedback_notes}"</i>` : ''}
+                    </li>`;
+            });
+            historyHtml += `</ul></div>`;
+        }
+
+        noticeBox.innerHTML = `
+            <div style="text-align: left; padding: 5px 0;">
+                <strong style="color: var(--gold);">Protocol Locked:</strong> You have left feedback for this phase. Further architectural modifications are now permanently locked.
+                ${historyHtml}
+            </div>`;
+    } else {
+        let historyHtml = '';
+        if (revList && revList.length > 0) {
+            historyHtml = `
+                <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                    <strong style="color: var(--gold); display: block; margin-bottom: 8px;">Revision Timeline Log:</strong>
+                    <ul style="list-style: none; padding-left: 0; font-size: 0.8rem;">
+            `;
+            revList.forEach(item => {
+                const dateStr = new Date(item.created_at).toLocaleDateString('en-GB', {
+                    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+                historyHtml += `
+                    <li style="margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.1);">
+                        <span style="color: var(--gold2); font-weight: 600;">Stage Revision #${item.revision_number}</span> — 
+                        <span style="color: var(--mist);">${dateStr}</span>
+                    </li>`;
+            });
+            historyHtml += `</ul></div>`;
+        }
+
+        noticeBox.innerHTML = `
+            <strong>Revision Policy Notice:</strong> You have currently utilized 
+            <span style="color: #fff; font-weight: bold;">${currentCount}</span> of 3 complimentary revision phases assigned to this project. Please note that upon reaching the maximum allocation of 3/3 revisions, any subsequent modification requests will require a formal project scope adjustment, incurring a 10% increment on the initial aggregate project sum. Furthermore, each approved revision extension request will automatically extend the contract delivery timeline by an additional three (3) business days.
+            ${historyHtml}
+        `;
+    }
+}
+
+function toggleRevisionNotice() {
+    const noticeBox = document.getElementById('revisionNoticeContent');
+    if (!noticeBox) return;
+
+    if (noticeBox.style.display === 'none' || !noticeBox.style.display) {
+        loadRevisionTimelineHistory();
+        noticeBox.style.display = 'block';
+    } else {
+        noticeBox.style.display = 'none';
+    }
+}
+
+// ─── START ────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', initDashboard);
+</script>
+</body>
+</html>
