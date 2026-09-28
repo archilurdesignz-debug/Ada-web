@@ -206,6 +206,73 @@ async function getNewsletterSubscribers_() {
   return data || [];
 }
 
+// --- Rolling 3-day news archive ---------------------------------------
+// The published page shows everything that was fresh at some point in
+// the last NEWS_ARCHIVE_WINDOW_DAYS, not just the current run's items —
+// this is what actually makes it a "news page" rather than a
+// single-run snapshot. Category/subcategory are captured once, at
+// archive time, so an item doesn't jump categories if keyword lists
+// change while it's still within its 3-day window.
+async function archiveNewsItems_(items) {
+  if (!supabase || items.length === 0) return;
+  const rows = items.map((item) => {
+    const { category, subcategory } = categorizeItem_(item);
+    return {
+      url: item.url,
+      title: item.title,
+      region: REGION_KEYS.includes(item.region) ? item.region : 'global',
+      category,
+      subcategory: subcategory || null,
+      source: item.source,
+      also_reported_by: item.alsoReportedBy && item.alsoReportedBy.length > 0 ? item.alsoReportedBy : null,
+      published_at: item.publishedAt,
+    };
+  });
+  const { error } = await supabase
+    .from('digest_news_archive')
+    .upsert(rows, { onConflict: 'url' });
+
+  if (error) {
+    console.error('Supabase news-archive insert failed:', error.message);
+  }
+}
+
+async function pruneOldArchivedNews_() {
+  if (!supabase) return;
+  const cutoff = new Date(Date.now() - NEWS_ARCHIVE_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  const { error } = await supabase
+    .from('digest_news_archive')
+    .delete()
+    .lt('archived_at', cutoff);
+
+  if (error) {
+    console.error('Supabase news-archive prune failed:', error.message);
+  }
+}
+
+async function getArchivedNews_() {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from('digest_news_archive')
+    .select('url, title, region, category, subcategory, source, also_reported_by, published_at')
+    .order('published_at', { ascending: false });
+
+  if (error) {
+    console.error('Supabase news-archive lookup failed:', error.message);
+    return [];
+  }
+  return (data || []).map((row) => ({
+    url: row.url,
+    title: row.title,
+    region: row.region,
+    category: row.category,
+    subcategory: row.subcategory || undefined,
+    source: row.source,
+    alsoReportedBy: row.also_reported_by || undefined,
+    publishedAt: row.published_at,
+  }));
+}
+
 function chunk_(arr, size) {
   const out = [];
   for (let i = 0; i < arr.length; i += size) {
@@ -249,6 +316,11 @@ async function fetchScrapeFallbacks_(rssItemsBySource) {
 }
 
 const MAX_ITEMS_PER_CATEGORY = 15;
+// The rendered news page (3-day rolling window) can reasonably hold more
+// per category than a single run's fresh items would — this only affects
+// how many items get RENDERED on the page, not what gets archived/pruned.
+const MAX_ITEMS_PER_CATEGORY_NEWS_PAGE = 30;
+const NEWS_ARCHIVE_WINDOW_DAYS = 3;
 const MAX_AGE_HOURS_GLOBAL = 30;
 const MAX_AGE_HOURS_LOCAL = 96;
 
@@ -994,7 +1066,7 @@ function emptyRegionTaxonomy_() {
   };
 }
 
-function buildTaxonomy_(items) {
+function buildTaxonomy_(items, maxPerCategory = MAX_ITEMS_PER_CATEGORY) {
   const taxonomy = {
     nigeria: emptyRegionTaxonomy_(),
     africa: emptyRegionTaxonomy_(),
@@ -1003,7 +1075,13 @@ function buildTaxonomy_(items) {
 
   for (const item of items) {
     const region = REGION_KEYS.includes(item.region) ? item.region : 'global';
-    const { category, subcategory } = categorizeItem_(item);
+    // Archived rows already carry their category/subcategory (decided
+    // once, at the run that first fetched them) — reuse that instead of
+    // re-running categorizeItem_, so an item's placement stays stable
+    // for its whole 3 days on the page even if keyword lists change.
+    const { category, subcategory } = item.category
+      ? { category: item.category, subcategory: item.subcategory }
+      : categorizeItem_(item);
     if (category === 'professionalPractice') {
       taxonomy[region].professionalPractice[subcategory].push(item);
     } else {
@@ -1014,17 +1092,17 @@ function buildTaxonomy_(items) {
   // Cap each bucket so no single category runs away with the digest.
   for (const region of REGION_KEYS) {
     const t = taxonomy[region];
-    t.policyRegulation = t.policyRegulation.slice(0, MAX_ITEMS_PER_CATEGORY);
-    t.developmentRealEstate = t.developmentRealEstate.slice(0, MAX_ITEMS_PER_CATEGORY);
-    t.materials = t.materials.slice(0, MAX_ITEMS_PER_CATEGORY);
-    t.construction = t.construction.slice(0, MAX_ITEMS_PER_CATEGORY);
-    t.competitionsExams = t.competitionsExams.slice(0, MAX_ITEMS_PER_CATEGORY);
-    t.exhibitions = t.exhibitions.slice(0, MAX_ITEMS_PER_CATEGORY);
-    t.artificialIntelligence = t.artificialIntelligence.slice(0, MAX_ITEMS_PER_CATEGORY);
-    t.designCulture = t.designCulture.slice(0, MAX_ITEMS_PER_CATEGORY);
-    t.generalNews = t.generalNews.slice(0, MAX_ITEMS_PER_CATEGORY);
+    t.policyRegulation = t.policyRegulation.slice(0, maxPerCategory);
+    t.developmentRealEstate = t.developmentRealEstate.slice(0, maxPerCategory);
+    t.materials = t.materials.slice(0, maxPerCategory);
+    t.construction = t.construction.slice(0, maxPerCategory);
+    t.competitionsExams = t.competitionsExams.slice(0, maxPerCategory);
+    t.exhibitions = t.exhibitions.slice(0, maxPerCategory);
+    t.artificialIntelligence = t.artificialIntelligence.slice(0, maxPerCategory);
+    t.designCulture = t.designCulture.slice(0, maxPerCategory);
+    t.generalNews = t.generalNews.slice(0, maxPerCategory);
     for (const key of Object.keys(t.professionalPractice)) {
-      t.professionalPractice[key] = t.professionalPractice[key].slice(0, MAX_ITEMS_PER_CATEGORY);
+      t.professionalPractice[key] = t.professionalPractice[key].slice(0, maxPerCategory);
     }
   }
 
@@ -1066,6 +1144,15 @@ function taxonomyCounts_(taxonomy) {
 
 // --- Digest page HTML (the "zero-scroll" accordion webpage) ----------------
 
+function itemDateLabel_(item) {
+  if (!item.publishedAt) return '';
+  const d = new Date(item.publishedAt);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'Africa/Lagos',
+  });
+}
+
 function itemLi_(item) {
   const alsoReported =
     item.alsoReportedBy && item.alsoReportedBy.length > 0
@@ -1073,10 +1160,12 @@ function itemLi_(item) {
           item.alsoReportedBy.length === 1 ? '' : 's'
         }</span>`
       : '';
+  const dateLabel = itemDateLabel_(item);
+  const dateHtml = dateLabel ? `<span class="item-date">${escapeHtml(dateLabel)}</span>` : '';
   const safeUrl = escapeHtml(item.url);
   return `<li data-url="${safeUrl}">
     <a class="item-link" href="${safeUrl}" target="_blank" rel="noopener">${escapeHtml(item.title)}</a>
-    <span class="src">${escapeHtml(item.source)}${alsoReported}</span>
+    <span class="src">${escapeHtml(item.source)}${alsoReported}${dateHtml}</span>
     <div class="item-actions">
       <button type="button" class="like-btn" aria-label="Like this story">
         <span class="like-icon">♡</span><span class="like-count">0</span>
@@ -1152,7 +1241,7 @@ function regionSection_(emoji, label, regionTaxonomy, regionCounts) {
 }
 
 function buildDigestPageHtml_(taxonomy, counts, { dateLabel, timeLabel, digestUrl }) {
-  const ogDescription = `${counts.total} new architecture & built-environment stories, organized by Nigeria, Africa, and Globe — each covering Policy & Regulation, Professional Practice, Development & Real Estate, Materials, Construction, Competitions & Exams, Exhibitions, Artificial Intelligence, and Design & Culture.`;
+  const ogDescription = `${counts.total} architecture & built-environment stories from the last 3 days, organized by Nigeria, Africa, and Globe — each covering Policy & Regulation, Professional Practice, Development & Real Estate, Materials, Construction, Competitions & Exams, Exhibitions, Artificial Intelligence, and Design & Culture.`;
   const ogImage = process.env.DIGEST_OG_IMAGE_URL || 'https://archilurdesignz.com/assets/og-digest-cover.jpg';
   // Public site key — safe to embed in the page (this is how Turnstile is
   // designed to work; only the SECRET key, used server-side in
@@ -1260,6 +1349,8 @@ function buildDigestPageHtml_(taxonomy, counts, { dateLabel, timeLabel, digestUr
   a:hover { text-decoration: underline; }
   .src { color: #a3a3a3; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
   .also-reported { color: #c9a876; font-weight: 700; margin-left: 6px; text-transform: none; letter-spacing: normal; }
+  .item-date { color: #a3a3a3; margin-left: 6px; }
+  .item-date::before { content: "· "; }
   .item-actions { display: flex; align-items: center; gap: 14px; margin-top: 4px; }
   .like-btn, .comments-toggle {
     display: inline-flex; align-items: center; gap: 4px; background: none; border: none;
@@ -1309,8 +1400,8 @@ function buildDigestPageHtml_(taxonomy, counts, { dateLabel, timeLabel, digestUr
 </head>
 <body>
   <h1>ADA Architecture Digest</h1>
-  <p class="tagline">Architecture, construction, and property news from Nigeria, Africa, and around the world — sorted by region and topic, refreshed several times a day by Archilurdesignz and Architecture.</p>
-  <div class="date">${dateLabel} · ${timeLabel} · ${counts.total} stories</div>
+  <p class="tagline">Architecture, construction, and property news from Nigeria, Africa, and around the world — sorted by region and topic, covering the last 3 days, refreshed several times a day by Archilurdesignz and Architecture.</p>
+  <div class="date">Updated ${dateLabel} · ${timeLabel} · ${counts.total} stories from the last 3 days</div>
   <div class="subscribe-box">
     <div class="subscribe-title">📩 Get this digest by email</div>
     <p class="subscribe-copy">Subscribe once, and every future digest lands straight in your inbox.</p>
@@ -1737,6 +1828,10 @@ export default async function handler(req, res) {
     const unseenUrlSet = new Set(unseenUrls);
     const items = merged.filter((item) => unseenUrlSet.has(item.url));
 
+    // counts/taxonomy here are FRESH-ONLY (just this run's new items) —
+    // used for the email's "N new stories" breakdown, which should
+    // reflect what's actually new since last time, not the whole 3-day
+    // archive.
     const taxonomy = buildTaxonomy_(items);
     const counts = taxonomyCounts_(taxonomy);
 
@@ -1749,7 +1844,16 @@ export default async function handler(req, res) {
     });
     const digestUrl = process.env.DIGEST_PAGE_URL || 'https://archilurdesignz.com/digest';
 
-    const pageHtml = buildDigestPageHtml_(taxonomy, counts, { dateLabel, timeLabel, digestUrl });
+    // The PUBLISHED PAGE is the rolling 3-day archive, not just this
+    // run's fresh items — archive first, prune anything that's aged out,
+    // then rebuild the page from everything currently in the window.
+    await archiveNewsItems_(items);
+    await pruneOldArchivedNews_();
+    const archivedItems = await getArchivedNews_();
+    const newsTaxonomy = buildTaxonomy_(archivedItems, MAX_ITEMS_PER_CATEGORY_NEWS_PAGE);
+    const newsCounts = taxonomyCounts_(newsTaxonomy);
+
+    const pageHtml = buildDigestPageHtml_(newsTaxonomy, newsCounts, { dateLabel, timeLabel, digestUrl });
     await publishDigestToGitHub_(pageHtml);
 
     // Only now that publish has actually succeeded — mark these URLs so
@@ -1790,7 +1894,32 @@ export default async function handler(req, res) {
         const { data, error } = await resend.batch.send(emails);
         if (error) {
           console.error('Resend batch send error:', error);
-          failedCount += batch.length;
+          // The batch endpoint rejects the ENTIRE call if even one
+          // recipient fails validation (e.g. a placeholder domain like
+          // example.com that slipped past signup validation) — which
+          // means one bad address would otherwise cost everyone in the
+          // batch their digest, including your own copy. Falling back to
+          // sending this batch one-by-one isolates the failure to just
+          // the actually-bad address.
+          for (const recipient of batch) {
+            try {
+              const single = await resend.emails.send({
+                from: process.env.DIGEST_FROM_EMAIL,
+                to: recipient.email,
+                subject,
+                html: buildNotificationEmailHtml_(counts, { dateLabel, timeLabel, digestUrl, unsubscribeUrl: recipient.unsubscribeUrl }),
+              });
+              if (single.error) {
+                console.error(`Resend send failed for ${recipient.email}:`, single.error);
+                failedCount += 1;
+              } else {
+                sentCount += 1;
+              }
+            } catch (singleErr) {
+              console.error(`Resend send threw for ${recipient.email}:`, singleErr.message);
+              failedCount += 1;
+            }
+          }
         } else {
           sentCount += (data || []).length;
         }
@@ -1800,6 +1929,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ok: true,
       counts,
+      newsPageTotal: newsCounts.total,
       digestUrl,
       emailsSent: sentCount,
       emailsFailed: failedCount,
