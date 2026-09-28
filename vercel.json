@@ -6,6 +6,10 @@
       "destination": "/blog.html"
     },
     {
+      "source": "/digest",
+      "destination": "/digest.html"
+    },
+    {
       "source": "/store",
       "has": [
         { "type": "query", "key": "plan" },
