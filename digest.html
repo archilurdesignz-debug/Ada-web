@@ -2,131 +2,408 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Vercel Web Analytics -->
+<script defer src="/_vercel/insights/script.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 <title>ADA Architecture Digest — Tuesday, September 29, 2026</title>
+<meta name="description" content="9 architecture &amp; built-environment stories from the last 3 days, organized by Nigeria, Africa, and Globe — each covering Policy &amp; Regulation, Professional Practice, Development &amp; Real Estate, Materials, Construction, Competitions &amp; Exams, Exhibitions, Artificial Intelligence, and Design &amp; Culture.">
+<link rel="canonical" href="https://archilurdesignz.com/digest">
 
-<meta property="og:title" content="ADA Architecture Digest — Tuesday, September 29, 2026">
-<meta property="og:description" content="2 architecture &amp; built-environment stories from the last 3 days, organized by Nigeria, Africa, and Globe — each covering Policy &amp; Regulation, Professional Practice, Development &amp; Real Estate, Materials, Construction, Competitions &amp; Exams, Exhibitions, Artificial Intelligence, and Design &amp; Culture.">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Archilurdesignz and Architecture">
+<meta property="og:title" content="ADA Architecture Digest — Tuesday, September 29, 2026">
+<meta property="og:description" content="9 architecture &amp; built-environment stories from the last 3 days, organized by Nigeria, Africa, and Globe — each covering Policy &amp; Regulation, Professional Practice, Development &amp; Real Estate, Materials, Construction, Competitions &amp; Exams, Exhibitions, Artificial Intelligence, and Design &amp; Culture.">
 <meta property="og:url" content="https://archilurdesignz.com/digest">
 <meta property="og:image" content="https://www.dropbox.com/scl/fi/ns265vu8kfhbkbmnu5e16/ADA.jpg?rlkey=xzu2vjs2xk6fxwip27zfglrk2&st=kcglja1v&raw=1">
-<meta property="og:site_name" content="Archilurdesignz and Architecture">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="ADA Architecture Digest — Tuesday, September 29, 2026">
-<meta name="twitter:description" content="2 architecture &amp; built-environment stories from the last 3 days, organized by Nigeria, Africa, and Globe — each covering Policy &amp; Regulation, Professional Practice, Development &amp; Real Estate, Materials, Construction, Competitions &amp; Exams, Exhibitions, Artificial Intelligence, and Design &amp; Culture.">
+<meta name="twitter:description" content="9 architecture &amp; built-environment stories from the last 3 days, organized by Nigeria, Africa, and Globe — each covering Policy &amp; Regulation, Professional Practice, Development &amp; Real Estate, Materials, Construction, Competitions &amp; Exams, Exhibitions, Artificial Intelligence, and Design &amp; Culture.">
 <meta name="twitter:image" content="https://www.dropbox.com/scl/fi/ns265vu8kfhbkbmnu5e16/ADA.jpg?rlkey=xzu2vjs2xk6fxwip27zfglrk2&st=kcglja1v&raw=1">
 
+<!-- Favicons -->
+<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+
+<!-- Set theme before first paint to avoid a flash of the wrong theme -->
+<script>
+  (function () {
+    try {
+      var saved = localStorage.getItem('ada-site-theme');
+      document.documentElement.setAttribute('data-theme', saved || 'light');
+    } catch (e) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+
 <style>
-  :root { color-scheme: light; }
-  * { box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    max-width: 720px; margin: 0 auto; padding: 32px 20px 60px;
-    background: #faf8f4; color: #1a1a1a;
-  }
-  h1 { font-family: Georgia, serif; font-size: 26px; margin: 0 0 4px; }
-  .tagline { color: #4a4a4a; font-size: 14px; line-height: 1.5; margin: 0 0 12px; max-width: 60ch; }
-  .date { color: #8a8378; font-size: 14px; margin-bottom: 28px; }
-  .subscribe-box {
-    background: #fff; border: 1px solid #e5e0d8; border-radius: 12px;
-    padding: 18px 20px; margin-bottom: 28px;
-  }
-  .subscribe-title { font-family: Georgia, serif; font-size: 17px; margin-bottom: 4px; }
-  .subscribe-copy { font-size: 13px; color: #4a4a4a; margin: 0 0 12px; }
-  .subscribe-form { display: flex; gap: 8px; flex-wrap: wrap; }
-  .subscribe-email {
-    flex: 1 1 220px; font-family: inherit; font-size: 14px; padding: 9px 12px;
-    border: 1px solid #e5e0d8; border-radius: 6px; background: #faf8f4; color: #1a1a1a;
-  }
-  .subscribe-form button {
-    background: #1a1a1a; color: #fff; border: none; padding: 9px 20px;
-    border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
-  }
-  .subscribe-form button:disabled { opacity: 0.6; cursor: default; }
-  .subscribe-msg { font-size: 13px; margin: 10px 0 0; }
-  .subscribe-msg.success { color: #1e7d32; }
-  .subscribe-msg.error { color: #c0392b; }
-  details {
-    background: #fff; border: 1px solid #e5e0d8; border-radius: 12px;
-    margin-bottom: 12px; overflow: hidden;
-  }
-  details[open] { border-color: #c9a876; }
-  summary {
-    cursor: pointer; padding: 16px 20px; font-size: 16px; font-weight: 600;
-    list-style: none; display: flex; justify-content: space-between; align-items: center;
-  }
-  summary::-webkit-details-marker { display: none; }
-  summary::after { content: '+'; font-size: 20px; color: #8a8378; margin-left: 12px; }
-  details[open] > summary::after { content: '−'; }
-  .count {
-    background: #f0ece2; color: #8a6d3b; font-size: 12px; font-weight: 700;
-    padding: 3px 11px; border-radius: 12px; margin-left: auto; margin-right: 8px;
-  }
-  ul { list-style: none; margin: 0; padding: 0 20px 16px; }
-  li {
-    padding: 12px 0; border-top: 1px solid #f0ece2; font-size: 14px; line-height: 1.5;
-    display: flex; flex-direction: column; gap: 3px;
-  }
-  li:first-child { border-top: none; }
-  a { color: #1a1a1a; text-decoration: none; font-weight: 500; }
-  a:hover { text-decoration: underline; }
-  .src { color: #a3a3a3; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
-  .also-reported { color: #c9a876; font-weight: 700; margin-left: 6px; text-transform: none; letter-spacing: normal; }
-  .item-date { color: #a3a3a3; margin-left: 6px; }
-  .item-date::before { content: "· "; }
-  .item-actions { display: flex; align-items: center; gap: 14px; margin-top: 4px; }
-  .like-btn, .comments-toggle {
-    display: inline-flex; align-items: center; gap: 4px; background: none; border: none;
-    color: #8a8378; font-size: 12px; cursor: pointer; padding: 3px 8px; border-radius: 6px;
-    font-family: inherit;
-  }
-  .like-btn:hover, .comments-toggle:hover { background: #f0ece2; color: #1a1a1a; }
-  .like-btn.liked { color: #c0392b; }
-  .like-btn:disabled { cursor: default; }
-  .view-count { display: inline-flex; align-items: center; gap: 4px; color: #a3a3a3; font-size: 12px; }
-  .comment-box {
-    margin-top: 8px; padding: 12px 14px; background: #faf8f4; border-radius: 8px;
-    border: 1px solid #f0ece2;
-  }
-  .comment-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
-  .comment-item { border-bottom: 1px solid #f0ece2; padding-bottom: 8px; }
-  .comment-item:last-child { border-bottom: none; padding-bottom: 0; }
-  .comment-head { display: flex; justify-content: space-between; font-size: 11px; color: #8a8378; margin-bottom: 2px; }
-  .comment-name { font-weight: 600; color: #1a1a1a; }
-  .comment-text { margin: 0; font-size: 13px; color: #4a4a4a; line-height: 1.4; }
-  .comment-empty { font-size: 12px; color: #a3a3a3; font-style: italic; margin: 0; }
-  .comment-form { display: flex; flex-direction: column; gap: 6px; }
-  .comment-form input, .comment-form textarea {
-    font-family: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid #e5e0d8;
-    border-radius: 6px; background: #fff; color: #1a1a1a;
-  }
-  .comment-form textarea { resize: vertical; min-height: 50px; }
-  .comment-form button {
-    align-self: flex-end; background: #1a1a1a; color: #fff; border: none; padding: 7px 18px;
-    border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
-  }
-  .comment-form button:disabled { opacity: 0.6; cursor: default; }
-  details.nested {
-    border: none; background: #faf8f4; margin: 0 16px 12px; border-left: 3px solid #e5e0d8;
-    border-radius: 0 8px 8px 0;
-  }
-  details.nested summary { padding: 10px 16px; font-size: 14px; font-weight: 500; }
-  details.nested2 {
-    border: none; background: #fff; margin: 0 14px 10px 26px; border-left: 3px dotted #e5e0d8;
-    border-radius: 0 8px 8px 0;
-  }
-  details.nested2 summary { padding: 8px 14px; font-size: 13px; font-weight: 500; }
-  footer { text-align: center; color: #a3a3a3; font-size: 12px; margin-top: 32px; }
-  .cf-turnstile-slot { margin: 2px 0; }
-  .turnstile-msg { margin: 0; font-size: 12px; color: #c0392b; }
+/* ── DESIGN TOKENS (same as index.html / journal.html) ────────────────── */
+:root, [data-theme="dark"] {
+  --ink:     #0d0c0a;
+  --ink2:    #1c1a17;
+  --ink3:    #2e2b26;
+  --mist:    #7a7570;
+  --sand:    #c9bfb0;
+  --paper:   #f3ede4;
+  --paper2:  #ede5d8;
+  --gold:    #b09070;
+  --gold2:   #d4b896;
+  --accent:  #c8a87a;
+  --white:   #faf8f4;
+  --shadow:  0 8px 40px rgba(26,23,20,0.12);
+  --line-rgb:    201,191,176;
+  --mist-rgb:    122,117,112;
+  --gold-rgb:    176,144,112;
+  --good:    #6fae76;
+  --bad:     #d98a7a;
+  --f-display: 'Playfair Display', Georgia, serif;
+  --f-body:    'Outfit', sans-serif;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+[data-theme="light"] {
+  --ink:     #f5f1ea;
+  --ink2:    #ffffff;
+  --ink3:    #ece5d8;
+  --mist:    #5f5346;
+  --sand:    #55493c;
+  --paper:   #1c1712;
+  --paper2:  #241f18;
+  --gold:    #8a6a45;
+  --gold2:   #9c6b2e;
+  --accent:  #a97c4a;
+  --white:   #0d0c0a;
+  --shadow:  0 8px 30px rgba(26,23,20,0.08);
+  --line-rgb:    13,12,10;
+  --mist-rgb:    95,83,70;
+  --gold-rgb:    138,106,69;
+  --good:    #3f7a49;
+  --bad:     #b1503d;
+}
+
+* { box-sizing: border-box; transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; width:100%; max-width:100%; overflow-x:hidden;
+  background: var(--ink); color: var(--paper);
+  font-family: var(--f-body); font-weight: 300;
+}
+a { color: inherit; }
+
+/* ── NAV (identical to index.html/journal.html) ─────────────────────── */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:1000;
+  height:72px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 0 4%;
+  background: rgba(13,12,10,0.94);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(201,191,176,0.08);
+}
+.nav-left { display:flex; gap:28px; align-items:center; }
+.nav-left a {
+  font-family: var(--f-body); font-size:0.62rem; font-weight:400;
+  letter-spacing:2.5px; text-transform:uppercase; color: #c9bfb0;
+  text-decoration:none; transition: color 0.3s; position:relative;
+}
+.nav-left a::after {
+  content:''; position:absolute; bottom:-3px; left:0;
+  width:0; height:1px; background:#c8a87a;
+  transition: width 0.35s var(--ease-out);
+}
+.nav-left a:hover, .nav-left a.active { color:#f3ede4; }
+.nav-left a:hover::after, .nav-left a.active::after { width:100%; }
+.nav-center {
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  display:flex; align-items:center; gap:10px;
+}
+.nav-logomark {
+  width:38px; height:38px; border:1px solid rgba(201,191,176,0.3);
+  display:flex; align-items:center; justify-content:center;
+  font-family: var(--f-display); font-size:1.1rem; color: #d4b896; letter-spacing:1px;
+}
+.nav-wordmark { line-height:1; }
+.nav-wordmark .w1 {
+  font-family: var(--f-display); font-size:1rem; font-weight:500;
+  letter-spacing:5px; text-transform:uppercase; color:#f3ede4; display:block;
+}
+.nav-wordmark .w2 {
+  font-family: var(--f-body); font-size:0.75rem; font-weight:300;
+  letter-spacing:2px; color:#b09070; display:block; margin-top:2px;
+}
+.nav-right { display:flex; gap:14px; align-items:center; }
+.nav-rc {
+  font-size:0.55rem; letter-spacing:2px; color:#7a7570;
+  border:1px solid rgba(122,117,112,0.3); padding:5px 10px;
+}
+.theme-toggle {
+  display:flex; align-items:center; justify-content:center;
+  width:36px; height:36px; flex-shrink:0;
+  background:transparent; border:1px solid rgba(201,191,176,0.25);
+  color:#c9bfb0; font-size:0.95rem; line-height:1; cursor:pointer; transition:all 0.3s;
+}
+.theme-toggle:hover { border-color:#b09070; color:#d4b896; }
+.nav-cta-btn {
+  font-family:var(--f-body); font-size:0.6rem; font-weight:400;
+  letter-spacing:2px; text-transform:uppercase; padding:10px 22px;
+  background:transparent; border:1px solid #c9bfb0; color:#f3ede4;
+  text-decoration:none; display:inline-block; cursor:pointer; transition:all 0.3s;
+}
+.nav-cta-btn:hover { background:#f3ede4; color:#0d0c0a; }
+
+/* ── PAGE HEADER ────────────────────────────────────────────────────── */
+.digest-header { padding: 160px 5% 40px; max-width: 900px; }
+.back-crumb {
+  display:inline-block; font-family:var(--f-body); font-size:0.62rem; font-weight:400;
+  letter-spacing:2px; text-transform:uppercase; color:var(--mist);
+  text-decoration:none; margin-bottom:22px; transition:color 0.3s;
+}
+.back-crumb:hover { color:var(--gold2); }
+.eyebrow {
+  display:flex; align-items:center; gap:10px;
+  font-family:var(--f-body); font-size:0.58rem; font-weight:400;
+  letter-spacing:4px; text-transform:uppercase; color:var(--gold);
+  margin-bottom:14px;
+}
+.eyebrow::before { content:''; width:24px; height:1px; background:var(--gold); }
+.digest-title {
+  font-family:var(--f-display); font-size:clamp(2rem,4.5vw,3.2rem);
+  font-weight:400; letter-spacing:1px; text-transform:uppercase;
+  color:var(--white); line-height:1.1; margin: 0 0 16px;
+}
+.digest-tagline {
+  font-size:0.92rem; font-weight:200; line-height:1.75;
+  color:var(--mist); max-width:640px; margin: 0 0 18px;
+}
+.digest-meta {
+  font-family:var(--f-body); font-size:0.7rem; letter-spacing:0.5px;
+  color:var(--sand);
+}
+
+/* ── SUBSCRIBE BOX ──────────────────────────────────────────────────── */
+.digest-body { padding: 0 5% 100px; max-width: 900px; }
+.subscribe-box {
+  background: var(--ink2); border: 1px solid rgba(var(--line-rgb),0.1);
+  padding: 24px 28px; margin: 0 0 32px;
+}
+.subscribe-title {
+  font-family:var(--f-display); font-size:1.1rem; font-weight:500;
+  color:var(--white); margin-bottom:6px;
+}
+.subscribe-copy { font-size: 0.8rem; font-weight:200; color: var(--mist); margin: 0 0 16px; line-height:1.6; }
+.subscribe-form { display: flex; gap: 10px; flex-wrap: wrap; }
+.subscribe-email {
+  flex: 1 1 220px; font-family: inherit; font-size: 13px; padding: 11px 14px;
+  border: 1px solid rgba(var(--line-rgb),0.2); background: var(--ink3); color: var(--paper);
+}
+.subscribe-email::placeholder { color: var(--mist); }
+.subscribe-form button {
+  font-family:var(--f-body); font-size:0.62rem; font-weight:500;
+  letter-spacing:2px; text-transform:uppercase;
+  background: var(--paper); color: var(--ink); border: none; padding: 11px 26px;
+  cursor: pointer; transition: all 0.3s var(--ease-out);
+}
+.subscribe-form button:hover { background: var(--accent); color: var(--white); }
+.subscribe-form button:disabled { opacity: 0.5; cursor: default; }
+.subscribe-msg { font-size: 12px; margin: 12px 0 0; letter-spacing:0.3px; }
+.subscribe-msg.success { color: var(--good); }
+.subscribe-msg.error { color: var(--bad); }
+
+/* ── CTA PANEL (back to the firm's site) ──────────────────────────────── */
+.cta-panel {
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:24px;
+  background: var(--ink2); border: 1px solid rgba(var(--line-rgb),0.1);
+  padding: 32px 34px; margin-top: 32px;
+}
+.cta-copy { flex: 1 1 340px; }
+.cta-copy p {
+  font-size:0.85rem; font-weight:200; line-height:1.75; color:var(--mist);
+  max-width: 480px; margin: 10px 0 0;
+}
+.cta-actions { display:flex; flex-direction:column; align-items:flex-start; gap:12px; }
+.cta-link {
+  font-size:0.62rem; letter-spacing:2px; text-transform:uppercase;
+  color:var(--gold); text-decoration:none;
+  border-bottom:1px solid rgba(var(--gold-rgb),0.3); padding-bottom:2px;
+  transition:color 0.3s, border-color 0.3s;
+}
+.cta-link:hover { color:var(--gold2); border-color:var(--gold2); }
+.btn-fill {
+  padding:14px 32px; background:var(--paper); color:var(--ink);
+  font-family:var(--f-body); font-size:0.62rem; font-weight:500;
+  letter-spacing:2.5px; text-transform:uppercase;
+  text-decoration:none; border:none; cursor:pointer;
+  transition:all 0.35s var(--ease-out); display:inline-block; width:fit-content;
+}
+.btn-fill:hover { background:var(--accent); color:var(--white); transform:translateY(-3px); }
+
+/* ── ACCORDION / REGIONS ────────────────────────────────────────────── */
+details {
+  background: var(--ink2); border: 1px solid rgba(var(--line-rgb),0.08);
+  margin-bottom: 14px; overflow: hidden;
+}
+details[open] { border-color: rgba(var(--gold-rgb),0.5); }
+summary {
+  cursor: pointer; padding: 18px 22px; font-size: 15px; font-weight: 500;
+  font-family: var(--f-display);
+  list-style: none; display: flex; justify-content: space-between; align-items: center;
+  color: var(--white);
+}
+summary::-webkit-details-marker { display: none; }
+summary::after { content: '+'; font-size: 18px; color: var(--mist); margin-left: 12px; font-family: var(--f-body); }
+details[open] > summary::after { content: '−'; }
+.count {
+  background: rgba(var(--gold-rgb),0.15); color: var(--gold2); font-size: 11px; font-weight: 600;
+  font-family: var(--f-body); letter-spacing:0.5px;
+  padding: 3px 11px; border-radius: 999px; margin-left: auto; margin-right: 8px;
+}
+ul { list-style: none; margin: 0; padding: 0 22px 18px; }
+li {
+  padding: 14px 0; border-top: 1px solid rgba(var(--line-rgb),0.08); font-size: 13.5px; line-height: 1.5;
+  display: flex; flex-direction: column; gap: 4px;
+}
+li:first-child { border-top: none; }
+a.item-link { color: var(--paper); text-decoration: none; font-weight: 400; }
+a.item-link:hover { color: var(--gold2); }
+.src { color: var(--mist); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--f-body); }
+.also-reported { color: var(--gold); font-weight: 600; margin-left: 6px; text-transform: none; letter-spacing: normal; }
+.item-date { color: var(--mist); margin-left: 6px; }
+.item-date::before { content: "· "; }
+.item-actions { display: flex; align-items: center; gap: 16px; margin-top: 5px; }
+.like-btn, .comments-toggle {
+  display: inline-flex; align-items: center; gap: 4px; background: none; border: none;
+  color: var(--mist); font-size: 12px; cursor: pointer; padding: 3px 8px; border-radius: 6px;
+  font-family: var(--f-body);
+}
+.like-btn:hover, .comments-toggle:hover { background: rgba(var(--line-rgb),0.08); color: var(--paper); }
+.like-btn.liked { color: var(--bad); }
+.like-btn:disabled { cursor: default; }
+.view-count { display: inline-flex; align-items: center; gap: 4px; color: var(--mist); font-size: 12px; font-family: var(--f-body); }
+.comment-box {
+  margin-top: 8px; padding: 14px 16px; background: var(--ink3); border-radius: 4px;
+  border: 1px solid rgba(var(--line-rgb),0.08);
+}
+.comment-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+.comment-item { border-bottom: 1px solid rgba(var(--line-rgb),0.08); padding-bottom: 8px; }
+.comment-item:last-child { border-bottom: none; padding-bottom: 0; }
+.comment-head { display: flex; justify-content: space-between; font-size: 11px; color: var(--mist); margin-bottom: 2px; font-family: var(--f-body); }
+.comment-name { font-weight: 600; color: var(--paper); }
+.comment-text { margin: 0; font-size: 13px; color: var(--sand); line-height: 1.4; }
+.comment-empty { font-size: 12px; color: var(--mist); font-style: italic; margin: 0; }
+.comment-form { display: flex; flex-direction: column; gap: 8px; }
+.comment-form input, .comment-form textarea {
+  font-family: var(--f-body); font-size: 13px; padding: 9px 11px; border: 1px solid rgba(var(--line-rgb),0.15);
+  background: var(--ink2); color: var(--paper); border-radius: 4px;
+}
+.comment-form input::placeholder, .comment-form textarea::placeholder { color: var(--mist); }
+.comment-form textarea { resize: vertical; min-height: 50px; }
+.comment-form button {
+  align-self: flex-end; background: var(--paper); color: var(--ink); border: none; padding: 8px 20px;
+  font-size: 11px; font-weight: 600; letter-spacing:1px; text-transform:uppercase;
+  cursor: pointer; font-family: var(--f-body); transition: all 0.3s;
+}
+.comment-form button:hover { background: var(--accent); color: var(--white); }
+.comment-form button:disabled { opacity: 0.6; cursor: default; }
+details.nested {
+  border: none; background: transparent; margin: 0 18px 12px; border-left: 2px solid rgba(var(--line-rgb),0.12);
+}
+details.nested summary { padding: 12px 16px; font-size: 14px; font-weight: 500; font-family: var(--f-body); color: var(--sand); }
+details.nested2 {
+  border: none; background: rgba(var(--line-rgb),0.03); margin: 0 16px 10px 28px; border-left: 2px dotted rgba(var(--line-rgb),0.15);
+}
+details.nested2 summary { padding: 10px 14px; font-size: 13px; font-weight: 400; font-family: var(--f-body); color: var(--mist); }
+.cf-turnstile-slot { margin: 2px 0; }
+.turnstile-msg { margin: 0; font-size: 12px; color: var(--bad); }
+
+/* ── FOOTER (identical to index.html/journal.html) ─────────────────── */
+footer { background:var(--ink2); padding:64px 5% 28px; border-top:1px solid rgba(var(--line-rgb),0.06); }
+.footer-top {
+  display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:40px;
+  padding-bottom:50px; border-bottom:1px solid rgba(var(--line-rgb),0.06); margin-bottom:28px;
+}
+.footer-brand .fb-name {
+  font-family:var(--f-display); font-size:1.5rem; font-weight:400;
+  letter-spacing:5px; text-transform:uppercase; color:var(--paper);
+  display:block; margin-bottom:6px;
+}
+.footer-brand .fb-rc { font-size:0.55rem; letter-spacing:2px; color:var(--gold); display:block; margin-bottom:18px; }
+.footer-brand p { font-size:0.75rem; color:var(--mist); font-weight:200; line-height:1.8; max-width:240px; }
+.footer-col h5 {
+  font-family:var(--f-body); font-size:0.58rem; font-weight:500;
+  letter-spacing:3px; text-transform:uppercase; color:var(--sand); margin-bottom:20px;
+}
+.footer-col a {
+  display:block; font-size:0.72rem; color:var(--mist); font-weight:200;
+  text-decoration:none; margin-bottom:10px; transition:color 0.3s; letter-spacing:0.3px;
+}
+.footer-col a:hover { color:var(--paper); }
+.footer-bottom { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.footer-copy { font-size:0.58rem; color:rgba(var(--mist-rgb),0.5); letter-spacing:1px; }
+.footer-ig {
+  display:inline-flex; align-items:center; gap:8px; margin-top:20px;
+  font-size:0.68rem; font-weight:300; letter-spacing:1.5px;
+  color:var(--mist); text-decoration:none; transition:color 0.3s;
+}
+.footer-ig svg { width:16px; height:16px; flex-shrink:0; }
+.footer-ig:hover { color:var(--gold2); }
+
+@media (max-width: 768px) {
+  .nav-center .nav-wordmark { display:none; }
+  .nav-right .nav-rc { display:none; }
+  .digest-header { padding:140px 6% 32px; }
+  .digest-body { padding: 0 6% 80px; }
+  .cta-panel { padding: 26px 22px; }
+  .cta-actions { width:100%; }
+  .cta-actions .btn-fill { width:100%; text-align:center; }
+  .footer-top { grid-template-columns:1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .footer-top { grid-template-columns:1fr; }
+}
 </style>
 </head>
 <body>
-  <h1>ADA Architecture Digest</h1>
-  <p class="tagline">Architecture, construction, and property news from Nigeria, Africa, and around the world — sorted by region and topic, covering the last 3 days, refreshed several times a day by Archilurdesignz and Architecture.</p>
-  <div class="date">Updated Tuesday, September 29, 2026 · 12:42 PM · 2 stories from the last 3 days</div>
+
+<!-- ── NAV ────────────────────────────────────────────────────────────── -->
+<nav id="navbar">
+  <div class="nav-left">
+    <a href="portfolio">Portfolio</a>
+    <a href="store">Store</a>
+    <a href="journal" class="active">Journal</a>
+  </div>
+  <div class="nav-center">
+    <div class="nav-logomark">A</div>
+    <div class="nav-wordmark">
+      <span class="w1">ADA</span>
+      <span class="w2">Archilurdesignz</span>
+    </div>
+  </div>
+  <div class="nav-right">
+    <span class="nav-rc">RC: 9176834</span>
+    <button class="theme-toggle" id="siteThemeToggle" onclick="toggleSiteTheme()" aria-label="Toggle day and night mode">☾</button>
+    <a href="connect" class="nav-cta-btn">Enquire</a>
+  </div>
+</nav>
+
+<!-- ── HEADER ─────────────────────────────────────────────────────────── -->
+<header class="digest-header">
+  <a class="back-crumb" href="journal">← ADA Journal</a>
+  <div class="eyebrow">ADA Journal · News</div>
+  <h1 class="digest-title">Architecture Digest</h1>
+  <p class="digest-tagline">Architecture, construction, and property news from Nigeria, Africa, and around the world — sorted by region and topic, covering the last 3 days, refreshed several times a day by Archilurdesignz and Architecture.</p>
+  <div class="digest-meta">Updated Tuesday, September 29, 2026 · 3:00 PM · 9 stories from the last 3 days</div>
+</header>
+
+<!-- ── DIGEST BODY ────────────────────────────────────────────────────── -->
+<div class="digest-body">
   <div class="subscribe-box">
-    <div class="subscribe-title">📩 Get this digest by email</div>
+    <div class="subscribe-title">Get this digest by email</div>
     <p class="subscribe-copy">Subscribe once, and every future digest lands straight in your inbox.</p>
     <form class="subscribe-form">
       <input type="email" class="subscribe-email" placeholder="you@email.com" maxlength="254" required>
@@ -136,7 +413,37 @@
   </div>
   
     <details>
-      <summary><span>🌐 Globe</span><span class="count">2</span></summary>
+      <summary><span>🇳🇬 Nigeria</span><span class="count">1</span></summary>
+      
+    <details class="nested">
+      <summary><span>📰 Nigeria News</span><span class="count">1</span></summary>
+      <ul><li data-url="https://news.google.com/rss/articles/CBMisgFBVV95cUxNWDA5UzVpZjkyVXJxbFVKSmhyOE8zM0t6Qm5oeWh4WWJtTV9zN2NEY0twZ3IybWFHQkxwenRQSjlMYjBFZGIwaUdCX0ZINUR2elFIdlY2VlFpWldaT2p6SXFTN3o1Q2tzOHdKM0tFUkZsck9NUjAyMXNCZjF5aWhvQTN4WHRPcURZbXU0eVAxb1Z5WEZQM0JYMXlBd0d2bkl5Mm8xMHJtXzhRbGNhbTFPSjBR?oc=5">
+    <a class="item-link" href="https://news.google.com/rss/articles/CBMisgFBVV95cUxNWDA5UzVpZjkyVXJxbFVKSmhyOE8zM0t6Qm5oeWh4WWJtTV9zN2NEY0twZ3IybWFHQkxwenRQSjlMYjBFZGIwaUdCX0ZINUR2elFIdlY2VlFpWldaT2p6SXFTN3o1Q2tzOHdKM0tFUkZsck9NUjAyMXNCZjF5aWhvQTN4WHRPcURZbXU0eVAxb1Z5WEZQM0JYMXlBd0d2bkl5Mm8xMHJtXzhRbGNhbTFPSjBR?oc=5" target="_blank" rel="noopener">Beyond the Spectacle: The Architecture of Nigeria’s Historic Guinness World Record Night - The Guardian Nigeria News</a>
+    <span class="src">Google News (Nigeria architecture)<span class="item-date">Sep 29, 1:41 PM</span></span>
+    <div class="item-actions">
+      <button type="button" class="like-btn" aria-label="Like this story">
+        <span class="like-icon">♡</span><span class="like-count">0</span>
+      </button>
+      <span class="view-count" title="Views"><span class="view-icon">👁</span> <span class="view-num">0</span></span>
+      <button type="button" class="comments-toggle" aria-label="Show comments">
+        💬 <span class="comment-count">0</span>
+      </button>
+    </div>
+    <div class="comment-box" hidden>
+      <div class="comment-list"></div>
+      <form class="comment-form">
+        <input type="text" class="comment-name" maxlength="60" placeholder="Name (optional)">
+        <textarea class="comment-text" maxlength="500" placeholder="Add a comment…" required></textarea>
+        <div class="cf-turnstile-slot"></div>
+        <p class="turnstile-msg" hidden></p>
+        <button type="submit">Post</button>
+      </form>
+    </div>
+  </li></ul>
+    </details>
+    </details>
+    <details>
+      <summary><span>🌐 Globe</span><span class="count">8</span></summary>
       
     <details class="nested">
       <summary><span>🧑‍💼 Professional Practice</span><span class="count">1</span></summary>
@@ -171,8 +478,148 @@
     </details>
     </details>
     <details class="nested">
-      <summary><span>📰 Globe News</span><span class="count">1</span></summary>
-      <ul><li data-url="https://www.archdaily.com/1185817/the-house-of-continum-squelette-design">
+      <summary><span>🏗️ Construction</span><span class="count">2</span></summary>
+      <ul><li data-url="https://www.constructiondive.com/news/not-if-when-how-construction-is-dealing-with-cybersecurity-in-the-age-of/831567/">
+    <a class="item-link" href="https://www.constructiondive.com/news/not-if-when-how-construction-is-dealing-with-cybersecurity-in-the-age-of/831567/" target="_blank" rel="noopener">Dotted Line: Not if, when: How construction is dealing with cybersecurity in the age of AI</a>
+    <span class="src">Construction Dive<span class="item-date">Sep 29, 2:41 PM</span></span>
+    <div class="item-actions">
+      <button type="button" class="like-btn" aria-label="Like this story">
+        <span class="like-icon">♡</span><span class="like-count">0</span>
+      </button>
+      <span class="view-count" title="Views"><span class="view-icon">👁</span> <span class="view-num">0</span></span>
+      <button type="button" class="comments-toggle" aria-label="Show comments">
+        💬 <span class="comment-count">0</span>
+      </button>
+    </div>
+    <div class="comment-box" hidden>
+      <div class="comment-list"></div>
+      <form class="comment-form">
+        <input type="text" class="comment-name" maxlength="60" placeholder="Name (optional)">
+        <textarea class="comment-text" maxlength="500" placeholder="Add a comment…" required></textarea>
+        <div class="cf-turnstile-slot"></div>
+        <p class="turnstile-msg" hidden></p>
+        <button type="submit">Post</button>
+      </form>
+    </div>
+  </li><li data-url="https://www.constructiondive.com/news/contractors-winning-us-infrastructure-projects/831485/">
+    <a class="item-link" href="https://www.constructiondive.com/news/contractors-winning-us-infrastructure-projects/831485/" target="_blank" rel="noopener">Contractors nail down infrastructure projects to wrap up construction season</a>
+    <span class="src">Construction Dive<span class="item-date">Sep 29, 2:25 PM</span></span>
+    <div class="item-actions">
+      <button type="button" class="like-btn" aria-label="Like this story">
+        <span class="like-icon">♡</span><span class="like-count">0</span>
+      </button>
+      <span class="view-count" title="Views"><span class="view-icon">👁</span> <span class="view-num">0</span></span>
+      <button type="button" class="comments-toggle" aria-label="Show comments">
+        💬 <span class="comment-count">0</span>
+      </button>
+    </div>
+    <div class="comment-box" hidden>
+      <div class="comment-list"></div>
+      <form class="comment-form">
+        <input type="text" class="comment-name" maxlength="60" placeholder="Name (optional)">
+        <textarea class="comment-text" maxlength="500" placeholder="Add a comment…" required></textarea>
+        <div class="cf-turnstile-slot"></div>
+        <p class="turnstile-msg" hidden></p>
+        <button type="submit">Post</button>
+      </form>
+    </div>
+  </li></ul>
+    </details>
+    <details class="nested">
+      <summary><span>📰 Globe News</span><span class="count">5</span></summary>
+      <ul><li data-url="https://www.constructiondive.com/news/hudson-tunnel-project-begins-boring/831600/">
+    <a class="item-link" href="https://www.constructiondive.com/news/hudson-tunnel-project-begins-boring/831600/" target="_blank" rel="noopener">$16B Hudson Tunnel Project begins boring</a>
+    <span class="src">Construction Dive<span class="item-date">Sep 29, 2:39 PM</span></span>
+    <div class="item-actions">
+      <button type="button" class="like-btn" aria-label="Like this story">
+        <span class="like-icon">♡</span><span class="like-count">0</span>
+      </button>
+      <span class="view-count" title="Views"><span class="view-icon">👁</span> <span class="view-num">0</span></span>
+      <button type="button" class="comments-toggle" aria-label="Show comments">
+        💬 <span class="comment-count">0</span>
+      </button>
+    </div>
+    <div class="comment-box" hidden>
+      <div class="comment-list"></div>
+      <form class="comment-form">
+        <input type="text" class="comment-name" maxlength="60" placeholder="Name (optional)">
+        <textarea class="comment-text" maxlength="500" placeholder="Add a comment…" required></textarea>
+        <div class="cf-turnstile-slot"></div>
+        <p class="turnstile-msg" hidden></p>
+        <button type="submit">Post</button>
+      </form>
+    </div>
+  </li><li data-url="https://news.google.com/rss/articles/CBMiugFBVV95cUxPVGNmYi1DLTlrY0lnZTBmS0wyTWRaSWw2a3NNakNPOF80UEQ5RXVqT25vR21BaUo5SlhzTFNGQ2d0djI0b1hGY1NkN0xVOVA5SU1LZGJuOGl2MWVKak1rc2ZFLXVSd2VpTkR3SHduX1o4WEFkbUxRSExTczMycFZzOTY3Y1g4LWVpdE5hWmdIQ2J3aDVscW1BWUFuRld3ZExSWkRjVFNqbDF4ZTVjYUs2bF96WTBXUDJEZUE?oc=5">
+    <a class="item-link" href="https://news.google.com/rss/articles/CBMiugFBVV95cUxPVGNmYi1DLTlrY0lnZTBmS0wyTWRaSWw2a3NNakNPOF80UEQ5RXVqT25vR21BaUo5SlhzTFNGQ2d0djI0b1hGY1NkN0xVOVA5SU1LZGJuOGl2MWVKak1rc2ZFLXVSd2VpTkR3SHduX1o4WEFkbUxRSExTczMycFZzOTY3Y1g4LWVpdE5hWmdIQ2J3aDVscW1BWUFuRld3ZExSWkRjVFNqbDF4ZTVjYUs2bF96WTBXUDJEZUE?oc=5" target="_blank" rel="noopener">Social Assistance in the Global South: Towards an Inclusive Welfare Architecture - orfonline.org</a>
+    <span class="src">Google News (Africa architecture)<span class="item-date">Sep 29, 12:53 PM</span></span>
+    <div class="item-actions">
+      <button type="button" class="like-btn" aria-label="Like this story">
+        <span class="like-icon">♡</span><span class="like-count">0</span>
+      </button>
+      <span class="view-count" title="Views"><span class="view-icon">👁</span> <span class="view-num">0</span></span>
+      <button type="button" class="comments-toggle" aria-label="Show comments">
+        💬 <span class="comment-count">0</span>
+      </button>
+    </div>
+    <div class="comment-box" hidden>
+      <div class="comment-list"></div>
+      <form class="comment-form">
+        <input type="text" class="comment-name" maxlength="60" placeholder="Name (optional)">
+        <textarea class="comment-text" maxlength="500" placeholder="Add a comment…" required></textarea>
+        <div class="cf-turnstile-slot"></div>
+        <p class="turnstile-msg" hidden></p>
+        <button type="submit">Post</button>
+      </form>
+    </div>
+  </li><li data-url="https://www.archdaily.com/1185838/building-on-volcanic-ground-architectures-response-to-volcanic-landscapes">
+    <a class="item-link" href="https://www.archdaily.com/1185838/building-on-volcanic-ground-architectures-response-to-volcanic-landscapes" target="_blank" rel="noopener">
+        Building on Volcanic Ground: Architecture's Response to Volcanic Landscapes
+      </a>
+    <span class="src">ArchDaily<span class="item-date">Sep 29, 8:30 AM</span></span>
+    <div class="item-actions">
+      <button type="button" class="like-btn" aria-label="Like this story">
+        <span class="like-icon">♡</span><span class="like-count">0</span>
+      </button>
+      <span class="view-count" title="Views"><span class="view-icon">👁</span> <span class="view-num">0</span></span>
+      <button type="button" class="comments-toggle" aria-label="Show comments">
+        💬 <span class="comment-count">0</span>
+      </button>
+    </div>
+    <div class="comment-box" hidden>
+      <div class="comment-list"></div>
+      <form class="comment-form">
+        <input type="text" class="comment-name" maxlength="60" placeholder="Name (optional)">
+        <textarea class="comment-text" maxlength="500" placeholder="Add a comment…" required></textarea>
+        <div class="cf-turnstile-slot"></div>
+        <p class="turnstile-msg" hidden></p>
+        <button type="submit">Post</button>
+      </form>
+    </div>
+  </li><li data-url="https://www.archdaily.com/1185724/next-practices-live-in-mexico">
+    <a class="item-link" href="https://www.archdaily.com/1185724/next-practices-live-in-mexico" target="_blank" rel="noopener">
+        Next Practices Live in Mexico
+      </a>
+    <span class="src">ArchDaily<span class="item-date">Sep 29, 8:15 AM</span></span>
+    <div class="item-actions">
+      <button type="button" class="like-btn" aria-label="Like this story">
+        <span class="like-icon">♡</span><span class="like-count">0</span>
+      </button>
+      <span class="view-count" title="Views"><span class="view-icon">👁</span> <span class="view-num">0</span></span>
+      <button type="button" class="comments-toggle" aria-label="Show comments">
+        💬 <span class="comment-count">0</span>
+      </button>
+    </div>
+    <div class="comment-box" hidden>
+      <div class="comment-list"></div>
+      <form class="comment-form">
+        <input type="text" class="comment-name" maxlength="60" placeholder="Name (optional)">
+        <textarea class="comment-text" maxlength="500" placeholder="Add a comment…" required></textarea>
+        <div class="cf-turnstile-slot"></div>
+        <p class="turnstile-msg" hidden></p>
+        <button type="submit">Post</button>
+      </form>
+    </div>
+  </li><li data-url="https://www.archdaily.com/1185817/the-house-of-continum-squelette-design">
     <a class="item-link" href="https://www.archdaily.com/1185817/the-house-of-continum-squelette-design" target="_blank" rel="noopener">
         The House of Continum / Squelette Design
       </a>
@@ -199,7 +646,80 @@
   </li></ul>
     </details>
     </details>
-  <footer>Archilurdesignz and Architecture</footer>
+  <div class="cta-panel">
+    <div class="cta-copy">
+      <span class="eyebrow" style="margin-bottom:0;">Archilurdesignz and Architecture</span>
+      <p>This digest is brought to you by ADA — a Nigerian architectural practice designing bespoke residential, commercial, and hospitality spaces across Lagos, Abuja, and Port Harcourt.</p>
+    </div>
+    <div class="cta-actions">
+      <a href="portfolio" class="btn-fill">View Our Portfolio →</a>
+      <a href="connect" class="cta-link">Start a Project →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <span class="fb-name">ADA</span>
+      <span class="fb-rc">RC: 9176834</span>
+      <p>Archilurdesignz and Architecture — crafting bespoke luxury spaces across Lagos, Abuja, and Port Harcourt to clients across Nigeria and beyond since 2012.</p>
+      <a href="https://www.instagram.com/archilurdesignz?igsh=YzEwaHVyNzY0aTZv"
+         target="_blank" rel="noopener noreferrer" class="footer-ig">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+          <circle cx="12" cy="12" r="4"/>
+          <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+        </svg>
+        <span>@archilurdesignz</span>
+      </a>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <a href="about">About Us</a>
+      <a href="portfolio">Portfolio</a>
+      <a href="connect">Contact</a>
+      <a href="journal">Journal</a>
+    </div>
+    <div class="footer-col">
+      <h5>Services</h5>
+      <a href="#">Architecture</a>
+      <a href="#">3D Visualization</a>
+      <a href="#">Engineering</a>
+      <a href="#">Quantity Surveying</a>
+    </div>
+    <div class="footer-col">
+      <h5>Plans Store</h5>
+      <a href="store">Browse Plans</a>
+      <a href="policy">Privacy Policy</a>
+      <a href="faq">FAQs</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2026 Archilurdesignz and Architecture. All rights reserved.</p>
+    <p class="footer-copy">contactus@archilurdesignz.com</p>
+  </div>
+</footer>
+
+  <script>
+  /* ── THEME TOGGLE (same mechanism as index.html/journal.html) ────────── */
+  function syncSiteThemeToggleIcon(theme) {
+    var btn = document.getElementById('siteThemeToggle');
+    if (!btn) return;
+    btn.textContent = theme === 'light' ? '☀' : '☾';
+    btn.setAttribute('aria-label', theme === 'light' ? 'Switch to night mode' : 'Switch to day mode');
+  }
+  function toggleSiteTheme() {
+    var root = document.documentElement;
+    var current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    var next = current === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('ada-site-theme', next); } catch (e) {}
+    syncSiteThemeToggleIcon(next);
+  }
+  syncSiteThemeToggleIcon(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
+  </script>
   <script>
   (function () {
     var API = '/api/digest-interactions';
