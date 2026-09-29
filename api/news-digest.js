@@ -1435,7 +1435,7 @@ nav {
 .nav-cta-btn:hover { background:#f3ede4; color:#0d0c0a; }
 
 /* ── PAGE HEADER ────────────────────────────────────────────────────── */
-.digest-header { padding: 160px 5% 40px; max-width: 900px; }
+.digest-header { padding: 160px 5% 40px; max-width: 900px; 0 auto; }
 .back-crumb {
   display:inline-block; font-family:var(--f-body); font-size:0.62rem; font-weight:400;
   letter-spacing:2px; text-transform:uppercase; color:var(--mist);
@@ -1464,7 +1464,7 @@ nav {
 }
 
 /* ── SUBSCRIBE BOX ──────────────────────────────────────────────────── */
-.digest-body { padding: 0 5% 100px; max-width: 900px; }
+.digest-body { padding: 0 5% 100px; max-width: 900px; 0 auto; }
 .subscribe-box {
   background: var(--ink2); border: 1px solid rgba(var(--line-rgb),0.1);
   padding: 24px 28px; margin: 0 0 32px;
